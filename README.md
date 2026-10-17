@@ -29,7 +29,7 @@
 | 后端 | Go 1.26 + go-kratos v2.9 + entgo（Ent ORM）+ buf（protobuf-first） |
 | 存储 | PostgreSQL / MySQL（双支持）+ Redis + MinIO |
 | 媒体 | FFmpeg 单帧抽图封面（缺失静默降级）；原始单码率直出 |
-| 管理后台 | React 18 + Ant Design 5 + Vite（frontend/admin） |
+| 管理后台 | 基于 GoWind Admin 底座（Ant Design Pro v6：React 19 + AntD + ProComponents + react-query，frontend/admin） |
 | 移动端 | Flutter + BLoC + media_kit（frontend/app） |
 
 ## 架构
@@ -59,8 +59,8 @@ flutter run --dart-define=API_BASE=http://127.0.0.1:6700   # 安卓模拟器缺�
 
 ```bash
 cd frontend/admin
-npm install
-npm run dev    # 开发态经 Vite 代理访问 :6600；演示账号 admin / admin（core 首次启动自动播种）
+pnpm install   # 需 Node ≥ 20.19（Vite 8 要求），系统 20.10 需切更高版本
+pnpm dev       # 开发态经 Vite 代理访问 :6600；演示账号 admin / admin（core 首次启动自动播种）
 ```
 
 ### 后端

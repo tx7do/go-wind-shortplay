@@ -374,11 +374,7 @@ func (r *VideoRepo) UpdateUploadTaskStatus(ctx context.Context, taskID string, s
 
 // SumLikeCountByAuthor 作者全部视频获赞求和
 func (r *VideoRepo) SumLikeCountByAuthor(ctx context.Context, authorID uint32) (int64, error) {
-	var sum int64
-	if err := r.Client().Video.Query().Where(video.AuthorID(authorID)).Aggregate(ent.Sum(video.FieldLikeCount)).Scan(ctx, &sum); err != nil {
-		return 0, err
-	}
-	return sum, nil
+	return sumColumn(ctx, r.Client().Video.Query().Where(video.AuthorID(authorID)), video.FieldLikeCount)
 }
 
 // ── Feed 召回查询 ──

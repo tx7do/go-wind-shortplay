@@ -37,3 +37,6 @@ backend/app/*/service/bin/
 
 # Local uploads
 backend/uploads/
+
+# smoke-test artifacts
+backend/bin/

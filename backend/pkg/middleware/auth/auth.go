@@ -37,23 +37,29 @@ func NewAuthenticator(signingKey string) (authnEngine.Authenticator, error) {
 }
 
 // NewServerMiddleware 入站鉴权中间件。
-// whiteList 命中的操作直接放行（登录 / 注册 / 游客 Feed 等）；
-// 其余操作必须携带有效 token，校验通过后把 claims 注入上下文。
+//
+// whiteList 命中的操作（登录 / 游客 Feed 等）不强制要求 token，但若携带了
+// 有效 token 仍解析并注入身份——游客接口需要登录态做个性化（如 Feed 的
+// 已看去重、详情页的 viewerState），不能因为进了白名单就丢掉用户身份。
+// 白名单外操作必须携带有效 token。
 func NewServerMiddleware(authenticator authnEngine.Authenticator, whiteList map[string]struct{}) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			if op, ok := transport.FromServerContext(ctx); ok {
-				if _, allow := whiteList[op.Operation()]; allow {
-					return handler(ctx, req)
+				_, isWhiteListed := whiteList[op.Operation()]
+				raw := op.RequestHeader().Get("Authorization")
+				if raw == "" {
+					if !isWhiteListed {
+						return nil, kratosErrors.Unauthorized("UNAUTHORIZED", "missing bearer token")
+					}
+					return handler(ctx, req) // 白名单游客
 				}
-				token := op.RequestHeader().Get("Authorization")
-				if token == "" {
-					return nil, kratosErrors.Unauthorized("UNAUTHORIZED", "missing bearer token")
-				}
-				token = strings.TrimPrefix(token, bearerPrefix)
-				claims, err := authenticator.AuthenticateToken(token)
+				claims, err := authenticator.AuthenticateToken(strings.TrimPrefix(raw, bearerPrefix))
 				if err != nil {
-					return nil, kratosErrors.Unauthorized("UNAUTHORIZED", "invalid or expired token")
+					if !isWhiteListed {
+						return nil, kratosErrors.Unauthorized("UNAUTHORIZED", "invalid or expired token")
+					}
+					return handler(ctx, req) // 白名单上令牌失效：按游客放行
 				}
 				ctx = authnEngine.ContextWithAuthClaims(ctx, claims)
 			}

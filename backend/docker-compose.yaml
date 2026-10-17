@@ -2,13 +2,13 @@
 # 用法：docker compose up -d --build
 services:
   postgres:
-    image: docker.io/bitnami/postgresql:16
+    image: docker.io/library/postgres:16-alpine
     environment:
-      POSTGRESQL_USERNAME: shortplay
-      POSTGRESQL_PASSWORD: shortplay
-      POSTGRESQL_DATABASE: shortplay
+      POSTGRES_USER: shortplay
+      POSTGRES_PASSWORD: shortplay
+      POSTGRES_DB: shortplay
     volumes:
-      - postgres_data:/bitnami/postgresql
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U shortplay"]
       interval: 5s
@@ -16,11 +16,9 @@ services:
       retries: 10
 
   redis:
-    image: docker.io/bitnami/redis:7.2
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
+    image: docker.io/library/redis:7-alpine
     volumes:
-      - redis_data:/bitnami/redis/data
+      - redis_data:/data
 
   minio:
     image: docker.io/minio/minio:latest
@@ -29,8 +27,8 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "9100:9000"
+      - "9101:9001"
     volumes:
       - minio_data:/data
 
@@ -43,7 +41,7 @@ services:
     environment:
       JWT_SIGNING_KEY: "${JWT_SIGNING_KEY:-dev_only_change_me_in_prod}"
       OSS_BUCKET: "${OSS_BUCKET:-shortplay}"
-      OSS_PUBLIC_ENDPOINT: "http://127.0.0.1:9000"
+      OSS_PUBLIC_ENDPOINT: "http://127.0.0.1:9100"
       UPLOAD_TEMP_DIR: "/tmp/shortplay-uploads"
     depends_on:
       postgres:

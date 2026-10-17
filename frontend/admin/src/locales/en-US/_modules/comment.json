@@ -1,0 +1,15 @@
+{
+  "moduleName": "Comment",
+  "commentList": "Comment List",
+  "user": "User",
+  "content": "Content",
+  "videoId": "Video ID",
+  "likeCount": "Likes",
+  "replyCount": "Replies",
+  "createdAt": "Created At",
+  "deleteConfirmTitle": "Delete this comment?",
+  "deleteConfirmDesc": "This cannot be undone. Delete this {{moduleName}}?",
+  "deleteSuccess": "Deleted",
+  "deleteFailed": "Delete failed",
+  "action": "Actions"
+}

@@ -111,15 +111,12 @@ func (r *StatsRepo) GetOverview(ctx context.Context) (*Overview, error) {
 	if o.TodayPublished, err = r.Client().Video.Query().Where(video.PublishedAtGTE(todayStart)).Count(ctx); err != nil {
 		return nil, err
 	}
-	var views, likes int64
-	if err = r.Client().Video.Query().Aggregate(ent.Sum(video.FieldViewCount)).Scan(ctx, &views); err != nil {
+	if o.TotalViews, err = sumColumn(ctx, r.Client().Video.Query(), video.FieldViewCount); err != nil {
 		return nil, err
 	}
-	o.TotalViews = views
-	if err = r.Client().Video.Query().Aggregate(ent.Sum(video.FieldLikeCount)).Scan(ctx, &likes); err != nil {
+	if o.TotalLikes, err = sumColumn(ctx, r.Client().Video.Query(), video.FieldLikeCount); err != nil {
 		return nil, err
 	}
-	o.TotalLikes = likes
 	return o, nil
 }
 
@@ -135,21 +132,23 @@ type CreatorOverview struct {
 // GetCreatorOverview 聚合本人已发布作品的播放 / 点赞 / 收藏 / 评论
 func (r *StatsRepo) GetCreatorOverview(ctx context.Context, userID uint32) (*CreatorOverview, error) {
 	o := &CreatorOverview{}
-	vq := r.Client().Video.Query().Where(video.AuthorID(userID), video.Status(uint8(3)))
+	mine := func() *ent.VideoQuery {
+		return r.Client().Video.Query().Where(video.AuthorID(userID), video.Status(uint8(3)))
+	}
 	var err error
-	if o.VideoCount, err = vq.Count(ctx); err != nil {
+	if o.VideoCount, err = mine().Count(ctx); err != nil {
 		return nil, err
 	}
-	if err = vq.Aggregate(ent.Sum(video.FieldViewCount)).Scan(ctx, &o.TotalViews); err != nil {
+	if o.TotalViews, err = sumColumn(ctx, mine(), video.FieldViewCount); err != nil {
 		return nil, err
 	}
-	if err = vq.Aggregate(ent.Sum(video.FieldLikeCount)).Scan(ctx, &o.TotalLikes); err != nil {
+	if o.TotalLikes, err = sumColumn(ctx, mine(), video.FieldLikeCount); err != nil {
 		return nil, err
 	}
-	if err = vq.Aggregate(ent.Sum(video.FieldCollectCount)).Scan(ctx, &o.TotalCollects); err != nil {
+	if o.TotalCollects, err = sumColumn(ctx, mine(), video.FieldCollectCount); err != nil {
 		return nil, err
 	}
-	if err = vq.Aggregate(ent.Sum(video.FieldCommentCount)).Scan(ctx, &o.TotalComments); err != nil {
+	if o.TotalComments, err = sumColumn(ctx, mine(), video.FieldCommentCount); err != nil {
 		return nil, err
 	}
 	return o, nil

@@ -14,6 +14,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"sync"
 
 	minioStorage "github.com/tx7do/kratos-bootstrap/oss/minio"
 	minioGo "github.com/minio/minio-go/v7"
@@ -25,6 +26,46 @@ type MinIOClient struct {
 	st             *minioStorage.Storage
 	bucket         string
 	publicEndpoint string
+
+	ensureOnce sync.Once
+	ensureErr  error
+}
+
+// ensureBucket 惰性确保桶存在并开放匿名只读（封面/视频经公网 URL 直接访问）。
+// 只在首次上传时执行一次；失败记录错误并在下次上传时重试。
+func (c *MinIOClient) ensureBucket(ctx context.Context) error {
+	c.ensureOnce.Do(func() {
+		cli := c.SDK()
+		if cli == nil {
+			c.ensureErr = fmt.Errorf("minio sdk not initialized")
+			return
+		}
+		exists, err := cli.BucketExists(ctx, c.bucket)
+		if err != nil {
+			c.ensureErr = err
+			return
+		}
+		if !exists {
+			if err := cli.MakeBucket(ctx, c.bucket, minioGo.MakeBucketOptions{}); err != nil {
+				c.ensureErr = err
+				return
+			}
+		}
+		// 匿名只读策略
+		policy := fmt.Sprintf(`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::%s/*"]}]}`, c.bucket)
+		if err := cli.SetBucketPolicy(ctx, c.bucket, policy); err != nil {
+			c.ensureErr = err
+			return
+		}
+		c.ensureErr = nil
+	})
+	// 失败后允许重试：重置 once（错误已返回给调用方）
+	if c.ensureErr != nil {
+		err := c.ensureErr
+		c.ensureOnce = sync.Once{}
+		return err
+	}
+	return nil
 }
 
 func NewMinIoClient(cfg *conf.Bootstrap) *MinIOClient {
@@ -54,6 +95,9 @@ func (c *MinIOClient) SDK() *minioGo.Client {
 func (c *MinIOClient) PutObject(ctx context.Context, key string, body io.Reader, contentType string) (string, error) {
 	if c == nil || c.st == nil {
 		return "", fmt.Errorf("minio client not initialized")
+	}
+	if err := c.ensureBucket(ctx); err != nil {
+		return "", fmt.Errorf("ensure bucket %s: %w", c.bucket, err)
 	}
 	if _, err := c.st.PutObject(ctx, c.bucket, key, body, contentType); err != nil {
 		return "", err

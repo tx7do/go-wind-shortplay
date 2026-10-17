@@ -1,0 +1,20 @@
+{
+  "title": "系统配置",
+  "subtitle": "社区全局参数（上传/审核/注册）",
+  "maxUploadSizeMb": "单视频大小上限（MB）",
+  "maxDurationSeconds": "单视频时长上限（秒）",
+  "manualReviewEnabled": "发布人工审核",
+  "manualReviewEnabledHint": "开启后用户发布的视频进入审核队列，审核通过才可见",
+  "registerEnabled": "开放注册",
+  "registerEnabledHint": "关闭后 App 端将无法自助注册新用户",
+  "allowedVideoTypes": "允许的视频格式",
+  "allowedVideoTypesHint": "逗号分隔的文件扩展名，如 mp4, mov, webm",
+  "updatedAt": "最近更新时间",
+  "save": "保存配置",
+  "saving": "保存中...",
+  "saveSuccess": "配置已保存",
+  "saveFailed": "保存失败",
+  "maxUploadSizeMbRequired": "请输入大小上限",
+  "maxDurationSecondsRequired": "请输入时长上限",
+  "allowedVideoTypesRequired": "请至少填写一种视频格式"
+}

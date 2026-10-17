@@ -1,0 +1,15 @@
+{
+  "moduleName": "评论",
+  "commentList": "评论列表",
+  "user": "评论人",
+  "content": "内容",
+  "videoId": "视频ID",
+  "likeCount": "点赞",
+  "replyCount": "回复",
+  "createdAt": "评论时间",
+  "deleteConfirmTitle": "确认删除该评论？",
+  "deleteConfirmDesc": "删除后不可恢复，确定删除该{{moduleName}}吗？",
+  "deleteSuccess": "删除成功",
+  "deleteFailed": "删除失败",
+  "action": "操作"
+}

@@ -2,27 +2,24 @@
 # 用法：docker compose -f docker-compose.libs.yaml up -d
 services:
   postgres:
-    image: docker.io/bitnami/postgresql:16
+    image: docker.io/library/postgres:16-alpine
     container_name: shortplay-postgres
     environment:
-      POSTGRESQL_USERNAME: shortplay
-      POSTGRESQL_PASSWORD: shortplay
-      POSTGRESQL_DATABASE: shortplay
+      POSTGRES_USER: shortplay
+      POSTGRES_PASSWORD: shortplay
+      POSTGRES_DB: shortplay
     ports:
-      - "5432:5432"
+      - "15432:5432"
     volumes:
-      - postgres_data:/bitnami/postgresql
+      - postgres_data:/var/lib/postgresql/data
 
   redis:
-    image: docker.io/bitnami/redis:7.2
+    image: docker.io/library/redis:7-alpine
     container_name: shortplay-redis
-    environment:
-      # 开发态免密；生产务必设置 REDIS_PASSWORD
-      - ALLOW_EMPTY_PASSWORD=yes
     ports:
-      - "6379:6379"
+      - "16379:6379"
     volumes:
-      - redis_data:/bitnami/redis/data
+      - redis_data:/data
 
   minio:
     image: docker.io/minio/minio:latest
@@ -32,8 +29,8 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "9100:9000"
+      - "9101:9001"
     volumes:
       - minio_data:/data
 

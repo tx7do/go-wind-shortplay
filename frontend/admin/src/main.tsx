@@ -1,21 +1,46 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { ConfigProvider } from 'antd';
-import zhCN from 'antd/locale/zh_CN';
-import dayjs from 'dayjs';
-import 'dayjs/locale/zh-cn';
-import App from './App';
-import { AuthProvider } from './utils/auth';
+import { App as AntdApp } from 'antd';
+
+import { QueryClientProvider } from '@tanstack/react-query';
+
+// Devtools 仅在开发环境导入，生产构建时自动 tree-shake
+const ReactQueryDevtools = import.meta.env.DEV
+  ? await import('@tanstack/react-query-devtools').then((m) => m.ReactQueryDevtools)
+  : () => null;
+
+import { ThemeProvider } from '@/core/preferences/components/ThemeProvider';
+import { queryClient } from './core';
+import { bootstrap } from '@/bootstrap.ts';
+
+// 样式
+import 'nprogress/nprogress.css';
+
+import './styles/global.css';
+import './styles/tailwind.css';
+import './styles/skeleton-force-dark.css';
+import './styles/pro-layout-overrides.css';
+import './styles/pro-components-dark.css';
+import './styles/semantic-text.css';
+
 import './index.css';
+import App from './app.tsx';
 
-dayjs.locale('zh-cn');
+// 执行全局初始化
+bootstrap().then(() => {
+  const root = ReactDOM.createRoot(document.getElementById('root')!);
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <ConfigProvider locale={zhCN}>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </ConfigProvider>
-  </React.StrictMode>,
-);
+  root.render(
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <AntdApp>
+            <App />
+          </AntdApp>
+        </ThemeProvider>
+
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </React.StrictMode>,
+  );
+});

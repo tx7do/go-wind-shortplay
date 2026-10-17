@@ -1,0 +1,20 @@
+{
+  "title": "System Settings",
+  "subtitle": "Global community settings (upload/review/registration)",
+  "maxUploadSizeMb": "Max Upload Size (MB)",
+  "maxDurationSeconds": "Max Duration (seconds)",
+  "manualReviewEnabled": "Manual Review",
+  "manualReviewEnabledHint": "Published videos enter the review queue before visible",
+  "registerEnabled": "Open Registration",
+  "registerEnabledHint": "When off, new users cannot self-register in the app",
+  "allowedVideoTypes": "Allowed Video Types",
+  "allowedVideoTypesHint": "Comma-separated extensions, e.g. mp4, mov, webm",
+  "updatedAt": "Updated At",
+  "save": "Save",
+  "saving": "Saving...",
+  "saveSuccess": "Settings saved",
+  "saveFailed": "Save failed",
+  "maxUploadSizeMbRequired": "Please enter max size",
+  "maxDurationSecondsRequired": "Please enter max duration",
+  "allowedVideoTypesRequired": "At least one video type is required"
+}

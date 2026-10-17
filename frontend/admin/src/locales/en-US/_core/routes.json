@@ -1,0 +1,18 @@
+{
+  "dashboard": "Dashboard",
+  "videos": "Video Management",
+  "comments": "Comment Management",
+  "reports": "Report Management",
+  "users": "User Management",
+  "sysconf": "System Settings",
+  "auth": "Auth",
+  "login": "Login",
+  "error-pages": "Error",
+  "unauthorized": "Unauthorized",
+  "forbidden": "Forbidden",
+  "server-error": "Server Error",
+  "offline": "Offline",
+  "coming-soon": "Coming Soon",
+  "not-found": "404",
+  "home": "Home"
+}

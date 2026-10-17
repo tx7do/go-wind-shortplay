@@ -1,11 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- 网络访问（release 构建默认不含 INTERNET 权限，需显式声明）。 -->
+    <!-- 网络权限（API 联调 / 短视频播放） -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- 摄像头 / 存储（发布页拍摄与相册选视频，image_picker） -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"/>
+
     <application
-        android:label="shortplay_app"
+        android:label="GoWind 短视频社区"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        <!-- 后端缺省为 http:// 明文地址（本地联调），需允许明文流量。 -->
         android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"

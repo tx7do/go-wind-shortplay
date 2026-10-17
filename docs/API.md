@@ -92,5 +92,5 @@
 | PUT | `/reports/{id}/handle` | `{action:1通过处置/2驳回, note?}` |
 | GET | `/users?page=&query=` / POST·PUT·DELETE `/users...` / PUT `/users/{id}/status` | 用户管理 |
 | GET | `/dashboard/overview` | `{totalVideos,publishedVideos,totalViews,totalLikes,totalComments,totalUsers,todayPublished}` |
-| GET | `/dashboard/top-videos?metric=VIEW/LIKE/COLLECT/COMMENT&limit=10` | 排行 |
+| GET | `/dashboard/top-videos?metric=METRIC_VIEW/METRIC_LIKE/METRIC_COLLECT/METRIC_COMMENT&limit=10`（注意：枚举字段用全名） | 排行 |
 | GET·PUT | `/sysconf` | `{maxUploadSizeMb,maxDurationSeconds,manualReviewEnabled,registerEnabled,allowedVideoTypes[]}` |

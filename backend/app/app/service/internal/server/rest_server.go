@@ -31,6 +31,7 @@ var appWhiteList = map[string]struct{}{
 	appV1.OperationUserServiceGetUserStats:           {},
 	appV1.OperationUserServiceListUserVideos:         {},
 	appV1.OperationCommentServiceListComment:         {},
+	appV1.OperationCommentServiceListReply:           {},
 	appV1.OperationInteractionServiceGetInteractionStatus: {},
 	appV1.OperationUbaServiceReportEvents:           {},
 }

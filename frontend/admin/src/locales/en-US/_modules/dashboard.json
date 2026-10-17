@@ -1,0 +1,27 @@
+{
+  "title": "Dashboard",
+  "subtitle": "Community operation metrics overview",
+  "stats": {
+    "totalVideos": "Total Videos",
+    "publishedVideos": "Published Videos",
+    "totalViews": "Total Views",
+    "totalLikes": "Total Likes",
+    "totalComments": "Total Comments",
+    "totalUsers": "Total Users",
+    "todayPublished": "Published Today"
+  },
+  "top": {
+    "title": "Top 10 Videos",
+    "metric": "Metric",
+    "metricView": "Views",
+    "metricLike": "Likes",
+    "metricCollect": "Collects",
+    "metricComment": "Comments",
+    "rank": "Rank",
+    "video": "Video",
+    "author": "Author",
+    "count": "Count",
+    "empty": "No ranking data",
+    "titleFallback": "Untitled video"
+  }
+}

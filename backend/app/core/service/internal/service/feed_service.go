@@ -150,8 +150,9 @@ func (s *FeedService) GetVideoDetail(ctx context.Context, req *feedV1.GetVideoDe
 		return nil, feedV1.ErrorNotFound("author not found")
 	}
 
+	tags, _ := s.videoRepo.TagsOfVideo(ctx, v.ID)
 	detail := &feedV1.VideoDetail{
-		Video:  toVideo(v, nil),
+		Video:  toVideo(v, tags),
 		Author: toUserBrief(author),
 	}
 

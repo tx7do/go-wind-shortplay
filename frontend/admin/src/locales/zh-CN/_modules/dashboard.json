@@ -1,0 +1,27 @@
+{
+  "title": "数据看板",
+  "subtitle": "社区运营核心指标总览",
+  "stats": {
+    "totalVideos": "视频总数",
+    "publishedVideos": "已发布视频",
+    "totalViews": "总播放量",
+    "totalLikes": "总点赞数",
+    "totalComments": "总评论数",
+    "totalUsers": "用户总数",
+    "todayPublished": "今日发布"
+  },
+  "top": {
+    "title": "视频 TOP10 排行",
+    "metric": "排行指标",
+    "metricView": "播放量",
+    "metricLike": "点赞数",
+    "metricCollect": "收藏数",
+    "metricComment": "评论数",
+    "rank": "排名",
+    "video": "视频",
+    "author": "作者",
+    "count": "数量",
+    "empty": "暂无排行数据",
+    "titleFallback": "未命名视频"
+  }
+}

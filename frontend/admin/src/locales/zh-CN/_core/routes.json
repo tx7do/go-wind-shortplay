@@ -1,0 +1,18 @@
+{
+  "dashboard": "数据看板",
+  "videos": "视频管理",
+  "comments": "评论管理",
+  "reports": "举报管理",
+  "users": "用户管理",
+  "sysconf": "系统配置",
+  "auth": "认证",
+  "login": "登录",
+  "error-pages": "错误",
+  "unauthorized": "未授权",
+  "forbidden": "无权限",
+  "server-error": "服务器错误",
+  "offline": "离线",
+  "coming-soon": "即将上线",
+  "not-found": "404",
+  "home": "首页"
+}
