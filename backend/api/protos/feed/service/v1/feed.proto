@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package feed.service.v1;
+
+import "identity/service/v1/user.proto";
+import "pagination/v1/pagination.proto";
+import "video/service/v1/video.proto";
+
+// 推荐流服务（开源基础版：规则召回，无模型）
+//
+// 召回规则（同时生效，按权重归并）：
+//   1. 关注作者最新视频
+//   2. 平台热门（点赞 + 浏览简单加权）
+//   3. 最新发布兜底
+// 已看视频经 Redis 去重过滤。
+service FeedService {
+  // 获取沉浸式 Feed 流（分页拉取，无限滚动）
+  rpc GetFeed (GetFeedRequest) returns (GetFeedResponse) {}
+
+  // 单视频详情（分享 / 点击标签聚合进入详情页）
+  rpc GetVideoDetail (GetVideoDetailRequest) returns (VideoDetail) {}
+
+  // 搜索视频（标题模糊匹配 + 标签精确匹配）
+  rpc SearchVideos (SearchVideosRequest) returns (GetFeedResponse) {}
+
+  // 按标签拉取视频聚合（话题标签主页，Phase 2 完整化）
+  rpc ListVideosByTag (ListVideosByTagRequest) returns (GetFeedResponse) {}
+}
+
+// Feed 召回来源
+enum FeedReason {
+  FEED_REASON_UNSPECIFIED = 0;
+  FEED_REASON_FOLLOW = 1; // 关注作者最新
+  FEED_REASON_HOT = 2;    // 热门加权
+  FEED_REASON_LATEST = 3; // 最新兜底
+}
+
+message GetFeedRequest {
+  optional string tag = 1 [json_name = "tag"];           // 标签过滤（可空）
+  optional uint32 page_num = 2 [json_name = "pageNum"];  // 页码（从 1 开始）
+  optional uint32 page_size = 3 [json_name = "pageSize"]; // 页大小（缺省 10）
+}
+
+message FeedItem {
+  video.service.v1.Video video = 1 [json_name = "video"]; // 视频
+  FeedReason reason = 2 [json_name = "reason"];           // 召回来源
+}
+
+message GetFeedResponse {
+  repeated FeedItem items = 1 [json_name = "items"]; // Feed 项
+  optional bool has_more = 2 [json_name = "hasMore"]; // 是否还有更多
+}
+
+// 观看者视角状态（登录时返回，游客全 false）
+message ViewerState {
+  optional bool liked = 1 [json_name = "liked"];         // 是否已点赞
+  optional bool collected = 2 [json_name = "collected"]; // 是否已收藏
+  optional bool following = 3 [json_name = "following"]; // 是否已关注作者
+}
+
+message VideoDetail {
+  video.service.v1.Video video = 1 [json_name = "video"];               // 视频
+  identity.service.v1.UserBrief author = 2 [json_name = "author"];      // 作者
+  identity.service.v1.UserStats author_stats = 3 [json_name = "authorStats"]; // 作者统计（粉丝数等）
+  ViewerState viewer_state = 4 [json_name = "viewerState"];             // 观看者互动状态
+}
+
+message GetVideoDetailRequest {
+  uint32 video_id = 1 [json_name = "videoId"]; // 视频ID
+}
+
+message SearchVideosRequest {
+  string keyword = 1 [json_name = "keyword"];            // 关键词（标题模糊 / 标签精确）
+  optional uint32 page_num = 2 [json_name = "pageNum"];  // 页码
+  optional uint32 page_size = 3 [json_name = "pageSize"]; // 页大小
+}
+
+message ListVideosByTagRequest {
+  string tag = 1 [json_name = "tag"];                    // 标签名
+  optional uint32 page_num = 2 [json_name = "pageNum"];  // 页码
+  optional uint32 page_size = 3 [json_name = "pageSize"]; // 页大小
+}

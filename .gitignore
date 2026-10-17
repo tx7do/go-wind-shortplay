@@ -31,3 +31,9 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Build output
+backend/app/*/service/bin/
+
+# Local uploads
+backend/uploads/

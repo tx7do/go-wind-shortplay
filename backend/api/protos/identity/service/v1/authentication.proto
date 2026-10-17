@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package identity.service.v1;
+
+import "google/protobuf/empty.proto";
+import "identity/service/v1/user.proto";
+
+// 认证服务（登录 / 注册 / 登出，JWT 签发在 core 完成后由网关透传）
+service AuthenticationService {
+  // 账号密码登录
+  rpc Login (LoginRequest) returns (LoginResponse) {}
+
+  // 注册（开源版开放注册，企业内网可关闭）
+  rpc Register (RegisterRequest) returns (LoginResponse) {}
+
+  // 登出（吊销令牌）
+  rpc Logout (LogoutRequest) returns (google.protobuf.Empty) {}
+
+  // 刷新令牌
+  rpc RefreshToken (RefreshTokenRequest) returns (LoginResponse) {}
+}
+
+message Authenticator {
+  optional string access_token = 1 [json_name = "accessToken"];    // 访问令牌
+  optional string refresh_token = 2 [json_name = "refreshToken"];  // 刷新令牌
+  optional int64 expires_in = 3 [json_name = "expiresIn"];         // 访问令牌有效期（秒）
+  optional string token_type = 4 [json_name = "tokenType"];        // 令牌类型（Bearer）
+}
+
+message LoginRequest {
+  string username = 1 [json_name = "username"]; // 用户名
+  string password = 2 [json_name = "password"]; // 密码
+}
+
+message RegisterRequest {
+  string username = 1 [json_name = "username"]; // 用户名
+  string password = 2 [json_name = "password"]; // 密码
+  string nickname = 3 [json_name = "nickname"]; // 昵称
+}
+
+message LoginResponse {
+  Authenticator authenticator = 1 [json_name = "authenticator"]; // 令牌
+  User user = 2 [json_name = "user"];                            // 用户信息
+}
+
+message LogoutRequest {
+  optional uint32 user_id = 1 [json_name = "userId"]; // 用户ID（缺省取令牌主体）
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1 [json_name = "refreshToken"]; // 刷新令牌
+}

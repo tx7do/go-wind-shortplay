@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package report.service.v1;
+
+import "google/protobuf/timestamp.proto";
+import "identity/service/v1/user.proto";
+import "pagination/v1/pagination.proto";
+
+// 举报服务（App 端提交举报，后台生成工单处理）
+service ReportService {
+  // 提交举报（登录用户）
+  rpc CreateReport (CreateReportRequest) returns (Report) {}
+
+  // 举报详情
+  rpc GetReport (GetReportRequest) returns (Report) {}
+
+  // 举报工单列表（管理端，按状态过滤）
+  rpc ListReport (pagination.PagingRequest) returns (ListReportResponse) {}
+
+  // 处理举报（通过：联动处置目标；驳回：仅关闭工单）
+  rpc HandleReport (HandleReportRequest) returns (Report) {}
+}
+
+// 举报目标类型
+enum ReportTargetType {
+  REPORT_TARGET_TYPE_UNSPECIFIED = 0;
+  REPORT_TARGET_TYPE_VIDEO = 1;   // 举报视频
+  REPORT_TARGET_TYPE_COMMENT = 2; // 举报评论
+  REPORT_TARGET_TYPE_USER = 3;    // 举报用户
+}
+
+// 工单状态
+enum ReportStatus {
+  REPORT_STATUS_UNSPECIFIED = 0;
+  REPORT_STATUS_PENDING = 1;   // 待处理
+  REPORT_STATUS_RESOLVED = 2;  // 已通过（处置了目标）
+  REPORT_STATUS_DISMISSED = 3; // 已驳回（未处置）
+}
+
+// 处置动作
+enum HandleAction {
+  HANDLE_ACTION_UNSPECIFIED = 0;
+  HANDLE_ACTION_RESOLVE = 1; // 通过并处置目标
+  HANDLE_ACTION_DISMISS = 2; // 驳回
+}
+
+message Report {
+  optional uint32 id = 1 [json_name = "id"];                       // 工单ID
+  optional uint32 reporter_id = 2 [json_name = "reporterId"];      // 举报人ID
+  identity.service.v1.UserBrief reporter = 3 [json_name = "reporter"]; // 举报人
+  optional ReportTargetType target_type = 4 [json_name = "targetType"]; // 目标类型
+  optional uint32 target_id = 5 [json_name = "targetId"];          // 目标ID
+  optional string reason = 6 [json_name = "reason"];               // 举报原因（枚举码）
+  optional string description = 7 [json_name = "description"];     // 补充说明
+  optional ReportStatus status = 8 [json_name = "status"];         // 工单状态
+  optional uint32 handled_by = 9 [json_name = "handledBy"];        // 处理人（管理员）
+  optional string handle_note = 10 [json_name = "handleNote"];     // 处理备注
+  optional google.protobuf.Timestamp handled_at = 11 [json_name = "handledAt"];   // 处理时间
+  optional google.protobuf.Timestamp created_at = 20 [json_name = "createdAt"];   // 创建时间
+}
+
+message CreateReportRequest {
+  ReportTargetType target_type = 1 [json_name = "targetType"]; // 目标类型
+  uint32 target_id = 2 [json_name = "targetId"];               // 目标ID
+  string reason = 3 [json_name = "reason"];                    // 举报原因（枚举码）
+  optional string description = 4 [json_name = "description"]; // 补充说明
+}
+
+message GetReportRequest {
+  uint32 id = 1 [json_name = "id"]; // 工单ID
+}
+
+message ListReportResponse {
+  repeated Report items = 1 [json_name = "items"]; // 工单列表
+  optional int64 total = 2 [json_name = "total"];  // 总数
+}
+
+message HandleReportRequest {
+  uint32 id = 1 [json_name = "id"];              // 工单ID
+  HandleAction action = 2 [json_name = "action"]; // 处置动作
+  optional string note = 3 [json_name = "note"];  // 处理备注
+}

@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package interaction.service.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "identity/service/v1/user.proto";
+import "pagination/v1/pagination.proto";
+import "video/service/v1/video.proto";
+
+// 互动服务（点赞 / 收藏 / 关注）
+//
+// viewer 身份由鉴权上下文注入，请求体不接受 user_id。
+// 计数走 Redis 缓存，异步批量落库。
+service InteractionService {
+  // 点赞（视频或评论）。幂等：已点赞则 no-op。
+  rpc Like (LikeRequest) returns (LikeResponse) {}
+
+  // 取消点赞。幂等：未点赞则 no-op。
+  rpc Unlike (LikeRequest) returns (LikeResponse) {}
+
+  // 收藏视频。幂等。
+  rpc Collect (CollectRequest) returns (CollectResponse) {}
+
+  // 取消收藏。幂等。
+  rpc Uncollect (CollectRequest) returns (CollectResponse) {}
+
+  // 批量查询 viewer 对视频的互动状态（点赞 / 收藏），供客户端渲染按钮态。
+  rpc GetInteractionStatus (GetInteractionStatusRequest) returns (GetInteractionStatusResponse) {}
+
+  // 我的收藏视频列表
+  rpc ListCollectedVideos (pagination.PagingRequest) returns (video.service.v1.ListVideoResponse) {}
+
+  // 关注作者。幂等：已关注则 no-op。
+  rpc Follow (FollowRequest) returns (FollowResponse) {}
+
+  // 取消关注。幂等。
+  rpc Unfollow (FollowRequest) returns (FollowResponse) {}
+
+  // 批量查询 viewer 对若干作者的关注状态
+  rpc GetFollowStatus (GetFollowStatusRequest) returns (GetFollowStatusResponse) {}
+
+  // 我的关注列表
+  rpc ListFollowing (pagination.PagingRequest) returns (ListFollowResponse) {}
+
+  // 我的粉丝列表
+  rpc ListFollowers (pagination.PagingRequest) returns (ListFollowResponse) {}
+}
+
+// 互动目标类型
+enum TargetType {
+  TARGET_TYPE_UNSPECIFIED = 0;
+  TARGET_TYPE_VIDEO = 1;
+  TARGET_TYPE_COMMENT = 2;
+}
+
+message LikeRequest {
+  TargetType target_type = 1 [json_name = "targetType"]; // 目标类型
+  uint32 target_id = 2 [json_name = "targetId"];         // 目标ID
+}
+
+message LikeResponse {
+  bool liked = 1 [json_name = "liked"];       // 操作后的点赞状态
+  int64 like_count = 2 [json_name = "likeCount"]; // 操作后的最新计数
+}
+
+message CollectRequest {
+  uint32 video_id = 1 [json_name = "videoId"]; // 视频ID
+}
+
+message CollectResponse {
+  bool collected = 1 [json_name = "collected"];       // 操作后的收藏状态
+  int64 collect_count = 2 [json_name = "collectCount"]; // 操作后的最新计数
+}
+
+message GetInteractionStatusRequest {
+  repeated uint32 video_ids = 1 [json_name = "videoIds"]; // 视频ID列表
+}
+
+message InteractionStatus {
+  bool liked = 1 [json_name = "liked"];
+  bool collected = 2 [json_name = "collected"];
+}
+
+message GetInteractionStatusResponse {
+  map<uint32, InteractionStatus> statuses = 1 [json_name = "statuses"]; // videoId → 状态
+}
+
+message FollowRequest {
+  uint32 user_id = 1 [json_name = "userId"]; // 目标作者ID
+}
+
+message FollowResponse {
+  bool following = 1 [json_name = "following"]; // 操作后的关注状态
+}
+
+message GetFollowStatusRequest {
+  repeated uint32 user_ids = 1 [json_name = "userIds"]; // 作者ID列表
+}
+
+message GetFollowStatusResponse {
+  map<uint32, bool> statuses = 1 [json_name = "statuses"]; // userId → 是否关注
+}
+
+message FollowItem {
+  identity.service.v1.UserBrief user = 1 [json_name = "user"];             // 用户
+  optional google.protobuf.Timestamp followed_at = 2 [json_name = "followedAt"]; // 关注时间
+}
+
+message ListFollowResponse {
+  repeated FollowItem items = 1 [json_name = "items"]; // 列表
+  optional int64 total = 2 [json_name = "total"];      // 总数
+}

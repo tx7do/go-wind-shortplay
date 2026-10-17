@@ -1,0 +1,1998 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: ""
+    version: 0.0.1
+paths:
+    /app/v1/auth/login:
+        post:
+            tags:
+                - AuthenticationService
+            description: 账号密码登录
+            operationId: AuthenticationService_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/identity.service.v1.LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/identity.service.v1.LoginResponse'
+    /app/v1/auth/logout:
+        post:
+            tags:
+                - AuthenticationService
+            description: 登出
+            operationId: AuthenticationService_Logout
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/identity.service.v1.LogoutRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /app/v1/auth/refresh:
+        post:
+            tags:
+                - AuthenticationService
+            description: 刷新令牌
+            operationId: AuthenticationService_RefreshToken
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/identity.service.v1.RefreshTokenRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/identity.service.v1.LoginResponse'
+    /app/v1/auth/register:
+        post:
+            tags:
+                - AuthenticationService
+            description: 注册（是否开放由系统配置决定）
+            operationId: AuthenticationService_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/identity.service.v1.RegisterRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/identity.service.v1.LoginResponse'
+    /app/v1/collects:
+        get:
+            tags:
+                - InteractionService
+            description: 我的收藏列表
+            operationId: InteractionService_ListCollectedVideos
+            parameters:
+                - name: page
+                  in: query
+                  description: 当前页码（从1开始，默认1）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  description: 每页条数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: offset
+                  in: query
+                  description: 跳过的记录数（从0开始，默认0）
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: 最多返回的记录数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: token
+                  in: query
+                  description: 上一页最后一条记录的游标（如ID/时间戳+ID，首次请求为空）
+                  schema:
+                    type: string
+                - name: noPaging
+                  in: query
+                  description: 是否不分页，如果为true，则page和pageSize参数无效。
+                  schema:
+                    type: boolean
+                - name: query
+                  in: query
+                  description: JSON字符串过滤条件，基础语法：{"field1":"val1", "field2___icontains":"val2"}，具体请参见：https://github.com/tx7do/go-crud/tree/main/pagination/filter/README.md
+                  schema:
+                    type: string
+                - name: filter
+                  in: query
+                  description: Google AIP规范字符串过滤条件
+                  schema:
+                    type: string
+                - name: filterExpr.type
+                  in: query
+                  description: 过滤表达式类型
+                  schema:
+                    enum:
+                        - EXPR_TYPE_UNSPECIFIED
+                        - AND
+                        - OR
+                    type: string
+                    format: enum
+                - name: orderBy
+                  in: query
+                  description: 排序条件
+                  schema:
+                    type: string
+                - name: fieldMask
+                  in: query
+                  description: 字段掩码，其作用为SELECT中的字段，其语法为使用逗号分隔字段名，例如：id,realName,userName。如果为空则选中所有字段，即SELECT *。
+                  schema:
+                    type: string
+                    format: field-mask
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.ListVideoResponse'
+    /app/v1/comments/{commentId}/replies:
+        get:
+            tags:
+                - CommentService
+            description: 评论的回复列表（楼中楼）
+            operationId: CommentService_ListReply
+            parameters:
+                - name: commentId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageNum
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/interaction.service.v1.ListCommentResponse'
+    /app/v1/comments/{id}:
+        delete:
+            tags:
+                - CommentService
+            description: 删除自己的评论
+            operationId: CommentService_DeleteComment
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /app/v1/creator/overview:
+        get:
+            tags:
+                - VideoService
+            description: 创作者中心总览（我的作品聚合数据）
+            operationId: VideoService_GetCreatorOverview
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/stats.service.v1.CreatorOverview'
+    /app/v1/drafts:
+        get:
+            tags:
+                - VideoService
+            description: 草稿列表
+            operationId: VideoService_ListDraft
+            parameters:
+                - name: page
+                  in: query
+                  description: 当前页码（从1开始，默认1）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  description: 每页条数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: offset
+                  in: query
+                  description: 跳过的记录数（从0开始，默认0）
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: 最多返回的记录数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: token
+                  in: query
+                  description: 上一页最后一条记录的游标（如ID/时间戳+ID，首次请求为空）
+                  schema:
+                    type: string
+                - name: noPaging
+                  in: query
+                  description: 是否不分页，如果为true，则page和pageSize参数无效。
+                  schema:
+                    type: boolean
+                - name: query
+                  in: query
+                  description: JSON字符串过滤条件，基础语法：{"field1":"val1", "field2___icontains":"val2"}，具体请参见：https://github.com/tx7do/go-crud/tree/main/pagination/filter/README.md
+                  schema:
+                    type: string
+                - name: filter
+                  in: query
+                  description: Google AIP规范字符串过滤条件
+                  schema:
+                    type: string
+                - name: filterExpr.type
+                  in: query
+                  description: 过滤表达式类型
+                  schema:
+                    enum:
+                        - EXPR_TYPE_UNSPECIFIED
+                        - AND
+                        - OR
+                    type: string
+                    format: enum
+                - name: orderBy
+                  in: query
+                  description: 排序条件
+                  schema:
+                    type: string
+                - name: fieldMask
+                  in: query
+                  description: 字段掩码，其作用为SELECT中的字段，其语法为使用逗号分隔字段名，例如：id,realName,userName。如果为空则选中所有字段，即SELECT *。
+                  schema:
+                    type: string
+                    format: field-mask
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.ListDraftResponse'
+        post:
+            tags:
+                - VideoService
+            description: 保存草稿（upsert）
+            operationId: VideoService_SaveDraft
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/video.service.v1.SaveDraftRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.VideoDraft'
+    /app/v1/drafts/{id}:
+        get:
+            tags:
+                - VideoService
+            description: 草稿详情
+            operationId: VideoService_GetDraft
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.VideoDraft'
+        delete:
+            tags:
+                - VideoService
+            description: 删除草稿
+            operationId: VideoService_DeleteDraft
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /app/v1/drafts/{id}/submit:
+        post:
+            tags:
+                - VideoService
+            description: 提交草稿发布（进入审核队列或直接发布）
+            operationId: VideoService_SubmitDraft
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/video.service.v1.SubmitDraftRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.Video'
+    /app/v1/feed:
+        get:
+            tags:
+                - FeedService
+            description: 获取 Feed 流（游客可访问）
+            operationId: FeedService_GetFeed
+            parameters:
+                - name: tag
+                  in: query
+                  schema:
+                    type: string
+                - name: pageNum
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/feed.service.v1.GetFeedResponse'
+    /app/v1/followers:
+        get:
+            tags:
+                - InteractionService
+            description: 我的粉丝列表
+            operationId: InteractionService_ListFollowers
+            parameters:
+                - name: page
+                  in: query
+                  description: 当前页码（从1开始，默认1）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  description: 每页条数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: offset
+                  in: query
+                  description: 跳过的记录数（从0开始，默认0）
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: 最多返回的记录数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: token
+                  in: query
+                  description: 上一页最后一条记录的游标（如ID/时间戳+ID，首次请求为空）
+                  schema:
+                    type: string
+                - name: noPaging
+                  in: query
+                  description: 是否不分页，如果为true，则page和pageSize参数无效。
+                  schema:
+                    type: boolean
+                - name: query
+                  in: query
+                  description: JSON字符串过滤条件，基础语法：{"field1":"val1", "field2___icontains":"val2"}，具体请参见：https://github.com/tx7do/go-crud/tree/main/pagination/filter/README.md
+                  schema:
+                    type: string
+                - name: filter
+                  in: query
+                  description: Google AIP规范字符串过滤条件
+                  schema:
+                    type: string
+                - name: filterExpr.type
+                  in: query
+                  description: 过滤表达式类型
+                  schema:
+                    enum:
+                        - EXPR_TYPE_UNSPECIFIED
+                        - AND
+                        - OR
+                    type: string
+                    format: enum
+                - name: orderBy
+                  in: query
+                  description: 排序条件
+                  schema:
+                    type: string
+                - name: fieldMask
+                  in: query
+                  description: 字段掩码，其作用为SELECT中的字段，其语法为使用逗号分隔字段名，例如：id,realName,userName。如果为空则选中所有字段，即SELECT *。
+                  schema:
+                    type: string
+                    format: field-mask
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/interaction.service.v1.ListFollowResponse'
+    /app/v1/following:
+        get:
+            tags:
+                - InteractionService
+            description: 我的关注列表
+            operationId: InteractionService_ListFollowing
+            parameters:
+                - name: page
+                  in: query
+                  description: 当前页码（从1开始，默认1）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  description: 每页条数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: offset
+                  in: query
+                  description: 跳过的记录数（从0开始，默认0）
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: 最多返回的记录数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: token
+                  in: query
+                  description: 上一页最后一条记录的游标（如ID/时间戳+ID，首次请求为空）
+                  schema:
+                    type: string
+                - name: noPaging
+                  in: query
+                  description: 是否不分页，如果为true，则page和pageSize参数无效。
+                  schema:
+                    type: boolean
+                - name: query
+                  in: query
+                  description: JSON字符串过滤条件，基础语法：{"field1":"val1", "field2___icontains":"val2"}，具体请参见：https://github.com/tx7do/go-crud/tree/main/pagination/filter/README.md
+                  schema:
+                    type: string
+                - name: filter
+                  in: query
+                  description: Google AIP规范字符串过滤条件
+                  schema:
+                    type: string
+                - name: filterExpr.type
+                  in: query
+                  description: 过滤表达式类型
+                  schema:
+                    enum:
+                        - EXPR_TYPE_UNSPECIFIED
+                        - AND
+                        - OR
+                    type: string
+                    format: enum
+                - name: orderBy
+                  in: query
+                  description: 排序条件
+                  schema:
+                    type: string
+                - name: fieldMask
+                  in: query
+                  description: 字段掩码，其作用为SELECT中的字段，其语法为使用逗号分隔字段名，例如：id,realName,userName。如果为空则选中所有字段，即SELECT *。
+                  schema:
+                    type: string
+                    format: field-mask
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/interaction.service.v1.ListFollowResponse'
+    /app/v1/interactions/status:
+        post:
+            tags:
+                - InteractionService
+            description: 批量查询视频互动状态（Feed 渲染按钮态）
+            operationId: InteractionService_GetInteractionStatus
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/interaction.service.v1.GetInteractionStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/interaction.service.v1.GetInteractionStatusResponse'
+    /app/v1/likes:
+        post:
+            tags:
+                - InteractionService
+            description: 点赞（视频或评论）
+            operationId: InteractionService_Like
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/interaction.service.v1.LikeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/interaction.service.v1.LikeResponse'
+    /app/v1/likes/{targetType}/{targetId}:
+        delete:
+            tags:
+                - InteractionService
+            description: 取消点赞
+            operationId: InteractionService_Unlike
+            parameters:
+                - name: targetType
+                  in: path
+                  required: true
+                  schema:
+                    enum:
+                        - TARGET_TYPE_UNSPECIFIED
+                        - TARGET_TYPE_VIDEO
+                        - TARGET_TYPE_COMMENT
+                    type: string
+                    format: enum
+                - name: targetId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/interaction.service.v1.LikeResponse'
+    /app/v1/notifications:
+        get:
+            tags:
+                - NotifyService
+            description: 通知列表（点赞 / 评论 / 粉丝 / 系统）
+            operationId: NotifyService_ListNotification
+            parameters:
+                - name: unreadOnly
+                  in: query
+                  schema:
+                    type: boolean
+                - name: pageNum
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/notify.service.v1.ListNotificationResponse'
+    /app/v1/notifications/read:
+        put:
+            tags:
+                - NotifyService
+            description: 标记已读
+            operationId: NotifyService_MarkRead
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/notify.service.v1.MarkReadRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /app/v1/notifications/read-all:
+        put:
+            tags:
+                - NotifyService
+            description: 全部标记已读
+            operationId: NotifyService_MarkAllRead
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /app/v1/notifications/unread-count:
+        get:
+            tags:
+                - NotifyService
+            description: 未读数（Tab 角标）
+            operationId: NotifyService_GetUnreadCount
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/notify.service.v1.GetUnreadCountResponse'
+    /app/v1/profile:
+        put:
+            tags:
+                - UserService
+            description: 编辑我的资料
+            operationId: UserService_UpdateProfile
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/identity.service.v1.UpdateUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/identity.service.v1.User'
+    /app/v1/reports:
+        post:
+            tags:
+                - ReportService
+            description: 提交举报（选择举报原因）
+            operationId: ReportService_CreateReport
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/report.service.v1.CreateReportRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/report.service.v1.Report'
+    /app/v1/search/videos:
+        get:
+            tags:
+                - FeedService
+            description: 搜索视频（标题 / 标签）
+            operationId: FeedService_SearchVideos
+            parameters:
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+                - name: pageNum
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/feed.service.v1.GetFeedResponse'
+    /app/v1/tags:
+        get:
+            tags:
+                - VideoService
+            description: 标签列表（发布页选择 / 搜索联想）
+            operationId: VideoService_ListTag
+            parameters:
+                - name: page
+                  in: query
+                  description: 当前页码（从1开始，默认1）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  description: 每页条数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: offset
+                  in: query
+                  description: 跳过的记录数（从0开始，默认0）
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: 最多返回的记录数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: token
+                  in: query
+                  description: 上一页最后一条记录的游标（如ID/时间戳+ID，首次请求为空）
+                  schema:
+                    type: string
+                - name: noPaging
+                  in: query
+                  description: 是否不分页，如果为true，则page和pageSize参数无效。
+                  schema:
+                    type: boolean
+                - name: query
+                  in: query
+                  description: JSON字符串过滤条件，基础语法：{"field1":"val1", "field2___icontains":"val2"}，具体请参见：https://github.com/tx7do/go-crud/tree/main/pagination/filter/README.md
+                  schema:
+                    type: string
+                - name: filter
+                  in: query
+                  description: Google AIP规范字符串过滤条件
+                  schema:
+                    type: string
+                - name: filterExpr.type
+                  in: query
+                  description: 过滤表达式类型
+                  schema:
+                    enum:
+                        - EXPR_TYPE_UNSPECIFIED
+                        - AND
+                        - OR
+                    type: string
+                    format: enum
+                - name: orderBy
+                  in: query
+                  description: 排序条件
+                  schema:
+                    type: string
+                - name: fieldMask
+                  in: query
+                  description: 字段掩码，其作用为SELECT中的字段，其语法为使用逗号分隔字段名，例如：id,realName,userName。如果为空则选中所有字段，即SELECT *。
+                  schema:
+                    type: string
+                    format: field-mask
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.ListTagResponse'
+    /app/v1/tags/{tag}/videos:
+        get:
+            tags:
+                - FeedService
+            description: 标签聚合页
+            operationId: FeedService_ListVideosByTag
+            parameters:
+                - name: tag
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: pageNum
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/feed.service.v1.GetFeedResponse'
+    /app/v1/uba/events:
+        post:
+            tags:
+                - UbaService
+            description: 批量上报行为事件（尽力而为，失败静默重试）
+            operationId: UbaService_ReportEvents
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/uba.service.v1.ReportEventsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /app/v1/uploads:
+        post:
+            tags:
+                - VideoService
+            description: 创建上传任务
+            operationId: VideoService_CreateUploadTask
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/video.service.v1.CreateUploadTaskRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.UploadTask'
+    /app/v1/uploads/{taskId}:
+        get:
+            tags:
+                - VideoService
+            description: 查询上传任务状态
+            operationId: VideoService_GetUploadTask
+            parameters:
+                - name: taskId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.UploadTask'
+    /app/v1/uploads/{taskId}/chunks/{chunkIndex}:
+        put:
+            tags:
+                - VideoService
+            description: 上传单个分片（二进制 body）
+            operationId: VideoService_UploadChunk
+            parameters:
+                - name: taskId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: chunkIndex
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.UploadChunkResponse'
+    /app/v1/uploads/{taskId}/complete:
+        post:
+            tags:
+                - VideoService
+            description: 完成上传（合并 / 入库 / 抽帧封面）
+            operationId: VideoService_CompleteUpload
+            parameters:
+                - name: taskId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/video.service.v1.CompleteUploadRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.UploadTask'
+    /app/v1/users/{id}:
+        get:
+            tags:
+                - UserService
+            description: 用户主页（本人 / 他人通用：资料 + 统计）
+            operationId: UserService_GetUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/identity.service.v1.User'
+    /app/v1/users/{userId}/follow:
+        post:
+            tags:
+                - InteractionService
+            description: 关注作者
+            operationId: InteractionService_Follow
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/interaction.service.v1.FollowRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/interaction.service.v1.FollowResponse'
+        delete:
+            tags:
+                - InteractionService
+            description: 取消关注
+            operationId: InteractionService_Unfollow
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/interaction.service.v1.FollowResponse'
+    /app/v1/users/{userId}/stats:
+        get:
+            tags:
+                - UserService
+            description: 用户统计（粉丝 / 关注 / 作品 / 获赞）
+            operationId: UserService_GetUserStats
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/identity.service.v1.UserStats'
+    /app/v1/users/{userId}/videos:
+        get:
+            tags:
+                - UserService
+            description: 用户作品列表（主页「作品」Tab；本人可见全部状态，他人仅已发布）
+            operationId: UserService_ListUserVideos
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageNum
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.ListVideoResponse'
+    /app/v1/videos/{id}:
+        put:
+            tags:
+                - VideoService
+            description: 编辑自己的视频（标题 / 简介 / 封面 / 标签）
+            operationId: VideoService_UpdateVideo
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/video.service.v1.UpdateVideoRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.Video'
+        delete:
+            tags:
+                - VideoService
+            description: 删除自己的视频
+            operationId: VideoService_DeleteVideo
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /app/v1/videos/{videoId}:
+        get:
+            tags:
+                - FeedService
+            description: 单视频详情（分享跳转 / 点击进入）
+            operationId: FeedService_GetVideoDetail
+            parameters:
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/feed.service.v1.VideoDetail'
+    /app/v1/videos/{videoId}/collect:
+        post:
+            tags:
+                - InteractionService
+            description: 收藏视频
+            operationId: InteractionService_Collect
+            parameters:
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/interaction.service.v1.CollectRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/interaction.service.v1.CollectResponse'
+        delete:
+            tags:
+                - InteractionService
+            description: 取消收藏
+            operationId: InteractionService_Uncollect
+            parameters:
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/interaction.service.v1.CollectResponse'
+    /app/v1/videos/{videoId}/comments:
+        get:
+            tags:
+                - CommentService
+            description: 视频评论列表（分页）
+            operationId: CommentService_ListComment
+            parameters:
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageNum
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/interaction.service.v1.ListCommentResponse'
+        post:
+            tags:
+                - CommentService
+            description: 发表评论
+            operationId: CommentService_CreateComment
+            parameters:
+                - name: videoId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/interaction.service.v1.CreateCommentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/interaction.service.v1.Comment'
+components:
+    schemas:
+        feed.service.v1.FeedItem:
+            type: object
+            properties:
+                video:
+                    $ref: '#/components/schemas/video.service.v1.Video'
+                reason:
+                    enum:
+                        - FEED_REASON_UNSPECIFIED
+                        - FEED_REASON_FOLLOW
+                        - FEED_REASON_HOT
+                        - FEED_REASON_LATEST
+                    type: string
+                    format: enum
+        feed.service.v1.GetFeedResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/feed.service.v1.FeedItem'
+                hasMore:
+                    type: boolean
+        feed.service.v1.VideoDetail:
+            type: object
+            properties:
+                video:
+                    $ref: '#/components/schemas/video.service.v1.Video'
+                author:
+                    $ref: '#/components/schemas/identity.service.v1.UserBrief'
+                authorStats:
+                    $ref: '#/components/schemas/identity.service.v1.UserStats'
+                viewerState:
+                    $ref: '#/components/schemas/feed.service.v1.ViewerState'
+        feed.service.v1.ViewerState:
+            type: object
+            properties:
+                liked:
+                    type: boolean
+                collected:
+                    type: boolean
+                following:
+                    type: boolean
+            description: 观看者视角状态（登录时返回，游客全 false）
+        identity.service.v1.Authenticator:
+            type: object
+            properties:
+                accessToken:
+                    type: string
+                refreshToken:
+                    type: string
+                expiresIn:
+                    type: string
+                tokenType:
+                    type: string
+        identity.service.v1.LoginRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+        identity.service.v1.LoginResponse:
+            type: object
+            properties:
+                authenticator:
+                    $ref: '#/components/schemas/identity.service.v1.Authenticator'
+                user:
+                    $ref: '#/components/schemas/identity.service.v1.User'
+        identity.service.v1.LogoutRequest:
+            type: object
+            properties:
+                userId:
+                    type: integer
+                    format: uint32
+        identity.service.v1.RefreshTokenRequest:
+            type: object
+            properties:
+                refreshToken:
+                    type: string
+        identity.service.v1.RegisterRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+                nickname:
+                    type: string
+        identity.service.v1.UpdateUserRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                nickname:
+                    type: string
+                avatarUrl:
+                    type: string
+                bio:
+                    type: string
+                password:
+                    type: string
+        identity.service.v1.User:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                username:
+                    type: string
+                nickname:
+                    type: string
+                avatarUrl:
+                    type: string
+                bio:
+                    type: string
+                status:
+                    enum:
+                        - USER_STATUS_UNSPECIFIED
+                        - USER_STATUS_DISABLED
+                        - USER_STATUS_NORMAL
+                    type: string
+                    format: enum
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+        identity.service.v1.UserBrief:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                nickname:
+                    type: string
+                avatarUrl:
+                    type: string
+        identity.service.v1.UserStats:
+            type: object
+            properties:
+                userId:
+                    type: integer
+                    format: uint32
+                videoCount:
+                    type: string
+                followerCount:
+                    type: string
+                followingCount:
+                    type: string
+                likeReceivedCount:
+                    type: string
+            description: 用户创作统计（计数由互动域异步维护，避免用户表与互动表强耦合）
+        interaction.service.v1.CollectRequest:
+            type: object
+            properties:
+                videoId:
+                    type: integer
+                    format: uint32
+        interaction.service.v1.CollectResponse:
+            type: object
+            properties:
+                collected:
+                    type: boolean
+                collectCount:
+                    type: string
+        interaction.service.v1.Comment:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                videoId:
+                    type: integer
+                    format: uint32
+                userId:
+                    type: integer
+                    format: uint32
+                user:
+                    $ref: '#/components/schemas/identity.service.v1.UserBrief'
+                content:
+                    type: string
+                parentId:
+                    type: integer
+                    format: uint32
+                likeCount:
+                    type: string
+                replyCount:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+        interaction.service.v1.CreateCommentRequest:
+            type: object
+            properties:
+                videoId:
+                    type: integer
+                    format: uint32
+                content:
+                    type: string
+                parentId:
+                    type: integer
+                    format: uint32
+        interaction.service.v1.FollowItem:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/identity.service.v1.UserBrief'
+                followedAt:
+                    type: string
+                    format: date-time
+        interaction.service.v1.FollowRequest:
+            type: object
+            properties:
+                userId:
+                    type: integer
+                    format: uint32
+        interaction.service.v1.FollowResponse:
+            type: object
+            properties:
+                following:
+                    type: boolean
+        interaction.service.v1.GetInteractionStatusRequest:
+            type: object
+            properties:
+                videoIds:
+                    type: array
+                    items:
+                        type: integer
+                        format: uint32
+        interaction.service.v1.GetInteractionStatusResponse:
+            type: object
+            properties:
+                statuses:
+                    type: object
+                    additionalProperties:
+                        $ref: '#/components/schemas/interaction.service.v1.InteractionStatus'
+        interaction.service.v1.InteractionStatus:
+            type: object
+            properties:
+                liked:
+                    type: boolean
+                collected:
+                    type: boolean
+        interaction.service.v1.LikeRequest:
+            type: object
+            properties:
+                targetType:
+                    enum:
+                        - TARGET_TYPE_UNSPECIFIED
+                        - TARGET_TYPE_VIDEO
+                        - TARGET_TYPE_COMMENT
+                    type: string
+                    format: enum
+                targetId:
+                    type: integer
+                    format: uint32
+        interaction.service.v1.LikeResponse:
+            type: object
+            properties:
+                liked:
+                    type: boolean
+                likeCount:
+                    type: string
+        interaction.service.v1.ListCommentResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/interaction.service.v1.Comment'
+                total:
+                    type: string
+        interaction.service.v1.ListFollowResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/interaction.service.v1.FollowItem'
+                total:
+                    type: string
+        notify.service.v1.GetUnreadCountResponse:
+            type: object
+            properties:
+                count:
+                    type: string
+        notify.service.v1.ListNotificationResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/notify.service.v1.Notification'
+                total:
+                    type: string
+                unreadCount:
+                    type: string
+        notify.service.v1.MarkReadRequest:
+            type: object
+            properties:
+                ids:
+                    type: array
+                    items:
+                        type: integer
+                        format: uint32
+        notify.service.v1.Notification:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                type:
+                    enum:
+                        - NOTIFY_TYPE_UNSPECIFIED
+                        - NOTIFY_TYPE_LIKE
+                        - NOTIFY_TYPE_COMMENT
+                        - NOTIFY_TYPE_FOLLOW
+                        - NOTIFY_TYPE_SYSTEM
+                    type: string
+                    format: enum
+                sender:
+                    $ref: '#/components/schemas/identity.service.v1.UserBrief'
+                videoId:
+                    type: integer
+                    format: uint32
+                commentId:
+                    type: integer
+                    format: uint32
+                content:
+                    type: string
+                isRead:
+                    type: boolean
+                createdAt:
+                    type: string
+                    format: date-time
+        report.service.v1.CreateReportRequest:
+            type: object
+            properties:
+                targetType:
+                    enum:
+                        - REPORT_TARGET_TYPE_UNSPECIFIED
+                        - REPORT_TARGET_TYPE_VIDEO
+                        - REPORT_TARGET_TYPE_COMMENT
+                        - REPORT_TARGET_TYPE_USER
+                    type: string
+                    format: enum
+                targetId:
+                    type: integer
+                    format: uint32
+                reason:
+                    type: string
+                description:
+                    type: string
+        report.service.v1.Report:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                reporterId:
+                    type: integer
+                    format: uint32
+                reporter:
+                    $ref: '#/components/schemas/identity.service.v1.UserBrief'
+                targetType:
+                    enum:
+                        - REPORT_TARGET_TYPE_UNSPECIFIED
+                        - REPORT_TARGET_TYPE_VIDEO
+                        - REPORT_TARGET_TYPE_COMMENT
+                        - REPORT_TARGET_TYPE_USER
+                    type: string
+                    format: enum
+                targetId:
+                    type: integer
+                    format: uint32
+                reason:
+                    type: string
+                description:
+                    type: string
+                status:
+                    enum:
+                        - REPORT_STATUS_UNSPECIFIED
+                        - REPORT_STATUS_PENDING
+                        - REPORT_STATUS_RESOLVED
+                        - REPORT_STATUS_DISMISSED
+                    type: string
+                    format: enum
+                handledBy:
+                    type: integer
+                    format: uint32
+                handleNote:
+                    type: string
+                handledAt:
+                    type: string
+                    format: date-time
+                createdAt:
+                    type: string
+                    format: date-time
+        stats.service.v1.CreatorOverview:
+            type: object
+            properties:
+                videoCount:
+                    type: string
+                totalViews:
+                    type: string
+                totalLikes:
+                    type: string
+                totalCollects:
+                    type: string
+                totalComments:
+                    type: string
+                followerCount:
+                    type: string
+            description: 创作者中心总览
+        uba.service.v1.ReportEventsRequest:
+            type: object
+            properties:
+                events:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/uba.service.v1.UbaEvent'
+        uba.service.v1.UbaEvent:
+            type: object
+            properties:
+                eventType:
+                    enum:
+                        - EVENT_TYPE_UNSPECIFIED
+                        - EVENT_TYPE_VIDEO_PLAY
+                        - EVENT_TYPE_VIDEO_HEARTBEAT
+                        - EVENT_TYPE_VIDEO_COMPLETE
+                        - EVENT_TYPE_VIDEO_SWIPE_AWAY
+                        - EVENT_TYPE_VIDEO_LIKE
+                        - EVENT_TYPE_VIDEO_COLLECT
+                        - EVENT_TYPE_COMMENT_CREATE
+                        - EVENT_TYPE_FOLLOW_AUTHOR
+                    type: string
+                    format: enum
+                videoId:
+                    type: integer
+                    format: uint32
+                targetUserId:
+                    type: integer
+                    format: uint32
+                durationMs:
+                    type: string
+                watchPercent:
+                    type: integer
+                    format: uint32
+                extra:
+                    type: string
+                occurredAt:
+                    type: string
+                    format: date-time
+        video.service.v1.CompleteUploadRequest:
+            type: object
+            properties:
+                taskId:
+                    type: string
+                title:
+                    type: string
+                description:
+                    type: string
+                tags:
+                    type: array
+                    items:
+                        type: string
+                coverUrl:
+                    type: string
+                duration:
+                    type: integer
+                    format: uint32
+                width:
+                    type: integer
+                    format: uint32
+                height:
+                    type: integer
+                    format: uint32
+                asDraft:
+                    type: boolean
+                    description: 提交去向：true 存草稿；false 直接提交发布（默认）
+        video.service.v1.CreateUploadTaskRequest:
+            type: object
+            properties:
+                fileName:
+                    type: string
+                fileSize:
+                    type: string
+                chunkSize:
+                    type: integer
+                    format: uint32
+        video.service.v1.ListDraftResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/video.service.v1.VideoDraft'
+                total:
+                    type: string
+        video.service.v1.ListTagResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/video.service.v1.Tag'
+                total:
+                    type: string
+        video.service.v1.ListVideoResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/video.service.v1.Video'
+                total:
+                    type: string
+        video.service.v1.SaveDraftRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                title:
+                    type: string
+                description:
+                    type: string
+                tags:
+                    type: array
+                    items:
+                        type: string
+                coverUrl:
+                    type: string
+                videoUrl:
+                    type: string
+                duration:
+                    type: integer
+                    format: uint32
+                width:
+                    type: integer
+                    format: uint32
+                height:
+                    type: integer
+                    format: uint32
+                uploadTaskId:
+                    type: string
+        video.service.v1.SubmitDraftRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+        video.service.v1.Tag:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                name:
+                    type: string
+                videoCount:
+                    type: string
+        video.service.v1.UpdateVideoRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                title:
+                    type: string
+                description:
+                    type: string
+                coverUrl:
+                    type: string
+                tags:
+                    type: array
+                    items:
+                        type: string
+        video.service.v1.UploadChunkResponse:
+            type: object
+            properties:
+                uploadedChunks:
+                    type: array
+                    items:
+                        type: integer
+                        format: uint32
+        video.service.v1.UploadTask:
+            type: object
+            properties:
+                taskId:
+                    type: string
+                fileName:
+                    type: string
+                fileSize:
+                    type: string
+                chunkSize:
+                    type: integer
+                    format: uint32
+                totalChunks:
+                    type: integer
+                    format: uint32
+                uploadedChunks:
+                    type: array
+                    items:
+                        type: integer
+                        format: uint32
+                status:
+                    enum:
+                        - UPLOAD_TASK_STATUS_UNSPECIFIED
+                        - UPLOAD_TASK_STATUS_UPLOADING
+                        - UPLOAD_TASK_STATUS_MERGING
+                        - UPLOAD_TASK_STATUS_COMPLETED
+                        - UPLOAD_TASK_STATUS_FAILED
+                    type: string
+                    format: enum
+                fileKey:
+                    type: string
+                videoId:
+                    type: integer
+                    format: uint32
+                createdAt:
+                    type: string
+                    format: date-time
+        video.service.v1.Video:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                title:
+                    type: string
+                description:
+                    type: string
+                coverUrl:
+                    type: string
+                videoUrl:
+                    type: string
+                duration:
+                    type: integer
+                    format: uint32
+                width:
+                    type: integer
+                    format: uint32
+                height:
+                    type: integer
+                    format: uint32
+                status:
+                    enum:
+                        - VIDEO_STATUS_UNSPECIFIED
+                        - VIDEO_STATUS_DRAFT
+                        - VIDEO_STATUS_REVIEWING
+                        - VIDEO_STATUS_PUBLISHED
+                        - VIDEO_STATUS_REJECTED
+                        - VIDEO_STATUS_OFFLINE
+                    type: string
+                    format: enum
+                authorId:
+                    type: integer
+                    format: uint32
+                tags:
+                    type: array
+                    items:
+                        type: string
+                likeCount:
+                    type: string
+                    description: 计数（Redis 缓存 + 异步落库）
+                collectCount:
+                    type: string
+                commentCount:
+                    type: string
+                viewCount:
+                    type: string
+                rejectReason:
+                    type: string
+                publishedAt:
+                    type: string
+                    format: date-time
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+        video.service.v1.VideoDraft:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                title:
+                    type: string
+                description:
+                    type: string
+                tags:
+                    type: array
+                    items:
+                        type: string
+                coverUrl:
+                    type: string
+                videoUrl:
+                    type: string
+                duration:
+                    type: integer
+                    format: uint32
+                width:
+                    type: integer
+                    format: uint32
+                height:
+                    type: integer
+                    format: uint32
+                uploadTaskId:
+                    type: string
+                authorId:
+                    type: integer
+                    format: uint32
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+tags:
+    - name: AuthenticationService
+      description: App 认证服务（注册 / 登录 / 登出 / 我的资料）
+    - name: CommentService
+      description: 评论服务（App 端底部弹窗）
+    - name: FeedService
+      description: Feed 流服务（App 首页沉浸式上下滑）
+    - name: InteractionService
+      description: 互动服务（App 端：点赞 / 收藏 / 关注 / 评论）
+    - name: NotifyService
+      description: 消息通知服务（App 端）
+    - name: ReportService
+      description: 举报服务（App 端：举报视频 / 评论 / 用户）
+    - name: UbaService
+      description: UBA 埋点上报服务（App 端：观看时长 / 完播 / 划走等）
+    - name: UserService
+      description: 用户主页服务（App 端）
+    - name: VideoService
+      description: 视频创作服务（App 端：分片上传 / 发布 / 草稿 / 我的作品）

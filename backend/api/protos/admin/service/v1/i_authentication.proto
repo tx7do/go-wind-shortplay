@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package admin.service.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "identity/service/v1/authentication.proto";
+import "identity/service/v1/user.proto";
+
+// 后台认证服务（管理员登录）
+service AuthenticationService {
+  // 登录
+  rpc Login (identity.service.v1.LoginRequest) returns (identity.service.v1.LoginResponse) {
+    option (google.api.http) = {
+      post: "/admin/v1/login"
+      body: "*"
+    };
+  }
+
+  // 登出
+  rpc Logout (identity.service.v1.LogoutRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/admin/v1/logout"
+      body: "*"
+    };
+  }
+}

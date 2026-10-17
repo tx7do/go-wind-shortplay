@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package sysconf.service.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// 系统配置服务（开源版运维开关：上传限制 / 时长限制 / 人工审核开关）
+service SysConfService {
+  // 获取系统配置（App 启动时拉取；游客可读）
+  rpc GetSysConf (google.protobuf.Empty) returns (SysConf) {}
+
+  // 更新系统配置（管理端）
+  rpc UpdateSysConf (UpdateSysConfRequest) returns (SysConf) {}
+}
+
+message SysConf {
+  optional uint32 max_upload_size_mb = 1 [json_name = "maxUploadSizeMb"];       // 单视频大小上限（MB）
+  optional uint32 max_duration_seconds = 2 [json_name = "maxDurationSeconds"];  // 单视频时长上限（秒）
+  optional bool manual_review_enabled = 3 [json_name = "manualReviewEnabled"];  // 人工审核开关（false 则发布直接可见）
+  optional bool register_enabled = 4 [json_name = "registerEnabled"];           // 开放注册开关
+  repeated string allowed_video_types = 5 [json_name = "allowedVideoTypes"];    // 允许的视频类型（扩展名）
+  optional google.protobuf.Timestamp updated_at = 20 [json_name = "updatedAt"]; // 更新时间
+}
+
+message UpdateSysConfRequest {
+  optional uint32 max_upload_size_mb = 1 [json_name = "maxUploadSizeMb"];
+  optional uint32 max_duration_seconds = 2 [json_name = "maxDurationSeconds"];
+  optional bool manual_review_enabled = 3 [json_name = "manualReviewEnabled"];
+  optional bool register_enabled = 4 [json_name = "registerEnabled"];
+  repeated string allowed_video_types = 5 [json_name = "allowedVideoTypes"];
+}

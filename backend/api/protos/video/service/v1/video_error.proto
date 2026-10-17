@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package video.service.v1;
+
+import "errors/errors.proto";
+
+// video 域错误定义
+enum VideoErrorReason {
+  option (errors.default_code) = 500;
+
+  // 400
+  BAD_REQUEST = 0 [(errors.code) = 400]; // 错误请求
+
+  // 401
+  UNAUTHORIZED = 100 [(errors.code) = 401]; // 未授权
+
+  // 403
+  FORBIDDEN = 300 [(errors.code) = 403]; // 禁止访问
+
+  // 404
+  NOT_FOUND = 400 [(errors.code) = 404]; // 找不到资源
+
+  // 409
+  CONFLICT = 900 [(errors.code) = 409]; // 冲突
+
+  // 413
+  PAYLOAD_TOO_LARGE = 1030 [(errors.code) = 413]; // 负载过大
+
+  // 500
+  INTERNAL_SERVER_ERROR = 2000 [(errors.code) = 500]; // 内部服务器错误
+
+  // ── 域内特有错误 ──
+  VIDEO_NOT_FOUND = 401 [(errors.code) = 404]; // 视频不存在
+  DRAFT_NOT_FOUND = 402 [(errors.code) = 404]; // 草稿不存在
+  TASK_NOT_FOUND = 403 [(errors.code) = 404]; // 上传任务不存在
+  NOT_VIDEO_OWNER = 302 [(errors.code) = 403]; // 非视频所有者
+  FILE_TOO_LARGE = 1031 [(errors.code) = 413]; // 文件超出大小限制
+  DURATION_TOO_LONG = 1032 [(errors.code) = 413]; // 视频超出时长限制
+  FILE_TYPE_NOT_ALLOWED = 1061 [(errors.code) = 415]; // 文件类型不允许
+  INVALID_STATUS_TRANSITION = 901 [(errors.code) = 409]; // 非法状态流转
+  CHUNK_MISSING = 902 [(errors.code) = 409]; // 分片缺失无法合并
+  COVER_EXTRACT_FAILED = 2001 [(errors.code) = 500]; // 封面抽帧失败
+  FILE_MERGE_FAILED = 2002 [(errors.code) = 500]; // 分片合并失败
+}

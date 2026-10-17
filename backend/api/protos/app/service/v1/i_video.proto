@@ -1,0 +1,122 @@
+syntax = "proto3";
+
+package app.service.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "pagination/v1/pagination.proto";
+import "stats/service/v1/stats.proto";
+import "video/service/v1/video.proto";
+
+// 视频创作服务（App 端：分片上传 / 发布 / 草稿 / 我的作品）
+service VideoService {
+  // ── 分片上传 ──
+
+  // 创建上传任务
+  rpc CreateUploadTask (video.service.v1.CreateUploadTaskRequest) returns (video.service.v1.UploadTask) {
+    option (google.api.http) = {
+      post: "/app/v1/uploads"
+      body: "*"
+    };
+  }
+
+  // 上传单个分片（二进制 body）
+  rpc UploadChunk (UploadChunkRequest) returns (video.service.v1.UploadChunkResponse) {
+    option (google.api.http) = {
+      put: "/app/v1/uploads/{task_id}/chunks/{chunk_index}"
+      body: "data"
+    };
+  }
+
+  // 完成上传（合并 / 入库 / 抽帧封面）
+  rpc CompleteUpload (video.service.v1.CompleteUploadRequest) returns (video.service.v1.UploadTask) {
+    option (google.api.http) = {
+      post: "/app/v1/uploads/{task_id}/complete"
+      body: "*"
+    };
+  }
+
+  // 查询上传任务状态
+  rpc GetUploadTask (video.service.v1.GetUploadTaskRequest) returns (video.service.v1.UploadTask) {
+    option (google.api.http) = {
+      get: "/app/v1/uploads/{task_id}"
+    };
+  }
+
+  // ── 草稿 ──
+
+  // 保存草稿（upsert）
+  rpc SaveDraft (video.service.v1.SaveDraftRequest) returns (video.service.v1.VideoDraft) {
+    option (google.api.http) = {
+      post: "/app/v1/drafts"
+      body: "*"
+    };
+  }
+
+  // 草稿列表
+  rpc ListDraft (pagination.PagingRequest) returns (video.service.v1.ListDraftResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/drafts"
+    };
+  }
+
+  // 草稿详情
+  rpc GetDraft (video.service.v1.GetDraftRequest) returns (video.service.v1.VideoDraft) {
+    option (google.api.http) = {
+      get: "/app/v1/drafts/{id}"
+    };
+  }
+
+  // 删除草稿
+  rpc DeleteDraft (video.service.v1.DeleteDraftRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/app/v1/drafts/{id}"
+    };
+  }
+
+  // 提交草稿发布（进入审核队列或直接发布）
+  rpc SubmitDraft (video.service.v1.SubmitDraftRequest) returns (video.service.v1.Video) {
+    option (google.api.http) = {
+      post: "/app/v1/drafts/{id}/submit"
+      body: "*"
+    };
+  }
+
+  // ── 我的作品 ──
+
+  // 编辑自己的视频（标题 / 简介 / 封面 / 标签）
+  rpc UpdateVideo (video.service.v1.UpdateVideoRequest) returns (video.service.v1.Video) {
+    option (google.api.http) = {
+      put: "/app/v1/videos/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除自己的视频
+  rpc DeleteVideo (video.service.v1.DeleteVideoRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/app/v1/videos/{id}"
+    };
+  }
+
+  // 标签列表（发布页选择 / 搜索联想）
+  rpc ListTag (pagination.PagingRequest) returns (video.service.v1.ListTagResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/tags"
+    };
+  }
+
+  // 创作者中心总览（我的作品聚合数据）
+  rpc GetCreatorOverview (stats.service.v1.GetCreatorOverviewRequest) returns (stats.service.v1.CreatorOverview) {
+    option (google.api.http) = {
+      get: "/app/v1/creator/overview"
+    };
+  }
+}
+
+// 分片上传请求（task_id / chunk_index 取自路径，data 为二进制 body）
+message UploadChunkRequest {
+  string task_id = 1 [json_name = "taskId"];         // 任务号
+  uint32 chunk_index = 2 [json_name = "chunkIndex"]; // 分片序号
+  bytes data = 3 [json_name = "data"];               // 分片数据
+}

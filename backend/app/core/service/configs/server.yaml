@@ -1,0 +1,7 @@
+server:
+  grpc:
+    addr: "0.0.0.0:6900"
+    timeout: 10s
+    middleware:
+      enable_logging: true
+      enable_recovery: true

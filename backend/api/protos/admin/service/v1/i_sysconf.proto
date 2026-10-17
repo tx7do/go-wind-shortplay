@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package admin.service.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "sysconf/service/v1/sysconf.proto";
+
+// 系统配置服务（后台：上传限制 / 时长限制 / 人工审核开关）
+service SysConfService {
+  // 获取系统配置
+  rpc Get (google.protobuf.Empty) returns (sysconf.service.v1.SysConf) {
+    option (google.api.http) = {
+      get: "/admin/v1/sysconf"
+    };
+  }
+
+  // 更新系统配置
+  rpc Update (sysconf.service.v1.UpdateSysConfRequest) returns (sysconf.service.v1.SysConf) {
+    option (google.api.http) = {
+      put: "/admin/v1/sysconf"
+      body: "*"
+    };
+  }
+}

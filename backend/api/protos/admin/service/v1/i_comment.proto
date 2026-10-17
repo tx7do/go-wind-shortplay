@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package admin.service.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "interaction/service/v1/comment.proto";
+import "pagination/v1/pagination.proto";
+
+// 评论管理服务（后台）
+service CommentService {
+  // 评论列表（全量，按视频过滤）
+  rpc List (pagination.PagingRequest) returns (interaction.service.v1.ListCommentResponse) {
+    option (google.api.http) = {
+      get: "/admin/v1/comments"
+    };
+  }
+
+  // 删除违规评论
+  rpc Delete (interaction.service.v1.DeleteCommentRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/admin/v1/comments/{id}"
+    };
+  }
+}

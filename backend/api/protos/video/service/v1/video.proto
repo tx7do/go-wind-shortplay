@@ -1,0 +1,249 @@
+syntax = "proto3";
+
+package video.service.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "pagination/v1/pagination.proto";
+
+// 视频服务（元数据 / 分片上传 / 发布流转 / 草稿）
+//
+// 状态流转（开源版为人工审核开关控制）：
+//   DRAFT --提交发布--> REVIEWING --审核通过--> PUBLISHED
+//          └─审核关闭时直接→ PUBLISHED     └─审核驳回--> REJECTED
+//   PUBLISHED --管理员下架--> OFFLINE
+service VideoService {
+  // 获取视频
+  rpc GetVideo (GetVideoRequest) returns (Video) {}
+
+  // 视频列表（管理端全量 / 作者按 author_id+status 过滤自己的作品）
+  rpc ListVideo (pagination.PagingRequest) returns (ListVideoResponse) {}
+
+  // 用户作品列表（个人主页；viewer 为本人时含草稿/审核中，他人仅已发布）
+  rpc ListUserVideo (ListUserVideoRequest) returns (ListVideoResponse) {}
+
+  // 更新视频（作者编辑自己的视频 / 管理端编辑）
+  rpc UpdateVideo (UpdateVideoRequest) returns (Video) {}
+
+  // 删除视频（作者删自己的 / 管理端强制删除）
+  rpc DeleteVideo (DeleteVideoRequest) returns (google.protobuf.Empty) {}
+
+  // 变更视频状态（审核通过 / 驳回 / 强制下架，管理端）
+  rpc ChangeVideoStatus (ChangeVideoStatusRequest) returns (Video) {}
+
+  // ── 分片上传 ──
+
+  // 创建上传任务，返回任务号与分片参数
+  rpc CreateUploadTask (CreateUploadTaskRequest) returns (UploadTask) {}
+
+  // 上传单个分片（顺序上传）
+  rpc UploadChunk (UploadChunkRequest) returns (UploadChunkResponse) {}
+
+  // 完成上传：校验分片完整性 → 合并 → 存入 MinIO → 单帧抽图生成封面（FFmpeg，异步任务）
+  rpc CompleteUpload (CompleteUploadRequest) returns (UploadTask) {}
+
+  // 查询上传任务状态
+  rpc GetUploadTask (GetUploadTaskRequest) returns (UploadTask) {}
+
+  // ── 草稿 ──
+
+  // 保存草稿（存在则更新，upsert）
+  rpc SaveDraft (SaveDraftRequest) returns (VideoDraft) {}
+
+  // 获取草稿
+  rpc GetDraft (GetDraftRequest) returns (VideoDraft) {}
+
+  // 我的草稿列表
+  rpc ListDraft (pagination.PagingRequest) returns (ListDraftResponse) {}
+
+  // 删除草稿
+  rpc DeleteDraft (DeleteDraftRequest) returns (google.protobuf.Empty) {}
+
+  // 提交草稿发布（进入审核队列或直接发布，依据系统配置）
+  rpc SubmitDraft (SubmitDraftRequest) returns (Video) {}
+
+  // ── 标签 ──
+
+  // 标签列表（按引用数排序，供搜索页 / 发布页选择）
+  rpc ListTag (pagination.PagingRequest) returns (ListTagResponse) {}
+}
+
+// 视频状态
+enum VideoStatus {
+  VIDEO_STATUS_UNSPECIFIED = 0;
+  VIDEO_STATUS_DRAFT = 1;      // 草稿
+  VIDEO_STATUS_REVIEWING = 2;  // 审核中
+  VIDEO_STATUS_PUBLISHED = 3;  // 已发布
+  VIDEO_STATUS_REJECTED = 4;   // 审核驳回
+  VIDEO_STATUS_OFFLINE = 5;    // 已下架
+}
+
+// 上传任务状态
+enum UploadTaskStatus {
+  UPLOAD_TASK_STATUS_UNSPECIFIED = 0;
+  UPLOAD_TASK_STATUS_UPLOADING = 1; // 上传中
+  UPLOAD_TASK_STATUS_MERGING = 2;   // 合并中
+  UPLOAD_TASK_STATUS_COMPLETED = 3; // 完成
+  UPLOAD_TASK_STATUS_FAILED = 4;    // 失败
+}
+
+message Video {
+  optional uint32 id = 1 [json_name = "id"];                    // 视频ID
+  optional string title = 2 [json_name = "title"];              // 标题
+  optional string description = 3 [json_name = "description"];  // 简介
+  optional string cover_url = 4 [json_name = "coverUrl"];       // 封面图
+  optional string video_url = 5 [json_name = "videoUrl"];       // 视频播放地址
+  optional uint32 duration = 6 [json_name = "duration"];        // 时长（秒）
+  optional uint32 width = 7 [json_name = "width"];              // 分辨率宽
+  optional uint32 height = 8 [json_name = "height"];            // 分辨率高
+  optional VideoStatus status = 9 [json_name = "status"];       // 状态
+  optional uint32 author_id = 10 [json_name = "authorId"];      // 作者ID
+  repeated string tags = 11 [json_name = "tags"];               // 标签名列表
+
+  // 计数（Redis 缓存 + 异步落库）
+  optional uint64 like_count = 20 [json_name = "likeCount"];        // 点赞数
+  optional uint64 collect_count = 21 [json_name = "collectCount"];  // 收藏数
+  optional uint64 comment_count = 22 [json_name = "commentCount"];  // 评论数
+  optional uint64 view_count = 23 [json_name = "viewCount"];        // 播放量
+
+  optional string reject_reason = 30 [json_name = "rejectReason"]; // 驳回原因
+  optional google.protobuf.Timestamp published_at = 40 [json_name = "publishedAt"]; // 发布时间
+  optional google.protobuf.Timestamp created_at = 41 [json_name = "createdAt"];     // 创建时间
+  optional google.protobuf.Timestamp updated_at = 42 [json_name = "updatedAt"];     // 更新时间
+}
+
+message Tag {
+  optional uint32 id = 1 [json_name = "id"];       // 标签ID
+  optional string name = 2 [json_name = "name"];   // 标签名
+  optional uint64 video_count = 3 [json_name = "videoCount"]; // 引用视频数
+}
+
+message UploadTask {
+  optional string task_id = 1 [json_name = "taskId"];              // 任务号（UUID）
+  optional string file_name = 2 [json_name = "fileName"];          // 原始文件名
+  optional uint64 file_size = 3 [json_name = "fileSize"];          // 文件大小（字节）
+  optional uint32 chunk_size = 4 [json_name = "chunkSize"];        // 分片大小（字节）
+  optional uint32 total_chunks = 5 [json_name = "totalChunks"];    // 总分片数
+  repeated uint32 uploaded_chunks = 6 [json_name = "uploadedChunks"]; // 已上传分片序号
+  optional UploadTaskStatus status = 7 [json_name = "status"];     // 任务状态
+  optional string file_key = 8 [json_name = "fileKey"];            // 合并后的 MinIO 对象键
+  optional uint32 video_id = 9 [json_name = "videoId"];            // 关联视频ID
+  optional google.protobuf.Timestamp created_at = 20 [json_name = "createdAt"]; // 创建时间
+}
+
+message VideoDraft {
+  optional uint32 id = 1 [json_name = "id"];                   // 草稿ID
+  optional string title = 2 [json_name = "title"];             // 标题
+  optional string description = 3 [json_name = "description"]; // 简介
+  repeated string tags = 4 [json_name = "tags"];               // 标签名列表
+  optional string cover_url = 5 [json_name = "coverUrl"];      // 封面图（可空，提交时生成）
+  optional string video_url = 6 [json_name = "videoUrl"];      // 视频地址（上传完成后回填）
+  optional uint32 duration = 7 [json_name = "duration"];       // 时长（秒）
+  optional uint32 width = 8 [json_name = "width"];             // 分辨率宽
+  optional uint32 height = 9 [json_name = "height"];           // 分辨率高
+  optional string upload_task_id = 10 [json_name = "uploadTaskId"]; // 关联上传任务号
+  optional uint32 author_id = 11 [json_name = "authorId"];     // 作者ID
+  optional google.protobuf.Timestamp created_at = 20 [json_name = "createdAt"]; // 创建时间
+  optional google.protobuf.Timestamp updated_at = 21 [json_name = "updatedAt"]; // 更新时间
+}
+
+message GetVideoRequest {
+  uint32 id = 1 [json_name = "id"]; // 视频ID
+}
+
+message ListUserVideoRequest {
+  uint32 user_id = 1 [json_name = "userId"];             // 用户ID
+  optional uint32 page_num = 2 [json_name = "pageNum"];  // 页码
+  optional uint32 page_size = 3 [json_name = "pageSize"]; // 页大小
+}
+
+message ListVideoResponse {
+  repeated Video items = 1 [json_name = "items"]; // 视频列表
+  optional int64 total = 2 [json_name = "total"]; // 总数
+}
+
+message UpdateVideoRequest {
+  uint32 id = 1 [json_name = "id"];                      // 视频ID
+  optional string title = 2 [json_name = "title"];       // 标题
+  optional string description = 3 [json_name = "description"]; // 简介
+  optional string cover_url = 4 [json_name = "coverUrl"]; // 封面
+  repeated string tags = 5 [json_name = "tags"];         // 标签
+}
+
+message DeleteVideoRequest {
+  uint32 id = 1 [json_name = "id"]; // 视频ID
+}
+
+message ChangeVideoStatusRequest {
+  uint32 id = 1 [json_name = "id"];                   // 视频ID
+  VideoStatus status = 2 [json_name = "status"];      // 目标状态（REVIEWING/PUBLISHED/REJECTED/OFFLINE）
+  optional string reason = 3 [json_name = "reason"];  // 操作原因（驳回 / 下架说明）
+}
+
+message CreateUploadTaskRequest {
+  string file_name = 1 [json_name = "fileName"];    // 文件名（含扩展名）
+  uint64 file_size = 2 [json_name = "fileSize"];    // 文件大小（字节）
+  optional uint32 chunk_size = 3 [json_name = "chunkSize"]; // 期望分片大小（缺省 4MB）
+}
+
+message UploadChunkRequest {
+  string task_id = 1 [json_name = "taskId"];       // 任务号
+  uint32 chunk_index = 2 [json_name = "chunkIndex"]; // 分片序号（从 0 开始）
+  bytes data = 3 [json_name = "data"];             // 分片数据
+}
+
+message UploadChunkResponse {
+  repeated uint32 uploaded_chunks = 1 [json_name = "uploadedChunks"]; // 已上传分片序号
+}
+
+message CompleteUploadRequest {
+  string task_id = 1 [json_name = "taskId"];              // 任务号
+  optional string title = 2 [json_name = "title"];        // 标题（直接发布时必填）
+  optional string description = 3 [json_name = "description"]; // 简介
+  repeated string tags = 4 [json_name = "tags"];          // 标签
+  optional string cover_url = 5 [json_name = "coverUrl"]; // 自定义封面（空则后端抽帧）
+  optional uint32 duration = 6 [json_name = "duration"];  // 时长（秒）
+  optional uint32 width = 7 [json_name = "width"];        // 分辨率宽
+  optional uint32 height = 8 [json_name = "height"];      // 分辨率高
+  // 提交去向：true 存草稿；false 直接提交发布（默认）
+  optional bool as_draft = 9 [json_name = "asDraft"];
+}
+
+message GetUploadTaskRequest {
+  string task_id = 1 [json_name = "taskId"]; // 任务号
+}
+
+message SaveDraftRequest {
+  optional uint32 id = 1 [json_name = "id"];               // 草稿ID（更新时传）
+  optional string title = 2 [json_name = "title"];         // 标题
+  optional string description = 3 [json_name = "description"]; // 简介
+  repeated string tags = 4 [json_name = "tags"];           // 标签
+  optional string cover_url = 5 [json_name = "coverUrl"];  // 封面
+  optional string video_url = 6 [json_name = "videoUrl"];  // 视频地址
+  optional uint32 duration = 7 [json_name = "duration"];   // 时长
+  optional uint32 width = 8 [json_name = "width"];         // 分辨率宽
+  optional uint32 height = 9 [json_name = "height"];       // 分辨率高
+  optional string upload_task_id = 10 [json_name = "uploadTaskId"]; // 上传任务号
+}
+
+message GetDraftRequest {
+  uint32 id = 1 [json_name = "id"]; // 草稿ID
+}
+
+message ListDraftResponse {
+  repeated VideoDraft items = 1 [json_name = "items"]; // 草稿列表
+  optional int64 total = 2 [json_name = "total"];      // 总数
+}
+
+message DeleteDraftRequest {
+  uint32 id = 1 [json_name = "id"]; // 草稿ID
+}
+
+message SubmitDraftRequest {
+  uint32 id = 1 [json_name = "id"]; // 草稿ID
+}
+
+message ListTagResponse {
+  repeated Tag items = 1 [json_name = "items"]; // 标签列表
+  optional int64 total = 2 [json_name = "total"]; // 总数
+}

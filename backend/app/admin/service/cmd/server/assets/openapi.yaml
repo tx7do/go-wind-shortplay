@@ -1,0 +1,1073 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: ""
+    version: 0.0.1
+paths:
+    /admin/v1/comments:
+        get:
+            tags:
+                - CommentService
+            description: 评论列表（全量，按视频过滤）
+            operationId: CommentService_List
+            parameters:
+                - name: page
+                  in: query
+                  description: 当前页码（从1开始，默认1）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  description: 每页条数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: offset
+                  in: query
+                  description: 跳过的记录数（从0开始，默认0）
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: 最多返回的记录数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: token
+                  in: query
+                  description: 上一页最后一条记录的游标（如ID/时间戳+ID，首次请求为空）
+                  schema:
+                    type: string
+                - name: noPaging
+                  in: query
+                  description: 是否不分页，如果为true，则page和pageSize参数无效。
+                  schema:
+                    type: boolean
+                - name: query
+                  in: query
+                  description: JSON字符串过滤条件，基础语法：{"field1":"val1", "field2___icontains":"val2"}，具体请参见：https://github.com/tx7do/go-crud/tree/main/pagination/filter/README.md
+                  schema:
+                    type: string
+                - name: filter
+                  in: query
+                  description: Google AIP规范字符串过滤条件
+                  schema:
+                    type: string
+                - name: filterExpr.type
+                  in: query
+                  description: 过滤表达式类型
+                  schema:
+                    enum:
+                        - EXPR_TYPE_UNSPECIFIED
+                        - AND
+                        - OR
+                    type: string
+                    format: enum
+                - name: orderBy
+                  in: query
+                  description: 排序条件
+                  schema:
+                    type: string
+                - name: fieldMask
+                  in: query
+                  description: 字段掩码，其作用为SELECT中的字段，其语法为使用逗号分隔字段名，例如：id,realName,userName。如果为空则选中所有字段，即SELECT *。
+                  schema:
+                    type: string
+                    format: field-mask
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/interaction.service.v1.ListCommentResponse'
+    /admin/v1/comments/{id}:
+        delete:
+            tags:
+                - CommentService
+            description: 删除违规评论
+            operationId: CommentService_Delete
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /admin/v1/dashboard/overview:
+        get:
+            tags:
+                - DashboardService
+            description: 运营总览
+            operationId: DashboardService_GetOverview
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/stats.service.v1.Overview'
+    /admin/v1/dashboard/top-videos:
+        get:
+            tags:
+                - DashboardService
+            description: 视频 TOP 排行
+            operationId: DashboardService_ListTopVideos
+            parameters:
+                - name: metric
+                  in: query
+                  schema:
+                    enum:
+                        - METRIC_UNSPECIFIED
+                        - METRIC_VIEW
+                        - METRIC_LIKE
+                        - METRIC_COLLECT
+                        - METRIC_COMMENT
+                    type: string
+                    format: enum
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.ListVideoResponse'
+    /admin/v1/login:
+        post:
+            tags:
+                - AuthenticationService
+            description: 登录
+            operationId: AuthenticationService_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/identity.service.v1.LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/identity.service.v1.LoginResponse'
+    /admin/v1/logout:
+        post:
+            tags:
+                - AuthenticationService
+            description: 登出
+            operationId: AuthenticationService_Logout
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/identity.service.v1.LogoutRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /admin/v1/reports:
+        get:
+            tags:
+                - ReportService
+            description: 举报工单列表（按状态过滤）
+            operationId: ReportService_List
+            parameters:
+                - name: page
+                  in: query
+                  description: 当前页码（从1开始，默认1）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  description: 每页条数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: offset
+                  in: query
+                  description: 跳过的记录数（从0开始，默认0）
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: 最多返回的记录数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: token
+                  in: query
+                  description: 上一页最后一条记录的游标（如ID/时间戳+ID，首次请求为空）
+                  schema:
+                    type: string
+                - name: noPaging
+                  in: query
+                  description: 是否不分页，如果为true，则page和pageSize参数无效。
+                  schema:
+                    type: boolean
+                - name: query
+                  in: query
+                  description: JSON字符串过滤条件，基础语法：{"field1":"val1", "field2___icontains":"val2"}，具体请参见：https://github.com/tx7do/go-crud/tree/main/pagination/filter/README.md
+                  schema:
+                    type: string
+                - name: filter
+                  in: query
+                  description: Google AIP规范字符串过滤条件
+                  schema:
+                    type: string
+                - name: filterExpr.type
+                  in: query
+                  description: 过滤表达式类型
+                  schema:
+                    enum:
+                        - EXPR_TYPE_UNSPECIFIED
+                        - AND
+                        - OR
+                    type: string
+                    format: enum
+                - name: orderBy
+                  in: query
+                  description: 排序条件
+                  schema:
+                    type: string
+                - name: fieldMask
+                  in: query
+                  description: 字段掩码，其作用为SELECT中的字段，其语法为使用逗号分隔字段名，例如：id,realName,userName。如果为空则选中所有字段，即SELECT *。
+                  schema:
+                    type: string
+                    format: field-mask
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/report.service.v1.ListReportResponse'
+    /admin/v1/reports/{id}:
+        get:
+            tags:
+                - ReportService
+            description: 举报工单详情
+            operationId: ReportService_Get
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/report.service.v1.Report'
+    /admin/v1/reports/{id}/handle:
+        put:
+            tags:
+                - ReportService
+            description: 处理工单（通过并处置 / 驳回）
+            operationId: ReportService_Handle
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/report.service.v1.HandleReportRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/report.service.v1.Report'
+    /admin/v1/sysconf:
+        get:
+            tags:
+                - SysConfService
+            description: 获取系统配置
+            operationId: SysConfService_Get
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/sysconf.service.v1.SysConf'
+        put:
+            tags:
+                - SysConfService
+            description: 更新系统配置
+            operationId: SysConfService_Update
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/sysconf.service.v1.UpdateSysConfRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/sysconf.service.v1.SysConf'
+    /admin/v1/users:
+        get:
+            tags:
+                - UserService
+            description: 用户列表
+            operationId: UserService_List
+            parameters:
+                - name: page
+                  in: query
+                  description: 当前页码（从1开始，默认1）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  description: 每页条数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: offset
+                  in: query
+                  description: 跳过的记录数（从0开始，默认0）
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: 最多返回的记录数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: token
+                  in: query
+                  description: 上一页最后一条记录的游标（如ID/时间戳+ID，首次请求为空）
+                  schema:
+                    type: string
+                - name: noPaging
+                  in: query
+                  description: 是否不分页，如果为true，则page和pageSize参数无效。
+                  schema:
+                    type: boolean
+                - name: query
+                  in: query
+                  description: JSON字符串过滤条件，基础语法：{"field1":"val1", "field2___icontains":"val2"}，具体请参见：https://github.com/tx7do/go-crud/tree/main/pagination/filter/README.md
+                  schema:
+                    type: string
+                - name: filter
+                  in: query
+                  description: Google AIP规范字符串过滤条件
+                  schema:
+                    type: string
+                - name: filterExpr.type
+                  in: query
+                  description: 过滤表达式类型
+                  schema:
+                    enum:
+                        - EXPR_TYPE_UNSPECIFIED
+                        - AND
+                        - OR
+                    type: string
+                    format: enum
+                - name: orderBy
+                  in: query
+                  description: 排序条件
+                  schema:
+                    type: string
+                - name: fieldMask
+                  in: query
+                  description: 字段掩码，其作用为SELECT中的字段，其语法为使用逗号分隔字段名，例如：id,realName,userName。如果为空则选中所有字段，即SELECT *。
+                  schema:
+                    type: string
+                    format: field-mask
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/identity.service.v1.ListUserResponse'
+        post:
+            tags:
+                - UserService
+            description: 创建用户
+            operationId: UserService_Create
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/identity.service.v1.CreateUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/identity.service.v1.User'
+    /admin/v1/users/{id}:
+        get:
+            tags:
+                - UserService
+            description: 用户详情
+            operationId: UserService_Get
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/identity.service.v1.User'
+        put:
+            tags:
+                - UserService
+            description: 更新用户
+            operationId: UserService_Update
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/identity.service.v1.UpdateUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/identity.service.v1.User'
+        delete:
+            tags:
+                - UserService
+            description: 删除用户
+            operationId: UserService_Delete
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /admin/v1/users/{id}/status:
+        put:
+            tags:
+                - UserService
+            description: 启用 / 禁用用户
+            operationId: UserService_UpdateStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/identity.service.v1.UpdateUserStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/identity.service.v1.User'
+    /admin/v1/users/{userId}/stats:
+        get:
+            tags:
+                - UserService
+            description: 用户统计（作品 / 粉丝 / 关注 / 获赞）
+            operationId: UserService_GetStats
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/identity.service.v1.UserStats'
+    /admin/v1/videos:
+        get:
+            tags:
+                - VideoService
+            description: 视频列表（按状态 / 作者过滤）
+            operationId: VideoService_List
+            parameters:
+                - name: page
+                  in: query
+                  description: 当前页码（从1开始，默认1）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  description: 每页条数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: offset
+                  in: query
+                  description: 跳过的记录数（从0开始，默认0）
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: 最多返回的记录数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: token
+                  in: query
+                  description: 上一页最后一条记录的游标（如ID/时间戳+ID，首次请求为空）
+                  schema:
+                    type: string
+                - name: noPaging
+                  in: query
+                  description: 是否不分页，如果为true，则page和pageSize参数无效。
+                  schema:
+                    type: boolean
+                - name: query
+                  in: query
+                  description: JSON字符串过滤条件，基础语法：{"field1":"val1", "field2___icontains":"val2"}，具体请参见：https://github.com/tx7do/go-crud/tree/main/pagination/filter/README.md
+                  schema:
+                    type: string
+                - name: filter
+                  in: query
+                  description: Google AIP规范字符串过滤条件
+                  schema:
+                    type: string
+                - name: filterExpr.type
+                  in: query
+                  description: 过滤表达式类型
+                  schema:
+                    enum:
+                        - EXPR_TYPE_UNSPECIFIED
+                        - AND
+                        - OR
+                    type: string
+                    format: enum
+                - name: orderBy
+                  in: query
+                  description: 排序条件
+                  schema:
+                    type: string
+                - name: fieldMask
+                  in: query
+                  description: 字段掩码，其作用为SELECT中的字段，其语法为使用逗号分隔字段名，例如：id,realName,userName。如果为空则选中所有字段，即SELECT *。
+                  schema:
+                    type: string
+                    format: field-mask
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.ListVideoResponse'
+    /admin/v1/videos/{id}:
+        get:
+            tags:
+                - VideoService
+            description: 视频详情
+            operationId: VideoService_Get
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.Video'
+        delete:
+            tags:
+                - VideoService
+            description: 删除视频
+            operationId: VideoService_Delete
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /admin/v1/videos/{id}/status:
+        put:
+            tags:
+                - VideoService
+            description: 审核通过 / 驳回 / 强制下架
+            operationId: VideoService_ChangeStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/video.service.v1.ChangeVideoStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.Video'
+components:
+    schemas:
+        identity.service.v1.Authenticator:
+            type: object
+            properties:
+                accessToken:
+                    type: string
+                refreshToken:
+                    type: string
+                expiresIn:
+                    type: string
+                tokenType:
+                    type: string
+        identity.service.v1.CreateUserRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+                nickname:
+                    type: string
+                avatarUrl:
+                    type: string
+                bio:
+                    type: string
+        identity.service.v1.ListUserResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/identity.service.v1.User'
+                total:
+                    type: string
+        identity.service.v1.LoginRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+        identity.service.v1.LoginResponse:
+            type: object
+            properties:
+                authenticator:
+                    $ref: '#/components/schemas/identity.service.v1.Authenticator'
+                user:
+                    $ref: '#/components/schemas/identity.service.v1.User'
+        identity.service.v1.LogoutRequest:
+            type: object
+            properties:
+                userId:
+                    type: integer
+                    format: uint32
+        identity.service.v1.UpdateUserRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                nickname:
+                    type: string
+                avatarUrl:
+                    type: string
+                bio:
+                    type: string
+                password:
+                    type: string
+        identity.service.v1.UpdateUserStatusRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                status:
+                    enum:
+                        - USER_STATUS_UNSPECIFIED
+                        - USER_STATUS_DISABLED
+                        - USER_STATUS_NORMAL
+                    type: string
+                    format: enum
+        identity.service.v1.User:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                username:
+                    type: string
+                nickname:
+                    type: string
+                avatarUrl:
+                    type: string
+                bio:
+                    type: string
+                status:
+                    enum:
+                        - USER_STATUS_UNSPECIFIED
+                        - USER_STATUS_DISABLED
+                        - USER_STATUS_NORMAL
+                    type: string
+                    format: enum
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+        identity.service.v1.UserBrief:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                nickname:
+                    type: string
+                avatarUrl:
+                    type: string
+        identity.service.v1.UserStats:
+            type: object
+            properties:
+                userId:
+                    type: integer
+                    format: uint32
+                videoCount:
+                    type: string
+                followerCount:
+                    type: string
+                followingCount:
+                    type: string
+                likeReceivedCount:
+                    type: string
+            description: 用户创作统计（计数由互动域异步维护，避免用户表与互动表强耦合）
+        interaction.service.v1.Comment:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                videoId:
+                    type: integer
+                    format: uint32
+                userId:
+                    type: integer
+                    format: uint32
+                user:
+                    $ref: '#/components/schemas/identity.service.v1.UserBrief'
+                content:
+                    type: string
+                parentId:
+                    type: integer
+                    format: uint32
+                likeCount:
+                    type: string
+                replyCount:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+        interaction.service.v1.ListCommentResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/interaction.service.v1.Comment'
+                total:
+                    type: string
+        report.service.v1.HandleReportRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                action:
+                    enum:
+                        - HANDLE_ACTION_UNSPECIFIED
+                        - HANDLE_ACTION_RESOLVE
+                        - HANDLE_ACTION_DISMISS
+                    type: string
+                    format: enum
+                note:
+                    type: string
+        report.service.v1.ListReportResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/report.service.v1.Report'
+                total:
+                    type: string
+        report.service.v1.Report:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                reporterId:
+                    type: integer
+                    format: uint32
+                reporter:
+                    $ref: '#/components/schemas/identity.service.v1.UserBrief'
+                targetType:
+                    enum:
+                        - REPORT_TARGET_TYPE_UNSPECIFIED
+                        - REPORT_TARGET_TYPE_VIDEO
+                        - REPORT_TARGET_TYPE_COMMENT
+                        - REPORT_TARGET_TYPE_USER
+                    type: string
+                    format: enum
+                targetId:
+                    type: integer
+                    format: uint32
+                reason:
+                    type: string
+                description:
+                    type: string
+                status:
+                    enum:
+                        - REPORT_STATUS_UNSPECIFIED
+                        - REPORT_STATUS_PENDING
+                        - REPORT_STATUS_RESOLVED
+                        - REPORT_STATUS_DISMISSED
+                    type: string
+                    format: enum
+                handledBy:
+                    type: integer
+                    format: uint32
+                handleNote:
+                    type: string
+                handledAt:
+                    type: string
+                    format: date-time
+                createdAt:
+                    type: string
+                    format: date-time
+        stats.service.v1.Overview:
+            type: object
+            properties:
+                totalVideos:
+                    type: string
+                publishedVideos:
+                    type: string
+                totalViews:
+                    type: string
+                totalLikes:
+                    type: string
+                totalComments:
+                    type: string
+                totalUsers:
+                    type: string
+                todayPublished:
+                    type: string
+        sysconf.service.v1.SysConf:
+            type: object
+            properties:
+                maxUploadSizeMb:
+                    type: integer
+                    format: uint32
+                maxDurationSeconds:
+                    type: integer
+                    format: uint32
+                manualReviewEnabled:
+                    type: boolean
+                registerEnabled:
+                    type: boolean
+                allowedVideoTypes:
+                    type: array
+                    items:
+                        type: string
+                updatedAt:
+                    type: string
+                    format: date-time
+        sysconf.service.v1.UpdateSysConfRequest:
+            type: object
+            properties:
+                maxUploadSizeMb:
+                    type: integer
+                    format: uint32
+                maxDurationSeconds:
+                    type: integer
+                    format: uint32
+                manualReviewEnabled:
+                    type: boolean
+                registerEnabled:
+                    type: boolean
+                allowedVideoTypes:
+                    type: array
+                    items:
+                        type: string
+        video.service.v1.ChangeVideoStatusRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                status:
+                    enum:
+                        - VIDEO_STATUS_UNSPECIFIED
+                        - VIDEO_STATUS_DRAFT
+                        - VIDEO_STATUS_REVIEWING
+                        - VIDEO_STATUS_PUBLISHED
+                        - VIDEO_STATUS_REJECTED
+                        - VIDEO_STATUS_OFFLINE
+                    type: string
+                    format: enum
+                reason:
+                    type: string
+        video.service.v1.ListVideoResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/video.service.v1.Video'
+                total:
+                    type: string
+        video.service.v1.Video:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                title:
+                    type: string
+                description:
+                    type: string
+                coverUrl:
+                    type: string
+                videoUrl:
+                    type: string
+                duration:
+                    type: integer
+                    format: uint32
+                width:
+                    type: integer
+                    format: uint32
+                height:
+                    type: integer
+                    format: uint32
+                status:
+                    enum:
+                        - VIDEO_STATUS_UNSPECIFIED
+                        - VIDEO_STATUS_DRAFT
+                        - VIDEO_STATUS_REVIEWING
+                        - VIDEO_STATUS_PUBLISHED
+                        - VIDEO_STATUS_REJECTED
+                        - VIDEO_STATUS_OFFLINE
+                    type: string
+                    format: enum
+                authorId:
+                    type: integer
+                    format: uint32
+                tags:
+                    type: array
+                    items:
+                        type: string
+                likeCount:
+                    type: string
+                    description: 计数（Redis 缓存 + 异步落库）
+                collectCount:
+                    type: string
+                commentCount:
+                    type: string
+                viewCount:
+                    type: string
+                rejectReason:
+                    type: string
+                publishedAt:
+                    type: string
+                    format: date-time
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+tags:
+    - name: AuthenticationService
+      description: 后台认证服务（管理员登录）
+    - name: CommentService
+      description: 评论管理服务（后台）
+    - name: DashboardService
+      description: 数据看板服务（后台）
+    - name: ReportService
+      description: 举报工单管理服务（后台）
+    - name: SysConfService
+      description: 系统配置服务（后台：上传限制 / 时长限制 / 人工审核开关）
+    - name: UserService
+      description: 用户管理服务（后台）
+    - name: VideoService
+      description: 视频管理服务（后台：列表 / 详情 / 审核 / 下架 / 删除）

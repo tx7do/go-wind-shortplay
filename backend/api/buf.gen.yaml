@@ -1,0 +1,98 @@
+version: v2
+
+clean: true
+
+managed:
+  enabled: true
+
+  disable:
+    - module: buf.build/googleapis/googleapis
+    - module: 'buf.build/envoyproxy/protoc-gen-validate'
+    - module: 'buf.build/kratos/apis'
+    - module: 'buf.build/gnostic/gnostic'
+    - module: 'buf.build/gogo/protobuf'
+    - module: 'buf.build/tx7do/pagination'
+    - module: 'buf.build/go-wind/redact'
+
+  override:
+    # global go_package_prefix option
+    # 如果没有在各目录下单独配置go_package，则会使用该前缀。
+    - file_option: go_package_prefix
+      value: go-wind-shortplay/api/gen/go
+
+    # per-directory go_package options
+    # value第一部分是生成代码的包路径，第二部分是go包名。
+    - file_option: go_package
+      path: admin/service/v1
+      value: go-wind-shortplay/api/gen/go/admin/service/v1;adminpb
+    - file_option: go_package
+      path: app/service/v1
+      value: go-wind-shortplay/api/gen/go/app/service/v1;apppb
+    - file_option: go_package
+      path: conf/v1
+      value: go-wind-shortplay/api/gen/go/conf/v1;confv1
+    - file_option: go_package
+      path: identity/service/v1
+      value: go-wind-shortplay/api/gen/go/identity/service/v1;identitypb
+    - file_option: go_package
+      path: video/service/v1
+      value: go-wind-shortplay/api/gen/go/video/service/v1;videopb
+    - file_option: go_package
+      path: feed/service/v1
+      value: go-wind-shortplay/api/gen/go/feed/service/v1;feedpb
+    - file_option: go_package
+      path: interaction/service/v1
+      value: go-wind-shortplay/api/gen/go/interaction/service/v1;interactionpb
+    - file_option: go_package
+      path: report/service/v1
+      value: go-wind-shortplay/api/gen/go/report/service/v1;reportpb
+    - file_option: go_package
+      path: uba/service/v1
+      value: go-wind-shortplay/api/gen/go/uba/service/v1;ubapb
+    - file_option: go_package
+      path: sysconf/service/v1
+      value: go-wind-shortplay/api/gen/go/sysconf/service/v1;sysconfpb
+    - file_option: go_package
+      path: notify/service/v1
+      value: go-wind-shortplay/api/gen/go/notify/service/v1;notifypb
+    - file_option: go_package
+      path: stats/service/v1
+      value: go-wind-shortplay/api/gen/go/stats/service/v1;statspb
+
+plugins:
+  # generate go code
+  - local: protoc-gen-go
+    out: gen/go
+    opt: paths=source_relative # use relative paths
+
+  # generate grpc service code
+  - local: protoc-gen-go-grpc
+    out: gen/go
+    opt:
+      - paths=source_relative # use relative paths
+
+  # generate rest service code
+  - local: protoc-gen-go-http
+    out: gen/go
+    opt:
+      - paths=source_relative # use relative paths
+
+  # generate kratos errors code
+  - local: protoc-gen-go-errors
+    out: gen/go
+    opt:
+      - paths=source_relative # use relative paths
+
+  # generate message validator code
+  - local: protoc-gen-validate
+    out: gen/go
+    opt:
+      - paths=source_relative # use relative paths
+      - lang=go
+
+  # generate redact code
+  - local: protoc-gen-go-redact
+    out: gen/go
+    opt:
+      - paths=source_relative # use relative paths
+      - lang=go

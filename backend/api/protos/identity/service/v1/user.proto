@@ -1,0 +1,110 @@
+syntax = "proto3";
+
+package identity.service.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "pagination/v1/pagination.proto";
+
+// 用户服务（核心域，仅 gRPC；对外 REST 由 admin/app 网关 BFF 暴露）
+service UserService {
+  // 获取用户
+  rpc GetUser (GetUserRequest) returns (User) {}
+
+  // 按用户名获取用户（登录 / 注册查重用）
+  rpc GetUserByUsername (GetUserByUsernameRequest) returns (User) {}
+
+  // 用户列表（管理端）
+  rpc ListUser (pagination.PagingRequest) returns (ListUserResponse) {}
+
+  // 创建用户（管理端）
+  rpc CreateUser (CreateUserRequest) returns (User) {}
+
+  // 更新用户（管理端 / 本人编辑资料复用，按 update_mask 控制可改字段）
+  rpc UpdateUser (UpdateUserRequest) returns (User) {}
+
+  // 删除用户（管理端）
+  rpc DeleteUser (DeleteUserRequest) returns (google.protobuf.Empty) {}
+
+  // 变更用户状态（启用 / 禁用，管理端）
+  rpc UpdateUserStatus (UpdateUserStatusRequest) returns (User) {}
+
+  // 用户创作统计（作品 / 粉丝 / 关注 / 获赞数，个人主页用）
+  rpc GetUserStats (GetUserStatsRequest) returns (UserStats) {}
+}
+
+// 用户状态
+enum UserStatus {
+  USER_STATUS_UNSPECIFIED = 0;
+  USER_STATUS_DISABLED = 1;  // 禁用（管理员手动禁用，禁止登录）
+  USER_STATUS_NORMAL = 2;    // 正常
+}
+
+message UserBrief {
+  optional uint32 id = 1 [json_name = "id"];          // 用户ID
+  optional string nickname = 2 [json_name = "nickname"]; // 昵称
+  optional string avatar_url = 3 [json_name = "avatarUrl"]; // 头像
+}
+
+message User {
+  optional uint32 id = 1 [json_name = "id"];                  // 用户ID
+  optional string username = 2 [json_name = "username"];      // 登录名（唯一）
+  optional string nickname = 3 [json_name = "nickname"];      // 昵称
+  optional string avatar_url = 4 [json_name = "avatarUrl"];   // 头像地址
+  optional string bio = 5 [json_name = "bio"];                // 个人简介
+  optional UserStatus status = 6 [json_name = "status"];      // 状态
+
+  optional google.protobuf.Timestamp created_at = 200 [json_name = "createdAt"]; // 创建时间
+  optional google.protobuf.Timestamp updated_at = 201 [json_name = "updatedAt"]; // 更新时间
+}
+
+// 用户创作统计（计数由互动域异步维护，避免用户表与互动表强耦合）
+message UserStats {
+  optional uint32 user_id = 1 [json_name = "userId"];            // 用户ID
+  optional uint64 video_count = 2 [json_name = "videoCount"];        // 作品数（已发布）
+  optional uint64 follower_count = 3 [json_name = "followerCount"];  // 粉丝数
+  optional uint64 following_count = 4 [json_name = "followingCount"]; // 关注数
+  optional uint64 like_received_count = 5 [json_name = "likeReceivedCount"]; // 获赞总数
+}
+
+message GetUserRequest {
+  uint32 id = 1 [json_name = "id"]; // 用户ID
+}
+
+message GetUserByUsernameRequest {
+  string username = 1 [json_name = "username"]; // 用户名
+}
+
+message ListUserResponse {
+  repeated User items = 1 [json_name = "items"]; // 用户列表
+  optional int64 total = 2 [json_name = "total"]; // 总数
+}
+
+message CreateUserRequest {
+  string username = 1 [json_name = "username"];   // 登录名
+  string password = 2 [json_name = "password"];   // 初始密码
+  string nickname = 3 [json_name = "nickname"];   // 昵称
+  optional string avatar_url = 4 [json_name = "avatarUrl"]; // 头像
+  optional string bio = 5 [json_name = "bio"];    // 简介
+}
+
+message UpdateUserRequest {
+  uint32 id = 1 [json_name = "id"];                       // 用户ID
+  optional string nickname = 2 [json_name = "nickname"];  // 昵称
+  optional string avatar_url = 3 [json_name = "avatarUrl"]; // 头像
+  optional string bio = 4 [json_name = "bio"];            // 简介
+  optional string password = 5 [json_name = "password"];  // 新密码（管理端重置）
+}
+
+message DeleteUserRequest {
+  uint32 id = 1 [json_name = "id"]; // 用户ID
+}
+
+message UpdateUserStatusRequest {
+  uint32 id = 1 [json_name = "id"];                 // 用户ID
+  UserStatus status = 2 [json_name = "status"];     // 目标状态
+}
+
+message GetUserStatsRequest {
+  uint32 user_id = 1 [json_name = "userId"]; // 用户ID
+}

@@ -1,0 +1,87 @@
+# 全量部署：基础设施 + 三服务（core / admin / app）
+# 用法：docker compose up -d --build
+services:
+  postgres:
+    image: docker.io/bitnami/postgresql:16
+    environment:
+      POSTGRESQL_USERNAME: shortplay
+      POSTGRESQL_PASSWORD: shortplay
+      POSTGRESQL_DATABASE: shortplay
+    volumes:
+      - postgres_data:/bitnami/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shortplay"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: docker.io/bitnami/redis:7.2
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - redis_data:/bitnami/redis/data
+
+  minio:
+    image: docker.io/minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  core-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: core
+    environment:
+      JWT_SIGNING_KEY: "${JWT_SIGNING_KEY:-dev_only_change_me_in_prod}"
+      OSS_BUCKET: "${OSS_BUCKET:-shortplay}"
+      OSS_PUBLIC_ENDPOINT: "http://127.0.0.1:9000"
+      UPLOAD_TEMP_DIR: "/tmp/shortplay-uploads"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+
+  admin-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: admin
+    environment:
+      JWT_SIGNING_KEY: "${JWT_SIGNING_KEY:-dev_only_change_me_in_prod}"
+      CORE_SERVICE_ADDR: "core-service:6900"
+    ports:
+      - "6600:6600"
+    depends_on:
+      - core-service
+
+  app-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: app
+    environment:
+      JWT_SIGNING_KEY: "${JWT_SIGNING_KEY:-dev_only_change_me_in_prod}"
+      CORE_SERVICE_ADDR: "core-service:6900"
+    ports:
+      - "6700:6700"
+    depends_on:
+      - core-service
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:

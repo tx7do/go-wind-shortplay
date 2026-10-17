@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package app.service.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "identity/service/v1/authentication.proto";
+import "identity/service/v1/user.proto";
+
+// App 认证服务（注册 / 登录 / 登出 / 我的资料）
+service AuthenticationService {
+  // 账号密码登录
+  rpc Login (identity.service.v1.LoginRequest) returns (identity.service.v1.LoginResponse) {
+    option (google.api.http) = {
+      post: "/app/v1/auth/login"
+      body: "*"
+    };
+  }
+
+  // 注册（是否开放由系统配置决定）
+  rpc Register (identity.service.v1.RegisterRequest) returns (identity.service.v1.LoginResponse) {
+    option (google.api.http) = {
+      post: "/app/v1/auth/register"
+      body: "*"
+    };
+  }
+
+  // 刷新令牌
+  rpc RefreshToken (identity.service.v1.RefreshTokenRequest) returns (identity.service.v1.LoginResponse) {
+    option (google.api.http) = {
+      post: "/app/v1/auth/refresh"
+      body: "*"
+    };
+  }
+
+  // 登出
+  rpc Logout (identity.service.v1.LogoutRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/app/v1/auth/logout"
+      body: "*"
+    };
+  }
+}

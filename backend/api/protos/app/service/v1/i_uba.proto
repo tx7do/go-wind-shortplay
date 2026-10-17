@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package app.service.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "uba/service/v1/uba.proto";
+
+// UBA 埋点上报服务（App 端：观看时长 / 完播 / 划走等）
+service UbaService {
+  // 批量上报行为事件（尽力而为，失败静默重试）
+  rpc ReportEvents (uba.service.v1.ReportEventsRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/app/v1/uba/events"
+      body: "*"
+    };
+  }
+}

@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package admin.service.v1;
+
+import "google/api/annotations.proto";
+import "pagination/v1/pagination.proto";
+import "report/service/v1/report.proto";
+
+// 举报工单管理服务（后台）
+service ReportService {
+  // 举报工单列表（按状态过滤）
+  rpc List (pagination.PagingRequest) returns (report.service.v1.ListReportResponse) {
+    option (google.api.http) = {
+      get: "/admin/v1/reports"
+    };
+  }
+
+  // 举报工单详情
+  rpc Get (report.service.v1.GetReportRequest) returns (report.service.v1.Report) {
+    option (google.api.http) = {
+      get: "/admin/v1/reports/{id}"
+    };
+  }
+
+  // 处理工单（通过并处置 / 驳回）
+  rpc Handle (report.service.v1.HandleReportRequest) returns (report.service.v1.Report) {
+    option (google.api.http) = {
+      put: "/admin/v1/reports/{id}/handle"
+      body: "*"
+    };
+  }
+}

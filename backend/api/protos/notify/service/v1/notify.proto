@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package notify.service.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "identity/service/v1/user.proto";
+import "pagination/v1/pagination.proto";
+
+// 通知服务（点赞 / 评论 / 新增粉丝 / 系统通知）
+//
+// 开源版站内通知独立实现；Phase 2 与风信 IM 深度打通（私信、离线推送）。
+service NotifyService {
+  // 通知列表（分页，可只看未读）
+  rpc ListNotification (ListNotificationRequest) returns (ListNotificationResponse) {}
+
+  // 标记已读
+  rpc MarkRead (MarkReadRequest) returns (google.protobuf.Empty) {}
+
+  // 全部标记已读
+  rpc MarkAllRead (google.protobuf.Empty) returns (google.protobuf.Empty) {}
+
+  // 未读数
+  rpc GetUnreadCount (google.protobuf.Empty) returns (GetUnreadCountResponse) {}
+}
+
+// 通知类型
+enum NotifyType {
+  NOTIFY_TYPE_UNSPECIFIED = 0;
+  NOTIFY_TYPE_LIKE = 1;    // 点赞（我的视频收到点赞）
+  NOTIFY_TYPE_COMMENT = 2; // 评论（我的视频收到评论 / 收到回复）
+  NOTIFY_TYPE_FOLLOW = 3;  // 粉丝（新增关注）
+  NOTIFY_TYPE_SYSTEM = 4;  // 系统（审核结果、下架通知等）
+}
+
+message Notification {
+  optional uint32 id = 1 [json_name = "id"];                       // 通知ID
+  optional NotifyType type = 2 [json_name = "type"];               // 类型
+  identity.service.v1.UserBrief sender = 3 [json_name = "sender"]; // 触发者（系统通知为空）
+  optional uint32 video_id = 4 [json_name = "videoId"];            // 关联视频（点击跳转）
+  optional uint32 comment_id = 5 [json_name = "commentId"];        // 关联评论
+  optional string content = 6 [json_name = "content"];             // 文案
+  optional bool is_read = 7 [json_name = "isRead"];                // 是否已读
+  optional google.protobuf.Timestamp created_at = 20 [json_name = "createdAt"]; // 创建时间
+}
+
+message ListNotificationRequest {
+  optional bool unread_only = 1 [json_name = "unreadOnly"]; // 只看未读
+  optional uint32 page_num = 2 [json_name = "pageNum"];     // 页码
+  optional uint32 page_size = 3 [json_name = "pageSize"];   // 页大小
+}
+
+message ListNotificationResponse {
+  repeated Notification items = 1 [json_name = "items"]; // 通知列表
+  optional int64 total = 2 [json_name = "total"];        // 总数
+  optional int64 unread_count = 3 [json_name = "unreadCount"]; // 未读数
+}
+
+message MarkReadRequest {
+  repeated uint32 ids = 1 [json_name = "ids"]; // 通知ID列表
+}
+
+message GetUnreadCountResponse {
+  int64 count = 1 [json_name = "count"]; // 未读数
+}

@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package app.service.v1;
+
+import "feed/service/v1/feed.proto";
+import "google/api/annotations.proto";
+
+// Feed 流服务（App 首页沉浸式上下滑）
+service FeedService {
+  // 获取 Feed 流（游客可访问）
+  rpc GetFeed (feed.service.v1.GetFeedRequest) returns (feed.service.v1.GetFeedResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/feed"
+    };
+  }
+
+  // 单视频详情（分享跳转 / 点击进入）
+  rpc GetVideoDetail (feed.service.v1.GetVideoDetailRequest) returns (feed.service.v1.VideoDetail) {
+    option (google.api.http) = {
+      get: "/app/v1/videos/{video_id}"
+    };
+  }
+
+  // 搜索视频（标题 / 标签）
+  rpc SearchVideos (feed.service.v1.SearchVideosRequest) returns (feed.service.v1.GetFeedResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/search/videos"
+    };
+  }
+
+  // 标签聚合页
+  rpc ListVideosByTag (feed.service.v1.ListVideosByTagRequest) returns (feed.service.v1.GetFeedResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/tags/{tag}/videos"
+    };
+  }
+}

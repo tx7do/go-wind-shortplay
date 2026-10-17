@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package uba.service.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// UBA 埋点服务（用户行为分析，开源版仅服务 Feed 排序与基础报表）
+//
+// 事件先入 Redis 缓冲，异步批量落库；上报接口尽力而为，不阻塞播放链路。
+service UbaService {
+  // 批量上报行为事件（观看时长 / 完播 / 划走 / 点赞等）
+  rpc ReportEvents (ReportEventsRequest) returns (google.protobuf.Empty) {}
+}
+
+// 行为事件类型
+enum EventType {
+  EVENT_TYPE_UNSPECIFIED = 0;
+  EVENT_TYPE_VIDEO_PLAY = 1;         // 开始播放
+  EVENT_TYPE_VIDEO_HEARTBEAT = 2;    // 观看心跳（周期上报累计时长）
+  EVENT_TYPE_VIDEO_COMPLETE = 3;     // 完播
+  EVENT_TYPE_VIDEO_SWIPE_AWAY = 4;   // 划走（未完播离开）
+  EVENT_TYPE_VIDEO_LIKE = 5;         // 点赞
+  EVENT_TYPE_VIDEO_COLLECT = 6;      // 收藏
+  EVENT_TYPE_COMMENT_CREATE = 7;     // 发表评论
+  EVENT_TYPE_FOLLOW_AUTHOR = 8;      // 关注作者
+}
+
+message UbaEvent {
+  EventType event_type = 1 [json_name = "eventType"];    // 事件类型
+  uint32 video_id = 2 [json_name = "videoId"];           // 视频ID（非视频事件可空）
+  optional uint32 target_user_id = 3 [json_name = "targetUserId"]; // 对方用户ID（关注事件）
+  optional uint64 duration_ms = 4 [json_name = "durationMs"];      // 观看时长（毫秒）
+  optional uint32 watch_percent = 5 [json_name = "watchPercent"];  // 观看进度百分比（0-100）
+  optional string extra = 6 [json_name = "extra"];       // 扩展参数（JSON 字符串）
+  optional google.protobuf.Timestamp occurred_at = 7 [json_name = "occurredAt"]; // 发生时间
+}
+
+message ReportEventsRequest {
+  repeated UbaEvent events = 1 [json_name = "events"]; // 事件列表
+}

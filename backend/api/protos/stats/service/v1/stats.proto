@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package stats.service.v1;
+
+import "pagination/v1/pagination.proto";
+import "video/service/v1/video.proto";
+
+// 数据看板服务（开源基础报表：UBA 聚合 + 计数排行）
+service DashboardService {
+  // 运营总览（视频量 / 播放量 / 互动量 / 用户量 / 今日发布）
+  rpc GetOverview (GetOverviewRequest) returns (Overview) {}
+
+  // 视频 TOP 排行（按播放 / 点赞 / 收藏 / 评论）
+  rpc ListTopVideos (ListTopVideosRequest) returns (video.service.v1.ListVideoResponse) {}
+
+  // 创作者中心总览（viewer 本人作品聚合：播放 / 点赞 / 收藏 / 评论）
+  rpc GetCreatorOverview (GetCreatorOverviewRequest) returns (CreatorOverview) {}
+}
+
+message GetCreatorOverviewRequest {
+  // viewer 取鉴权上下文，无入参
+}
+
+// 创作者中心总览
+message CreatorOverview {
+  optional uint64 video_count = 1 [json_name = "videoCount"];   // 作品数（已发布）
+  optional uint64 total_views = 2 [json_name = "totalViews"];   // 累计播放
+  optional uint64 total_likes = 3 [json_name = "totalLikes"];   // 累计获赞
+  optional uint64 total_collects = 4 [json_name = "totalCollects"]; // 累计收藏
+  optional uint64 total_comments = 5 [json_name = "totalComments"]; // 累计评论
+  optional uint64 follower_count = 6 [json_name = "followerCount"]; // 粉丝数
+}
+
+message GetOverviewRequest {
+  // 预留时间范围过滤（开源版固定全量 + 今日）
+}
+
+message Overview {
+  optional uint64 total_videos = 1 [json_name = "totalVideos"];         // 视频总数
+  optional uint64 published_videos = 2 [json_name = "publishedVideos"]; // 在线视频数
+  optional uint64 total_views = 3 [json_name = "totalViews"];           // 总播放量
+  optional uint64 total_likes = 4 [json_name = "totalLikes"];           // 总点赞数
+  optional uint64 total_comments = 5 [json_name = "totalComments"];     // 总评论数
+  optional uint64 total_users = 6 [json_name = "totalUsers"];           // 用户总数
+  optional uint64 today_published = 7 [json_name = "todayPublished"];   // 今日发布数
+}
+
+message ListTopVideosRequest {
+  enum Metric {
+    METRIC_UNSPECIFIED = 0;
+    METRIC_VIEW = 1;    // 播放
+    METRIC_LIKE = 2;    // 点赞
+    METRIC_COLLECT = 3; // 收藏
+    METRIC_COMMENT = 4; // 评论
+  }
+  Metric metric = 1 [json_name = "metric"];             // 排行指标
+  optional uint32 limit = 2 [json_name = "limit"];      // 条数（缺省 10）
+}

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package admin.service.v1;
+
+import "google/api/annotations.proto";
+import "stats/service/v1/stats.proto";
+import "video/service/v1/video.proto";
+
+// 数据看板服务（后台）
+service DashboardService {
+  // 运营总览
+  rpc GetOverview (stats.service.v1.GetOverviewRequest) returns (stats.service.v1.Overview) {
+    option (google.api.http) = {
+      get: "/admin/v1/dashboard/overview"
+    };
+  }
+
+  // 视频 TOP 排行
+  rpc ListTopVideos (stats.service.v1.ListTopVideosRequest) returns (video.service.v1.ListVideoResponse) {
+    option (google.api.http) = {
+      get: "/admin/v1/dashboard/top-videos"
+    };
+  }
+}

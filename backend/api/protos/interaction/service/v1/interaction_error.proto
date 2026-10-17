@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package interaction.service.v1;
+
+import "errors/errors.proto";
+
+// interaction 域错误定义
+enum InteractionErrorReason {
+  option (errors.default_code) = 500;
+
+  // 400
+  BAD_REQUEST = 0 [(errors.code) = 400]; // 错误请求
+
+  // 401
+  UNAUTHORIZED = 100 [(errors.code) = 401]; // 未授权
+
+  // 403
+  FORBIDDEN = 300 [(errors.code) = 403]; // 禁止访问
+
+  // 404
+  NOT_FOUND = 400 [(errors.code) = 404]; // 找不到资源
+
+  // 409
+  CONFLICT = 900 [(errors.code) = 409]; // 冲突
+
+  // 413
+  PAYLOAD_TOO_LARGE = 1030 [(errors.code) = 413]; // 负载过大
+
+  // 500
+  INTERNAL_SERVER_ERROR = 2000 [(errors.code) = 500]; // 内部服务器错误
+
+  // ── 域内特有错误 ──
+  VIDEO_NOT_FOUND = 401 [(errors.code) = 404]; // 视频不存在
+  COMMENT_NOT_FOUND = 402 [(errors.code) = 404]; // 评论不存在
+  NOT_COMMENT_OWNER = 302 [(errors.code) = 403]; // 非评论所有者
+  ALREADY_FOLLOWING = 901 [(errors.code) = 409]; // 已关注
+  NOT_FOLLOWING = 902 [(errors.code) = 409]; // 未关注
+  CANNOT_FOLLOW_SELF = 903 [(errors.code) = 409]; // 不能关注自己
+}

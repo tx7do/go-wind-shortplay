@@ -1,0 +1,25 @@
+version: v2
+
+clean: false
+
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: go-wind-shortplay/api/gen/go
+
+inputs:
+  - directory: protos
+    paths:
+      - protos/admin/service/v1
+
+plugins:
+  - local: protoc-gen-openapi
+    out: ../app/admin/service/cmd/server/assets
+    opt:
+      - naming=json
+      - depth=2
+      - default_response=false
+      - enum_type=string
+      - output_mode=merged
+      - fq_schema_naming=true

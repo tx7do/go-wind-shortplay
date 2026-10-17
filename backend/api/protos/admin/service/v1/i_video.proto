@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package admin.service.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "pagination/v1/pagination.proto";
+import "video/service/v1/video.proto";
+
+// 视频管理服务（后台：列表 / 详情 / 审核 / 下架 / 删除）
+service VideoService {
+  // 视频列表（按状态 / 作者过滤）
+  rpc List (pagination.PagingRequest) returns (video.service.v1.ListVideoResponse) {
+    option (google.api.http) = {
+      get: "/admin/v1/videos"
+    };
+  }
+
+  // 视频详情
+  rpc Get (video.service.v1.GetVideoRequest) returns (video.service.v1.Video) {
+    option (google.api.http) = {
+      get: "/admin/v1/videos/{id}"
+    };
+  }
+
+  // 审核通过 / 驳回 / 强制下架
+  rpc ChangeStatus (video.service.v1.ChangeVideoStatusRequest) returns (video.service.v1.Video) {
+    option (google.api.http) = {
+      put: "/admin/v1/videos/{id}/status"
+      body: "*"
+    };
+  }
+
+  // 删除视频
+  rpc Delete (video.service.v1.DeleteVideoRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/admin/v1/videos/{id}"
+    };
+  }
+}

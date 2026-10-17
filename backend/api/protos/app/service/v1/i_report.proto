@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package app.service.v1;
+
+import "google/api/annotations.proto";
+import "report/service/v1/report.proto";
+
+// 举报服务（App 端：举报视频 / 评论 / 用户）
+service ReportService {
+  // 提交举报（选择举报原因）
+  rpc CreateReport (report.service.v1.CreateReportRequest) returns (report.service.v1.Report) {
+    option (google.api.http) = {
+      post: "/app/v1/reports"
+      body: "*"
+    };
+  }
+}
