@@ -24,7 +24,7 @@ func CoreServiceAddr() string {
 	if addr := os.Getenv("CORE_SERVICE_ADDR"); addr != "" {
 		return addr
 	}
-	return "127.0.0.1:6900"
+	return "127.0.0.1:7900"
 }
 
 // NewCoreConn 创建到 core 的 gRPC 连接（附带身份与调用面透传中间件）

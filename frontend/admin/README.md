@@ -14,7 +14,7 @@ router/access/preferences/i18n 体系。
 
 ```bash
 pnpm install          # 必须用 pnpm（patches/ 有 pnpm patch 依赖）
-pnpm dev              # 开发模式，端口 15999（.env VITE_SERVER_PORT）
+pnpm dev              # 开发模式，端口 16800（.env VITE_SERVER_PORT）
 pnpm typecheck        # tsc 类型检查
 pnpm build            # 生产构建
 ```
@@ -24,7 +24,7 @@ pnpm build            # 生产构建
 > 端口被占用时 vite 会自动顺延（如 16001）。
 
 - 后端联调：`.env.development` 的 `VITE_PROXY` 将 `/admin` 前缀请求代理到
-  `http://127.0.0.1:6600`（不做 rewrite，与后端 `/admin/v1` 路由前缀天然对齐）。
+  `http://127.0.0.1:7600`（不做 rewrite，与后端 `/admin/v1` 路由前缀天然对齐）。
 - 演示账号：`admin / admin`。
 
 ## 模块清单
@@ -38,7 +38,7 @@ pnpm build            # 生产构建
 | 用户管理 | `/users` | 用户列表 + 新建/编辑（重置密码）+ 启用禁用 + 删除 |
 | 系统配置 | `/sysconf` | 上传上限/时长上限/人工审核/开放注册/允许的视频格式 |
 
-接口契约见 `docs/API.md` 的「Admin 端（:6600 /admin/v1）」一节。
+接口契约见 `docs/API.md` 的「Admin 端（:7600 /admin/v1）」一节。
 
 ## 与 CMS 底座的关系
 

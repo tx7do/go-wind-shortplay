@@ -22,15 +22,15 @@ GoWind 短视频社区的移动端 App。**基于 [go-wind-cms](../../go-wind-cm
 cd frontend/app
 flutter pub get
 
-# 安卓模拟器（默认 .dev.env 已指向 http://10.0.2.2:6700）
+# 安卓模拟器（默认 .dev.env 已指向 http://10.0.2.2:7700）
 flutter run
 
 # iOS 模拟器（宿主机网络，改用 127.0.0.1）
-flutter run --dart-define=API_BASE=http://127.0.0.1:6700 \
+flutter run --dart-define=API_BASE=http://127.0.0.1:7700 \
             --dart-define=MEDIA_BASE=http://127.0.0.1:9100/shortplay
 
 # 真机（宿主机局域网 IP）
-flutter run --dart-define=API_BASE=http://192.168.x.x:6700 \
+flutter run --dart-define=API_BASE=http://192.168.x.x:7700 \
             --dart-define=MEDIA_BASE=http://192.168.x.x:9100/shortplay
 ```
 
@@ -43,7 +43,7 @@ flutter run --dart-define=API_BASE=http://192.168.x.x:6700 \
 
 | 变量 | 说明 | 默认（debug） |
 |---|---|---|
-| `API_BASE` / `API_BASE_URL` | app BFF 网关（:6700，路径前缀 /app/v1 由 dio baseUrl 拼好） | `http://10.0.2.2:6700` |
+| `API_BASE` / `API_BASE_URL` | app BFF 网关（:7700，路径前缀 /app/v1 由 dio baseUrl 拼好） | `http://10.0.2.2:7700` |
 | `MEDIA_BASE` / `MEDIA_BASE_URL` | MinIO 公开访问前缀（对象键拼接），默认桶 `shortplay` | `http://10.0.2.2:9100/shortplay` |
 | `CONNECTION_TIMEOUT` / `RECEIVE_TIMEOUT` | 连接/接收超时（秒） | 15 / 30 |
 

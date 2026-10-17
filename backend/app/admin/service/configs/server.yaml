@@ -1,6 +1,6 @@
 server:
   rest:
-    addr: "0.0.0.0:6600"
+    addr: "0.0.0.0:7600"
     timeout: 10s
     enable_swagger: true
     cors:
@@ -17,5 +17,5 @@ server:
         - "HEAD"
         - "OPTIONS"
       origins:
-        - "http://localhost:15999"
-        - "http://127.0.0.1:15999"
+        - "http://localhost:16800"
+        - "http://127.0.0.1:16800"

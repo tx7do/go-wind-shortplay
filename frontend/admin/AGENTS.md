@@ -6,7 +6,7 @@ GoWind 短视频社区管理后台（shortplay），从 go-wind-cms/frontend/adm
 
 - **包管理器**：pnpm（`patches/` 依赖 pnpm patch，勿用 npm/yarn）。
 - **接口前缀**：所有业务请求走 `src/api/client.ts` 的 `adminHttp`，统一 `admin/v1/*`；
-  vite 代理把 `/admin` 原样转发到 `127.0.0.1:6600`（无 rewrite）。
+  vite 代理把 `/admin` 原样转发到 `127.0.0.1:7600`（无 rewrite）。
 - **protojson 铁律**：枚举字段是字符串全名（`"VIDEO_STATUS_PUBLISHED"`）；
   int64/uint64 是 JSON 字符串；uint32/int32 是数字。提交枚举必须传全名。
 - **路由**：静态路由模式（`preferences.app.accessMode = "frontend"`）。
@@ -25,7 +25,7 @@ GoWind 短视频社区管理后台（shortplay），从 go-wind-cms/frontend/adm
 ## 常用命令
 
 ```bash
-pnpm dev         # http://localhost:15999
+pnpm dev         # http://localhost:16800
 pnpm typecheck   # tsc -p tsconfig.app.json --noEmit
 pnpm build       # vite build
 pnpm lint        # eslint

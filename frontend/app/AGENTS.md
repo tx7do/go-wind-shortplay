@@ -18,7 +18,7 @@ GoWind 短视频社区（shortplay）移动端 App。**基于 go-wind-cms 的 Fl
    - `int64/uint64` 字段是 **JSON 字符串**（likeCount/collectCount/commentCount/viewCount/total/unreadCount/fileSize/durationMs 等）→ 用 `core/utilities/convert.dart` 的 `jsonInt` 解析，发送时 `'$value'`；
    - `uint32` 是数字（id/videoId/duration/width/height/pageNum/watchPercent 等）；
    - 枚举是**字符串全名**（`VIDEO_STATUS_PUBLISHED`、`NOTIFY_TYPE_LIKE`、`TARGET_TYPE_VIDEO`、`REPORT_TARGET_TYPE_VIDEO`、`EVENT_TYPE_VIDEO_PLAY`…），请求也要传全名（见各 feature 常量类）。
-3. 后端契约以 `docs/API.md`「App 端（:6700 /app/v1）」为准；错误响应为 HTTP 状态码 + `{code,reason,message,metadata}`，用 `ApiStatusException(handleDioError(e))` 抛出、UI 层用 `localizedApiErrorMessage` 转文案。
+3. 后端契约以 `docs/API.md`「App 端（:7700 /app/v1）」为准；错误响应为 HTTP 状态码 + `{code,reason,message,metadata}`，用 `ApiStatusException(handleDioError(e))` 抛出、UI 层用 `localizedApiErrorMessage` 转文案。
 4. 新增/修改文案必须进 `lib/l10n/intl_zh_CN.arb` 与 `intl_en_US.arb`，然后 `dart run intl_utils:generate`（生成到 `lib/generated`，已从 analyze 排除）。
 5. `flutter analyze` 必须保持 **No issues found**；平台目录（android/ios）改动要真实可用，不留 TODO 占位。
 
@@ -60,10 +60,10 @@ lib/
 
 ## 后端联调
 
-- App BFF：`http://<host>:6700/app/v1`；媒体（MinIO 公开读）：`http://<host>:9100/shortplay/<objectKey>`。
+- App BFF：`http://<host>:7700/app/v1`；媒体（MinIO 公开读）：`http://<host>:9100/shortplay/<objectKey>`。
 - 默认 `.dev.env` 指向安卓模拟器（10.0.2.2）；覆盖方式：
   ```
-  flutter run --dart-define=API_BASE=http://<局域网IP>:6700 --dart-define=MEDIA_BASE=http://<局域网IP>:9100/shortplay
+  flutter run --dart-define=API_BASE=http://<局域网IP>:7700 --dart-define=MEDIA_BASE=http://<局域网IP>:9100/shortplay
   ```
 - 后端返回的 `videoUrl/coverUrl/avatarUrl` 是对象键，展示/播放前必须过 `MediaUrl.resolve()`。
 - 游客白名单：Feed/详情/搜索/主页/评论列表；互动/发布/通知需登录（UI 层用 `ensureLogin(context)` 引导）。

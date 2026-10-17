@@ -23,13 +23,13 @@
 
 ```
 HTTP/REST 请求
-  └─ admin-service  (后台网关 BFF，REST:6600)
-       └─ gRPC → core-service  (核心业务 + 数据落点, gRPC:6900)
+  └─ admin-service  (后台网关 BFF，REST:7600)
+       └─ gRPC → core-service  (核心业务 + 数据落点, gRPC:7900)
                  ├─ ent ORM → PostgreSQL
                  ├─ Redis / MinIO
                  └─ FFmpeg（封面抽帧，进程内）
 
-app-service (前台网关 BFF，REST:6700，Flutter 走这里) ──gRPC──→ core-service
+app-service (前台网关 BFF，REST:7700，Flutter 走这里) ──gRPC──→ core-service
 ```
 
 | 服务 | 角色 | 是否访问 DB |
@@ -146,7 +146,7 @@ docker compose up -d --build                        # 全量部署
 | 变量 | 说明 | 缺省 |
 |------|------|------|
 | `JWT_SIGNING_KEY` | JWT 签名密钥（三服务一致） | dev key（警告） |
-| `CORE_SERVICE_ADDR` | BFF 直连 core 地址 | 127.0.0.1:6900 |
+| `CORE_SERVICE_ADDR` | BFF 直连 core 地址 | 127.0.0.1:7900 |
 | `OSS_BUCKET` | MinIO 工作桶 | shortplay |
 | `OSS_PUBLIC_ENDPOINT` | 客户端访问 MinIO 的端点 | 返回对象键 |
 | `UPLOAD_TEMP_DIR` | 分片上传暂存目录 | 系统临时目录 |

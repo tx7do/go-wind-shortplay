@@ -35,9 +35,9 @@
 ## 架构
 
 ```
-React Admin ──▶ admin-service (BFF :6600) ──┐
-                                            ├──gRPC──▶ core-service (:6900, 唯一数据落点)
-Flutter App ──▶ app-service   (BFF :6700) ──┘              │
+React Admin ──▶ admin-service (BFF :7600) ──┐
+                                            ├──gRPC──▶ core-service (:7900, 唯一数据落点)
+Flutter App ──▶ app-service   (BFF :7700) ──┘              │
                                         PostgreSQL / Redis / MinIO / FFmpeg
 ```
 
@@ -52,7 +52,7 @@ Flutter App ──▶ app-service   (BFF :6700) ──┘              │
 ```bash
 cd frontend/app
 flutter pub get
-flutter run --dart-define=API_BASE=http://127.0.0.1:6700   # 安卓模拟器缺省 10.0.2.2
+flutter run --dart-define=API_BASE=http://127.0.0.1:7700   # 安卓模拟器缺省 10.0.2.2
 ```
 
 ### 管理后台
@@ -60,7 +60,7 @@ flutter run --dart-define=API_BASE=http://127.0.0.1:6700   # 安卓模拟器缺�
 ```bash
 cd frontend/admin
 pnpm install   # 需 Node ≥ 20.19（Vite 8 要求），系统 20.10 需切更高版本
-pnpm dev       # 开发态经 Vite 代理访问 :6600；演示账号 admin / admin（core 首次启动自动播种）
+pnpm dev       # 开发态经 Vite 代理访问 :7600；演示账号 admin / admin（core 首次启动自动播种）
 ```
 
 ### 后端
@@ -74,17 +74,17 @@ docker compose -f docker-compose.libs.yaml up -d
 
 # 2) 生成代码并启动三服务（三个终端）
 make gen
-cd app/core/service  && make run   # gRPC :6900（启动即自动建表）
-cd app/admin/service && make run   # REST :6600
-cd app/app/service   && make run   # REST :6700
+cd app/core/service  && make run   # gRPC :7900（启动即自动建表）
+cd app/admin/service && make run   # REST :7600
+cd app/app/service   && make run   # REST :7700
 
 # 3) 冒烟验证
-curl -X POST http://127.0.0.1:6700/app/v1/auth/register \
+curl -X POST http://127.0.0.1:7700/app/v1/auth/register \
   -H 'Content-Type: application/json' \
   -d '{"username":"demo","password":"demo123","nickname":"Demo"}'
 ```
 
-API 文档：服务启动后访问 `http://127.0.0.1:6600/docs/`、`http://127.0.0.1:6700/docs/`（Swagger）。
+API 文档：服务启动后访问 `http://127.0.0.1:7600/docs/`、`http://127.0.0.1:7700/docs/`（Swagger）。
 
 一键容器化部署：`docker compose up -d --build`。
 

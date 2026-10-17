@@ -9,7 +9,7 @@ import 'package:shortplay_app/src/core/utilities/convert.dart';
 ///
 /// 常用覆盖方式：
 /// ```
-/// flutter run --dart-define=API_BASE=http://192.168.1.100:6700
+/// flutter run --dart-define=API_BASE=http://192.168.1.100:7700
 /// ```
 class Environments {
   Environments._(); // Private constructor to prevent instantiation
@@ -24,7 +24,7 @@ class Environments {
     await dotenv.load(fileName: fileName);
   }
 
-  /// API 网关根地址（app BFF，:6700；分享页 /s/{id} 与其同源）
+  /// API 网关根地址（app BFF，:7700；分享页 /s/{id} 与其同源）
   ///
   /// 安卓模拟器统一走 10.0.2.2 映射宿主机；
   /// iOS 模拟器与宿主机共享网络，用 127.0.0.1；

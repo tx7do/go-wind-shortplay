@@ -1,7 +1,7 @@
 /**
  * GoWind shortplay Admin BFF 类型定义
  *
- * 对齐 docs/API.md「Admin 端（:6600 /admin/v1）」与 backend proto（protojson）：
+ * 对齐 docs/API.md「Admin 端（:7600 /admin/v1）」与 backend proto（protojson）：
  * - 枚举字段是字符串全名（"VIDEO_STATUS_PUBLISHED" 等）；
  * - int64/uint64 序列化为 JSON 字符串（"likeCount":"1"），这里用 string | number
  *   接住后统一经 toNum() 转数值；

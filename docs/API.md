@@ -1,16 +1,16 @@
 # REST API 契约（前端对接）
 
-两个网关均由 proto 定义生成，本文是人工可读摘要。字段为 camelCase JSON。完整定义以 `backend/api/protos/` 为准；Swagger：`:6600/docs/`、`:6700/docs/`。
+两个网关均由 proto 定义生成，本文是人工可读摘要。字段为 camelCase JSON。完整定义以 `backend/api/protos/` 为准；Swagger：`:7600/docs/`、`:7700/docs/`。
 
 ## 约定
 
-- **Base URL**：App 端 `http://<host>:6700/app/v1`；Admin 端 `http://<host>:6600/admin/v1`
+- **Base URL**：App 端 `http://<host>:7700/app/v1`；Admin 端 `http://<host>:7600/admin/v1`
 - **鉴权**：`Authorization: Bearer <accessToken>`；游客仅白名单接口（Feed/详情/搜索/主页/评论列表）
 - **错误响应**（HTTP 状态码 + body）：`{"code":404,"reason":"VIDEO_NOT_FOUND","message":"video not found","metadata":{}}`；reason 枚举见各 `*_error.proto`
 - **分页参数**：`page`（从 1 起）+ `pageSize`（缺省 10，上限 50）；部分新接口用 `pageNum/pageSize`（以下逐条标注）；分页响应含 `total`
 - **令牌**：登录/注册返回 `authenticator{accessToken, refreshToken, expiresIn, tokenType:"Bearer"}` + `user`；刷新 `POST /app/v1/auth/refresh {refreshToken}`
 
-## App 端（:6700 /app/v1）
+## App 端（:7700 /app/v1）
 
 ### 认证
 | 方法 | 路径 | 说明 |
@@ -79,7 +79,7 @@
 ### 分享 H5
 `GET /s/{videoId}`（无 /app/v1 前缀）→ 内联 HTML 预览页（OG meta + video 标签）。
 
-## Admin 端（:6600 /admin/v1，均需登录）
+## Admin 端（:7600 /admin/v1，均需登录）
 
 | 方法 | 路径 | 说明 |
 |---|---|---|

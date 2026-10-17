@@ -59,9 +59,9 @@ services:
         SERVICE_NAME: admin
     environment:
       JWT_SIGNING_KEY: "${JWT_SIGNING_KEY:-dev_only_change_me_in_prod}"
-      CORE_SERVICE_ADDR: "core-service:6900"
+      CORE_SERVICE_ADDR: "core-service:7900"
     ports:
-      - "6600:6600"
+      - "7600:7600"
     depends_on:
       - core-service
 
@@ -73,9 +73,9 @@ services:
         SERVICE_NAME: app
     environment:
       JWT_SIGNING_KEY: "${JWT_SIGNING_KEY:-dev_only_change_me_in_prod}"
-      CORE_SERVICE_ADDR: "core-service:6900"
+      CORE_SERVICE_ADDR: "core-service:7900"
     ports:
-      - "6700:6700"
+      - "7700:7700"
     depends_on:
       - core-service
 

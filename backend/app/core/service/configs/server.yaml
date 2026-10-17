@@ -1,6 +1,6 @@
 server:
   grpc:
-    addr: "0.0.0.0:6900"
+    addr: "0.0.0.0:7900"
     timeout: 10s
     middleware:
       enable_logging: true

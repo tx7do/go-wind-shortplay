@@ -12,7 +12,7 @@
  */
 import { RequestClient } from '@/core/transport/rest';
 
-/** Admin BFF 统一前缀（与 .env 的 VITE_PROXY 转发规则对齐：/admin → 127.0.0.1:6600，无 rewrite） */
+/** Admin BFF 统一前缀（与 .env 的 VITE_PROXY 转发规则对齐：/admin → 127.0.0.1:7600，无 rewrite） */
 export const ADMIN_API_PREFIX = 'admin/v1';
 
 /** 组合完整请求路径：`videos` → `admin/v1/videos` */
