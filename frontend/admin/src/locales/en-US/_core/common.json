@@ -284,11 +284,74 @@
     "csv": "CSV (Comma Separated)",
     "xlsx": "Excel Workbook",
     "success": "Exported {count} rows",
-    "failed": "Export failed"
+    "failed": "Export failed",
+    "serverXlsx": "Server-side full (XLSX)",
+    "serverSuccess": "Server-side export requested",
+    "serverFailed": "Server-side export failed"
   },
   "uploadFeedback": {
     "uploading": "Uploading image",
     "fileTooLarge": "File is too large and was rejected by the server. Please compress it and try again",
     "uploadFailed": "Upload failed, please try again later"
+  },
+  "menu": {
+    "profile": {
+      "settings": "Profile",
+      "internalMessage": "Inbox"
+    },
+    "tenant": {
+      "moduleName": "Tenant Management",
+      "member": "Tenant Members"
+    },
+    "opm": {
+      "moduleName": "Organization & Personnel",
+      "orgUnit": "Organization Structure",
+      "position": "Position Management",
+      "user": "User Management",
+      "userDetail": "User Details"
+    },
+    "permission": {
+      "moduleName": "Permission Management",
+      "permission": "API Management",
+      "role": "Role Management",
+      "menu": "Menu Management",
+      "department": "Department Management"
+    },
+    "internalMessage": {
+      "moduleName": "Internal Messages",
+      "internalMessage": "Message List",
+      "internalMessageCategory": "Message Categories"
+    },
+    "log": {
+      "moduleName": "Log Audit",
+      "loginAuditLog": "Login Audit Log",
+      "apiAuditLog": "API Audit Log",
+      "operationAuditLog": "Operation Audit Log",
+      "dataAccessAuditLog": "Data Access Audit Log",
+      "permissionAuditLog": "Permission Audit Log"
+    },
+    "system": {
+      "moduleName": "System Management",
+      "menu": "Menu Management",
+      "api": "API Management",
+      "dict": "Dictionary Management",
+      "file": "File Management",
+      "task": "Task Management",
+      "loginPolicy": "Login Policies",
+      "language": "Language Management"
+    },
+    "shortPlay": {
+      "moduleName": "ShortPlay Management",
+      "video": "Video Management",
+      "comment": "Comment Management",
+      "report": "Report Management",
+      "sysconf": "System Settings"
+    }
+  },
+  "page": {
+    "dashboard": {
+      "title": "Dashboard",
+      "analytics": "Dashboard"
+    }
   }
 }

@@ -1,41 +1,57 @@
 /**
- * 用户管理列表页
- * 模式对齐底座 opm/user（ProTable + Drawer 新建/编辑），去组织/角色/租户：
- * 列表（用户名/昵称模糊搜索）+ 新建/编辑 + 启用禁用 + 删除。
+ * 用户管理列表页（/admin/v1/users：短剧 App 用户域 AppUser 契约）
+ *
+ * 布局与请求模式对齐基座列表页（ContentContainer + ListTable +
+ * PaginationQuery request + TableExportButton，同 go-wind-cms opm/user）；
+ * 域形状按本仓后端 proto（username/nickname/avatarUrl/bio/status 1禁用-2正常）
+ * 保持，附短剧特有的「作品」抽屉（GET /videos?authorId=）。
  */
 import { useRef, useState } from 'react';
 import type { ProColumns, ActionType } from '@ant-design/pro-components';
+import TableExportButton from '@/components/common/TableExportButton';
 import ListTable from '@/components/common/ListTable';
 import { Avatar, Button, Popconfirm, Switch, Tag, App } from 'antd';
-import { DeleteOutlined, EditOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlaySquareOutlined,
+  PlusOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 
 import { TABLE } from '@/config/constants';
 import { useProTableScrollY } from '@/hooks/useProTableScrollY';
+import { PaginationQuery } from '@/core';
+import ContentContainer from '@/layouts/components/PageContainer/ContentContainer';
 import {
   fetchListUsers,
   useDeleteUser,
   useUpdateUserStatus,
 } from '@/api/hooks';
-import { USER_STATUS } from '@/api/types';
+import { USER_STATUS_VALUE } from '@/api/types';
 import type { AppUser } from '@/api/types';
 import UserDrawer from './UserDrawer';
-
-const PAGE_SIZE_MAX = 50; // 后端 pageSize 上限
+import UserVideosDrawer from './UserVideosDrawer';
 
 const UserManagement = () => {
   const { t } = useTranslation('user');
   const actionRef = useRef<ActionType>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const tableScrollY = useProTableScrollY(containerRef);
   const queryClient = useQueryClient();
   const { message } = App.useApp();
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const tableScrollY = useProTableScrollY(containerRef);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit'>('create');
   const [editingUser, setEditingUser] = useState<AppUser | null>(null);
+
+  // 「作品」抽屉：查看该用户发布的视频（GET /videos?authorId=）
+  const [worksUser, setWorksUser] = useState<AppUser | null>(null);
+  const [worksOpen, setWorksOpen] = useState(false);
 
   const refresh = () => {
     actionRef.current?.reload();
@@ -62,23 +78,23 @@ const UserManagement = () => {
     },
   });
 
-  const isDisabled = (record: AppUser) => record.status === USER_STATUS.DISABLED;
+  // 基座转发契约：status 1禁用 / 2正常（实测 protojson 数字形态，宽容接住字符串）
+  const isDisabled = (record: AppUser) => {
+    const v = Number(record.status ?? 0);
+    return v === 1 || String(record.status ?? '').toUpperCase().includes('DISABLED');
+  };
 
   const columns: ProColumns<AppUser>[] = [
     {
       title: 'ID',
       dataIndex: 'id',
       width: 70,
-      search: false,
+      hideInSearch: true,
     },
     {
       title: t('username'),
-      dataIndex: 'query',
+      dataIndex: 'username',
       width: 160,
-      fieldProps: {
-        placeholder: t('queryPlaceholder'),
-        allowClear: true,
-      },
       render: (_, record) => (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <Avatar src={record.avatarUrl} size="small" icon={<UserOutlined />}>
@@ -91,14 +107,13 @@ const UserManagement = () => {
     {
       title: t('nickname'),
       dataIndex: 'nickname',
-      search: false,
       width: 160,
       ellipsis: true,
     },
     {
       title: t('bio'),
       dataIndex: 'bio',
-      search: false,
+      hideInSearch: true,
       width: 220,
       ellipsis: true,
       render: (_, record) => record.bio || '-',
@@ -107,7 +122,7 @@ const UserManagement = () => {
       title: t('status'),
       dataIndex: 'status',
       width: 120,
-      search: false,
+      hideInSearch: true,
       render: (_, record) => {
         const disabled = isDisabled(record);
         return (
@@ -118,7 +133,7 @@ const UserManagement = () => {
               record.id != null &&
               statusMutation.mutate({
                 id: record.id,
-                status: disabled ? USER_STATUS.NORMAL : USER_STATUS.DISABLED,
+                status: disabled ? USER_STATUS_VALUE.NORMAL : USER_STATUS_VALUE.DISABLED,
               })
             }
             okText={t('common:button.ok')}
@@ -141,7 +156,7 @@ const UserManagement = () => {
     {
       title: t('createdAt'),
       dataIndex: 'createdAt',
-      search: false,
+      hideInSearch: true,
       width: 160,
       render: (_, record) =>
         record.createdAt ? dayjs(record.createdAt).format('YYYY-MM-DD HH:mm') : '',
@@ -149,9 +164,18 @@ const UserManagement = () => {
     {
       title: t('action'),
       valueType: 'option',
-      width: 120,
+      width: 150,
       fixed: 'right',
       render: (_, record) => [
+        <a
+          key="works"
+          onClick={() => {
+            setWorksUser(record);
+            setWorksOpen(true);
+          }}
+        >
+          <PlaySquareOutlined /> {t('works')}
+        </a>,
         <a
           key="edit"
           onClick={() => {
@@ -180,66 +204,77 @@ const UserManagement = () => {
 
   return (
     <>
-      <div
-        ref={containerRef}
-        className="page-container-content"
-        style={{ padding: '0 8px', height: '100%' }}
-      >
-        <ListTable<AppUser>
-          actionRef={actionRef}
-          columns={columns}
-          headerTitle={t('userList')}
-          request={async (params) => {
-            const response = await fetchListUsers({
-              page: params.current || 1,
-              pageSize: Math.min(params.pageSize || TABLE.DEFAULT_PAGE_SIZE, PAGE_SIZE_MAX),
-              query: typeof params.query === 'string' ? params.query : undefined,
-            });
-            return {
-              data: response.items || [],
-              total: Number(response.total ?? 0),
-              success: true,
-            };
-          }}
-          rowKey="id"
-          search={{
-            labelWidth: 'auto',
-            defaultCollapsed: false,
-            span: 8,
-          }}
-          pagination={{
-            defaultPageSize: TABLE.DEFAULT_PAGE_SIZE,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            pageSizeOptions: ['10', '20', '50'],
-          }}
-          toolBarRender={() => [
-            <Button
-              key="create"
-              type="primary"
-              icon={<PlusOutlined />}
-              size="small"
-              onClick={() => {
-                setEditingUser(null);
-                setDrawerMode('create');
-                setDrawerOpen(true);
-              }}
-            >
-              {t('create')}
-            </Button>,
-          ]}
-          options={{
-            density: false,
-            fullScreen: false,
-            setting: false,
-            reload: true,
-          }}
-          size="small"
-          bordered
-          cardBordered={false}
-          scroll={{ x: 1100, y: tableScrollY }}
-        />
-      </div>
+      <ContentContainer heightMode="fixed" padding="16px" bottomMargin={0}>
+        <div ref={containerRef} className="page-container-content">
+          <ListTable<AppUser>
+            actionRef={actionRef}
+            columns={columns}
+            headerTitle={t('userList')}
+            request={async (params) => {
+              // 基座请求模式：PaginationQuery 序列化（字符串值自动 __contains）
+              const query = new PaginationQuery({
+                paging: {
+                  page: params.current || 1,
+                  pageSize: params.pageSize || TABLE.DEFAULT_PAGE_SIZE,
+                },
+                formValues: Object.fromEntries(
+                  Object.entries(params).filter(
+                    ([key]) => !['current', 'pageSize'].includes(key),
+                  ),
+                ),
+              });
+
+              const response = await fetchListUsers(query);
+
+              return {
+                data: response.items || [],
+                total: Number(response.total ?? 0),
+                success: true,
+              };
+            }}
+            rowKey="id"
+            search={{
+              labelWidth: 'auto',
+              defaultCollapsed: false,
+            }}
+            pagination={{
+              defaultPageSize: TABLE.DEFAULT_PAGE_SIZE,
+              showSizeChanger: true,
+              showQuickJumper: true,
+            }}
+            toolBarRender={() => [
+              <TableExportButton
+                key="export"
+                fetcher={fetchListUsers}
+                columns={columns}
+                filename="users"
+              />,
+              <Button
+                key="create"
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  setEditingUser(null);
+                  setDrawerMode('create');
+                  setDrawerOpen(true);
+                }}
+              >
+                {t('create')}
+              </Button>,
+            ]}
+            options={{
+              density: true,
+              fullScreen: true,
+              setting: true,
+              reload: true,
+            }}
+            size="middle"
+            bordered
+            cardBordered={false}
+            scroll={{ x: 1100, y: tableScrollY }}
+          />
+        </div>
+      </ContentContainer>
 
       <UserDrawer
         open={drawerOpen}
@@ -250,6 +285,16 @@ const UserManagement = () => {
           setEditingUser(null);
         }}
         onSuccess={refresh}
+      />
+
+      {/* 用户作品抽屉（authorId 过滤的视频列表） */}
+      <UserVideosDrawer
+        open={worksOpen}
+        user={worksUser}
+        onClose={() => {
+          setWorksOpen(false);
+          setWorksUser(null);
+        }}
       />
     </>
   );

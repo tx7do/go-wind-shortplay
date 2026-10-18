@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 )
 
@@ -69,6 +70,87 @@ func (_u *VideoDraftUpdate) ClearDeletedAt() *VideoDraftUpdate {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *VideoDraftUpdate) SetCreatedBy(v uint32) *VideoDraftUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *VideoDraftUpdate) SetNillableCreatedBy(v *uint32) *VideoDraftUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *VideoDraftUpdate) AddCreatedBy(v int32) *VideoDraftUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *VideoDraftUpdate) ClearCreatedBy() *VideoDraftUpdate {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *VideoDraftUpdate) SetUpdatedBy(v uint32) *VideoDraftUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *VideoDraftUpdate) SetNillableUpdatedBy(v *uint32) *VideoDraftUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *VideoDraftUpdate) AddUpdatedBy(v int32) *VideoDraftUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *VideoDraftUpdate) ClearUpdatedBy() *VideoDraftUpdate {
+	_u.mutation.ClearUpdatedBy()
+	return _u
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (_u *VideoDraftUpdate) SetDeletedBy(v uint32) *VideoDraftUpdate {
+	_u.mutation.ResetDeletedBy()
+	_u.mutation.SetDeletedBy(v)
+	return _u
+}
+
+// SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
+func (_u *VideoDraftUpdate) SetNillableDeletedBy(v *uint32) *VideoDraftUpdate {
+	if v != nil {
+		_u.SetDeletedBy(*v)
+	}
+	return _u
+}
+
+// AddDeletedBy adds value to the "deleted_by" field.
+func (_u *VideoDraftUpdate) AddDeletedBy(v int32) *VideoDraftUpdate {
+	_u.mutation.AddDeletedBy(v)
+	return _u
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (_u *VideoDraftUpdate) ClearDeletedBy() *VideoDraftUpdate {
+	_u.mutation.ClearDeletedBy()
+	return _u
+}
+
 // SetTitle sets the "title" field.
 func (_u *VideoDraftUpdate) SetTitle(v string) *VideoDraftUpdate {
 	_u.mutation.SetTitle(v)
@@ -106,6 +188,24 @@ func (_u *VideoDraftUpdate) SetNillableDescription(v *string) *VideoDraftUpdate 
 // ClearDescription clears the value of the "description" field.
 func (_u *VideoDraftUpdate) ClearDescription() *VideoDraftUpdate {
 	_u.mutation.ClearDescription()
+	return _u
+}
+
+// SetTags sets the "tags" field.
+func (_u *VideoDraftUpdate) SetTags(v []string) *VideoDraftUpdate {
+	_u.mutation.SetTags(v)
+	return _u
+}
+
+// AppendTags appends value to the "tags" field.
+func (_u *VideoDraftUpdate) AppendTags(v []string) *VideoDraftUpdate {
+	_u.mutation.AppendTags(v)
+	return _u
+}
+
+// ClearTags clears the value of the "tags" field.
+func (_u *VideoDraftUpdate) ClearTags() *VideoDraftUpdate {
+	_u.mutation.ClearTags()
 	return _u
 }
 
@@ -170,12 +270,6 @@ func (_u *VideoDraftUpdate) AddDuration(v int32) *VideoDraftUpdate {
 	return _u
 }
 
-// ClearDuration clears the value of the "duration" field.
-func (_u *VideoDraftUpdate) ClearDuration() *VideoDraftUpdate {
-	_u.mutation.ClearDuration()
-	return _u
-}
-
 // SetWidth sets the "width" field.
 func (_u *VideoDraftUpdate) SetWidth(v uint32) *VideoDraftUpdate {
 	_u.mutation.ResetWidth()
@@ -197,12 +291,6 @@ func (_u *VideoDraftUpdate) AddWidth(v int32) *VideoDraftUpdate {
 	return _u
 }
 
-// ClearWidth clears the value of the "width" field.
-func (_u *VideoDraftUpdate) ClearWidth() *VideoDraftUpdate {
-	_u.mutation.ClearWidth()
-	return _u
-}
-
 // SetHeight sets the "height" field.
 func (_u *VideoDraftUpdate) SetHeight(v uint32) *VideoDraftUpdate {
 	_u.mutation.ResetHeight()
@@ -221,12 +309,6 @@ func (_u *VideoDraftUpdate) SetNillableHeight(v *uint32) *VideoDraftUpdate {
 // AddHeight adds value to the "height" field.
 func (_u *VideoDraftUpdate) AddHeight(v int32) *VideoDraftUpdate {
 	_u.mutation.AddHeight(v)
-	return _u
-}
-
-// ClearHeight clears the value of the "height" field.
-func (_u *VideoDraftUpdate) ClearHeight() *VideoDraftUpdate {
-	_u.mutation.ClearHeight()
 	return _u
 }
 
@@ -268,12 +350,6 @@ func (_u *VideoDraftUpdate) SetNillableAuthorID(v *uint32) *VideoDraftUpdate {
 // AddAuthorID adds value to the "author_id" field.
 func (_u *VideoDraftUpdate) AddAuthorID(v int32) *VideoDraftUpdate {
 	_u.mutation.AddAuthorID(v)
-	return _u
-}
-
-// ClearAuthorID clears the value of the "author_id" field.
-func (_u *VideoDraftUpdate) ClearAuthorID() *VideoDraftUpdate {
-	_u.mutation.ClearAuthorID()
 	return _u
 }
 
@@ -339,6 +415,36 @@ func (_u *VideoDraftUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(videodraft.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(videodraft.FieldCreatedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(videodraft.FieldCreatedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(videodraft.FieldCreatedBy, field.TypeUint32)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(videodraft.FieldUpdatedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(videodraft.FieldUpdatedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(videodraft.FieldUpdatedBy, field.TypeUint32)
+	}
+	if value, ok := _u.mutation.DeletedBy(); ok {
+		_spec.SetField(videodraft.FieldDeletedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedDeletedBy(); ok {
+		_spec.AddField(videodraft.FieldDeletedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.DeletedByCleared() {
+		_spec.ClearField(videodraft.FieldDeletedBy, field.TypeUint32)
+	}
+	if _u.mutation.TenantIDCleared() {
+		_spec.ClearField(videodraft.FieldTenantID, field.TypeUint32)
+	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(videodraft.FieldTitle, field.TypeString, value)
 	}
@@ -350,6 +456,17 @@ func (_u *VideoDraftUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(videodraft.FieldDescription, field.TypeString)
+	}
+	if value, ok := _u.mutation.Tags(); ok {
+		_spec.SetField(videodraft.FieldTags, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedTags(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, videodraft.FieldTags, value)
+		})
+	}
+	if _u.mutation.TagsCleared() {
+		_spec.ClearField(videodraft.FieldTags, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.CoverURL(); ok {
 		_spec.SetField(videodraft.FieldCoverURL, field.TypeString, value)
@@ -369,26 +486,17 @@ func (_u *VideoDraftUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if value, ok := _u.mutation.AddedDuration(); ok {
 		_spec.AddField(videodraft.FieldDuration, field.TypeUint32, value)
 	}
-	if _u.mutation.DurationCleared() {
-		_spec.ClearField(videodraft.FieldDuration, field.TypeUint32)
-	}
 	if value, ok := _u.mutation.Width(); ok {
 		_spec.SetField(videodraft.FieldWidth, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedWidth(); ok {
 		_spec.AddField(videodraft.FieldWidth, field.TypeUint32, value)
 	}
-	if _u.mutation.WidthCleared() {
-		_spec.ClearField(videodraft.FieldWidth, field.TypeUint32)
-	}
 	if value, ok := _u.mutation.Height(); ok {
 		_spec.SetField(videodraft.FieldHeight, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedHeight(); ok {
 		_spec.AddField(videodraft.FieldHeight, field.TypeUint32, value)
-	}
-	if _u.mutation.HeightCleared() {
-		_spec.ClearField(videodraft.FieldHeight, field.TypeUint32)
 	}
 	if value, ok := _u.mutation.UploadTaskID(); ok {
 		_spec.SetField(videodraft.FieldUploadTaskID, field.TypeString, value)
@@ -401,9 +509,6 @@ func (_u *VideoDraftUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if value, ok := _u.mutation.AddedAuthorID(); ok {
 		_spec.AddField(videodraft.FieldAuthorID, field.TypeUint32, value)
-	}
-	if _u.mutation.AuthorIDCleared() {
-		_spec.ClearField(videodraft.FieldAuthorID, field.TypeUint32)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -467,6 +572,87 @@ func (_u *VideoDraftUpdateOne) ClearDeletedAt() *VideoDraftUpdateOne {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *VideoDraftUpdateOne) SetCreatedBy(v uint32) *VideoDraftUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *VideoDraftUpdateOne) SetNillableCreatedBy(v *uint32) *VideoDraftUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *VideoDraftUpdateOne) AddCreatedBy(v int32) *VideoDraftUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *VideoDraftUpdateOne) ClearCreatedBy() *VideoDraftUpdateOne {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *VideoDraftUpdateOne) SetUpdatedBy(v uint32) *VideoDraftUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *VideoDraftUpdateOne) SetNillableUpdatedBy(v *uint32) *VideoDraftUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *VideoDraftUpdateOne) AddUpdatedBy(v int32) *VideoDraftUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *VideoDraftUpdateOne) ClearUpdatedBy() *VideoDraftUpdateOne {
+	_u.mutation.ClearUpdatedBy()
+	return _u
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (_u *VideoDraftUpdateOne) SetDeletedBy(v uint32) *VideoDraftUpdateOne {
+	_u.mutation.ResetDeletedBy()
+	_u.mutation.SetDeletedBy(v)
+	return _u
+}
+
+// SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
+func (_u *VideoDraftUpdateOne) SetNillableDeletedBy(v *uint32) *VideoDraftUpdateOne {
+	if v != nil {
+		_u.SetDeletedBy(*v)
+	}
+	return _u
+}
+
+// AddDeletedBy adds value to the "deleted_by" field.
+func (_u *VideoDraftUpdateOne) AddDeletedBy(v int32) *VideoDraftUpdateOne {
+	_u.mutation.AddDeletedBy(v)
+	return _u
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (_u *VideoDraftUpdateOne) ClearDeletedBy() *VideoDraftUpdateOne {
+	_u.mutation.ClearDeletedBy()
+	return _u
+}
+
 // SetTitle sets the "title" field.
 func (_u *VideoDraftUpdateOne) SetTitle(v string) *VideoDraftUpdateOne {
 	_u.mutation.SetTitle(v)
@@ -504,6 +690,24 @@ func (_u *VideoDraftUpdateOne) SetNillableDescription(v *string) *VideoDraftUpda
 // ClearDescription clears the value of the "description" field.
 func (_u *VideoDraftUpdateOne) ClearDescription() *VideoDraftUpdateOne {
 	_u.mutation.ClearDescription()
+	return _u
+}
+
+// SetTags sets the "tags" field.
+func (_u *VideoDraftUpdateOne) SetTags(v []string) *VideoDraftUpdateOne {
+	_u.mutation.SetTags(v)
+	return _u
+}
+
+// AppendTags appends value to the "tags" field.
+func (_u *VideoDraftUpdateOne) AppendTags(v []string) *VideoDraftUpdateOne {
+	_u.mutation.AppendTags(v)
+	return _u
+}
+
+// ClearTags clears the value of the "tags" field.
+func (_u *VideoDraftUpdateOne) ClearTags() *VideoDraftUpdateOne {
+	_u.mutation.ClearTags()
 	return _u
 }
 
@@ -568,12 +772,6 @@ func (_u *VideoDraftUpdateOne) AddDuration(v int32) *VideoDraftUpdateOne {
 	return _u
 }
 
-// ClearDuration clears the value of the "duration" field.
-func (_u *VideoDraftUpdateOne) ClearDuration() *VideoDraftUpdateOne {
-	_u.mutation.ClearDuration()
-	return _u
-}
-
 // SetWidth sets the "width" field.
 func (_u *VideoDraftUpdateOne) SetWidth(v uint32) *VideoDraftUpdateOne {
 	_u.mutation.ResetWidth()
@@ -595,12 +793,6 @@ func (_u *VideoDraftUpdateOne) AddWidth(v int32) *VideoDraftUpdateOne {
 	return _u
 }
 
-// ClearWidth clears the value of the "width" field.
-func (_u *VideoDraftUpdateOne) ClearWidth() *VideoDraftUpdateOne {
-	_u.mutation.ClearWidth()
-	return _u
-}
-
 // SetHeight sets the "height" field.
 func (_u *VideoDraftUpdateOne) SetHeight(v uint32) *VideoDraftUpdateOne {
 	_u.mutation.ResetHeight()
@@ -619,12 +811,6 @@ func (_u *VideoDraftUpdateOne) SetNillableHeight(v *uint32) *VideoDraftUpdateOne
 // AddHeight adds value to the "height" field.
 func (_u *VideoDraftUpdateOne) AddHeight(v int32) *VideoDraftUpdateOne {
 	_u.mutation.AddHeight(v)
-	return _u
-}
-
-// ClearHeight clears the value of the "height" field.
-func (_u *VideoDraftUpdateOne) ClearHeight() *VideoDraftUpdateOne {
-	_u.mutation.ClearHeight()
 	return _u
 }
 
@@ -666,12 +852,6 @@ func (_u *VideoDraftUpdateOne) SetNillableAuthorID(v *uint32) *VideoDraftUpdateO
 // AddAuthorID adds value to the "author_id" field.
 func (_u *VideoDraftUpdateOne) AddAuthorID(v int32) *VideoDraftUpdateOne {
 	_u.mutation.AddAuthorID(v)
-	return _u
-}
-
-// ClearAuthorID clears the value of the "author_id" field.
-func (_u *VideoDraftUpdateOne) ClearAuthorID() *VideoDraftUpdateOne {
-	_u.mutation.ClearAuthorID()
 	return _u
 }
 
@@ -767,6 +947,36 @@ func (_u *VideoDraftUpdateOne) sqlSave(ctx context.Context) (_node *VideoDraft, 
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(videodraft.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(videodraft.FieldCreatedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(videodraft.FieldCreatedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(videodraft.FieldCreatedBy, field.TypeUint32)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(videodraft.FieldUpdatedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(videodraft.FieldUpdatedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(videodraft.FieldUpdatedBy, field.TypeUint32)
+	}
+	if value, ok := _u.mutation.DeletedBy(); ok {
+		_spec.SetField(videodraft.FieldDeletedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedDeletedBy(); ok {
+		_spec.AddField(videodraft.FieldDeletedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.DeletedByCleared() {
+		_spec.ClearField(videodraft.FieldDeletedBy, field.TypeUint32)
+	}
+	if _u.mutation.TenantIDCleared() {
+		_spec.ClearField(videodraft.FieldTenantID, field.TypeUint32)
+	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(videodraft.FieldTitle, field.TypeString, value)
 	}
@@ -778,6 +988,17 @@ func (_u *VideoDraftUpdateOne) sqlSave(ctx context.Context) (_node *VideoDraft, 
 	}
 	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(videodraft.FieldDescription, field.TypeString)
+	}
+	if value, ok := _u.mutation.Tags(); ok {
+		_spec.SetField(videodraft.FieldTags, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedTags(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, videodraft.FieldTags, value)
+		})
+	}
+	if _u.mutation.TagsCleared() {
+		_spec.ClearField(videodraft.FieldTags, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.CoverURL(); ok {
 		_spec.SetField(videodraft.FieldCoverURL, field.TypeString, value)
@@ -797,26 +1018,17 @@ func (_u *VideoDraftUpdateOne) sqlSave(ctx context.Context) (_node *VideoDraft, 
 	if value, ok := _u.mutation.AddedDuration(); ok {
 		_spec.AddField(videodraft.FieldDuration, field.TypeUint32, value)
 	}
-	if _u.mutation.DurationCleared() {
-		_spec.ClearField(videodraft.FieldDuration, field.TypeUint32)
-	}
 	if value, ok := _u.mutation.Width(); ok {
 		_spec.SetField(videodraft.FieldWidth, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedWidth(); ok {
 		_spec.AddField(videodraft.FieldWidth, field.TypeUint32, value)
 	}
-	if _u.mutation.WidthCleared() {
-		_spec.ClearField(videodraft.FieldWidth, field.TypeUint32)
-	}
 	if value, ok := _u.mutation.Height(); ok {
 		_spec.SetField(videodraft.FieldHeight, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedHeight(); ok {
 		_spec.AddField(videodraft.FieldHeight, field.TypeUint32, value)
-	}
-	if _u.mutation.HeightCleared() {
-		_spec.ClearField(videodraft.FieldHeight, field.TypeUint32)
 	}
 	if value, ok := _u.mutation.UploadTaskID(); ok {
 		_spec.SetField(videodraft.FieldUploadTaskID, field.TypeString, value)
@@ -829,9 +1041,6 @@ func (_u *VideoDraftUpdateOne) sqlSave(ctx context.Context) (_node *VideoDraft, 
 	}
 	if value, ok := _u.mutation.AddedAuthorID(); ok {
 		_spec.AddField(videodraft.FieldAuthorID, field.TypeUint32, value)
-	}
-	if _u.mutation.AuthorIDCleared() {
-		_spec.ClearField(videodraft.FieldAuthorID, field.TypeUint32)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &VideoDraft{config: _u.config}

@@ -6,12 +6,56 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go-wind-shortplay/app/core/service/internal/data/ent/notification"
+	"go-wind-shortplay/app/core/service/internal/data/ent/api"
+	"go-wind-shortplay/app/core/service/internal/data/ent/apiauditlog"
+	"go-wind-shortplay/app/core/service/internal/data/ent/comment"
+	"go-wind-shortplay/app/core/service/internal/data/ent/dataaccessauditlog"
+	"go-wind-shortplay/app/core/service/internal/data/ent/dictentry"
+	"go-wind-shortplay/app/core/service/internal/data/ent/dictentryi18n"
+	"go-wind-shortplay/app/core/service/internal/data/ent/dicttype"
+	"go-wind-shortplay/app/core/service/internal/data/ent/file"
+	"go-wind-shortplay/app/core/service/internal/data/ent/internalmessage"
+	"go-wind-shortplay/app/core/service/internal/data/ent/internalmessagecategory"
+	"go-wind-shortplay/app/core/service/internal/data/ent/internalmessagerecipient"
+	"go-wind-shortplay/app/core/service/internal/data/ent/language"
+	"go-wind-shortplay/app/core/service/internal/data/ent/loginauditlog"
+	"go-wind-shortplay/app/core/service/internal/data/ent/loginpolicy"
+	"go-wind-shortplay/app/core/service/internal/data/ent/mediaasset"
+	"go-wind-shortplay/app/core/service/internal/data/ent/mediavariant"
+	"go-wind-shortplay/app/core/service/internal/data/ent/membership"
+	"go-wind-shortplay/app/core/service/internal/data/ent/membershiporgunit"
+	"go-wind-shortplay/app/core/service/internal/data/ent/membershipposition"
+	"go-wind-shortplay/app/core/service/internal/data/ent/membershiprole"
+	"go-wind-shortplay/app/core/service/internal/data/ent/menu"
+	"go-wind-shortplay/app/core/service/internal/data/ent/notificationchannel"
+	"go-wind-shortplay/app/core/service/internal/data/ent/notificationdelivery"
+	"go-wind-shortplay/app/core/service/internal/data/ent/notificationpreference"
+	"go-wind-shortplay/app/core/service/internal/data/ent/notificationrule"
+	"go-wind-shortplay/app/core/service/internal/data/ent/notificationtemplate"
+	"go-wind-shortplay/app/core/service/internal/data/ent/operationauditlog"
+	"go-wind-shortplay/app/core/service/internal/data/ent/orgunit"
+	"go-wind-shortplay/app/core/service/internal/data/ent/permission"
+	"go-wind-shortplay/app/core/service/internal/data/ent/permissionapi"
+	"go-wind-shortplay/app/core/service/internal/data/ent/permissionauditlog"
+	"go-wind-shortplay/app/core/service/internal/data/ent/permissiongroup"
+	"go-wind-shortplay/app/core/service/internal/data/ent/permissionmenu"
+	"go-wind-shortplay/app/core/service/internal/data/ent/permissionpolicy"
+	"go-wind-shortplay/app/core/service/internal/data/ent/policyevaluationlog"
+	"go-wind-shortplay/app/core/service/internal/data/ent/position"
+	"go-wind-shortplay/app/core/service/internal/data/ent/role"
+	"go-wind-shortplay/app/core/service/internal/data/ent/rolemetadata"
+	"go-wind-shortplay/app/core/service/internal/data/ent/rolepermission"
 	"go-wind-shortplay/app/core/service/internal/data/ent/sysconfig"
+	"go-wind-shortplay/app/core/service/internal/data/ent/task"
+	"go-wind-shortplay/app/core/service/internal/data/ent/tenant"
 	"go-wind-shortplay/app/core/service/internal/data/ent/ubaevent"
 	"go-wind-shortplay/app/core/service/internal/data/ent/uploadtask"
 	"go-wind-shortplay/app/core/service/internal/data/ent/user"
+	"go-wind-shortplay/app/core/service/internal/data/ent/usercredential"
 	"go-wind-shortplay/app/core/service/internal/data/ent/userfollow"
+	"go-wind-shortplay/app/core/service/internal/data/ent/userorgunit"
+	"go-wind-shortplay/app/core/service/internal/data/ent/userposition"
+	"go-wind-shortplay/app/core/service/internal/data/ent/userrole"
 	"go-wind-shortplay/app/core/service/internal/data/ent/video"
 	"go-wind-shortplay/app/core/service/internal/data/ent/videocollect"
 	"go-wind-shortplay/app/core/service/internal/data/ent/videocomment"
@@ -86,20 +130,64 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			notification.Table: notification.ValidColumn,
-			sysconfig.Table:    sysconfig.ValidColumn,
-			ubaevent.Table:     ubaevent.ValidColumn,
-			uploadtask.Table:   uploadtask.ValidColumn,
-			user.Table:         user.ValidColumn,
-			userfollow.Table:   userfollow.ValidColumn,
-			video.Table:        video.ValidColumn,
-			videocollect.Table: videocollect.ValidColumn,
-			videocomment.Table: videocomment.ValidColumn,
-			videodraft.Table:   videodraft.ValidColumn,
-			videolike.Table:    videolike.ValidColumn,
-			videoreport.Table:  videoreport.ValidColumn,
-			videotag.Table:     videotag.ValidColumn,
-			videotagrel.Table:  videotagrel.ValidColumn,
+			api.Table:                      api.ValidColumn,
+			apiauditlog.Table:              apiauditlog.ValidColumn,
+			comment.Table:                  comment.ValidColumn,
+			dataaccessauditlog.Table:       dataaccessauditlog.ValidColumn,
+			dictentry.Table:                dictentry.ValidColumn,
+			dictentryi18n.Table:            dictentryi18n.ValidColumn,
+			dicttype.Table:                 dicttype.ValidColumn,
+			file.Table:                     file.ValidColumn,
+			internalmessage.Table:          internalmessage.ValidColumn,
+			internalmessagecategory.Table:  internalmessagecategory.ValidColumn,
+			internalmessagerecipient.Table: internalmessagerecipient.ValidColumn,
+			language.Table:                 language.ValidColumn,
+			loginauditlog.Table:            loginauditlog.ValidColumn,
+			loginpolicy.Table:              loginpolicy.ValidColumn,
+			mediaasset.Table:               mediaasset.ValidColumn,
+			mediavariant.Table:             mediavariant.ValidColumn,
+			membership.Table:               membership.ValidColumn,
+			membershiporgunit.Table:        membershiporgunit.ValidColumn,
+			membershipposition.Table:       membershipposition.ValidColumn,
+			membershiprole.Table:           membershiprole.ValidColumn,
+			menu.Table:                     menu.ValidColumn,
+			notificationchannel.Table:      notificationchannel.ValidColumn,
+			notificationdelivery.Table:     notificationdelivery.ValidColumn,
+			notificationpreference.Table:   notificationpreference.ValidColumn,
+			notificationrule.Table:         notificationrule.ValidColumn,
+			notificationtemplate.Table:     notificationtemplate.ValidColumn,
+			operationauditlog.Table:        operationauditlog.ValidColumn,
+			orgunit.Table:                  orgunit.ValidColumn,
+			permission.Table:               permission.ValidColumn,
+			permissionapi.Table:            permissionapi.ValidColumn,
+			permissionauditlog.Table:       permissionauditlog.ValidColumn,
+			permissiongroup.Table:          permissiongroup.ValidColumn,
+			permissionmenu.Table:           permissionmenu.ValidColumn,
+			permissionpolicy.Table:         permissionpolicy.ValidColumn,
+			policyevaluationlog.Table:      policyevaluationlog.ValidColumn,
+			position.Table:                 position.ValidColumn,
+			role.Table:                     role.ValidColumn,
+			rolemetadata.Table:             rolemetadata.ValidColumn,
+			rolepermission.Table:           rolepermission.ValidColumn,
+			sysconfig.Table:                sysconfig.ValidColumn,
+			task.Table:                     task.ValidColumn,
+			tenant.Table:                   tenant.ValidColumn,
+			ubaevent.Table:                 ubaevent.ValidColumn,
+			uploadtask.Table:               uploadtask.ValidColumn,
+			user.Table:                     user.ValidColumn,
+			usercredential.Table:           usercredential.ValidColumn,
+			userfollow.Table:               userfollow.ValidColumn,
+			userorgunit.Table:              userorgunit.ValidColumn,
+			userposition.Table:             userposition.ValidColumn,
+			userrole.Table:                 userrole.ValidColumn,
+			video.Table:                    video.ValidColumn,
+			videocollect.Table:             videocollect.ValidColumn,
+			videocomment.Table:             videocomment.ValidColumn,
+			videodraft.Table:               videodraft.ValidColumn,
+			videolike.Table:                videolike.ValidColumn,
+			videoreport.Table:              videoreport.ValidColumn,
+			videotag.Table:                 videotag.ValidColumn,
+			videotagrel.Table:              videotagrel.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

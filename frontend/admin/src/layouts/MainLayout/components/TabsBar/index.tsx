@@ -65,8 +65,11 @@ export const Index = () => {
         const keyName = title.substring(7);
         return tRoutes(keyName, { defaultValue: title });
       } else if (title.startsWith('menu.')) {
-        const keyName = title.substring(5);
-        return tRoutes(keyName, { defaultValue: title });
+        // 基座点分键：routes 命名空间按完整键存放，优先完整键再退回去前缀键
+        return (
+          tRoutes(title, { defaultValue: '' }) ||
+          tRoutes(title.substring(5), { defaultValue: title })
+        );
       } else if (title.startsWith('routes.')) {
         const keyName = title.substring(7);
         return tRoutes(keyName, { defaultValue: title });

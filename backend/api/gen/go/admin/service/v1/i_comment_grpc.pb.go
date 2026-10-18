@@ -31,6 +31,9 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
 // 评论管理服务（后台）
+// Phase 2：短剧业务评论管理面接管 /admin/v1/comments 路由（基座 CMS 泛型评论
+// BFF 面与业务前端契约同路径冲突，此处按业务契约重写；基座 comment 域的
+// gRPC 服务保持原样，仅不再被 admin BFF 消费）。
 type CommentServiceClient interface {
 	// 评论列表（全量，按视频过滤）
 	List(ctx context.Context, in *v1.PagingRequest, opts ...grpc.CallOption) (*v11.ListCommentResponse, error)
@@ -71,6 +74,9 @@ func (c *commentServiceClient) Delete(ctx context.Context, in *v11.DeleteComment
 // for forward compatibility.
 //
 // 评论管理服务（后台）
+// Phase 2：短剧业务评论管理面接管 /admin/v1/comments 路由（基座 CMS 泛型评论
+// BFF 面与业务前端契约同路径冲突，此处按业务契约重写；基座 comment 域的
+// gRPC 服务保持原样，仅不再被 admin BFF 消费）。
 type CommentServiceServer interface {
 	// 评论列表（全量，按视频过滤）
 	List(context.Context, *v1.PagingRequest) (*v11.ListCommentResponse, error)

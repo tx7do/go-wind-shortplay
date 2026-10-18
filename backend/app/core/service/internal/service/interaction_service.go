@@ -2,370 +2,477 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/tx7do/go-utils/timeutil"
+	"github.com/tx7do/go-utils/trans"
 	"github.com/tx7do/kratos-bootstrap/bootstrap"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	paginationV1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
 
-	interactionV1 "go-wind-shortplay/api/gen/go/interaction/service/v1"
-	notifyV1 "go-wind-shortplay/api/gen/go/notify/service/v1"
-	videoV1 "go-wind-shortplay/api/gen/go/video/service/v1"
 	"go-wind-shortplay/app/core/service/internal/data"
 	"go-wind-shortplay/app/core/service/internal/data/ent"
-	"go-wind-shortplay/pkg/authctx"
+
+	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
+	interactionV1 "go-wind-shortplay/api/gen/go/interaction/service/v1"
+	videoV1 "go-wind-shortplay/api/gen/go/video/service/v1"
 )
 
 type InteractionService struct {
 	interactionV1.UnimplementedInteractionServiceServer
 
+	log *log.Helper
+
 	interRepo *data.InteractionRepo
 	videoRepo *data.VideoRepo
-	userRepo  *data.UserRepo
-	notifyRepo *data.NotificationRepo
-	log       *log.Helper
+	userRepo  data.UserRepo
 }
 
-func NewInteractionService(ctx *bootstrap.Context, interRepo *data.InteractionRepo, videoRepo *data.VideoRepo, userRepo *data.UserRepo, notifyRepo *data.NotificationRepo) *InteractionService {
+func NewInteractionService(
+	ctx *bootstrap.Context,
+	interRepo *data.InteractionRepo,
+	videoRepo *data.VideoRepo,
+	userRepo data.UserRepo,
+) *InteractionService {
 	return &InteractionService{
-		interRepo:  interRepo,
-		videoRepo:  videoRepo,
-		userRepo:   userRepo,
-		notifyRepo: notifyRepo,
-		log:        ctx.NewLoggerHelper("interaction/service/core-service"),
+		log:       ctx.NewLoggerHelper("interaction/service/core-service"),
+		interRepo: interRepo,
+		videoRepo: videoRepo,
+		userRepo:  userRepo,
 	}
 }
 
+// Like 点赞（视频或评论）。幂等。
 func (s *InteractionService) Like(ctx context.Context, req *interactionV1.LikeRequest) (*interactionV1.LikeResponse, error) {
-	uid := authctx.UserIDFromContext(ctx)
+	uid := spViewerUserID(ctx)
 	if uid == 0 {
 		return nil, interactionV1.ErrorUnauthorized("login required")
 	}
-	liked, count, err := s.interRepo.Like(ctx, uid, uint32(req.GetTargetType()), req.GetTargetId())
-	if err != nil {
-		return nil, interactionV1.ErrorInternalServerError("like failed")
+	if req.GetTargetId() == 0 {
+		return nil, interactionV1.ErrorBadRequest("invalid parameter")
 	}
-	if liked && req.GetTargetType() == interactionV1.TargetType_TARGET_TYPE_VIDEO {
-		s.notifyVideoOwner(ctx, req.GetTargetId(), uid, notifyV1.NotifyType_NOTIFY_TYPE_LIKE, 0, "赞了你的视频")
+
+	var count int64
+	switch req.GetTargetType() {
+	case interactionV1.TargetType_TARGET_TYPE_COMMENT:
+		_, err := s.interRepo.LikeCommentWithCounter(ctx, uid, req.GetTargetId())
+		if err != nil {
+			return nil, err
+		}
+		if n, cerr := s.interRepo.CountLikesOfTarget(ctx, req.GetTargetType(), req.GetTargetId()); cerr == nil {
+			count = int64(n)
+		}
+	default:
+		liked, _, err := s.interRepo.LikeVideoWithCounter(ctx, uid, req.GetTargetId())
+		if err != nil {
+			return nil, err
+		}
+		v, gerr := s.videoRepo.GetEntityRaw(ctx, req.GetTargetId())
+		if gerr != nil {
+			return nil, interactionV1.ErrorVideoNotFound("video not found")
+		}
+		count = int64(v.LikeCount)
+		_ = liked
 	}
-	return &interactionV1.LikeResponse{Liked: liked, LikeCount: count}, nil
+	return &interactionV1.LikeResponse{
+		Liked:     true,
+		LikeCount: count,
+	}, nil
 }
 
+// Unlike 取消点赞。幂等。
 func (s *InteractionService) Unlike(ctx context.Context, req *interactionV1.LikeRequest) (*interactionV1.LikeResponse, error) {
-	uid := authctx.UserIDFromContext(ctx)
+	uid := spViewerUserID(ctx)
 	if uid == 0 {
 		return nil, interactionV1.ErrorUnauthorized("login required")
 	}
-	liked, count, err := s.interRepo.Unlike(ctx, uid, uint32(req.GetTargetType()), req.GetTargetId())
-	if err != nil {
-		return nil, interactionV1.ErrorInternalServerError("unlike failed")
+
+	var count int64
+	switch req.GetTargetType() {
+	case interactionV1.TargetType_TARGET_TYPE_COMMENT:
+		if _, err := s.interRepo.UnlikeCommentWithCounter(ctx, uid, req.GetTargetId()); err != nil {
+			return nil, err
+		}
+		if n, cerr := s.interRepo.CountLikesOfTarget(ctx, req.GetTargetType(), req.GetTargetId()); cerr == nil {
+			count = int64(n)
+		}
+	default:
+		if _, err := s.interRepo.UnlikeVideoWithCounter(ctx, uid, req.GetTargetId()); err != nil {
+			return nil, err
+		}
+		v, gerr := s.videoRepo.GetEntityRaw(ctx, req.GetTargetId())
+		if gerr != nil {
+			return nil, interactionV1.ErrorVideoNotFound("video not found")
+		}
+		count = int64(v.LikeCount)
 	}
-	return &interactionV1.LikeResponse{Liked: liked, LikeCount: count}, nil
+	return &interactionV1.LikeResponse{
+		Liked:     false,
+		LikeCount: count,
+	}, nil
 }
 
+// Collect 收藏。幂等。
 func (s *InteractionService) Collect(ctx context.Context, req *interactionV1.CollectRequest) (*interactionV1.CollectResponse, error) {
-	uid := authctx.UserIDFromContext(ctx)
+	uid := spViewerUserID(ctx)
 	if uid == 0 {
 		return nil, interactionV1.ErrorUnauthorized("login required")
 	}
-	collected, count, err := s.interRepo.Collect(ctx, uid, req.GetVideoId())
-	if err != nil {
-		return nil, interactionV1.ErrorInternalServerError("collect failed")
+	if _, err := s.interRepo.CollectWithCounter(ctx, uid, req.GetVideoId()); err != nil {
+		return nil, err
 	}
-	return &interactionV1.CollectResponse{Collected: collected, CollectCount: count}, nil
+	v, err := s.videoRepo.GetEntityRaw(ctx, req.GetVideoId())
+	if err != nil {
+		return nil, interactionV1.ErrorVideoNotFound("video not found")
+	}
+	return &interactionV1.CollectResponse{
+		Collected:    true,
+		CollectCount: int64(v.CollectCount),
+	}, nil
 }
 
+// Uncollect 取消收藏。幂等。
 func (s *InteractionService) Uncollect(ctx context.Context, req *interactionV1.CollectRequest) (*interactionV1.CollectResponse, error) {
-	uid := authctx.UserIDFromContext(ctx)
+	uid := spViewerUserID(ctx)
 	if uid == 0 {
 		return nil, interactionV1.ErrorUnauthorized("login required")
 	}
-	collected, count, err := s.interRepo.Uncollect(ctx, uid, req.GetVideoId())
-	if err != nil {
-		return nil, interactionV1.ErrorInternalServerError("uncollect failed")
+	if _, err := s.interRepo.UncollectWithCounter(ctx, uid, req.GetVideoId()); err != nil {
+		return nil, err
 	}
-	return &interactionV1.CollectResponse{Collected: collected, CollectCount: count}, nil
+	v, err := s.videoRepo.GetEntityRaw(ctx, req.GetVideoId())
+	if err != nil {
+		return nil, interactionV1.ErrorVideoNotFound("video not found")
+	}
+	return &interactionV1.CollectResponse{
+		Collected:    false,
+		CollectCount: int64(v.CollectCount),
+	}, nil
 }
 
+// GetInteractionStatus 批量互动状态（游客全 false）
 func (s *InteractionService) GetInteractionStatus(ctx context.Context, req *interactionV1.GetInteractionStatusRequest) (*interactionV1.GetInteractionStatusResponse, error) {
-	uid := authctx.UserIDFromContext(ctx)
-	liked, collected, err := s.interRepo.GetInteractionStatus(ctx, uid, req.GetVideoIds())
-	if err != nil {
-		return nil, interactionV1.ErrorInternalServerError("query status failed")
+	uid := spViewerUserID(ctx)
+	resp := &interactionV1.GetInteractionStatusResponse{
+		Statuses: make(map[uint32]*interactionV1.InteractionStatus),
 	}
-	statuses := make(map[uint32]*interactionV1.InteractionStatus, len(req.GetVideoIds()))
+	if uid == 0 || len(req.GetVideoIds()) == 0 {
+		return resp, nil
+	}
+	liked, _ := s.interRepo.GetLikeStatus(ctx, uid, req.GetVideoIds())
+	collected, _ := s.interRepo.GetCollectStatus(ctx, uid, req.GetVideoIds())
 	for _, id := range req.GetVideoIds() {
-		statuses[id] = &interactionV1.InteractionStatus{
+		resp.Statuses[id] = &interactionV1.InteractionStatus{
 			Liked:     liked[id],
 			Collected: collected[id],
 		}
 	}
-	return &interactionV1.GetInteractionStatusResponse{Statuses: statuses}, nil
+	return resp, nil
 }
 
+// ListCollectedVideos 我的收藏
 func (s *InteractionService) ListCollectedVideos(ctx context.Context, req *paginationV1.PagingRequest) (*videoV1.ListVideoResponse, error) {
-	uid := authctx.UserIDFromContext(ctx)
+	uid := spViewerUserID(ctx)
 	if uid == 0 {
 		return nil, interactionV1.ErrorUnauthorized("login required")
 	}
-	offset, limit := pageArgs(req.GetPage(), req.GetPageSize())
-	ids, total, err := s.interRepo.CollectedVideoIDs(ctx, uid, offset, limit)
+	page := req.GetPage()
+	if page < 1 {
+		page = 1
+	}
+	size := req.GetPageSize()
+	if size <= 0 {
+		size = 10
+	}
+	if size > 50 {
+		size = 50
+	}
+	ids, total, err := s.interRepo.CollectedVideoIDs(ctx, uid, page, size)
 	if err != nil {
 		return nil, interactionV1.ErrorInternalServerError("list collects failed")
 	}
-	videos, err := s.videoRepo.ListPublishedByIDs(ctx, ids)
-	if err != nil {
-		return nil, interactionV1.ErrorInternalServerError("list collects failed")
-	}
-	out := make([]*videoV1.Video, 0, len(videos))
+	resp := &videoV1.ListVideoResponse{Total: trans.Ptr(int64(total))}
+	videos, _ := s.videoRepo.ListCollectedByUser(ctx, ids)
+	byID := make(map[uint32]*videoV1.Video, len(videos))
 	for _, v := range videos {
-		out = append(out, toVideo(v, nil))
+		tags, _ := s.videoRepo.TagsOfVideo(ctx, v.ID)
+		byID[v.ID] = spVideoToDTO(v, tags)
 	}
-	return &videoV1.ListVideoResponse{Items: out, Total: ptr(int64(total))}, nil
+	// 保持收藏时间倒序
+	for _, id := range ids {
+		if dto, ok := byID[id]; ok {
+			resp.Items = append(resp.Items, dto)
+		}
+	}
+	return resp, nil
 }
 
+// Follow 关注。幂等；不能关注自己。
 func (s *InteractionService) Follow(ctx context.Context, req *interactionV1.FollowRequest) (*interactionV1.FollowResponse, error) {
-	uid := authctx.UserIDFromContext(ctx)
+	uid := spViewerUserID(ctx)
 	if uid == 0 {
 		return nil, interactionV1.ErrorUnauthorized("login required")
 	}
-	if uid == req.GetUserId() {
-		return nil, interactionV1.ErrorCannotFollowSelf("cannot follow yourself")
+	if req.GetUserId() == 0 {
+		return nil, interactionV1.ErrorBadRequest("invalid parameter")
 	}
-	following, err := s.interRepo.Follow(ctx, uid, req.GetUserId())
-	if err != nil {
-		return nil, interactionV1.ErrorInternalServerError("follow failed")
+	if req.GetUserId() == uid {
+		return nil, interactionV1.ErrorCannotFollowSelf("cannot follow self")
 	}
-	if following {
-		s.notifyUser(req.GetUserId(), uid, notifyV1.NotifyType_NOTIFY_TYPE_FOLLOW, 0, 0, "关注了你")
+	if _, err := s.interRepo.CreateFollow(ctx, uid, req.GetUserId()); err != nil {
+		return nil, err
 	}
-	return &interactionV1.FollowResponse{Following: following}, nil
+	return &interactionV1.FollowResponse{Following: true}, nil
 }
 
+// Unfollow 取消关注。幂等。
 func (s *InteractionService) Unfollow(ctx context.Context, req *interactionV1.FollowRequest) (*interactionV1.FollowResponse, error) {
-	uid := authctx.UserIDFromContext(ctx)
+	uid := spViewerUserID(ctx)
 	if uid == 0 {
 		return nil, interactionV1.ErrorUnauthorized("login required")
 	}
-	following, err := s.interRepo.Unfollow(ctx, uid, req.GetUserId())
-	if err != nil {
-		return nil, interactionV1.ErrorInternalServerError("unfollow failed")
+	if _, err := s.interRepo.DeleteFollow(ctx, uid, req.GetUserId()); err != nil {
+		return nil, err
 	}
-	return &interactionV1.FollowResponse{Following: following}, nil
+	return &interactionV1.FollowResponse{Following: false}, nil
 }
 
+// GetFollowStatus 批量关注状态
 func (s *InteractionService) GetFollowStatus(ctx context.Context, req *interactionV1.GetFollowStatusRequest) (*interactionV1.GetFollowStatusResponse, error) {
-	uid := authctx.UserIDFromContext(ctx)
+	uid := spViewerUserID(ctx)
+	resp := &interactionV1.GetFollowStatusResponse{Statuses: make(map[uint32]bool)}
+	if uid == 0 || len(req.GetUserIds()) == 0 {
+		return resp, nil
+	}
 	statuses, err := s.interRepo.GetFollowStatus(ctx, uid, req.GetUserIds())
 	if err != nil {
-		return nil, interactionV1.ErrorInternalServerError("query follow status failed")
+		return nil, interactionV1.ErrorInternalServerError("get follow status failed")
 	}
-	return &interactionV1.GetFollowStatusResponse{Statuses: statuses}, nil
+	resp.Statuses = statuses
+	return resp, nil
 }
 
+// ListFollowing 我的关注
 func (s *InteractionService) ListFollowing(ctx context.Context, req *paginationV1.PagingRequest) (*interactionV1.ListFollowResponse, error) {
-	return s.listFollow(ctx, req, false)
+	return s.listFollowSide(ctx, req, true)
 }
 
+// ListFollowers 我的粉丝
 func (s *InteractionService) ListFollowers(ctx context.Context, req *paginationV1.PagingRequest) (*interactionV1.ListFollowResponse, error) {
-	return s.listFollow(ctx, req, true)
+	return s.listFollowSide(ctx, req, false)
 }
 
-func (s *InteractionService) listFollow(ctx context.Context, req *paginationV1.PagingRequest, byFollowee bool) (*interactionV1.ListFollowResponse, error) {
-	uid := authctx.UserIDFromContext(ctx)
+func (s *InteractionService) listFollowSide(ctx context.Context, req *paginationV1.PagingRequest, following bool) (*interactionV1.ListFollowResponse, error) {
+	uid := spViewerUserID(ctx)
 	if uid == 0 {
 		return nil, interactionV1.ErrorUnauthorized("login required")
 	}
-	offset, limit := pageArgs(req.GetPage(), req.GetPageSize())
-	items, total, err := s.interRepo.FollowList(ctx, uid, byFollowee, offset, limit)
+	page := req.GetPage()
+	if page < 1 {
+		page = 1
+	}
+	size := req.GetPageSize()
+	if size <= 0 {
+		size = 10
+	}
+	if size > 50 {
+		size = 50
+	}
+
+	var (
+		rows  []*ent.UserFollow
+		total int
+		err   error
+	)
+	if following {
+		rows, total, err = s.interRepo.ListFollowing(ctx, uid, page, size)
+	} else {
+		rows, total, err = s.interRepo.ListFollowers(ctx, uid, page, size)
+	}
 	if err != nil {
 		return nil, interactionV1.ErrorInternalServerError("list follow failed")
 	}
 
-	// 组装用户简报
-	userIDs := make([]uint32, 0, len(items))
-	for _, it := range items {
-		if byFollowee {
-			if it.FollowerID != nil {
-				userIDs = append(userIDs, *it.FollowerID)
-			}
-		} else {
-			if it.FolloweeID != nil {
-				userIDs = append(userIDs, *it.FolloweeID)
-			}
+	resp := &interactionV1.ListFollowResponse{Total: trans.Ptr(int64(total))}
+	for _, row := range rows {
+		targetID := row.FolloweeID
+		if !following {
+			targetID = row.FollowerID
 		}
-	}
-	users := s.loadUsers(ctx, userIDs)
-
-	out := make([]*interactionV1.FollowItem, 0, len(items))
-	for _, it := range items {
-		var targetID uint32
-		if byFollowee {
-			if it.FollowerID != nil {
-				targetID = *it.FollowerID
-			}
-		} else {
-			if it.FolloweeID != nil {
-				targetID = *it.FolloweeID
-			}
+		item := &interactionV1.FollowItem{FollowedAt: timeutil.TimeToTimestamppb(row.CreatedAt)}
+		if u, uerr := s.userRepo.Get(ctx, &identityV1.GetUserRequest{
+			QueryBy: &identityV1.GetUserRequest_Id{Id: targetID},
+		}); uerr == nil {
+			item.User = toUserBriefSP(u)
 		}
-		out = append(out, &interactionV1.FollowItem{
-			User:       toUserBrief(users[targetID]),
-			FollowedAt: tsPtr(it.CreatedAt),
-		})
+		resp.Items = append(resp.Items, item)
 	}
-	return &interactionV1.ListFollowResponse{Items: out, Total: ptr(int64(total))}, nil
+	return resp, nil
 }
 
-// loadUsers 批量取用户（小集合循环查询，量大后改 IN 查询）
-func (s *InteractionService) loadUsers(ctx context.Context, ids []uint32) map[uint32]*ent.User {
-	res := make(map[uint32]*ent.User, len(ids))
-	for _, id := range ids {
-		if _, ok := res[id]; ok {
-			continue
-		}
-		if u, err := s.userRepo.GetByID(ctx, id); err == nil {
-			res[id] = u
-		}
-	}
-	return res
+// rowCreatedAtSP 时间指针转 Timestamp
+func rowCreatedAtSP(t *time.Time) *timestamppb.Timestamp {
+	return timeutil.TimeToTimestamppb(t)
 }
 
-// notifyVideoOwner 视频作者通知（去重：不给自己发）
-func (s *InteractionService) notifyVideoOwner(ctx context.Context, videoID, senderID uint32, typ notifyV1.NotifyType, commentID uint32, content string) {
-	v, err := s.videoRepo.GetByID(ctx, videoID)
-	if err != nil || v.AuthorID == nil || *v.AuthorID == senderID || *v.AuthorID == 0 {
-		return
-	}
-	s.notifyUser(*v.AuthorID, senderID, typ, videoID, commentID, content)
-}
+// ── 视频评论 ──
 
-func (s *InteractionService) notifyUser(userID, senderID uint32, typ notifyV1.NotifyType, videoID, commentID uint32, content string) {
-	if err := s.notifyRepo.Create(context.Background(), userID, uint8(typ), senderID, videoID, commentID, content); err != nil {
-		s.log.Warnf("create notification failed: %s", err.Error())
-	}
-}
-
-// ── CommentService ──
-
-type CommentService struct {
+type VideoCommentService struct {
 	interactionV1.UnimplementedCommentServiceServer
 
-	commentRepo *data.CommentRepo
-	userRepo    *data.UserRepo
-	notifyRepo  *data.NotificationRepo
+	log *log.Helper
+
+	commentRepo *data.VideoCommentRepo
 	videoRepo   *data.VideoRepo
-	log         *log.Helper
+	userRepo    data.UserRepo
 }
 
-func NewCommentService(ctx *bootstrap.Context, commentRepo *data.CommentRepo, userRepo *data.UserRepo, notifyRepo *data.NotificationRepo, videoRepo *data.VideoRepo) *CommentService {
-	return &CommentService{
+func NewVideoCommentService(
+	ctx *bootstrap.Context,
+	commentRepo *data.VideoCommentRepo,
+	videoRepo *data.VideoRepo,
+	userRepo data.UserRepo,
+) *VideoCommentService {
+	return &VideoCommentService{
+		log:         ctx.NewLoggerHelper("video-comment/service/core-service"),
 		commentRepo: commentRepo,
-		userRepo:    userRepo,
-		notifyRepo:  notifyRepo,
 		videoRepo:   videoRepo,
-		log:         ctx.NewLoggerHelper("comment/service/core-service"),
+		userRepo:    userRepo,
 	}
 }
 
-func (s *CommentService) CreateComment(ctx context.Context, req *interactionV1.CreateCommentRequest) (*interactionV1.Comment, error) {
-	uid := authctx.UserIDFromContext(ctx)
+// enrichCommentAuthors 批量补全评论人 UserBrief
+func (s *VideoCommentService) enrichCommentAuthors(ctx context.Context, comments []*interactionV1.Comment) {
+	if len(comments) == 0 {
+		return
+	}
+	ids := make(map[uint32]struct{}, len(comments))
+	for _, c := range comments {
+		if c.GetUserId() > 0 {
+			ids[c.GetUserId()] = struct{}{}
+		}
+	}
+	users := make(map[uint32]*identityV1.UserBrief, len(ids))
+	for id := range ids {
+		if u, err := s.userRepo.Get(ctx, &identityV1.GetUserRequest{
+			QueryBy: &identityV1.GetUserRequest_Id{Id: id},
+		}); err == nil && u != nil {
+			users[id] = toUserBriefSP(u)
+		}
+	}
+	for _, c := range comments {
+		c.User = users[c.GetUserId()]
+	}
+}
+
+// CreateComment 发表评论（评论行 + 视频评论计数 + 父评论回复数同事务）
+func (s *VideoCommentService) CreateComment(ctx context.Context, req *interactionV1.CreateCommentRequest) (*interactionV1.Comment, error) {
+	uid := spViewerUserID(ctx)
 	if uid == 0 {
 		return nil, interactionV1.ErrorUnauthorized("login required")
 	}
-	if req.GetContent() == "" {
-		return nil, interactionV1.ErrorBadRequest("content required")
+	if req.GetVideoId() == 0 || req.GetContent() == "" {
+		return nil, interactionV1.ErrorBadRequest("invalid parameter")
 	}
-	c, err := s.commentRepo.Create(ctx, req.GetVideoId(), uid, req.GetContent(), req.GetParentId())
+	if _, err := s.videoRepo.GetEntityRaw(ctx, req.GetVideoId()); err != nil {
+		return nil, interactionV1.ErrorVideoNotFound("video not found")
+	}
+
+	e, err := s.commentRepo.CreateWithCounter(ctx, uid, req.GetVideoId(), req.GetContent(), req.GetParentId())
 	if err != nil {
-		return nil, interactionV1.ErrorInternalServerError("create comment failed")
+		return nil, err
 	}
-	_ = s.commentRepo.IncVideoCommentCount(ctx, req.GetVideoId(), 1)
-	if req.GetParentId() > 0 {
-		_ = s.commentRepo.IncReplyCount(ctx, req.GetParentId(), 1)
+	dto := &interactionV1.Comment{
+		Id:        trans.Ptr(e.ID),
+		VideoId:   trans.Ptr(e.VideoID),
+		UserId:    trans.Ptr(e.UserID),
+		Content:   trans.Ptr(e.Content),
+		ParentId:  trans.Ptr(e.ParentID),
+		LikeCount: trans.Ptr(e.LikeCount),
+		ReplyCount: trans.Ptr(e.ReplyCount),
+		CreatedAt: rowCreatedAtSP(e.CreatedAt),
 	}
-
-	// 通知视频作者（不给自己发）
-	if v, verr := s.videoRepo.GetByID(ctx, req.GetVideoId()); verr == nil && v.AuthorID != nil && *v.AuthorID != uid && *v.AuthorID > 0 {
-		if nerr := s.notifyRepo.Create(ctx, *v.AuthorID, uint8(notifyV1.NotifyType_NOTIFY_TYPE_COMMENT), uid, req.GetVideoId(), c.ID, "评论了你的视频"); nerr != nil {
-			s.log.Warnf("create comment notification failed: %s", nerr.Error())
-		}
-	}
-
-	u, _ := s.userRepo.GetByID(ctx, uid)
-	return toComment(c, toUserBrief(u)), nil
+	s.enrichCommentAuthors(ctx, []*interactionV1.Comment{dto})
+	return dto, nil
 }
 
-// DeleteComment 删除评论：本人可删；管理端经 metadata 标记放行（admin 网关注入）
-func (s *CommentService) DeleteComment(ctx context.Context, req *interactionV1.DeleteCommentRequest) (*emptypb.Empty, error) {
-	c, err := s.commentRepo.GetByID(ctx, req.GetId())
+// DeleteComment 删除评论（本人或管理端）
+func (s *VideoCommentService) DeleteComment(ctx context.Context, req *interactionV1.DeleteCommentRequest) (*emptypb.Empty, error) {
+	e, err := s.commentRepo.Get(ctx, req.GetId())
 	if err != nil {
-		return nil, interactionV1.ErrorCommentNotFound("comment not found")
+		return nil, err
 	}
-	uid := authctx.UserIDFromContext(ctx)
-	isAdmin := authctx.IsAdminCaller(ctx)
-	if !isAdmin && (uid == 0 || c.UserID == nil || *c.UserID != uid) {
+	uid := spViewerUserID(ctx)
+	if !spIsAdminCaller(ctx) && e.UserID != uid {
 		return nil, interactionV1.ErrorNotCommentOwner("not comment owner")
 	}
-	if err := s.commentRepo.Delete(ctx, req.GetId()); err != nil {
-		return nil, interactionV1.ErrorInternalServerError("delete comment failed")
-	}
-	if c.VideoID != nil {
-		_ = s.commentRepo.IncVideoCommentCount(ctx, *c.VideoID, -1)
+	if err = s.commentRepo.DeleteWithCounter(ctx, e); err != nil {
+		return nil, err
 	}
 	return &emptypb.Empty{}, nil
 }
 
-func (s *CommentService) ListComment(ctx context.Context, req *interactionV1.ListCommentRequest) (*interactionV1.ListCommentResponse, error) {
-	offset, limit := pageArgs(req.GetPageNum(), req.GetPageSize())
-	// video_id=0 视为全量查询（管理端复用）
-	items, total, err := s.commentRepo.ListAll(ctx, req.GetVideoId(), offset, limit)
+// ListComment 视频评论列表（游客可读）
+func (s *VideoCommentService) ListComment(ctx context.Context, req *interactionV1.ListCommentRequest) (*interactionV1.ListCommentResponse, error) {
+	if req.GetVideoId() == 0 {
+		return nil, interactionV1.ErrorBadRequest("invalid parameter")
+	}
+	items, total, err := s.commentRepo.ListByVideo(ctx, req.GetVideoId(), nil, req.GetPageNum(), req.GetPageSize())
 	if err != nil {
-		return nil, interactionV1.ErrorInternalServerError("list comments failed")
+		return nil, err
 	}
-	out := make([]*interactionV1.Comment, 0, len(items))
-	for _, it := range items {
-		var u *ent.User
-		if it.UserID != nil {
-			u, _ = s.userRepo.GetByID(ctx, *it.UserID)
-		}
-		out = append(out, toComment(it, toUserBrief(u)))
+	resp := &interactionV1.ListCommentResponse{Total: trans.Ptr(int64(total))}
+	for _, e := range items {
+		resp.Items = append(resp.Items, &interactionV1.Comment{
+			Id:        trans.Ptr(e.ID),
+			VideoId:   trans.Ptr(e.VideoID),
+			UserId:    trans.Ptr(e.UserID),
+			Content:   trans.Ptr(e.Content),
+			ParentId:  trans.Ptr(e.ParentID),
+			LikeCount: trans.Ptr(e.LikeCount),
+			ReplyCount: trans.Ptr(e.ReplyCount),
+			CreatedAt: rowCreatedAtSP(e.CreatedAt),
+		})
 	}
-	return &interactionV1.ListCommentResponse{Items: out, Total: ptr(int64(total))}, nil
+	s.enrichCommentAuthors(ctx, resp.Items)
+	return resp, nil
 }
 
-// ListReply 评论的回复列表（楼中楼）
-func (s *CommentService) ListReply(ctx context.Context, req *interactionV1.ListReplyRequest) (*interactionV1.ListCommentResponse, error) {
-	offset, limit := pageArgs(req.GetPageNum(), req.GetPageSize())
-	items, total, err := s.commentRepo.ListReplies(ctx, req.GetCommentId(), offset, limit)
+// ListReply 楼中楼回复列表
+func (s *VideoCommentService) ListReply(ctx context.Context, req *interactionV1.ListReplyRequest) (*interactionV1.ListCommentResponse, error) {
+	if req.GetCommentId() == 0 {
+		return nil, interactionV1.ErrorBadRequest("invalid parameter")
+	}
+	items, total, err := s.commentRepo.ListReplies(ctx, req.GetCommentId(), req.GetPageNum(), req.GetPageSize())
 	if err != nil {
-		return nil, interactionV1.ErrorInternalServerError("list replies failed")
+		return nil, err
 	}
-	out := make([]*interactionV1.Comment, 0, len(items))
-	for _, it := range items {
-		var u *ent.User
-		if it.UserID != nil {
-			u, _ = s.userRepo.GetByID(ctx, *it.UserID)
-		}
-		out = append(out, toComment(it, toUserBrief(u)))
+	resp := &interactionV1.ListCommentResponse{Total: trans.Ptr(int64(total))}
+	for _, e := range items {
+		resp.Items = append(resp.Items, &interactionV1.Comment{
+			Id:        trans.Ptr(e.ID),
+			VideoId:   trans.Ptr(e.VideoID),
+			UserId:    trans.Ptr(e.UserID),
+			Content:   trans.Ptr(e.Content),
+			ParentId:  trans.Ptr(e.ParentID),
+			LikeCount: trans.Ptr(e.LikeCount),
+			ReplyCount: trans.Ptr(e.ReplyCount),
+			CreatedAt: rowCreatedAtSP(e.CreatedAt),
+		})
 	}
-	return &interactionV1.ListCommentResponse{Items: out, Total: ptr(int64(total))}, nil
+	s.enrichCommentAuthors(ctx, resp.Items)
+	return resp, nil
 }
 
-// ListAllComments 管理端全量评论列表（AdminCommentService 调用）
-func (s *CommentService) ListAllComments(ctx context.Context, videoID uint32, offset, limit int) ([]*interactionV1.Comment, int64, error) {
-	items, total, err := s.commentRepo.ListAll(ctx, videoID, offset, limit)
+// AdminList 管理端全量评论列表（admin BFF 转发入口）
+func (s *VideoCommentService) AdminList(ctx context.Context, req *paginationV1.PagingRequest) (*interactionV1.ListCommentResponse, error) {
+	resp, err := s.commentRepo.ListAdmin(ctx, req)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	out := make([]*interactionV1.Comment, 0, len(items))
-	for _, it := range items {
-		var u *ent.User
-		if it.UserID != nil {
-			u, _ = s.userRepo.GetByID(ctx, *it.UserID)
-		}
-		out = append(out, toComment(it, toUserBrief(u)))
-	}
-	return out, int64(total), nil
+	s.enrichCommentAuthors(ctx, resp.Items)
+	return resp, nil
 }

@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:shortplay_app/generated/l10n.dart';
-import 'package:shortplay_app/src/app_router/app_router.dart' show AppRoutePath;
 import 'package:shortplay_app/src/features/common/widgets/login_guard.dart';
-import 'package:shortplay_app/src/features/common/widgets/user_avatar.dart';
 import 'package:shortplay_app/src/features/notify/bloc/notify_bloc.dart';
 import 'package:shortplay_app/src/features/notify/models/notification.dart';
 
-/// 消息通知页（四类型图标 + 未读角标 + 全部已读 + 点击带 videoId 进详情）
+/// 消息通知页（基座站内信收件箱形状：图标 + 标题/正文 + 未读点 + 全部已读）
 class NotifyPage extends StatefulWidget {
   const NotifyPage({super.key});
 
@@ -46,9 +43,6 @@ class _NotifyPageState extends State<NotifyPage>
 
   void _openItem(NotificationItem item) {
     context.read<NotifyBloc>().add(NotifyMarkedRead(item));
-    if (item.videoId > 0) {
-      context.push(AppRoutePath.videoPath(item.videoId));
-    }
   }
 
   @override
@@ -194,10 +188,7 @@ class _NotifyTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loc = S.of(context);
     final theme = Theme.of(context);
-
-    final (icon, iconColor, typeLabel) = _typeVisual(context, loc);
 
     return InkWell(
       onTap: onTap,
@@ -209,19 +200,37 @@ class _NotifyTile extends StatelessWidget {
             Stack(
               clipBehavior: Clip.none,
               children: [
-                UserAvatar.fromBrief(item.sender, radius: 20),
-                Positioned(
-                  right: -2,
-                  bottom: -2,
-                  child: Container(
-                    padding: EdgeInsets.all(3.r),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(icon, size: 13.sp, color: iconColor),
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor:
+                      theme.colorScheme.secondaryContainer,
+                  child: Icon(
+                    item.isRead
+                        ? Icons.notifications_none
+                        : Icons.notifications_active,
+                    size: 20.sp,
+                    color: theme.colorScheme.onSecondaryContainer,
                   ),
                 ),
+                if (!item.isRead)
+                  Positioned(
+                    right: -2,
+                    bottom: -2,
+                    child: Container(
+                      width: 10.r,
+                      height: 10.r,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.error,
+                        shape: BoxShape.circle,
+                        border: Border.fromBorderSide(
+                          BorderSide(
+                            color: theme.colorScheme.surface,
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
             SizedBox(width: 12.w),
@@ -229,43 +238,16 @@ class _NotifyTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        item.sender?.nickname ?? typeLabel,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
-                      SizedBox(width: 6.w),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 5.w, vertical: 1.h),
-                        decoration: BoxDecoration(
-                          color: iconColor.withAlpha(25),
-                          borderRadius: BorderRadius.circular(4.r),
-                        ),
-                        child: Text(
-                          typeLabel,
-                          style: TextStyle(
-                            fontSize: 10.sp,
-                            color: iconColor,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      if (!item.isRead)
-                        Container(
-                          width: 8.r,
-                          height: 8.r,
-                          decoration: const BoxDecoration(
-                            color: Colors.redAccent,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                    ],
+                  Text(
+                    item.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight:
+                          item.isRead ? FontWeight.w500 : FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
                   ),
                   SizedBox(height: 4.h),
                   Text(
@@ -280,43 +262,9 @@ class _NotifyTile extends StatelessWidget {
                 ],
               ),
             ),
-            if (item.videoId > 0) ...[
-              SizedBox(width: 8.w),
-              Icon(
-                Icons.chevron_right,
-                size: 20.sp,
-                color: theme.colorScheme.onSurface.withAlpha(90),
-              ),
-            ],
           ],
         ),
       ),
     );
-  }
-
-  (IconData, Color, String) _typeVisual(BuildContext context, S loc) {
-    final theme = Theme.of(context);
-    switch (item.type) {
-      case NotifyType.like:
-        return (Icons.favorite, theme.colorScheme.error, loc.notifyTypeLike);
-      case NotifyType.comment:
-        return (
-          Icons.chat_bubble_outline,
-          theme.colorScheme.primary,
-          loc.notifyTypeComment
-        );
-      case NotifyType.follow:
-        return (
-          Icons.person_add_alt,
-          theme.colorScheme.tertiary,
-          loc.notifyTypeFollow
-        );
-      default:
-        return (
-          Icons.notifications_outlined,
-          theme.colorScheme.secondary,
-          loc.notifyTypeSystem
-        );
-    }
   }
 }

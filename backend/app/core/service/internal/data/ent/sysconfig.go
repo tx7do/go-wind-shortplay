@@ -13,7 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 系统配置表
+// shortplay 系统配置表（单行）
 type SysConfig struct {
 	config `json:"-"`
 	// ID of the ent.
@@ -25,15 +25,21 @@ type SysConfig struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// 创建者ID
+	CreatedBy *uint32 `json:"created_by,omitempty"`
+	// 更新者ID
+	UpdatedBy *uint32 `json:"updated_by,omitempty"`
+	// 删除者ID
+	DeletedBy *uint32 `json:"deleted_by,omitempty"`
 	// 单视频大小上限（MB）
-	MaxUploadSizeMB *uint32 `json:"max_upload_size_mb,omitempty"`
+	MaxUploadSizeMB uint32 `json:"max_upload_size_mb,omitempty"`
 	// 单视频时长上限（秒）
-	MaxDurationSeconds *uint32 `json:"max_duration_seconds,omitempty"`
-	// 人工审核开关
-	ManualReviewEnabled *bool `json:"manual_review_enabled,omitempty"`
+	MaxDurationSeconds uint32 `json:"max_duration_seconds,omitempty"`
+	// 人工审核开关（false 则发布直接可见）
+	ManualReviewEnabled bool `json:"manual_review_enabled,omitempty"`
 	// 开放注册开关
-	RegisterEnabled *bool `json:"register_enabled,omitempty"`
-	// 允许的视频扩展名
+	RegisterEnabled bool `json:"register_enabled,omitempty"`
+	// 允许的视频扩展名（小写带点）
 	AllowedVideoTypes []string `json:"allowed_video_types,omitempty"`
 	selectValues      sql.SelectValues
 }
@@ -47,7 +53,7 @@ func (*SysConfig) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case sysconfig.FieldManualReviewEnabled, sysconfig.FieldRegisterEnabled:
 			values[i] = new(sql.NullBool)
-		case sysconfig.FieldID, sysconfig.FieldMaxUploadSizeMB, sysconfig.FieldMaxDurationSeconds:
+		case sysconfig.FieldID, sysconfig.FieldCreatedBy, sysconfig.FieldUpdatedBy, sysconfig.FieldDeletedBy, sysconfig.FieldMaxUploadSizeMB, sysconfig.FieldMaxDurationSeconds:
 			values[i] = new(sql.NullInt64)
 		case sysconfig.FieldCreatedAt, sysconfig.FieldUpdatedAt, sysconfig.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -93,33 +99,50 @@ func (_m *SysConfig) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
+		case sysconfig.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				_m.CreatedBy = new(uint32)
+				*_m.CreatedBy = uint32(value.Int64)
+			}
+		case sysconfig.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				_m.UpdatedBy = new(uint32)
+				*_m.UpdatedBy = uint32(value.Int64)
+			}
+		case sysconfig.FieldDeletedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_by", values[i])
+			} else if value.Valid {
+				_m.DeletedBy = new(uint32)
+				*_m.DeletedBy = uint32(value.Int64)
+			}
 		case sysconfig.FieldMaxUploadSizeMB:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field max_upload_size_mb", values[i])
 			} else if value.Valid {
-				_m.MaxUploadSizeMB = new(uint32)
-				*_m.MaxUploadSizeMB = uint32(value.Int64)
+				_m.MaxUploadSizeMB = uint32(value.Int64)
 			}
 		case sysconfig.FieldMaxDurationSeconds:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field max_duration_seconds", values[i])
 			} else if value.Valid {
-				_m.MaxDurationSeconds = new(uint32)
-				*_m.MaxDurationSeconds = uint32(value.Int64)
+				_m.MaxDurationSeconds = uint32(value.Int64)
 			}
 		case sysconfig.FieldManualReviewEnabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field manual_review_enabled", values[i])
 			} else if value.Valid {
-				_m.ManualReviewEnabled = new(bool)
-				*_m.ManualReviewEnabled = value.Bool
+				_m.ManualReviewEnabled = value.Bool
 			}
 		case sysconfig.FieldRegisterEnabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field register_enabled", values[i])
 			} else if value.Valid {
-				_m.RegisterEnabled = new(bool)
-				*_m.RegisterEnabled = value.Bool
+				_m.RegisterEnabled = value.Bool
 			}
 		case sysconfig.FieldAllowedVideoTypes:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -180,25 +203,32 @@ func (_m *SysConfig) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	if v := _m.MaxUploadSizeMB; v != nil {
-		builder.WriteString("max_upload_size_mb=")
+	if v := _m.CreatedBy; v != nil {
+		builder.WriteString("created_by=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := _m.MaxDurationSeconds; v != nil {
-		builder.WriteString("max_duration_seconds=")
+	if v := _m.UpdatedBy; v != nil {
+		builder.WriteString("updated_by=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := _m.ManualReviewEnabled; v != nil {
-		builder.WriteString("manual_review_enabled=")
+	if v := _m.DeletedBy; v != nil {
+		builder.WriteString("deleted_by=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := _m.RegisterEnabled; v != nil {
-		builder.WriteString("register_enabled=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("max_upload_size_mb=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MaxUploadSizeMB))
+	builder.WriteString(", ")
+	builder.WriteString("max_duration_seconds=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MaxDurationSeconds))
+	builder.WriteString(", ")
+	builder.WriteString("manual_review_enabled=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ManualReviewEnabled))
+	builder.WriteString(", ")
+	builder.WriteString("register_enabled=")
+	builder.WriteString(fmt.Sprintf("%v", _m.RegisterEnabled))
 	builder.WriteString(", ")
 	builder.WriteString("allowed_video_types=")
 	builder.WriteString(fmt.Sprintf("%v", _m.AllowedVideoTypes))

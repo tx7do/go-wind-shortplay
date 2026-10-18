@@ -23,5 +23,27 @@
     "count": "Count",
     "empty": "No ranking data",
     "titleFallback": "Untitled video"
+  },
+  "banner": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening",
+    "todayPublished": "Published Today",
+    "totalViews": "Total Views",
+    "quickTitle": "Quick Entries",
+    "quickVideos": "Video Management",
+    "quickVideosDesc": "Review and content",
+    "quickReports": "Report Management",
+    "quickReportsDesc": "Handle community reports",
+    "quickRoles": "Role Management",
+    "quickRolesDesc": "RBAC configuration"
+  },
+  "trend": {
+    "title": "7-Day Trends",
+    "published": "Published",
+    "plays": "Plays",
+    "likes": "Likes",
+    "empty": "No trend data",
+    "emptyHint": "Trends API unavailable or no data yet"
   }
 }

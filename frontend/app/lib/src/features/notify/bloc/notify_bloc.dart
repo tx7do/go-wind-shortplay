@@ -3,7 +3,6 @@ import 'package:equatable/equatable.dart';
 import 'package:get_it/get_it.dart' show GetIt;
 
 import 'package:shortplay_app/src/core/repositories/user_auth_cache.dart';
-import 'package:shortplay_app/src/core/services/pagination_query.dart';
 import 'package:shortplay_app/src/core/transport/http/index.dart';
 import 'package:shortplay_app/src/features/notify/models/notification.dart';
 import 'package:shortplay_app/src/features/notify/services/notification_service.dart';
@@ -154,7 +153,8 @@ class NotifyBloc extends Bloc<NotifyEvent, NotifyState> {
     try {
       _pageNum = 1;
       final page = await _service.list(
-        query: const PaginationQuery(pageNum: 1, pageSize: _pageSize),
+        page: 1,
+        pageSize: _pageSize,
         unreadOnly: event.unreadOnly,
       );
       add(const NotifyUnreadCountRefreshed());
@@ -183,7 +183,8 @@ class NotifyBloc extends Bloc<NotifyEvent, NotifyState> {
     try {
       _pageNum += 1;
       final page = await _service.list(
-        query: PaginationQuery(pageNum: _pageNum, pageSize: _pageSize),
+        page: _pageNum,
+        pageSize: _pageSize,
         unreadOnly: state.unreadOnly,
       );
       emit(state.copyWith(

@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package app.service.v1;
+
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+import "internal_message/service/v1/internal_message_recipient.proto";
+
+// 消息通知服务（基座 internal_message 域收件箱的 App 端薄转发面）
+//
+// 仅暴露 C 端必需的收件箱能力：列表 / 未读数 / 已读。
+// 数据归属与越权防护由 core 收件箱仓储强制（recipient_user_id 恒取鉴权上下文调用者），
+// 本面不新增数据访问，仅做参数整形与转发；全部接口需登录（不入游客白名单）。
+service NotificationService {
+  // 消息通知列表（当前用户收件箱，通知类）
+  rpc ListNotifications (ListNotificationsRequest) returns (internal_message.service.v1.ListUserInboxResponse) {
+    option (google.api.http) = {
+      post: "/app/v1/notifications/list"
+      body: "*"
+    };
+  }
+
+  // 未读消息数
+  rpc GetUnreadCount (google.protobuf.Empty) returns (GetUnreadCountResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/notifications/unread-count"
+    };
+  }
+
+  // 将指定收件记录标记为已读
+  rpc MarkNotificationsRead (MarkNotificationsReadRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/app/v1/notifications/read"
+      body: "*"
+    };
+  }
+
+  // 全部标记为已读
+  rpc MarkAllNotificationsRead (google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/app/v1/notifications/read-all"
+      body: "*"
+    };
+  }
+}
+
+// 消息通知列表 - 请求
+message ListNotificationsRequest {
+  // 页码（从 1 开始，缺省 1）
+  optional uint32 page = 1 [json_name = "page"];
+
+  // 每页条数（缺省 10）
+  optional uint32 page_size = 2 [json_name = "pageSize"];
+
+  // 仅看未读（服务端按收件状态 != READ 过滤）
+  optional bool unread_only = 3 [json_name = "unreadOnly"];
+}
+
+// 未读消息数 - 回应
+message GetUnreadCountResponse {
+  // 未读收件记录总数
+  uint64 count = 1 [json_name = "count"];
+}
+
+// 标记已读 - 请求
+message MarkNotificationsReadRequest {
+  // 收件记录 ID 列表（必填，来自列表响应的 id）
+  repeated uint32 recipient_ids = 1 [json_name = "recipientIds"];
+}

@@ -8,6 +8,7 @@ package interactionpb
 
 import (
 	context "context"
+	v1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -24,6 +25,7 @@ const (
 	CommentService_DeleteComment_FullMethodName = "/interaction.service.v1.CommentService/DeleteComment"
 	CommentService_ListComment_FullMethodName   = "/interaction.service.v1.CommentService/ListComment"
 	CommentService_ListReply_FullMethodName     = "/interaction.service.v1.CommentService/ListReply"
+	CommentService_AdminList_FullMethodName     = "/interaction.service.v1.CommentService/AdminList"
 )
 
 // CommentServiceClient is the client API for CommentService service.
@@ -42,6 +44,8 @@ type CommentServiceClient interface {
 	ListComment(ctx context.Context, in *ListCommentRequest, opts ...grpc.CallOption) (*ListCommentResponse, error)
 	// 评论的回复列表（楼中楼，Phase 2）
 	ListReply(ctx context.Context, in *ListReplyRequest, opts ...grpc.CallOption) (*ListCommentResponse, error)
+	// 管理端全量评论列表（admin BFF 评论管理转发入口）
+	AdminList(ctx context.Context, in *v1.PagingRequest, opts ...grpc.CallOption) (*ListCommentResponse, error)
 }
 
 type commentServiceClient struct {
@@ -92,6 +96,16 @@ func (c *commentServiceClient) ListReply(ctx context.Context, in *ListReplyReque
 	return out, nil
 }
 
+func (c *commentServiceClient) AdminList(ctx context.Context, in *v1.PagingRequest, opts ...grpc.CallOption) (*ListCommentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListCommentResponse)
+	err := c.cc.Invoke(ctx, CommentService_AdminList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CommentServiceServer is the server API for CommentService service.
 // All implementations must embed UnimplementedCommentServiceServer
 // for forward compatibility.
@@ -108,6 +122,8 @@ type CommentServiceServer interface {
 	ListComment(context.Context, *ListCommentRequest) (*ListCommentResponse, error)
 	// 评论的回复列表（楼中楼，Phase 2）
 	ListReply(context.Context, *ListReplyRequest) (*ListCommentResponse, error)
+	// 管理端全量评论列表（admin BFF 评论管理转发入口）
+	AdminList(context.Context, *v1.PagingRequest) (*ListCommentResponse, error)
 	mustEmbedUnimplementedCommentServiceServer()
 }
 
@@ -129,6 +145,9 @@ func (UnimplementedCommentServiceServer) ListComment(context.Context, *ListComme
 }
 func (UnimplementedCommentServiceServer) ListReply(context.Context, *ListReplyRequest) (*ListCommentResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListReply not implemented")
+}
+func (UnimplementedCommentServiceServer) AdminList(context.Context, *v1.PagingRequest) (*ListCommentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AdminList not implemented")
 }
 func (UnimplementedCommentServiceServer) mustEmbedUnimplementedCommentServiceServer() {}
 func (UnimplementedCommentServiceServer) testEmbeddedByValue()                        {}
@@ -223,6 +242,24 @@ func _CommentService_ListReply_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CommentService_AdminList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.PagingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommentServiceServer).AdminList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CommentService_AdminList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommentServiceServer).AdminList(ctx, req.(*v1.PagingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CommentService_ServiceDesc is the grpc.ServiceDesc for CommentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -245,6 +282,10 @@ var CommentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListReply",
 			Handler:    _CommentService_ListReply_Handler,
+		},
+		{
+			MethodName: "AdminList",
+			Handler:    _CommentService_AdminList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -8,6 +8,9 @@ import "interaction/service/v1/comment.proto";
 import "pagination/v1/pagination.proto";
 
 // 评论管理服务（后台）
+// Phase 2：短剧业务评论管理面接管 /admin/v1/comments 路由（基座 CMS 泛型评论
+// BFF 面与业务前端契约同路径冲突，此处按业务契约重写；基座 comment 域的
+// gRPC 服务保持原样，仅不再被 admin BFF 消费）。
 service CommentService {
   // 评论列表（全量，按视频过滤）
   rpc List (pagination.PagingRequest) returns (interaction.service.v1.ListCommentResponse) {

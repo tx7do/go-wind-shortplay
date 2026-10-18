@@ -64,6 +64,20 @@ func (_c *UserFollowCreate) SetNillableDeletedAt(v *time.Time) *UserFollowCreate
 	return _c
 }
 
+// SetTenantID sets the "tenant_id" field.
+func (_c *UserFollowCreate) SetTenantID(v uint32) *UserFollowCreate {
+	_c.mutation.SetTenantID(v)
+	return _c
+}
+
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_c *UserFollowCreate) SetNillableTenantID(v *uint32) *UserFollowCreate {
+	if v != nil {
+		_c.SetTenantID(*v)
+	}
+	return _c
+}
+
 // SetFollowerID sets the "follower_id" field.
 func (_c *UserFollowCreate) SetFollowerID(v uint32) *UserFollowCreate {
 	_c.mutation.SetFollowerID(v)
@@ -105,6 +119,9 @@ func (_c *UserFollowCreate) Mutation() *UserFollowMutation {
 
 // Save creates the UserFollow in the database.
 func (_c *UserFollowCreate) Save(ctx context.Context) (*UserFollow, error) {
+	if err := _c.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -130,8 +147,31 @@ func (_c *UserFollowCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_c *UserFollowCreate) defaults() error {
+	if _, ok := _c.mutation.TenantID(); !ok {
+		v := userfollow.DefaultTenantID
+		_c.mutation.SetTenantID(v)
+	}
+	if _, ok := _c.mutation.FollowerID(); !ok {
+		v := userfollow.DefaultFollowerID
+		_c.mutation.SetFollowerID(v)
+	}
+	if _, ok := _c.mutation.FolloweeID(); !ok {
+		v := userfollow.DefaultFolloweeID
+		_c.mutation.SetFolloweeID(v)
+	}
+	return nil
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_c *UserFollowCreate) check() error {
+	if _, ok := _c.mutation.FollowerID(); !ok {
+		return &ValidationError{Name: "follower_id", err: errors.New(`ent: missing required field "UserFollow.follower_id"`)}
+	}
+	if _, ok := _c.mutation.FolloweeID(); !ok {
+		return &ValidationError{Name: "followee_id", err: errors.New(`ent: missing required field "UserFollow.followee_id"`)}
+	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := userfollow.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "UserFollow.id": %w`, err)}
@@ -182,13 +222,17 @@ func (_c *UserFollowCreate) createSpec() (*UserFollow, *sqlgraph.CreateSpec) {
 		_spec.SetField(userfollow.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
+	if value, ok := _c.mutation.TenantID(); ok {
+		_spec.SetField(userfollow.FieldTenantID, field.TypeUint32, value)
+		_node.TenantID = &value
+	}
 	if value, ok := _c.mutation.FollowerID(); ok {
 		_spec.SetField(userfollow.FieldFollowerID, field.TypeUint32, value)
-		_node.FollowerID = &value
+		_node.FollowerID = value
 	}
 	if value, ok := _c.mutation.FolloweeID(); ok {
 		_spec.SetField(userfollow.FieldFolloweeID, field.TypeUint32, value)
-		_node.FolloweeID = &value
+		_node.FolloweeID = value
 	}
 	return _node, _spec
 }
@@ -296,12 +340,6 @@ func (u *UserFollowUpsert) AddFollowerID(v uint32) *UserFollowUpsert {
 	return u
 }
 
-// ClearFollowerID clears the value of the "follower_id" field.
-func (u *UserFollowUpsert) ClearFollowerID() *UserFollowUpsert {
-	u.SetNull(userfollow.FieldFollowerID)
-	return u
-}
-
 // SetFolloweeID sets the "followee_id" field.
 func (u *UserFollowUpsert) SetFolloweeID(v uint32) *UserFollowUpsert {
 	u.Set(userfollow.FieldFolloweeID, v)
@@ -317,12 +355,6 @@ func (u *UserFollowUpsert) UpdateFolloweeID() *UserFollowUpsert {
 // AddFolloweeID adds v to the "followee_id" field.
 func (u *UserFollowUpsert) AddFolloweeID(v uint32) *UserFollowUpsert {
 	u.Add(userfollow.FieldFolloweeID, v)
-	return u
-}
-
-// ClearFolloweeID clears the value of the "followee_id" field.
-func (u *UserFollowUpsert) ClearFolloweeID() *UserFollowUpsert {
-	u.SetNull(userfollow.FieldFolloweeID)
 	return u
 }
 
@@ -345,6 +377,9 @@ func (u *UserFollowUpsertOne) UpdateNewValues() *UserFollowUpsertOne {
 		}
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(userfollow.FieldCreatedAt)
+		}
+		if _, exists := u.create.mutation.TenantID(); exists {
+			s.SetIgnore(userfollow.FieldTenantID)
 		}
 	}))
 	return u
@@ -440,13 +475,6 @@ func (u *UserFollowUpsertOne) UpdateFollowerID() *UserFollowUpsertOne {
 	})
 }
 
-// ClearFollowerID clears the value of the "follower_id" field.
-func (u *UserFollowUpsertOne) ClearFollowerID() *UserFollowUpsertOne {
-	return u.Update(func(s *UserFollowUpsert) {
-		s.ClearFollowerID()
-	})
-}
-
 // SetFolloweeID sets the "followee_id" field.
 func (u *UserFollowUpsertOne) SetFolloweeID(v uint32) *UserFollowUpsertOne {
 	return u.Update(func(s *UserFollowUpsert) {
@@ -465,13 +493,6 @@ func (u *UserFollowUpsertOne) AddFolloweeID(v uint32) *UserFollowUpsertOne {
 func (u *UserFollowUpsertOne) UpdateFolloweeID() *UserFollowUpsertOne {
 	return u.Update(func(s *UserFollowUpsert) {
 		s.UpdateFolloweeID()
-	})
-}
-
-// ClearFolloweeID clears the value of the "followee_id" field.
-func (u *UserFollowUpsertOne) ClearFolloweeID() *UserFollowUpsertOne {
-	return u.Update(func(s *UserFollowUpsert) {
-		s.ClearFolloweeID()
 	})
 }
 
@@ -527,6 +548,7 @@ func (_c *UserFollowCreateBulk) Save(ctx context.Context) ([]*UserFollow, error)
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserFollowMutation)
 				if !ok {
@@ -659,6 +681,9 @@ func (u *UserFollowUpsertBulk) UpdateNewValues() *UserFollowUpsertBulk {
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(userfollow.FieldCreatedAt)
 			}
+			if _, exists := b.mutation.TenantID(); exists {
+				s.SetIgnore(userfollow.FieldTenantID)
+			}
 		}
 	}))
 	return u
@@ -754,13 +779,6 @@ func (u *UserFollowUpsertBulk) UpdateFollowerID() *UserFollowUpsertBulk {
 	})
 }
 
-// ClearFollowerID clears the value of the "follower_id" field.
-func (u *UserFollowUpsertBulk) ClearFollowerID() *UserFollowUpsertBulk {
-	return u.Update(func(s *UserFollowUpsert) {
-		s.ClearFollowerID()
-	})
-}
-
 // SetFolloweeID sets the "followee_id" field.
 func (u *UserFollowUpsertBulk) SetFolloweeID(v uint32) *UserFollowUpsertBulk {
 	return u.Update(func(s *UserFollowUpsert) {
@@ -779,13 +797,6 @@ func (u *UserFollowUpsertBulk) AddFolloweeID(v uint32) *UserFollowUpsertBulk {
 func (u *UserFollowUpsertBulk) UpdateFolloweeID() *UserFollowUpsertBulk {
 	return u.Update(func(s *UserFollowUpsert) {
 		s.UpdateFolloweeID()
-	})
-}
-
-// ClearFolloweeID clears the value of the "followee_id" field.
-func (u *UserFollowUpsertBulk) ClearFolloweeID() *UserFollowUpsertBulk {
-	return u.Update(func(s *UserFollowUpsert) {
-		s.ClearFolloweeID()
 	})
 }
 

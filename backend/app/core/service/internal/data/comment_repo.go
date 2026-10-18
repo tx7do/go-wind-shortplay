@@ -2,102 +2,336 @@ package data
 
 import (
 	"context"
+	"strconv"
+	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/go-kratos/kratos/v2/log"
+	kratosMetadata "github.com/go-kratos/kratos/v2/metadata"
+
+	"github.com/tx7do/go-utils/copierutil"
+	"github.com/tx7do/go-utils/mapper"
+
+	paginationV1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
+	entCrud "github.com/tx7do/go-crud/entgo"
 	"github.com/tx7do/kratos-bootstrap/bootstrap"
 
-	entCrud "github.com/tx7do/go-crud/entgo"
-
 	"go-wind-shortplay/app/core/service/internal/data/ent"
-	"go-wind-shortplay/app/core/service/internal/data/ent/videocomment"
+	"go-wind-shortplay/app/core/service/internal/data/ent/comment"
+	"go-wind-shortplay/app/core/service/internal/data/ent/predicate"
+
+	commentV1 "go-wind-shortplay/api/gen/go/comment/service/v1"
 )
 
-// CommentRepo 评论仓储
 type CommentRepo struct {
 	entClient *entCrud.EntClient[*ent.Client]
 	log       *log.Helper
+
+	mapper *mapper.CopierMapper[commentV1.Comment, ent.Comment]
+
+	repository *entCrud.Repository[
+		ent.CommentQuery, ent.CommentSelect,
+		ent.CommentCreate, ent.CommentCreateBulk,
+		ent.CommentUpdate, ent.CommentUpdateOne,
+		ent.CommentDelete,
+		predicate.Comment,
+		commentV1.Comment, ent.Comment,
+	]
+
+	statusConverter      *mapper.EnumTypeConverter[commentV1.Comment_Status, comment.Status]
+	contentTypeConverter *mapper.EnumTypeConverter[commentV1.Comment_ContentType, comment.ContentType]
+	authorTypeConverter  *mapper.EnumTypeConverter[commentV1.Comment_AuthorType, comment.AuthorType]
 }
 
 func NewCommentRepo(ctx *bootstrap.Context, entClient *entCrud.EntClient[*ent.Client]) *CommentRepo {
-	return &CommentRepo{
+	repo := &CommentRepo{
 		entClient: entClient,
 		log:       ctx.NewLoggerHelper("comment/repo/core-service"),
+		mapper:    mapper.NewCopierMapper[commentV1.Comment, ent.Comment](),
+		statusConverter: mapper.NewEnumTypeConverter[commentV1.Comment_Status, comment.Status](
+			commentV1.Comment_Status_name, commentV1.Comment_Status_value,
+		),
+		contentTypeConverter: mapper.NewEnumTypeConverter[commentV1.Comment_ContentType, comment.ContentType](
+			commentV1.Comment_ContentType_name, commentV1.Comment_ContentType_value,
+		),
+		authorTypeConverter: mapper.NewEnumTypeConverter[commentV1.Comment_AuthorType, comment.AuthorType](
+			commentV1.Comment_AuthorType_name, commentV1.Comment_AuthorType_value,
+		),
 	}
+
+	repo.init()
+
+	return repo
 }
 
-func (r *CommentRepo) Client() *ent.Client {
-	return r.entClient.Client()
+func (r *CommentRepo) init() {
+	r.repository = entCrud.NewRepository[
+		ent.CommentQuery, ent.CommentSelect,
+		ent.CommentCreate, ent.CommentCreateBulk,
+		ent.CommentUpdate, ent.CommentUpdateOne,
+		ent.CommentDelete,
+		predicate.Comment,
+		commentV1.Comment, ent.Comment,
+	](r.mapper)
+
+	r.mapper.AppendConverters(copierutil.NewTimeStringConverterPair())
+	r.mapper.AppendConverters(copierutil.NewTimeTimestamppbConverterPair())
+
+	r.mapper.AppendConverters(r.statusConverter.NewConverterPair())
+	r.mapper.AppendConverters(r.contentTypeConverter.NewConverterPair())
+	r.mapper.AppendConverters(r.authorTypeConverter.NewConverterPair())
 }
 
-func (r *CommentRepo) GetByID(ctx context.Context, id uint32) (*ent.VideoComment, error) {
-	return r.Client().VideoComment.Query().Where(videocomment.ID(id)).Only(ctx)
-}
+func (r *CommentRepo) count(ctx context.Context, whereCond []func(s *sql.Selector)) (int, error) {
+	builder := r.entClient.Client().Comment.Query()
+	if len(whereCond) != 0 {
+		builder.Modify(whereCond...)
+	}
 
-func (r *CommentRepo) Create(ctx context.Context, videoID, userID uint32, content string, parentID uint32) (*ent.VideoComment, error) {
-	c := r.Client().VideoComment.Create().
-		SetVideoID(videoID).
-		SetUserID(userID).
-		SetContent(content).
-		SetParentID(parentID)
-	return c.Save(ctx)
-}
-
-func (r *CommentRepo) Delete(ctx context.Context, id uint32) error {
-	return r.Client().VideoComment.DeleteOneID(id).Exec(ctx)
-}
-
-func (r *CommentRepo) ListByVideo(ctx context.Context, videoID uint32, offset, limit int) ([]*ent.VideoComment, int, error) {
-	q := r.Client().VideoComment.Query().Where(videocomment.VideoID(videoID))
-	total, err := q.Count(ctx)
+	count, err := builder.Count(ctx)
 	if err != nil {
-		return nil, 0, err
+		r.log.Errorf("query count failed: %s", err.Error())
 	}
-	items, err := q.Order(ent.Desc(videocomment.FieldCreatedAt)).Offset(offset).Limit(limit).All(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	return items, total, nil
+
+	return count, err
 }
 
-// ListAll 全量评论列表（管理端），videoID 为 0 表示不过滤
-func (r *CommentRepo) ListAll(ctx context.Context, videoID uint32, offset, limit int) ([]*ent.VideoComment, int, error) {
-	q := r.Client().VideoComment.Query()
-	if videoID > 0 {
-		q = q.Where(videocomment.VideoID(videoID))
+func (r *CommentRepo) Count(ctx context.Context, req *paginationV1.PagingRequest) (int, error) {
+	builder := r.entClient.Client().Comment.Query()
+
+	whereSelectors, _, err := r.repository.BuildListSelectorWithPaging(builder, req)
+	if len(whereSelectors) != 0 {
+		builder.Modify(whereSelectors...)
 	}
-	total, err := q.Count(ctx)
+
+	count, err := builder.Count(ctx)
 	if err != nil {
-		return nil, 0, err
+		r.log.Errorf("query count failed: %s", err.Error())
+		return 0, commentV1.ErrorInternalServerError("query count failed")
 	}
-	items, err := q.Order(ent.Desc(videocomment.FieldID)).Offset(offset).Limit(limit).All(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	return items, total, nil
+
+	return count, nil
 }
 
-// IncVideoCommentCount 评论数增减（事务外单行更新）
-func (r *CommentRepo) IncVideoCommentCount(ctx context.Context, videoID uint32, delta int) error {
-	_, err := r.Client().Video.UpdateOneID(videoID).AddCommentCount(int64(delta)).Save(ctx)
+func (r *CommentRepo) IsExist(ctx context.Context, id uint32) (bool, error) {
+	exist, err := r.entClient.Client().Comment.Query().
+		Where(comment.IDEQ(id)).
+		Exist(ctx)
+	if err != nil {
+		r.log.Errorf("query comment exist failed: %s", err.Error())
+		return false, commentV1.ErrorInternalServerError("query comment exist failed")
+	}
+	return exist, nil
+}
+
+func (r *CommentRepo) buildCommentTree(items []*commentV1.Comment, parentId uint32) []*commentV1.Comment {
+	var tree []*commentV1.Comment
+	for _, item := range items {
+		if item.GetParentId() == parentId {
+			// 递归查找子节点
+			children := r.buildCommentTree(items, item.GetId())
+			item.Children = children
+			tree = append(tree, item)
+		}
+	}
+	return tree
+}
+
+func (r *CommentRepo) List(ctx context.Context, req *paginationV1.PagingRequest, treeTravel bool) (*commentV1.ListCommentResponse, error) {
+	if req == nil {
+		return nil, commentV1.ErrorBadRequest("invalid parameter")
+	}
+
+	builder := r.entClient.Client().Comment.Query()
+
+	ret, err := r.repository.ListWithPaging(ctx, builder, builder.Clone(), req)
+	if err != nil {
+		return nil, err
+	}
+	if ret == nil {
+		return &commentV1.ListCommentResponse{Total: 0, Items: nil}, nil
+	}
+
+	if treeTravel {
+		roots := r.buildCommentTree(ret.Items, 0) // 假设根节点ParentId为0
+		return &commentV1.ListCommentResponse{
+			Total: ret.Total,
+			Items: roots,
+		}, nil
+	}
+
+	return &commentV1.ListCommentResponse{
+		Total: ret.Total,
+		Items: ret.Items,
+	}, nil
+}
+
+func (r *CommentRepo) Get(ctx context.Context, req *commentV1.GetCommentRequest) (*commentV1.Comment, error) {
+	if req == nil {
+		return nil, commentV1.ErrorBadRequest("invalid parameter")
+	}
+
+	entity, err := r.entClient.Client().Comment.Get(ctx, req.GetId())
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, commentV1.ErrorFileNotFound("comment not found")
+		}
+
+		r.log.Errorf("query comment failed: %s", err.Error())
+
+		return nil, commentV1.ErrorInternalServerError("query comment failed")
+	}
+
+	return r.mapper.ToDTO(entity), nil
+}
+
+func (r *CommentRepo) Create(ctx context.Context, req *commentV1.CreateCommentRequest) (*commentV1.Comment, error) {
+	if req == nil || req.Data == nil {
+		return nil, commentV1.ErrorBadRequest("invalid parameter")
+	}
+
+	// ── 评论策略开关(site_settings)──
+	// enable_comments=false:评论功能整体关闭(登录/游客一律拒绝);
+	// allow_guest_comments=false:游客(未登录)不可评论,登录用户不受影响。
+	// 开关全站点生效;设置行不存在时视为开启。
+	if !r.boolSetting(ctx, settingKeyEnableComments) {
+		return nil, commentV1.ErrorForbidden("comments are disabled")
+	}
+	if req.Data.GetAuthorType() == commentV1.Comment_AUTHOR_TYPE_GUEST &&
+		!r.boolSetting(ctx, settingKeyAllowGuestComments) {
+		return nil, commentV1.ErrorForbidden("guest comments are disabled")
+	}
+
+	// 租户归属:游客/匿名链路 BFF 经 x-md-global-tenant-id 元数据注入(内网可信);
+	// 读取失败回落 0(平台)。与搜索链路的租户注入口径一致。
+	tenantID := uint32(0)
+	if md, ok := kratosMetadata.FromServerContext(ctx); ok {
+		if v := md.Get("x-md-global-tenant-id"); v != "" {
+			if parsed, perr := strconv.ParseUint(v, 10, 32); perr == nil {
+				tenantID = uint32(parsed)
+			}
+		}
+	}
+
+	builder := r.entClient.Client().Comment.Create().
+		SetTenantID(tenantID).
+		SetNillableContentType(r.contentTypeConverter.ToEntity(req.Data.ContentType)).
+		SetNillableObjectID(req.Data.ObjectId).
+		SetNillableContent(req.Data.Content).
+		SetNillableAuthorID(req.Data.AuthorId).
+		SetNillableAuthorName(req.Data.AuthorName).
+		SetNillableAuthorEmail(req.Data.AuthorEmail).
+		SetNillableAuthorURL(req.Data.AuthorUrl).
+		SetNillableAuthorType(r.authorTypeConverter.ToEntity(req.Data.AuthorType)).
+		SetNillableStatus(r.statusConverter.ToEntity(req.Data.Status)).
+		SetNillableIPAddress(req.Data.IpAddress).
+		SetNillableLocation(req.Data.Location).
+		SetNillableUserAgent(req.Data.UserAgent).
+		SetNillableDetectedLanguage(req.Data.DetectedLanguage).
+		SetNillableIsSpam(req.Data.IsSpam).
+		SetNillableIsSticky(req.Data.IsSticky).
+		SetNillableParentID(req.Data.ParentId).
+		SetNillableReplyToID(req.Data.ReplyToId).
+		SetNillableCreatedBy(req.Data.CreatedBy).
+		SetCreatedAt(time.Now())
+
+	var err error
+	var entity *ent.Comment
+	if entity, err = builder.Save(ctx); err != nil {
+		r.log.Errorf("insert comment failed: %s", err.Error())
+		return nil, commentV1.ErrorInternalServerError("insert comment failed")
+	}
+
+	return r.mapper.ToDTO(entity), nil
+}
+
+func (r *CommentRepo) Update(ctx context.Context, req *commentV1.UpdateCommentRequest) (*commentV1.Comment, error) {
+	if req == nil || req.Data == nil {
+		return nil, commentV1.ErrorBadRequest("invalid parameter")
+	}
+
+	// 如果不存在则创建
+	if req.GetAllowMissing() {
+		exist, err := r.IsExist(ctx, req.GetId())
+		if err != nil {
+			return nil, err
+		}
+		if !exist {
+			req.Data.CreatedBy = req.Data.UpdatedBy
+			req.Data.UpdatedBy = nil
+			_, err = r.Create(ctx, &commentV1.CreateCommentRequest{Data: req.Data})
+			return nil, err
+		}
+	}
+
+	tid, hasTenant := maybeTenantFromViewer(ctx)
+	callerUserID, hasUser := viewerUserIDFromContext(ctx)
+	// 计数列已从 Comment 表移除，统一存于 interaction_counter 表（由 InteractionService 独占写入），
+	// 故此处不再需要 FilterBlacklist 保护计数列。
+	builder := r.entClient.Client().Comment.UpdateOneID(req.GetId())
+	builder.Where(comment.IDEQ(req.GetId()))
+	if hasTenant {
+		builder.Where(comment.TenantIDEQ(tid))
+	}
+	result, err := r.repository.UpdateOne(ctx, builder, req.Data, req.GetUpdateMask(),
+		func(dto *commentV1.Comment) {
+			builder.
+				SetNillableContentType(r.contentTypeConverter.ToEntity(req.Data.ContentType)).
+				SetNillableObjectID(req.Data.ObjectId).
+				SetNillableContent(req.Data.Content).
+				SetNillableAuthorID(req.Data.AuthorId).
+				SetNillableAuthorName(req.Data.AuthorName).
+				SetNillableAuthorEmail(req.Data.AuthorEmail).
+				SetNillableAuthorURL(req.Data.AuthorUrl).
+				SetNillableAuthorType(r.authorTypeConverter.ToEntity(req.Data.AuthorType)).
+				SetNillableStatus(r.statusConverter.ToEntity(req.Data.Status)).
+				SetNillableIPAddress(req.Data.IpAddress).
+				SetNillableLocation(req.Data.Location).
+				SetNillableUserAgent(req.Data.UserAgent).
+				SetNillableDetectedLanguage(req.Data.DetectedLanguage).
+				SetNillableIsSpam(req.Data.IsSpam).
+				SetNillableIsSticky(req.Data.IsSticky).
+				SetNillableParentID(req.Data.ParentId).
+				SetNillableReplyToID(req.Data.ReplyToId).
+				SetUpdatedAt(time.Now())
+
+			// updated_by 强制由服务端 viewer context 推导，忽略客户端传入值
+			if hasUser {
+				builder.SetUpdatedBy(callerUserID)
+			}
+		},
+		func(s *sql.Selector) {
+			s.Where(sql.EQ(comment.FieldID, req.GetId()))
+		},
+	)
+
+	return result, err
+}
+
+func (r *CommentRepo) Delete(ctx context.Context, req *commentV1.DeleteCommentRequest) error {
+	tid, hasTenant := maybeTenantFromViewer(ctx)
+	delBuilder := r.entClient.Client().Comment.Delete()
+	delBuilder.Where(comment.IDEQ(req.GetId()))
+	if hasTenant {
+		delBuilder.Where(comment.TenantIDEQ(tid))
+	}
+	_, err := delBuilder.Exec(ctx)
+	if err != nil {
+		r.log.Errorf("delete one data failed: %s", err.Error())
+	}
+
 	return err
 }
 
-// ListReplies 一级评论的回复列表（楼中楼，按时间正序）
-func (r *CommentRepo) ListReplies(ctx context.Context, commentID uint32, offset, limit int) ([]*ent.VideoComment, int, error) {
-	q := r.Client().VideoComment.Query().Where(videocomment.ParentID(commentID))
-	total, err := q.Count(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	items, err := q.Order(ent.Asc(videocomment.FieldCreatedAt)).Offset(offset).Limit(limit).All(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	return items, total, nil
+// boolSetting 读取评论策略开关。site 域（site_settings 表）已在基座移植时裁剪，
+// 无处存放开关配置：缺省全部开启（允许评论、允许游客评论），待 shortplay
+// 自有配置域接入后再恢复开关语义。
+func (r *CommentRepo) boolSetting(_ context.Context, _ string) bool {
+	return true
 }
 
-// IncReplyCount 一级评论回复数增减
-func (r *CommentRepo) IncReplyCount(ctx context.Context, commentID uint32, delta int) error {
-	_, err := r.Client().VideoComment.UpdateOneID(commentID).AddReplyCount(int64(delta)).Save(ctx)
-	return err
-}
+// 评论策略开关的 site_settings 键
+const (
+	settingKeyEnableComments     = "enable_comments"
+	settingKeyAllowGuestComments = "allow_guest_comments"
+)

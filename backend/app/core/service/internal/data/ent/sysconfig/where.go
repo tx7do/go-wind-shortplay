@@ -69,6 +69,21 @@ func DeletedAt(v time.Time) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldEQ(FieldDeletedAt, v))
 }
 
+// CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
+func CreatedBy(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// UpdatedBy applies equality check predicate on the "updated_by" field. It's identical to UpdatedByEQ.
+func UpdatedBy(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldUpdatedBy, v))
+}
+
+// DeletedBy applies equality check predicate on the "deleted_by" field. It's identical to DeletedByEQ.
+func DeletedBy(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldDeletedBy, v))
+}
+
 // MaxUploadSizeMB applies equality check predicate on the "max_upload_size_mb" field. It's identical to MaxUploadSizeMBEQ.
 func MaxUploadSizeMB(v uint32) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldEQ(FieldMaxUploadSizeMB, v))
@@ -239,6 +254,156 @@ func DeletedAtNotNil() predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldNotNull(FieldDeletedAt))
 }
 
+// CreatedByEQ applies the EQ predicate on the "created_by" field.
+func CreatedByEQ(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// CreatedByNEQ applies the NEQ predicate on the "created_by" field.
+func CreatedByNEQ(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNEQ(FieldCreatedBy, v))
+}
+
+// CreatedByIn applies the In predicate on the "created_by" field.
+func CreatedByIn(vs ...uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByNotIn applies the NotIn predicate on the "created_by" field.
+func CreatedByNotIn(vs ...uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNotIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByGT applies the GT predicate on the "created_by" field.
+func CreatedByGT(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldGT(FieldCreatedBy, v))
+}
+
+// CreatedByGTE applies the GTE predicate on the "created_by" field.
+func CreatedByGTE(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldGTE(FieldCreatedBy, v))
+}
+
+// CreatedByLT applies the LT predicate on the "created_by" field.
+func CreatedByLT(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldLT(FieldCreatedBy, v))
+}
+
+// CreatedByLTE applies the LTE predicate on the "created_by" field.
+func CreatedByLTE(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldLTE(FieldCreatedBy, v))
+}
+
+// CreatedByIsNil applies the IsNil predicate on the "created_by" field.
+func CreatedByIsNil() predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldIsNull(FieldCreatedBy))
+}
+
+// CreatedByNotNil applies the NotNil predicate on the "created_by" field.
+func CreatedByNotNil() predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNotNull(FieldCreatedBy))
+}
+
+// UpdatedByEQ applies the EQ predicate on the "updated_by" field.
+func UpdatedByEQ(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldUpdatedBy, v))
+}
+
+// UpdatedByNEQ applies the NEQ predicate on the "updated_by" field.
+func UpdatedByNEQ(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNEQ(FieldUpdatedBy, v))
+}
+
+// UpdatedByIn applies the In predicate on the "updated_by" field.
+func UpdatedByIn(vs ...uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldIn(FieldUpdatedBy, vs...))
+}
+
+// UpdatedByNotIn applies the NotIn predicate on the "updated_by" field.
+func UpdatedByNotIn(vs ...uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNotIn(FieldUpdatedBy, vs...))
+}
+
+// UpdatedByGT applies the GT predicate on the "updated_by" field.
+func UpdatedByGT(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldGT(FieldUpdatedBy, v))
+}
+
+// UpdatedByGTE applies the GTE predicate on the "updated_by" field.
+func UpdatedByGTE(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldGTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByLT applies the LT predicate on the "updated_by" field.
+func UpdatedByLT(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldLT(FieldUpdatedBy, v))
+}
+
+// UpdatedByLTE applies the LTE predicate on the "updated_by" field.
+func UpdatedByLTE(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldLTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByIsNil applies the IsNil predicate on the "updated_by" field.
+func UpdatedByIsNil() predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldIsNull(FieldUpdatedBy))
+}
+
+// UpdatedByNotNil applies the NotNil predicate on the "updated_by" field.
+func UpdatedByNotNil() predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNotNull(FieldUpdatedBy))
+}
+
+// DeletedByEQ applies the EQ predicate on the "deleted_by" field.
+func DeletedByEQ(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldDeletedBy, v))
+}
+
+// DeletedByNEQ applies the NEQ predicate on the "deleted_by" field.
+func DeletedByNEQ(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNEQ(FieldDeletedBy, v))
+}
+
+// DeletedByIn applies the In predicate on the "deleted_by" field.
+func DeletedByIn(vs ...uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldIn(FieldDeletedBy, vs...))
+}
+
+// DeletedByNotIn applies the NotIn predicate on the "deleted_by" field.
+func DeletedByNotIn(vs ...uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNotIn(FieldDeletedBy, vs...))
+}
+
+// DeletedByGT applies the GT predicate on the "deleted_by" field.
+func DeletedByGT(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldGT(FieldDeletedBy, v))
+}
+
+// DeletedByGTE applies the GTE predicate on the "deleted_by" field.
+func DeletedByGTE(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldGTE(FieldDeletedBy, v))
+}
+
+// DeletedByLT applies the LT predicate on the "deleted_by" field.
+func DeletedByLT(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldLT(FieldDeletedBy, v))
+}
+
+// DeletedByLTE applies the LTE predicate on the "deleted_by" field.
+func DeletedByLTE(v uint32) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldLTE(FieldDeletedBy, v))
+}
+
+// DeletedByIsNil applies the IsNil predicate on the "deleted_by" field.
+func DeletedByIsNil() predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldIsNull(FieldDeletedBy))
+}
+
+// DeletedByNotNil applies the NotNil predicate on the "deleted_by" field.
+func DeletedByNotNil() predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNotNull(FieldDeletedBy))
+}
+
 // MaxUploadSizeMBEQ applies the EQ predicate on the "max_upload_size_mb" field.
 func MaxUploadSizeMBEQ(v uint32) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldEQ(FieldMaxUploadSizeMB, v))
@@ -277,16 +442,6 @@ func MaxUploadSizeMBLT(v uint32) predicate.SysConfig {
 // MaxUploadSizeMBLTE applies the LTE predicate on the "max_upload_size_mb" field.
 func MaxUploadSizeMBLTE(v uint32) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldLTE(FieldMaxUploadSizeMB, v))
-}
-
-// MaxUploadSizeMBIsNil applies the IsNil predicate on the "max_upload_size_mb" field.
-func MaxUploadSizeMBIsNil() predicate.SysConfig {
-	return predicate.SysConfig(sql.FieldIsNull(FieldMaxUploadSizeMB))
-}
-
-// MaxUploadSizeMBNotNil applies the NotNil predicate on the "max_upload_size_mb" field.
-func MaxUploadSizeMBNotNil() predicate.SysConfig {
-	return predicate.SysConfig(sql.FieldNotNull(FieldMaxUploadSizeMB))
 }
 
 // MaxDurationSecondsEQ applies the EQ predicate on the "max_duration_seconds" field.
@@ -329,16 +484,6 @@ func MaxDurationSecondsLTE(v uint32) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldLTE(FieldMaxDurationSeconds, v))
 }
 
-// MaxDurationSecondsIsNil applies the IsNil predicate on the "max_duration_seconds" field.
-func MaxDurationSecondsIsNil() predicate.SysConfig {
-	return predicate.SysConfig(sql.FieldIsNull(FieldMaxDurationSeconds))
-}
-
-// MaxDurationSecondsNotNil applies the NotNil predicate on the "max_duration_seconds" field.
-func MaxDurationSecondsNotNil() predicate.SysConfig {
-	return predicate.SysConfig(sql.FieldNotNull(FieldMaxDurationSeconds))
-}
-
 // ManualReviewEnabledEQ applies the EQ predicate on the "manual_review_enabled" field.
 func ManualReviewEnabledEQ(v bool) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldEQ(FieldManualReviewEnabled, v))
@@ -349,16 +494,6 @@ func ManualReviewEnabledNEQ(v bool) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldNEQ(FieldManualReviewEnabled, v))
 }
 
-// ManualReviewEnabledIsNil applies the IsNil predicate on the "manual_review_enabled" field.
-func ManualReviewEnabledIsNil() predicate.SysConfig {
-	return predicate.SysConfig(sql.FieldIsNull(FieldManualReviewEnabled))
-}
-
-// ManualReviewEnabledNotNil applies the NotNil predicate on the "manual_review_enabled" field.
-func ManualReviewEnabledNotNil() predicate.SysConfig {
-	return predicate.SysConfig(sql.FieldNotNull(FieldManualReviewEnabled))
-}
-
 // RegisterEnabledEQ applies the EQ predicate on the "register_enabled" field.
 func RegisterEnabledEQ(v bool) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldEQ(FieldRegisterEnabled, v))
@@ -367,16 +502,6 @@ func RegisterEnabledEQ(v bool) predicate.SysConfig {
 // RegisterEnabledNEQ applies the NEQ predicate on the "register_enabled" field.
 func RegisterEnabledNEQ(v bool) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldNEQ(FieldRegisterEnabled, v))
-}
-
-// RegisterEnabledIsNil applies the IsNil predicate on the "register_enabled" field.
-func RegisterEnabledIsNil() predicate.SysConfig {
-	return predicate.SysConfig(sql.FieldIsNull(FieldRegisterEnabled))
-}
-
-// RegisterEnabledNotNil applies the NotNil predicate on the "register_enabled" field.
-func RegisterEnabledNotNil() predicate.SysConfig {
-	return predicate.SysConfig(sql.FieldNotNull(FieldRegisterEnabled))
 }
 
 // AllowedVideoTypesIsNil applies the IsNil predicate on the "allowed_video_types" field.

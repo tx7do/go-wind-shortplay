@@ -4,22 +4,59 @@ package admin.service.v1;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
-import "identity/service/v1/user.proto";
+import "google/protobuf/timestamp.proto";
+import "identity/service/v1/user_brief.proto";
 import "pagination/v1/pagination.proto";
 
-// 用户管理服务（后台）
+// 用户管理服务（后台，shortplay 业务 App 用户）
+//
+// Phase 2：/admin/v1/users 路由由业务用户管理接管（基座 RBAC 用户 CRUD 面与
+// 业务前端契约同路径冲突）。实现转发基座 identity UserService（字段映射
+// avatar→avatarUrl、description→bio、User.Status→1正常/0禁用），RBAC 角色分配
+// 面转发基座 permission RoleService。
 service UserService {
-  // 用户列表
-  rpc List (pagination.PagingRequest) returns (identity.service.v1.ListUserResponse) {
+  // 用户列表（昵称/用户名模糊搜索 query + 状态 filter）
+  rpc List (pagination.PagingRequest) returns (ListAppUserResponse) {
     option (google.api.http) = {
       get: "/admin/v1/users"
     };
   }
 
   // 用户详情
-  rpc Get (identity.service.v1.GetUserRequest) returns (identity.service.v1.User) {
+  rpc Get (GetAppUserRequest) returns (AppUser) {
     option (google.api.http) = {
       get: "/admin/v1/users/{id}"
+    };
+  }
+
+  // 创建用户
+  rpc Create (CreateAppUserRequest) returns (AppUser) {
+    option (google.api.http) = {
+      post: "/admin/v1/users"
+      body: "*"
+    };
+  }
+
+  // 更新用户
+  rpc Update (UpdateAppUserRequest) returns (AppUser) {
+    option (google.api.http) = {
+      put: "/admin/v1/users/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除用户
+  rpc Delete (GetAppUserRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/admin/v1/users/{id}"
+    };
+  }
+
+  // 启用 / 禁用用户（status: "1"禁用 "2"正常）
+  rpc UpdateStatus (UpdateAppUserStatusRequest) returns (AppUser) {
+    option (google.api.http) = {
+      put: "/admin/v1/users/{id}/status"
+      body: "*"
     };
   }
 
@@ -30,34 +67,69 @@ service UserService {
     };
   }
 
-  // 创建用户
-  rpc Create (identity.service.v1.CreateUserRequest) returns (identity.service.v1.User) {
+  // 分配角色（全量覆盖）
+  rpc SetUserRoles (SetUserRolesRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/admin/v1/users"
+      put: "/admin/v1/users/{id}/roles"
       body: "*"
     };
   }
 
-  // 更新用户
-  rpc Update (identity.service.v1.UpdateUserRequest) returns (identity.service.v1.User) {
+  // 用户已分配角色 ID
+  rpc GetUserRoleIds (GetAppUserRequest) returns (GetUserRoleIdsResponse) {
     option (google.api.http) = {
-      put: "/admin/v1/users/{id}"
-      body: "*"
+      get: "/admin/v1/users/{id}/role-ids"
     };
   }
+}
 
-  // 删除用户
-  rpc Delete (identity.service.v1.DeleteUserRequest) returns (google.protobuf.Empty) {
-    option (google.api.http) = {
-      delete: "/admin/v1/users/{id}"
-    };
-  }
+// 业务 App 用户（旧版契约形状：avatarUrl/bio、status 1禁用/2正常）
+message AppUser {
+  optional uint32 id = 1 [json_name = "id"];                   // 用户ID
+  optional string username = 2 [json_name = "username"];       // 登录名
+  optional string nickname = 3 [json_name = "nickname"];       // 昵称
+  optional string avatar_url = 4 [json_name = "avatarUrl"];    // 头像
+  optional string bio = 5 [json_name = "bio"];                 // 简介
+  optional int32 status = 6 [json_name = "status"];            // 状态（1禁用/2正常）
+  optional google.protobuf.Timestamp created_at = 20 [json_name = "createdAt"]; // 创建时间
+  optional google.protobuf.Timestamp updated_at = 21 [json_name = "updatedAt"]; // 更新时间
+}
 
-  // 启用 / 禁用用户
-  rpc UpdateStatus (identity.service.v1.UpdateUserStatusRequest) returns (identity.service.v1.User) {
-    option (google.api.http) = {
-      put: "/admin/v1/users/{id}/status"
-      body: "*"
-    };
-  }
+message ListAppUserResponse {
+  repeated AppUser items = 1 [json_name = "items"]; // 用户列表
+  optional int64 total = 2 [json_name = "total"];   // 总数
+}
+
+message GetAppUserRequest {
+  uint32 id = 1 [json_name = "id"]; // 用户ID
+}
+
+message CreateAppUserRequest {
+  string username = 1 [json_name = "username"];    // 登录名
+  string password = 2 [json_name = "password"];    // 初始密码
+  string nickname = 3 [json_name = "nickname"];    // 昵称
+  optional string avatar_url = 4 [json_name = "avatarUrl"]; // 头像
+  optional string bio = 5 [json_name = "bio"];     // 简介
+}
+
+message UpdateAppUserRequest {
+  uint32 id = 1 [json_name = "id"];                          // 用户ID
+  optional string nickname = 2 [json_name = "nickname"];     // 昵称
+  optional string avatar_url = 3 [json_name = "avatarUrl"];  // 头像
+  optional string bio = 4 [json_name = "bio"];               // 简介
+  optional string password = 5 [json_name = "password"];     // 新密码（重置）
+}
+
+message UpdateAppUserStatusRequest {
+  uint32 id = 1 [json_name = "id"];    // 用户ID
+  string status = 2 [json_name = "status"]; // 目标状态（"1"禁用/"2"正常）
+}
+
+message SetUserRolesRequest {
+  uint32 id = 1 [json_name = "id"];            // 用户ID
+  repeated uint32 role_ids = 2 [json_name = "roleIds"]; // 角色 ID（全量覆盖）
+}
+
+message GetUserRoleIdsResponse {
+  repeated uint32 role_ids = 1 [json_name = "roleIds"]; // 角色 ID 列表
 }

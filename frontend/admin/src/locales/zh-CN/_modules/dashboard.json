@@ -23,5 +23,27 @@
     "count": "数量",
     "empty": "暂无排行数据",
     "titleFallback": "未命名视频"
+  },
+  "banner": {
+    "morning": "早安",
+    "afternoon": "午安",
+    "evening": "晚上好",
+    "todayPublished": "今日发布",
+    "totalViews": "总播放量",
+    "quickTitle": "快捷入口",
+    "quickVideos": "视频管理",
+    "quickVideosDesc": "审核与内容管理",
+    "quickReports": "举报管理",
+    "quickReportsDesc": "处理社区举报",
+    "quickRoles": "角色管理",
+    "quickRolesDesc": "权限角色配置"
+  },
+  "trend": {
+    "title": "近 7 日趋势",
+    "published": "发布",
+    "plays": "播放",
+    "likes": "点赞",
+    "empty": "暂无趋势数据",
+    "emptyHint": "趋势接口暂不可用或暂无数据，稍后自动重试"
   }
 }

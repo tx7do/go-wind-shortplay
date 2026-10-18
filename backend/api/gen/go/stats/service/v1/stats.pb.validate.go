@@ -490,6 +490,363 @@ var _ interface {
 	ErrorName() string
 } = OverviewValidationError{}
 
+// Validate checks the field values on ListTrendsRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *ListTrendsRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListTrendsRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ListTrendsRequestMultiError, or nil if none found.
+func (m *ListTrendsRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListTrendsRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.Days != nil {
+		// no validation rules for Days
+	}
+
+	if len(errors) > 0 {
+		return ListTrendsRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListTrendsRequestMultiError is an error wrapping multiple validation errors
+// returned by ListTrendsRequest.ValidateAll() if the designated constraints
+// aren't met.
+type ListTrendsRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListTrendsRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListTrendsRequestMultiError) AllErrors() []error { return m }
+
+// ListTrendsRequestValidationError is the validation error returned by
+// ListTrendsRequest.Validate if the designated constraints aren't met.
+type ListTrendsRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListTrendsRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListTrendsRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListTrendsRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListTrendsRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListTrendsRequestValidationError) ErrorName() string {
+	return "ListTrendsRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListTrendsRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListTrendsRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListTrendsRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListTrendsRequestValidationError{}
+
+// Validate checks the field values on TrendItem with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *TrendItem) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on TrendItem with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in TrendItemMultiError, or nil
+// if none found.
+func (m *TrendItem) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *TrendItem) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.Date != nil {
+		// no validation rules for Date
+	}
+
+	if m.Published != nil {
+		// no validation rules for Published
+	}
+
+	if m.Plays != nil {
+		// no validation rules for Plays
+	}
+
+	if m.Likes != nil {
+		// no validation rules for Likes
+	}
+
+	if len(errors) > 0 {
+		return TrendItemMultiError(errors)
+	}
+
+	return nil
+}
+
+// TrendItemMultiError is an error wrapping multiple validation errors returned
+// by TrendItem.ValidateAll() if the designated constraints aren't met.
+type TrendItemMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m TrendItemMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m TrendItemMultiError) AllErrors() []error { return m }
+
+// TrendItemValidationError is the validation error returned by
+// TrendItem.Validate if the designated constraints aren't met.
+type TrendItemValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e TrendItemValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e TrendItemValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e TrendItemValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e TrendItemValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e TrendItemValidationError) ErrorName() string { return "TrendItemValidationError" }
+
+// Error satisfies the builtin error interface
+func (e TrendItemValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sTrendItem.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = TrendItemValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = TrendItemValidationError{}
+
+// Validate checks the field values on ListTrendsResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ListTrendsResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListTrendsResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ListTrendsResponseMultiError, or nil if none found.
+func (m *ListTrendsResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListTrendsResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ListTrendsResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ListTrendsResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ListTrendsResponseValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return ListTrendsResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListTrendsResponseMultiError is an error wrapping multiple validation errors
+// returned by ListTrendsResponse.ValidateAll() if the designated constraints
+// aren't met.
+type ListTrendsResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListTrendsResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListTrendsResponseMultiError) AllErrors() []error { return m }
+
+// ListTrendsResponseValidationError is the validation error returned by
+// ListTrendsResponse.Validate if the designated constraints aren't met.
+type ListTrendsResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListTrendsResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListTrendsResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListTrendsResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListTrendsResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListTrendsResponseValidationError) ErrorName() string {
+	return "ListTrendsResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListTrendsResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListTrendsResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListTrendsResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListTrendsResponseValidationError{}
+
 // Validate checks the field values on ListTopVideosRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.

@@ -3,295 +3,359 @@ package service
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/redis/go-redis/v9"
+	"github.com/tx7do/go-utils/trans"
 	"github.com/tx7do/kratos-bootstrap/bootstrap"
 
-	feedV1 "go-wind-shortplay/api/gen/go/feed/service/v1"
-	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
 	"go-wind-shortplay/app/core/service/internal/data"
 	"go-wind-shortplay/app/core/service/internal/data/ent"
-	"go-wind-shortplay/pkg/authctx"
+	videopkg "go-wind-shortplay/app/core/service/internal/data/ent/video"
+
+	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
+	feedV1 "go-wind-shortplay/api/gen/go/feed/service/v1"
+	videoV1 "go-wind-shortplay/api/gen/go/video/service/v1"
 )
 
 const (
-	seenKeyPrefix = "feed:seen:"
-	seenTTL       = 7 * 24 * time.Hour
-	seenCap       = 2000 // 已看集合上限，防止无限膨胀
+	// feedSeenKeyPrefix 已看集合 key 前缀（全仓 Redis key 约定 gowind-shortplay: 前缀）
+	feedSeenKeyPrefix = "gowind-shortplay:feed:seen:"
+	// feedSeenTTL 已看集合过期时间
+	feedSeenTTL = 7 * 24 * time.Hour
+	// feedSeenCap 已看集合上限，防止无限膨胀
+	feedSeenCap = 2000
 )
 
 type FeedService struct {
 	feedV1.UnimplementedFeedServiceServer
 
-	videoRepo  *data.VideoRepo
-	userRepo   *data.UserRepo
-	interRepo  *data.InteractionRepo
-	redis      *redis.Client
-	log        *log.Helper
+	log *log.Helper
+
+	videoRepo *data.VideoRepo
+	userRepo  data.UserRepo
+	interRepo *data.InteractionRepo
+	statsRepo *data.StatsRepo
+	redis     *redis.Client
 }
 
-func NewFeedService(ctx *bootstrap.Context, videoRepo *data.VideoRepo, userRepo *data.UserRepo, interRepo *data.InteractionRepo, rdb *redis.Client) *FeedService {
+func NewFeedService(
+	ctx *bootstrap.Context,
+	videoRepo *data.VideoRepo,
+	userRepo data.UserRepo,
+	interRepo *data.InteractionRepo,
+	statsRepo *data.StatsRepo,
+	rdb *redis.Client,
+) *FeedService {
 	return &FeedService{
+		log:       ctx.NewLoggerHelper("feed/service/core-service"),
 		videoRepo: videoRepo,
 		userRepo:  userRepo,
 		interRepo: interRepo,
+		statsRepo: statsRepo,
 		redis:     rdb,
-		log:       ctx.NewLoggerHelper("feed/service/core-service"),
 	}
 }
 
-// GetFeed 沉浸式 Feed 流：关注召回优先 → 热门 → 最新兜底，已看过滤
-func (s *FeedService) GetFeed(ctx context.Context, req *feedV1.GetFeedRequest) (*feedV1.GetFeedResponse, error) {
-	_, pageSize := pageArgs(req.GetPageNum(), req.GetPageSize())
-	uid := authctx.UserIDFromContext(ctx)
+// ── 已看集合（Redis set，尽力而为）──
 
-	// 三路召回（配额按页大小放大，合并去重后再截页）
-	recallN := pageSize * 4
-	var followVideos, hotVideos, latestVideos []*ent.Video
-	var err error
+func (s *FeedService) seenKey(uid uint32) string {
+	return fmt.Sprintf("%s%d", feedSeenKeyPrefix, uid)
+}
 
-	if uid > 0 {
-		authorIDs, _ := s.interRepo.FollowingAuthorIDs(ctx, uid, 100)
-		followVideos, err = s.videoRepo.ListPublishedByAuthors(ctx, authorIDs, recallN)
-		if err != nil {
-			s.log.Warnf("follow recall failed: %s", err.Error())
+func (s *FeedService) loadSeenSet(ctx context.Context, uid uint32) map[uint32]struct{} {
+	out := make(map[uint32]struct{})
+	if uid == 0 || s.redis == nil {
+		return out
+	}
+	ids, err := s.redis.SMembers(ctx, s.seenKey(uid)).Result()
+	if err != nil {
+		return out
+	}
+	for _, idStr := range ids {
+		var id uint32
+		if _, err := fmt.Sscanf(idStr, "%d", &id); err == nil {
+			out[id] = struct{}{}
 		}
 	}
-	hotVideos, err = s.videoRepo.ListHot(ctx, recallN)
-	if err != nil {
-		s.log.Warnf("hot recall failed: %s", err.Error())
-	}
-	latestVideos, err = s.videoRepo.ListLatest(ctx, recallN)
-	if err != nil {
-		s.log.Warnf("latest recall failed: %s", err.Error())
-	}
+	return out
+}
 
-	// 已看过滤
-	seen := s.loadSeenSet(ctx, uid)
+// markSeen 本页记为已看（SAdd + TTL；超上限随机弹出多余成员防膨胀）
+func (s *FeedService) markSeen(ctx context.Context, uid uint32, videoIDs []uint32) {
+	if uid == 0 || s.redis == nil || len(videoIDs) == 0 {
+		return
+	}
+	key := s.seenKey(uid)
+	members := make([]interface{}, 0, len(videoIDs))
+	for _, id := range videoIDs {
+		members = append(members, fmt.Sprintf("%d", id))
+	}
+	pipe := s.redis.Pipeline()
+	pipe.SAdd(ctx, key, members...)
+	pipe.Expire(ctx, key, feedSeenTTL)
+	if _, err := pipe.Exec(ctx); err != nil {
+		s.log.Warnf("mark seen failed: %s", err.Error())
+		return
+	}
+	if n, err := s.redis.SCard(ctx, key).Result(); err == nil && n > feedSeenCap {
+		s.redis.SPopN(ctx, key, n-feedSeenCap)
+	}
+}
 
+// pageArgsFeed 页码/页大小（缺省 1/10，上限 50）
+func pageArgsFeed(pageNum, pageSize uint32) (uint32, uint32) {
+	if pageNum < 1 {
+		pageNum = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+	if pageSize > 50 {
+		pageSize = 50
+	}
+	return pageNum, pageSize
+}
+
+// GetFeed 沉浸式 Feed：关注召回 → 热门 → 最新兜底，已看过滤
+func (s *FeedService) GetFeed(ctx context.Context, req *feedV1.GetFeedRequest) (*feedV1.GetFeedResponse, error) {
+	pageNum, pageSize := pageArgsFeed(req.GetPageNum(), req.GetPageSize())
+	uid := spViewerUserID(ctx)
+
+	recallN := int(pageSize) * 4
+	reasonsOf := make(map[uint32]feedV1.FeedReason, recallN)
 	merged := make([]*ent.Video, 0, recallN)
-	seenIDs := make(map[uint32]struct{}, recallN)
-	add := func(vs []*ent.Video) {
+	mergedIDs := make(map[uint32]struct{}, recallN)
+
+	add := func(vs []*ent.Video, reason feedV1.FeedReason) {
 		for _, v := range vs {
-			if _, dup := seenIDs[v.ID]; dup {
+			if _, dup := mergedIDs[v.ID]; dup {
 				continue
 			}
+			mergedIDs[v.ID] = struct{}{}
+			merged = append(merged, v)
+			reasonsOf[v.ID] = reason
+		}
+	}
+
+	seen := s.loadSeenSet(ctx, uid)
+	seenFiltered := func(vs []*ent.Video) []*ent.Video {
+		if len(seen) == 0 {
+			return vs
+		}
+		out := make([]*ent.Video, 0, len(vs))
+		for _, v := range vs {
 			if _, wasSeen := seen[v.ID]; wasSeen {
 				continue
 			}
-			seenIDs[v.ID] = struct{}{}
-			merged = append(merged, v)
+			out = append(out, v)
+		}
+		return out
+	}
+
+	// 1. 关注召回
+	if uid > 0 {
+		authorIDs, _ := s.interRepo.FollowingAuthorIDs(ctx, uid, 100)
+		if followVideos, err := s.videoRepo.ListPublishedByAuthors(ctx, authorIDs, recallN); err == nil {
+			add(seenFiltered(followVideos), feedV1.FeedReason_FEED_REASON_FOLLOW)
 		}
 	}
-	add(followVideos)
-	add(hotVideos)
-	add(latestVideos)
+	// 2. 热门加权
+	if hotVideos, err := s.videoRepo.ListHot(ctx, recallN); err == nil {
+		add(seenFiltered(hotVideos), feedV1.FeedReason_FEED_REASON_HOT)
+	}
+	// 3. 最新兜底（带标签过滤时走标签聚合）
+	if req.GetTag() != "" {
+		if tagVideos, err := s.videoRepo.ListByTag(ctx, req.GetTag(), recallN); err == nil {
+			add(seenFiltered(tagVideos), feedV1.FeedReason_FEED_REASON_LATEST)
+		}
+	} else if latestVideos, err := s.videoRepo.ListLatest(ctx, recallN); err == nil {
+		add(seenFiltered(latestVideos), feedV1.FeedReason_FEED_REASON_LATEST)
+	}
 
 	// 截页
-	offset, limit := pageArgs(req.GetPageNum(), req.GetPageSize())
-	if offset > len(merged) {
+	offset := (pageNum - 1) * pageSize
+	if int(offset) >= len(merged) {
 		merged = nil
 	} else {
 		merged = merged[offset:]
 	}
-	if len(merged) > limit {
-		merged = merged[:limit]
+	hasMore := false
+	if len(merged) > int(pageSize) {
+		merged = merged[:pageSize]
+		hasMore = true
 	}
 
 	items := make([]*feedV1.FeedItem, 0, len(merged))
+	videoIDs := make([]uint32, 0, len(merged))
 	for _, v := range merged {
-		reason := feedV1.FeedReason_FEED_REASON_LATEST
-		for _, fv := range followVideos {
-			if fv.ID == v.ID {
-				reason = feedV1.FeedReason_FEED_REASON_FOLLOW
-				break
-			}
-		}
-		if reason == feedV1.FeedReason_FEED_REASON_LATEST {
-			for _, hv := range hotVideos {
-				if hv.ID == v.ID {
-					reason = feedV1.FeedReason_FEED_REASON_HOT
-					break
-				}
-			}
+		reason := reasonsOf[v.ID]
+		if reason == feedV1.FeedReason_FEED_REASON_UNSPECIFIED {
+			reason = feedV1.FeedReason_FEED_REASON_LATEST
 		}
 		items = append(items, &feedV1.FeedItem{
-			Video:  toVideo(v, nil),
+			Video:  spVideoToDTO(v, nil),
 			Reason: reason,
 		})
+		videoIDs = append(videoIDs, v.ID)
 	}
 
 	// 本页记为已看（下翻不重复推送）
-	if uid > 0 && len(merged) > 0 {
-		s.markSeen(ctx, uid, merged)
+	if uid > 0 && len(videoIDs) > 0 {
+		s.markSeen(ctx, uid, videoIDs)
 	}
 
 	return &feedV1.GetFeedResponse{
 		Items:   items,
-		HasMore: ptr(len(items) >= pageSize),
+		HasMore: trans.Ptr(hasMore),
 	}, nil
 }
 
-// GetVideoDetail 单视频详情 + 作者 + 观看者状态；浏览量 +1
+// GetVideoDetail 单视频详情 + 作者 + 观看者状态；播放量 +1
 func (s *FeedService) GetVideoDetail(ctx context.Context, req *feedV1.GetVideoDetailRequest) (*feedV1.VideoDetail, error) {
-	v, err := s.videoRepo.GetByID(ctx, req.GetVideoId())
+	e, err := s.videoRepo.GetEntityRaw(ctx, req.GetVideoId())
 	if err != nil {
 		return nil, feedV1.ErrorNotFound("video not found")
 	}
-	if v.AuthorID == nil {
-		return nil, feedV1.ErrorNotFound("video author missing")
+	// 非已发布视频仅管理端可见
+	if e.Status != videopkg.StatusPublished && !spIsAdminCaller(ctx) {
+		return nil, feedV1.ErrorNotFound("video not found")
 	}
 
-	author, err := s.userRepo.GetByID(ctx, *v.AuthorID)
-	if err != nil {
-		return nil, feedV1.ErrorNotFound("author not found")
-	}
-
-	tags, _ := s.videoRepo.TagsOfVideo(ctx, v.ID)
+	tags, _ := s.videoRepo.TagsOfVideo(ctx, e.ID)
 	detail := &feedV1.VideoDetail{
-		Video:  toVideo(v, tags),
-		Author: toUserBrief(author),
+		Video: spVideoToDTO(e, tags),
 	}
 
-	// 作者统计
-	following, followers, _ := s.interRepo.FollowCounts(ctx, author.ID)
-	detail.AuthorStats = &identityV1.UserStats{
-		UserId:        ptr(author.ID),
-		FollowerCount: ptr(uint64(followers)),
-		FollowingCount: ptr(uint64(following)),
+	if author, aerr := s.userRepo.Get(ctx, &identityV1.GetUserRequest{
+		QueryBy: &identityV1.GetUserRequest_Id{Id: e.AuthorID},
+	}); aerr == nil && author != nil {
+		detail.Author = toUserBriefSP(author)
+
+		following, followers, _ := s.interRepo.FollowCounts(ctx, author.GetId())
+		detail.AuthorStats = &identityV1.UserStats{
+			UserId:         trans.Ptr(author.GetId()),
+			FollowerCount:  trans.Ptr(uint64(followers)),
+			FollowingCount: trans.Ptr(uint64(following)),
+		}
 	}
 
 	// 观看者互动状态（游客全 false）
-	uid := authctx.UserIDFromContext(ctx)
-	state := &feedV1.ViewerState{Liked: ptr(false), Collected: ptr(false), Following: ptr(false)}
+	uid := spViewerUserID(ctx)
+	state := &feedV1.ViewerState{Liked: trans.Ptr(false), Collected: trans.Ptr(false), Following: trans.Ptr(false)}
 	if uid > 0 {
-		liked, collected, _ := s.interRepo.GetInteractionStatus(ctx, uid, []uint32{v.ID})
-		isFollowed, _ := s.interRepo.GetFollowStatus(ctx, uid, []uint32{author.ID})
-		state.Liked = ptr(liked[v.ID])
-		state.Collected = ptr(collected[v.ID])
-		state.Following = ptr(isFollowed[author.ID])
+		liked, _ := s.interRepo.GetLikeStatus(ctx, uid, []uint32{e.ID})
+		collected, _ := s.interRepo.GetCollectStatus(ctx, uid, []uint32{e.ID})
+		followed, _ := s.interRepo.GetFollowStatus(ctx, uid, []uint32{e.AuthorID})
+		state.Liked = trans.Ptr(liked[e.ID])
+		state.Collected = trans.Ptr(collected[e.ID])
+		state.Following = trans.Ptr(followed[e.AuthorID])
 	}
 	detail.ViewerState = state
+
+	// 播放量 +1（容忍失败）
+	_ = s.videoRepo.AddViewCount(ctx, e.ID)
 
 	return detail, nil
 }
 
-// SearchVideos 标题模糊 + 标签精确搜索
+// SearchVideos 搜索（标题模糊 + 标签精确合并）
 func (s *FeedService) SearchVideos(ctx context.Context, req *feedV1.SearchVideosRequest) (*feedV1.GetFeedResponse, error) {
-	keyword := req.GetKeyword()
-	if keyword == "" {
-		return &feedV1.GetFeedResponse{Items: []*feedV1.FeedItem{}, HasMore: ptr(false)}, nil
-	}
-
-	found, err := s.videoRepo.SearchByTitle(ctx, keyword, 50)
+	pageNum, pageSize := pageArgsFeed(req.GetPageNum(), req.GetPageSize())
+	videos, err := s.videoRepo.SearchByKeyword(ctx, req.GetKeyword(), 200)
 	if err != nil {
-		return nil, feedV1.ErrorInternalServerError("search failed")
+		return nil, err
 	}
-
-	// 标签精确匹配合并（去重）
-	if tag, err := s.videoRepo.TagByName(ctx, keyword); err == nil && tag != nil {
-		ids, _ := s.videoRepo.VideoIDsByTag(ctx, tag.ID, 50)
-		byTag, _ := s.videoRepo.ListPublishedByIDs(ctx, ids)
-		exist := make(map[uint32]struct{}, len(found))
-		for _, f := range found {
-			exist[f.ID] = struct{}{}
-		}
-		for _, v := range byTag {
-			if _, dup := exist[v.ID]; !dup {
-				found = append(found, v)
-			}
-		}
-	}
-
-	return paginateVideos(found, req.GetPageNum(), req.GetPageSize()), nil
+	return feedItemsFromVideosSP(videos, int(pageNum), int(pageSize)), nil
 }
 
+// ListVideosByTag 标签聚合
 func (s *FeedService) ListVideosByTag(ctx context.Context, req *feedV1.ListVideosByTagRequest) (*feedV1.GetFeedResponse, error) {
-	tag, err := s.videoRepo.TagByName(ctx, req.GetTag())
+	pageNum, pageSize := pageArgsFeed(req.GetPageNum(), req.GetPageSize())
+	videos, err := s.videoRepo.ListByTag(ctx, req.GetTag(), 200)
 	if err != nil {
-		return &feedV1.GetFeedResponse{Items: []*feedV1.FeedItem{}, HasMore: ptr(false)}, nil
+		return nil, err
 	}
-	ids, err := s.videoRepo.VideoIDsByTag(ctx, tag.ID, 200)
-	if err != nil {
-		return nil, feedV1.ErrorInternalServerError("list tag videos failed")
-	}
-	found, err := s.videoRepo.ListPublishedByIDs(ctx, ids)
-	if err != nil {
-		return nil, feedV1.ErrorInternalServerError("list tag videos failed")
-	}
-	return paginateVideos(found, req.GetPageNum(), req.GetPageSize()), nil
+	return feedItemsFromVideosSP(videos, int(pageNum), int(pageSize)), nil
 }
 
-// paginateVideos 内存分页打包（召回集合量级小，够用；量大后改为查询层分页）
-func paginateVideos(vs []*ent.Video, pageNum, pageSize uint32) *feedV1.GetFeedResponse {
-	offset, limit := pageArgs(pageNum, pageSize)
-	if offset > len(vs) {
-		vs = nil
-	} else {
-		vs = vs[offset:]
+func feedItemsFromVideosSP(videos []*ent.Video, pageNum, pageSize int) *feedV1.GetFeedResponse {
+	resp := &feedV1.GetFeedResponse{HasMore: trans.Ptr(false)}
+	if len(videos) == 0 {
+		return resp
 	}
-	if len(vs) > limit {
-		vs = vs[:limit]
+	offset := (pageNum - 1) * pageSize
+	if offset >= len(videos) {
+		return resp
 	}
-	items := make([]*feedV1.FeedItem, 0, len(vs))
-	for _, v := range vs {
-		items = append(items, &feedV1.FeedItem{Video: toVideo(v, nil)})
+	videos = videos[offset:]
+	hasMore := false
+	if len(videos) > pageSize {
+		videos = videos[:pageSize]
+		hasMore = true
 	}
-	return &feedV1.GetFeedResponse{
-		Items:   items,
-		HasMore: ptr(offset+len(vs) < limit*50), // 粗略判断
+	for _, v := range videos {
+		resp.Items = append(resp.Items, &feedV1.FeedItem{
+			Video:  spVideoToDTO(v, nil),
+			Reason: feedV1.FeedReason_FEED_REASON_LATEST,
+		})
+	}
+	resp.HasMore = trans.Ptr(hasMore)
+	return resp
+}
+
+// spVideoStatusDTO ent 状态枚举 → proto
+func spVideoStatusDTO(s videopkg.Status) videoV1.VideoStatus {
+	switch s {
+	case videopkg.StatusDraft:
+		return videoV1.VideoStatus_VIDEO_STATUS_DRAFT
+	case videopkg.StatusReviewing:
+		return videoV1.VideoStatus_VIDEO_STATUS_REVIEWING
+	case videopkg.StatusPublished:
+		return videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED
+	case videopkg.StatusRejected:
+		return videoV1.VideoStatus_VIDEO_STATUS_REJECTED
+	case videopkg.StatusOffline:
+		return videoV1.VideoStatus_VIDEO_STATUS_OFFLINE
+	default:
+		return videoV1.VideoStatus_VIDEO_STATUS_UNSPECIFIED
 	}
 }
 
-// ── 已看集合（Redis） ──
-
-func (s *FeedService) seenKey(uid uint32) string {
-	return fmt.Sprintf("%s%d", seenKeyPrefix, uid)
+// spVideoToDTO ent.Video → proto Video（服务内映射，标签另查）
+func spVideoToDTO(e *ent.Video, tags []string) *videoV1.Video {
+	if e == nil {
+		return nil
+	}
+	return &videoV1.Video{
+		Id:           trans.Ptr(e.ID),
+		Title:        trans.Ptr(e.Title),
+		Description:  e.Description,
+		CoverUrl:     e.CoverURL,
+		VideoUrl:     e.VideoURL,
+		Duration:     trans.Ptr(e.Duration),
+		Width:        trans.Ptr(e.Width),
+		Height:       trans.Ptr(e.Height),
+		Status:       spVideoStatusDTO(e.Status).Enum(),
+		AuthorId:     trans.Ptr(e.AuthorID),
+		LikeCount:    trans.Ptr(e.LikeCount),
+		CollectCount: trans.Ptr(e.CollectCount),
+		CommentCount: trans.Ptr(e.CommentCount),
+		ViewCount:    trans.Ptr(e.ViewCount),
+		RejectReason: e.RejectReason,
+		Tags:         tags,
+	}
 }
 
-func (s *FeedService) loadSeenSet(ctx context.Context, uid uint32) map[uint32]struct{} {
-	res := make(map[uint32]struct{})
-	if uid == 0 || s.redis == nil {
-		return res
+// toUserBriefSP identity User → UserBrief
+func toUserBriefSP(u *identityV1.User) *identityV1.UserBrief {
+	if u == nil {
+		return nil
 	}
-	ids, err := s.redis.SMembers(ctx, s.seenKey(uid)).Result()
-	if err != nil {
-		return res
+	return &identityV1.UserBrief{
+		Id:        trans.Ptr(u.GetId()),
+		Nickname:  trans.Ptr(u.GetNickname()),
+		AvatarUrl: trans.Ptr(u.GetAvatar()),
 	}
-	for _, raw := range ids {
-		if id, err := strconv.ParseUint(raw, 10, 32); err == nil {
-			res[uint32(id)] = struct{}{}
-		}
-	}
-	return res
-}
-
-func (s *FeedService) markSeen(ctx context.Context, uid uint32, vs []*ent.Video) {
-	if uid == 0 || s.redis == nil {
-		return
-	}
-	members := make([]interface{}, 0, len(vs))
-	for _, v := range vs {
-		members = append(members, strconv.FormatUint(uint64(v.ID), 10))
-	}
-	key := s.seenKey(uid)
-	pipe := s.redis.Pipeline()
-	pipe.SAdd(ctx, key, members...)
-	pipe.Expire(ctx, key, seenTTL)
-	// 超限裁剪：保留最新的一半（SPOP 随机弹出，已看集合允许有损）
-	if n, _ := s.redis.SCard(ctx, key).Result(); n > seenCap {
-		pipe.SPopN(ctx, key, n-seenCap/2)
-	}
-	_, _ = pipe.Exec(ctx)
-}
-
-// RecordSeen 供 UBA 服务在播放事件时调用（观看 ≥N 秒才算已看也可后续细化）
-func (s *FeedService) RecordSeen(ctx context.Context, uid, videoID uint32) {
-	if uid == 0 || videoID == 0 {
-		return
-	}
-	s.markSeen(ctx, uid, []*ent.Video{{ID: videoID}})
 }

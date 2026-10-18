@@ -64,6 +64,62 @@ func (_c *VideoDraftCreate) SetNillableDeletedAt(v *time.Time) *VideoDraftCreate
 	return _c
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_c *VideoDraftCreate) SetCreatedBy(v uint32) *VideoDraftCreate {
+	_c.mutation.SetCreatedBy(v)
+	return _c
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_c *VideoDraftCreate) SetNillableCreatedBy(v *uint32) *VideoDraftCreate {
+	if v != nil {
+		_c.SetCreatedBy(*v)
+	}
+	return _c
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_c *VideoDraftCreate) SetUpdatedBy(v uint32) *VideoDraftCreate {
+	_c.mutation.SetUpdatedBy(v)
+	return _c
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_c *VideoDraftCreate) SetNillableUpdatedBy(v *uint32) *VideoDraftCreate {
+	if v != nil {
+		_c.SetUpdatedBy(*v)
+	}
+	return _c
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (_c *VideoDraftCreate) SetDeletedBy(v uint32) *VideoDraftCreate {
+	_c.mutation.SetDeletedBy(v)
+	return _c
+}
+
+// SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
+func (_c *VideoDraftCreate) SetNillableDeletedBy(v *uint32) *VideoDraftCreate {
+	if v != nil {
+		_c.SetDeletedBy(*v)
+	}
+	return _c
+}
+
+// SetTenantID sets the "tenant_id" field.
+func (_c *VideoDraftCreate) SetTenantID(v uint32) *VideoDraftCreate {
+	_c.mutation.SetTenantID(v)
+	return _c
+}
+
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_c *VideoDraftCreate) SetNillableTenantID(v *uint32) *VideoDraftCreate {
+	if v != nil {
+		_c.SetTenantID(*v)
+	}
+	return _c
+}
+
 // SetTitle sets the "title" field.
 func (_c *VideoDraftCreate) SetTitle(v string) *VideoDraftCreate {
 	_c.mutation.SetTitle(v)
@@ -89,6 +145,12 @@ func (_c *VideoDraftCreate) SetNillableDescription(v *string) *VideoDraftCreate 
 	if v != nil {
 		_c.SetDescription(*v)
 	}
+	return _c
+}
+
+// SetTags sets the "tags" field.
+func (_c *VideoDraftCreate) SetTags(v []string) *VideoDraftCreate {
+	_c.mutation.SetTags(v)
 	return _c
 }
 
@@ -203,7 +265,9 @@ func (_c *VideoDraftCreate) Mutation() *VideoDraftMutation {
 
 // Save creates the VideoDraft in the database.
 func (_c *VideoDraftCreate) Save(ctx context.Context) (*VideoDraft, error) {
-	_c.defaults()
+	if err := _c.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -230,7 +294,11 @@ func (_c *VideoDraftCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *VideoDraftCreate) defaults() {
+func (_c *VideoDraftCreate) defaults() error {
+	if _, ok := _c.mutation.TenantID(); !ok {
+		v := videodraft.DefaultTenantID
+		_c.mutation.SetTenantID(v)
+	}
 	if _, ok := _c.mutation.Duration(); !ok {
 		v := videodraft.DefaultDuration
 		_c.mutation.SetDuration(v)
@@ -243,10 +311,27 @@ func (_c *VideoDraftCreate) defaults() {
 		v := videodraft.DefaultHeight
 		_c.mutation.SetHeight(v)
 	}
+	if _, ok := _c.mutation.AuthorID(); !ok {
+		v := videodraft.DefaultAuthorID
+		_c.mutation.SetAuthorID(v)
+	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *VideoDraftCreate) check() error {
+	if _, ok := _c.mutation.Duration(); !ok {
+		return &ValidationError{Name: "duration", err: errors.New(`ent: missing required field "VideoDraft.duration"`)}
+	}
+	if _, ok := _c.mutation.Width(); !ok {
+		return &ValidationError{Name: "width", err: errors.New(`ent: missing required field "VideoDraft.width"`)}
+	}
+	if _, ok := _c.mutation.Height(); !ok {
+		return &ValidationError{Name: "height", err: errors.New(`ent: missing required field "VideoDraft.height"`)}
+	}
+	if _, ok := _c.mutation.AuthorID(); !ok {
+		return &ValidationError{Name: "author_id", err: errors.New(`ent: missing required field "VideoDraft.author_id"`)}
+	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := videodraft.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "VideoDraft.id": %w`, err)}
@@ -297,13 +382,33 @@ func (_c *VideoDraftCreate) createSpec() (*VideoDraft, *sqlgraph.CreateSpec) {
 		_spec.SetField(videodraft.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
+	if value, ok := _c.mutation.CreatedBy(); ok {
+		_spec.SetField(videodraft.FieldCreatedBy, field.TypeUint32, value)
+		_node.CreatedBy = &value
+	}
+	if value, ok := _c.mutation.UpdatedBy(); ok {
+		_spec.SetField(videodraft.FieldUpdatedBy, field.TypeUint32, value)
+		_node.UpdatedBy = &value
+	}
+	if value, ok := _c.mutation.DeletedBy(); ok {
+		_spec.SetField(videodraft.FieldDeletedBy, field.TypeUint32, value)
+		_node.DeletedBy = &value
+	}
+	if value, ok := _c.mutation.TenantID(); ok {
+		_spec.SetField(videodraft.FieldTenantID, field.TypeUint32, value)
+		_node.TenantID = &value
+	}
 	if value, ok := _c.mutation.Title(); ok {
 		_spec.SetField(videodraft.FieldTitle, field.TypeString, value)
-		_node.Title = &value
+		_node.Title = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(videodraft.FieldDescription, field.TypeString, value)
 		_node.Description = &value
+	}
+	if value, ok := _c.mutation.Tags(); ok {
+		_spec.SetField(videodraft.FieldTags, field.TypeJSON, value)
+		_node.Tags = value
 	}
 	if value, ok := _c.mutation.CoverURL(); ok {
 		_spec.SetField(videodraft.FieldCoverURL, field.TypeString, value)
@@ -315,15 +420,15 @@ func (_c *VideoDraftCreate) createSpec() (*VideoDraft, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := _c.mutation.Duration(); ok {
 		_spec.SetField(videodraft.FieldDuration, field.TypeUint32, value)
-		_node.Duration = &value
+		_node.Duration = value
 	}
 	if value, ok := _c.mutation.Width(); ok {
 		_spec.SetField(videodraft.FieldWidth, field.TypeUint32, value)
-		_node.Width = &value
+		_node.Width = value
 	}
 	if value, ok := _c.mutation.Height(); ok {
 		_spec.SetField(videodraft.FieldHeight, field.TypeUint32, value)
-		_node.Height = &value
+		_node.Height = value
 	}
 	if value, ok := _c.mutation.UploadTaskID(); ok {
 		_spec.SetField(videodraft.FieldUploadTaskID, field.TypeString, value)
@@ -331,7 +436,7 @@ func (_c *VideoDraftCreate) createSpec() (*VideoDraft, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := _c.mutation.AuthorID(); ok {
 		_spec.SetField(videodraft.FieldAuthorID, field.TypeUint32, value)
-		_node.AuthorID = &value
+		_node.AuthorID = value
 	}
 	return _node, _spec
 }
@@ -421,6 +526,78 @@ func (u *VideoDraftUpsert) ClearDeletedAt() *VideoDraftUpsert {
 	return u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (u *VideoDraftUpsert) SetCreatedBy(v uint32) *VideoDraftUpsert {
+	u.Set(videodraft.FieldCreatedBy, v)
+	return u
+}
+
+// UpdateCreatedBy sets the "created_by" field to the value that was provided on create.
+func (u *VideoDraftUpsert) UpdateCreatedBy() *VideoDraftUpsert {
+	u.SetExcluded(videodraft.FieldCreatedBy)
+	return u
+}
+
+// AddCreatedBy adds v to the "created_by" field.
+func (u *VideoDraftUpsert) AddCreatedBy(v uint32) *VideoDraftUpsert {
+	u.Add(videodraft.FieldCreatedBy, v)
+	return u
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (u *VideoDraftUpsert) ClearCreatedBy() *VideoDraftUpsert {
+	u.SetNull(videodraft.FieldCreatedBy)
+	return u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (u *VideoDraftUpsert) SetUpdatedBy(v uint32) *VideoDraftUpsert {
+	u.Set(videodraft.FieldUpdatedBy, v)
+	return u
+}
+
+// UpdateUpdatedBy sets the "updated_by" field to the value that was provided on create.
+func (u *VideoDraftUpsert) UpdateUpdatedBy() *VideoDraftUpsert {
+	u.SetExcluded(videodraft.FieldUpdatedBy)
+	return u
+}
+
+// AddUpdatedBy adds v to the "updated_by" field.
+func (u *VideoDraftUpsert) AddUpdatedBy(v uint32) *VideoDraftUpsert {
+	u.Add(videodraft.FieldUpdatedBy, v)
+	return u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (u *VideoDraftUpsert) ClearUpdatedBy() *VideoDraftUpsert {
+	u.SetNull(videodraft.FieldUpdatedBy)
+	return u
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (u *VideoDraftUpsert) SetDeletedBy(v uint32) *VideoDraftUpsert {
+	u.Set(videodraft.FieldDeletedBy, v)
+	return u
+}
+
+// UpdateDeletedBy sets the "deleted_by" field to the value that was provided on create.
+func (u *VideoDraftUpsert) UpdateDeletedBy() *VideoDraftUpsert {
+	u.SetExcluded(videodraft.FieldDeletedBy)
+	return u
+}
+
+// AddDeletedBy adds v to the "deleted_by" field.
+func (u *VideoDraftUpsert) AddDeletedBy(v uint32) *VideoDraftUpsert {
+	u.Add(videodraft.FieldDeletedBy, v)
+	return u
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (u *VideoDraftUpsert) ClearDeletedBy() *VideoDraftUpsert {
+	u.SetNull(videodraft.FieldDeletedBy)
+	return u
+}
+
 // SetTitle sets the "title" field.
 func (u *VideoDraftUpsert) SetTitle(v string) *VideoDraftUpsert {
 	u.Set(videodraft.FieldTitle, v)
@@ -454,6 +631,24 @@ func (u *VideoDraftUpsert) UpdateDescription() *VideoDraftUpsert {
 // ClearDescription clears the value of the "description" field.
 func (u *VideoDraftUpsert) ClearDescription() *VideoDraftUpsert {
 	u.SetNull(videodraft.FieldDescription)
+	return u
+}
+
+// SetTags sets the "tags" field.
+func (u *VideoDraftUpsert) SetTags(v []string) *VideoDraftUpsert {
+	u.Set(videodraft.FieldTags, v)
+	return u
+}
+
+// UpdateTags sets the "tags" field to the value that was provided on create.
+func (u *VideoDraftUpsert) UpdateTags() *VideoDraftUpsert {
+	u.SetExcluded(videodraft.FieldTags)
+	return u
+}
+
+// ClearTags clears the value of the "tags" field.
+func (u *VideoDraftUpsert) ClearTags() *VideoDraftUpsert {
+	u.SetNull(videodraft.FieldTags)
 	return u
 }
 
@@ -511,12 +706,6 @@ func (u *VideoDraftUpsert) AddDuration(v uint32) *VideoDraftUpsert {
 	return u
 }
 
-// ClearDuration clears the value of the "duration" field.
-func (u *VideoDraftUpsert) ClearDuration() *VideoDraftUpsert {
-	u.SetNull(videodraft.FieldDuration)
-	return u
-}
-
 // SetWidth sets the "width" field.
 func (u *VideoDraftUpsert) SetWidth(v uint32) *VideoDraftUpsert {
 	u.Set(videodraft.FieldWidth, v)
@@ -535,12 +724,6 @@ func (u *VideoDraftUpsert) AddWidth(v uint32) *VideoDraftUpsert {
 	return u
 }
 
-// ClearWidth clears the value of the "width" field.
-func (u *VideoDraftUpsert) ClearWidth() *VideoDraftUpsert {
-	u.SetNull(videodraft.FieldWidth)
-	return u
-}
-
 // SetHeight sets the "height" field.
 func (u *VideoDraftUpsert) SetHeight(v uint32) *VideoDraftUpsert {
 	u.Set(videodraft.FieldHeight, v)
@@ -556,12 +739,6 @@ func (u *VideoDraftUpsert) UpdateHeight() *VideoDraftUpsert {
 // AddHeight adds v to the "height" field.
 func (u *VideoDraftUpsert) AddHeight(v uint32) *VideoDraftUpsert {
 	u.Add(videodraft.FieldHeight, v)
-	return u
-}
-
-// ClearHeight clears the value of the "height" field.
-func (u *VideoDraftUpsert) ClearHeight() *VideoDraftUpsert {
-	u.SetNull(videodraft.FieldHeight)
 	return u
 }
 
@@ -601,12 +778,6 @@ func (u *VideoDraftUpsert) AddAuthorID(v uint32) *VideoDraftUpsert {
 	return u
 }
 
-// ClearAuthorID clears the value of the "author_id" field.
-func (u *VideoDraftUpsert) ClearAuthorID() *VideoDraftUpsert {
-	u.SetNull(videodraft.FieldAuthorID)
-	return u
-}
-
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -626,6 +797,9 @@ func (u *VideoDraftUpsertOne) UpdateNewValues() *VideoDraftUpsertOne {
 		}
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(videodraft.FieldCreatedAt)
+		}
+		if _, exists := u.create.mutation.TenantID(); exists {
+			s.SetIgnore(videodraft.FieldTenantID)
 		}
 	}))
 	return u
@@ -700,6 +874,90 @@ func (u *VideoDraftUpsertOne) ClearDeletedAt() *VideoDraftUpsertOne {
 	})
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (u *VideoDraftUpsertOne) SetCreatedBy(v uint32) *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.SetCreatedBy(v)
+	})
+}
+
+// AddCreatedBy adds v to the "created_by" field.
+func (u *VideoDraftUpsertOne) AddCreatedBy(v uint32) *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.AddCreatedBy(v)
+	})
+}
+
+// UpdateCreatedBy sets the "created_by" field to the value that was provided on create.
+func (u *VideoDraftUpsertOne) UpdateCreatedBy() *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.UpdateCreatedBy()
+	})
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (u *VideoDraftUpsertOne) ClearCreatedBy() *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.ClearCreatedBy()
+	})
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (u *VideoDraftUpsertOne) SetUpdatedBy(v uint32) *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.SetUpdatedBy(v)
+	})
+}
+
+// AddUpdatedBy adds v to the "updated_by" field.
+func (u *VideoDraftUpsertOne) AddUpdatedBy(v uint32) *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.AddUpdatedBy(v)
+	})
+}
+
+// UpdateUpdatedBy sets the "updated_by" field to the value that was provided on create.
+func (u *VideoDraftUpsertOne) UpdateUpdatedBy() *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.UpdateUpdatedBy()
+	})
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (u *VideoDraftUpsertOne) ClearUpdatedBy() *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.ClearUpdatedBy()
+	})
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (u *VideoDraftUpsertOne) SetDeletedBy(v uint32) *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.SetDeletedBy(v)
+	})
+}
+
+// AddDeletedBy adds v to the "deleted_by" field.
+func (u *VideoDraftUpsertOne) AddDeletedBy(v uint32) *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.AddDeletedBy(v)
+	})
+}
+
+// UpdateDeletedBy sets the "deleted_by" field to the value that was provided on create.
+func (u *VideoDraftUpsertOne) UpdateDeletedBy() *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.UpdateDeletedBy()
+	})
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (u *VideoDraftUpsertOne) ClearDeletedBy() *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.ClearDeletedBy()
+	})
+}
+
 // SetTitle sets the "title" field.
 func (u *VideoDraftUpsertOne) SetTitle(v string) *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
@@ -739,6 +997,27 @@ func (u *VideoDraftUpsertOne) UpdateDescription() *VideoDraftUpsertOne {
 func (u *VideoDraftUpsertOne) ClearDescription() *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.ClearDescription()
+	})
+}
+
+// SetTags sets the "tags" field.
+func (u *VideoDraftUpsertOne) SetTags(v []string) *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.SetTags(v)
+	})
+}
+
+// UpdateTags sets the "tags" field to the value that was provided on create.
+func (u *VideoDraftUpsertOne) UpdateTags() *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.UpdateTags()
+	})
+}
+
+// ClearTags clears the value of the "tags" field.
+func (u *VideoDraftUpsertOne) ClearTags() *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.ClearTags()
 	})
 }
 
@@ -805,13 +1084,6 @@ func (u *VideoDraftUpsertOne) UpdateDuration() *VideoDraftUpsertOne {
 	})
 }
 
-// ClearDuration clears the value of the "duration" field.
-func (u *VideoDraftUpsertOne) ClearDuration() *VideoDraftUpsertOne {
-	return u.Update(func(s *VideoDraftUpsert) {
-		s.ClearDuration()
-	})
-}
-
 // SetWidth sets the "width" field.
 func (u *VideoDraftUpsertOne) SetWidth(v uint32) *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
@@ -833,13 +1105,6 @@ func (u *VideoDraftUpsertOne) UpdateWidth() *VideoDraftUpsertOne {
 	})
 }
 
-// ClearWidth clears the value of the "width" field.
-func (u *VideoDraftUpsertOne) ClearWidth() *VideoDraftUpsertOne {
-	return u.Update(func(s *VideoDraftUpsert) {
-		s.ClearWidth()
-	})
-}
-
 // SetHeight sets the "height" field.
 func (u *VideoDraftUpsertOne) SetHeight(v uint32) *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
@@ -858,13 +1123,6 @@ func (u *VideoDraftUpsertOne) AddHeight(v uint32) *VideoDraftUpsertOne {
 func (u *VideoDraftUpsertOne) UpdateHeight() *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.UpdateHeight()
-	})
-}
-
-// ClearHeight clears the value of the "height" field.
-func (u *VideoDraftUpsertOne) ClearHeight() *VideoDraftUpsertOne {
-	return u.Update(func(s *VideoDraftUpsert) {
-		s.ClearHeight()
 	})
 }
 
@@ -907,13 +1165,6 @@ func (u *VideoDraftUpsertOne) AddAuthorID(v uint32) *VideoDraftUpsertOne {
 func (u *VideoDraftUpsertOne) UpdateAuthorID() *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.UpdateAuthorID()
-	})
-}
-
-// ClearAuthorID clears the value of the "author_id" field.
-func (u *VideoDraftUpsertOne) ClearAuthorID() *VideoDraftUpsertOne {
-	return u.Update(func(s *VideoDraftUpsert) {
-		s.ClearAuthorID()
 	})
 }
 
@@ -1102,6 +1353,9 @@ func (u *VideoDraftUpsertBulk) UpdateNewValues() *VideoDraftUpsertBulk {
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(videodraft.FieldCreatedAt)
 			}
+			if _, exists := b.mutation.TenantID(); exists {
+				s.SetIgnore(videodraft.FieldTenantID)
+			}
 		}
 	}))
 	return u
@@ -1176,6 +1430,90 @@ func (u *VideoDraftUpsertBulk) ClearDeletedAt() *VideoDraftUpsertBulk {
 	})
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (u *VideoDraftUpsertBulk) SetCreatedBy(v uint32) *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.SetCreatedBy(v)
+	})
+}
+
+// AddCreatedBy adds v to the "created_by" field.
+func (u *VideoDraftUpsertBulk) AddCreatedBy(v uint32) *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.AddCreatedBy(v)
+	})
+}
+
+// UpdateCreatedBy sets the "created_by" field to the value that was provided on create.
+func (u *VideoDraftUpsertBulk) UpdateCreatedBy() *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.UpdateCreatedBy()
+	})
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (u *VideoDraftUpsertBulk) ClearCreatedBy() *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.ClearCreatedBy()
+	})
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (u *VideoDraftUpsertBulk) SetUpdatedBy(v uint32) *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.SetUpdatedBy(v)
+	})
+}
+
+// AddUpdatedBy adds v to the "updated_by" field.
+func (u *VideoDraftUpsertBulk) AddUpdatedBy(v uint32) *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.AddUpdatedBy(v)
+	})
+}
+
+// UpdateUpdatedBy sets the "updated_by" field to the value that was provided on create.
+func (u *VideoDraftUpsertBulk) UpdateUpdatedBy() *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.UpdateUpdatedBy()
+	})
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (u *VideoDraftUpsertBulk) ClearUpdatedBy() *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.ClearUpdatedBy()
+	})
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (u *VideoDraftUpsertBulk) SetDeletedBy(v uint32) *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.SetDeletedBy(v)
+	})
+}
+
+// AddDeletedBy adds v to the "deleted_by" field.
+func (u *VideoDraftUpsertBulk) AddDeletedBy(v uint32) *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.AddDeletedBy(v)
+	})
+}
+
+// UpdateDeletedBy sets the "deleted_by" field to the value that was provided on create.
+func (u *VideoDraftUpsertBulk) UpdateDeletedBy() *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.UpdateDeletedBy()
+	})
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (u *VideoDraftUpsertBulk) ClearDeletedBy() *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.ClearDeletedBy()
+	})
+}
+
 // SetTitle sets the "title" field.
 func (u *VideoDraftUpsertBulk) SetTitle(v string) *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
@@ -1215,6 +1553,27 @@ func (u *VideoDraftUpsertBulk) UpdateDescription() *VideoDraftUpsertBulk {
 func (u *VideoDraftUpsertBulk) ClearDescription() *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.ClearDescription()
+	})
+}
+
+// SetTags sets the "tags" field.
+func (u *VideoDraftUpsertBulk) SetTags(v []string) *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.SetTags(v)
+	})
+}
+
+// UpdateTags sets the "tags" field to the value that was provided on create.
+func (u *VideoDraftUpsertBulk) UpdateTags() *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.UpdateTags()
+	})
+}
+
+// ClearTags clears the value of the "tags" field.
+func (u *VideoDraftUpsertBulk) ClearTags() *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.ClearTags()
 	})
 }
 
@@ -1281,13 +1640,6 @@ func (u *VideoDraftUpsertBulk) UpdateDuration() *VideoDraftUpsertBulk {
 	})
 }
 
-// ClearDuration clears the value of the "duration" field.
-func (u *VideoDraftUpsertBulk) ClearDuration() *VideoDraftUpsertBulk {
-	return u.Update(func(s *VideoDraftUpsert) {
-		s.ClearDuration()
-	})
-}
-
 // SetWidth sets the "width" field.
 func (u *VideoDraftUpsertBulk) SetWidth(v uint32) *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
@@ -1309,13 +1661,6 @@ func (u *VideoDraftUpsertBulk) UpdateWidth() *VideoDraftUpsertBulk {
 	})
 }
 
-// ClearWidth clears the value of the "width" field.
-func (u *VideoDraftUpsertBulk) ClearWidth() *VideoDraftUpsertBulk {
-	return u.Update(func(s *VideoDraftUpsert) {
-		s.ClearWidth()
-	})
-}
-
 // SetHeight sets the "height" field.
 func (u *VideoDraftUpsertBulk) SetHeight(v uint32) *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
@@ -1334,13 +1679,6 @@ func (u *VideoDraftUpsertBulk) AddHeight(v uint32) *VideoDraftUpsertBulk {
 func (u *VideoDraftUpsertBulk) UpdateHeight() *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.UpdateHeight()
-	})
-}
-
-// ClearHeight clears the value of the "height" field.
-func (u *VideoDraftUpsertBulk) ClearHeight() *VideoDraftUpsertBulk {
-	return u.Update(func(s *VideoDraftUpsert) {
-		s.ClearHeight()
 	})
 }
 
@@ -1383,13 +1721,6 @@ func (u *VideoDraftUpsertBulk) AddAuthorID(v uint32) *VideoDraftUpsertBulk {
 func (u *VideoDraftUpsertBulk) UpdateAuthorID() *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.UpdateAuthorID()
-	})
-}
-
-// ClearAuthorID clears the value of the "author_id" field.
-func (u *VideoDraftUpsertBulk) ClearAuthorID() *VideoDraftUpsertBulk {
-	return u.Update(func(s *VideoDraftUpsert) {
-		s.ClearAuthorID()
 	})
 }
 

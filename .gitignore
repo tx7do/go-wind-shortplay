@@ -40,3 +40,6 @@ backend/uploads/
 
 # smoke-test artifacts
 backend/bin/
+
+# playwright mcp artifacts
+.playwright-mcp/

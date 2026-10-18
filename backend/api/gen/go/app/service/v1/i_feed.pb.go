@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: app/service/v1/i_feed.proto
 
-package apppb
+package servicev1
 
 import (
 	v1 "go-wind-shortplay/api/gen/go/feed/service/v1"
@@ -31,9 +31,9 @@ const file_app_service_v1_i_feed_proto_rawDesc = "" +
 	"\aGetFeed\x12\x1f.feed.service.v1.GetFeedRequest\x1a .feed.service.v1.GetFeedResponse\"\x14\x82\xd3\xe4\x93\x02\x0e\x12\f/app/v1/feed\x12y\n" +
 	"\x0eGetVideoDetail\x12&.feed.service.v1.GetVideoDetailRequest\x1a\x1c.feed.service.v1.VideoDetail\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/app/v1/videos/{video_id}\x12u\n" +
 	"\fSearchVideos\x12$.feed.service.v1.SearchVideosRequest\x1a .feed.service.v1.GetFeedResponse\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/app/v1/search/videos\x12\x7f\n" +
-	"\x0fListVideosByTag\x12'.feed.service.v1.ListVideosByTagRequest\x1a .feed.service.v1.GetFeedResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/app/v1/tags/{tag}/videosB\xad\x01\n" +
+	"\x0fListVideosByTag\x12'.feed.service.v1.ListVideosByTagRequest\x1a .feed.service.v1.GetFeedResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/app/v1/tags/{tag}/videosB\xb1\x01\n" +
 	"\x12com.app.service.v1B\n" +
-	"IFeedProtoP\x01Z1go-wind-shortplay/api/gen/go/app/service/v1;apppb\xa2\x02\x03ASX\xaa\x02\x0eApp.Service.V1\xca\x02\x0eApp\\Service\\V1\xe2\x02\x1aApp\\Service\\V1\\GPBMetadata\xea\x02\x10App::Service::V1b\x06proto3"
+	"IFeedProtoP\x01Z5go-wind-shortplay/api/gen/go/app/service/v1;servicev1\xa2\x02\x03ASX\xaa\x02\x0eApp.Service.V1\xca\x02\x0eApp\\Service\\V1\xe2\x02\x1aApp\\Service\\V1\\GPBMetadata\xea\x02\x10App::Service::V1b\x06proto3"
 
 var file_app_service_v1_i_feed_proto_goTypes = []any{
 	(*v1.GetFeedRequest)(nil),         // 0: feed.service.v1.GetFeedRequest

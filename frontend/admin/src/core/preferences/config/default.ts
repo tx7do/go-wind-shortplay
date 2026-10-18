@@ -2,7 +2,9 @@ import type {Preferences} from "../types";
 
 const defaultPreferences: Preferences = {
     app: {
-        accessMode: "frontend",
+        // 后端菜单模式：登录后由 GET /admin/v1/navigation 下发菜单树
+        // （拉取失败自动回退静态路由，见 router/index.tsx）
+        accessMode: "backend",
         authPageLayout: "panel-right",
         checkUpdatesInterval: 1,
         colorGrayMode: false,

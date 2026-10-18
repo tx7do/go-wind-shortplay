@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"go-wind-shortplay/app/core/service/internal/data/ent/videodraft"
 	"strings"
@@ -12,7 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 视频草稿表
+// 短视频草稿表
 type VideoDraft struct {
 	config `json:"-"`
 	// ID of the ent.
@@ -24,24 +25,34 @@ type VideoDraft struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// 创建者ID
+	CreatedBy *uint32 `json:"created_by,omitempty"`
+	// 更新者ID
+	UpdatedBy *uint32 `json:"updated_by,omitempty"`
+	// 删除者ID
+	DeletedBy *uint32 `json:"deleted_by,omitempty"`
+	// 租户ID
+	TenantID *uint32 `json:"tenant_id,omitempty"`
 	// 标题
-	Title *string `json:"title,omitempty"`
+	Title string `json:"title,omitempty"`
 	// 简介
 	Description *string `json:"description,omitempty"`
-	// 封面图地址
+	// 标签名列表
+	Tags []string `json:"tags,omitempty"`
+	// 封面图
 	CoverURL *string `json:"cover_url,omitempty"`
-	// 视频地址
+	// 视频地址（上传完成后回填）
 	VideoURL *string `json:"video_url,omitempty"`
 	// 时长（秒）
-	Duration *uint32 `json:"duration,omitempty"`
+	Duration uint32 `json:"duration,omitempty"`
 	// 分辨率宽
-	Width *uint32 `json:"width,omitempty"`
+	Width uint32 `json:"width,omitempty"`
 	// 分辨率高
-	Height *uint32 `json:"height,omitempty"`
+	Height uint32 `json:"height,omitempty"`
 	// 关联上传任务号
 	UploadTaskID *string `json:"upload_task_id,omitempty"`
-	// 作者ID
-	AuthorID     *uint32 `json:"author_id,omitempty"`
+	// 作者用户ID
+	AuthorID     uint32 `json:"author_id,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -50,7 +61,9 @@ func (*VideoDraft) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case videodraft.FieldID, videodraft.FieldDuration, videodraft.FieldWidth, videodraft.FieldHeight, videodraft.FieldAuthorID:
+		case videodraft.FieldTags:
+			values[i] = new([]byte)
+		case videodraft.FieldID, videodraft.FieldCreatedBy, videodraft.FieldUpdatedBy, videodraft.FieldDeletedBy, videodraft.FieldTenantID, videodraft.FieldDuration, videodraft.FieldWidth, videodraft.FieldHeight, videodraft.FieldAuthorID:
 			values[i] = new(sql.NullInt64)
 		case videodraft.FieldTitle, videodraft.FieldDescription, videodraft.FieldCoverURL, videodraft.FieldVideoURL, videodraft.FieldUploadTaskID:
 			values[i] = new(sql.NullString)
@@ -98,12 +111,39 @@ func (_m *VideoDraft) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
+		case videodraft.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				_m.CreatedBy = new(uint32)
+				*_m.CreatedBy = uint32(value.Int64)
+			}
+		case videodraft.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				_m.UpdatedBy = new(uint32)
+				*_m.UpdatedBy = uint32(value.Int64)
+			}
+		case videodraft.FieldDeletedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_by", values[i])
+			} else if value.Valid {
+				_m.DeletedBy = new(uint32)
+				*_m.DeletedBy = uint32(value.Int64)
+			}
+		case videodraft.FieldTenantID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
+			} else if value.Valid {
+				_m.TenantID = new(uint32)
+				*_m.TenantID = uint32(value.Int64)
+			}
 		case videodraft.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
 			} else if value.Valid {
-				_m.Title = new(string)
-				*_m.Title = value.String
+				_m.Title = value.String
 			}
 		case videodraft.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -111,6 +151,14 @@ func (_m *VideoDraft) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Description = new(string)
 				*_m.Description = value.String
+			}
+		case videodraft.FieldTags:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field tags", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Tags); err != nil {
+					return fmt.Errorf("unmarshal field tags: %w", err)
+				}
 			}
 		case videodraft.FieldCoverURL:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -130,22 +178,19 @@ func (_m *VideoDraft) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field duration", values[i])
 			} else if value.Valid {
-				_m.Duration = new(uint32)
-				*_m.Duration = uint32(value.Int64)
+				_m.Duration = uint32(value.Int64)
 			}
 		case videodraft.FieldWidth:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field width", values[i])
 			} else if value.Valid {
-				_m.Width = new(uint32)
-				*_m.Width = uint32(value.Int64)
+				_m.Width = uint32(value.Int64)
 			}
 		case videodraft.FieldHeight:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field height", values[i])
 			} else if value.Valid {
-				_m.Height = new(uint32)
-				*_m.Height = uint32(value.Int64)
+				_m.Height = uint32(value.Int64)
 			}
 		case videodraft.FieldUploadTaskID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -158,8 +203,7 @@ func (_m *VideoDraft) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field author_id", values[i])
 			} else if value.Valid {
-				_m.AuthorID = new(uint32)
-				*_m.AuthorID = uint32(value.Int64)
+				_m.AuthorID = uint32(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -212,15 +256,36 @@ func (_m *VideoDraft) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	if v := _m.Title; v != nil {
-		builder.WriteString("title=")
-		builder.WriteString(*v)
+	if v := _m.CreatedBy; v != nil {
+		builder.WriteString("created_by=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	if v := _m.UpdatedBy; v != nil {
+		builder.WriteString("updated_by=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.DeletedBy; v != nil {
+		builder.WriteString("deleted_by=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.TenantID; v != nil {
+		builder.WriteString("tenant_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("title=")
+	builder.WriteString(_m.Title)
 	builder.WriteString(", ")
 	if v := _m.Description; v != nil {
 		builder.WriteString("description=")
 		builder.WriteString(*v)
 	}
+	builder.WriteString(", ")
+	builder.WriteString("tags=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Tags))
 	builder.WriteString(", ")
 	if v := _m.CoverURL; v != nil {
 		builder.WriteString("cover_url=")
@@ -232,30 +297,22 @@ func (_m *VideoDraft) String() string {
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
-	if v := _m.Duration; v != nil {
-		builder.WriteString("duration=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("duration=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Duration))
 	builder.WriteString(", ")
-	if v := _m.Width; v != nil {
-		builder.WriteString("width=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("width=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Width))
 	builder.WriteString(", ")
-	if v := _m.Height; v != nil {
-		builder.WriteString("height=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("height=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Height))
 	builder.WriteString(", ")
 	if v := _m.UploadTaskID; v != nil {
 		builder.WriteString("upload_task_id=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
-	if v := _m.AuthorID; v != nil {
-		builder.WriteString("author_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("author_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AuthorID))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -6,10 +6,11 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+
 	"github.com/tx7do/go-crud/entgo/mixin"
 )
 
-// VideoCollect 收藏表
+// VideoCollect holds the schema definition for the VideoCollect entity.
 type VideoCollect struct {
 	ent.Schema
 }
@@ -17,38 +18,47 @@ type VideoCollect struct {
 func (VideoCollect) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entsql.Annotation{
-			Table:     "video_collects",
+			Table:     "sp_video_collects",
 			Charset:   "utf8mb4",
 			Collation: "utf8mb4_bin",
 		},
 		entsql.WithComments(true),
-		schema.Comment("收藏表"),
+		schema.Comment("收藏台账表"),
 	}
 }
 
+// Fields of the VideoCollect.
 func (VideoCollect) Fields() []ent.Field {
 	return []ent.Field{
 		field.Uint32("user_id").
-			Comment("收藏人ID").
-			Optional().
-			Nillable(),
+			Comment("收藏人用户ID").
+			Default(0),
+
 		field.Uint32("video_id").
 			Comment("视频ID").
-			Optional().
-			Nillable(),
+			Default(0),
 	}
 }
 
+// Mixin of the VideoCollect.
 func (VideoCollect) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixin.AutoIncrementId{},
 		mixin.TimeAt{},
+		mixin.TenantID[uint32]{},
 	}
 }
 
 func (VideoCollect) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("user_id", "video_id").Unique(),
-		index.Fields("video_id"),
+		index.Fields("user_id", "video_id").
+			Unique().
+			StorageKey("uix_sp_video_collect_user_video"),
+
+		index.Fields("video_id").
+			StorageKey("idx_sp_video_collect_video"),
+
+		index.Fields("user_id", "created_at").
+			StorageKey("idx_sp_video_collect_user_created_at"),
 	}
 }

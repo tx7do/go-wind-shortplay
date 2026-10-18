@@ -34,5 +34,14 @@
   "nicknameRequired": "Please enter nickname",
   "passwordRequired": "Please enter initial password",
   "editOwnTip": "Admin account",
-  "action": "Actions"
+  "department": "Department",
+  "departmentPlaceholder": "Select a department",
+  "roles": "Roles",
+  "rolesPlaceholder": "Select roles (multiple)",
+  "assignRolesFailed": "Failed to assign roles",
+  "action": "Actions",
+  "works": "Works",
+  "worksTitle": "User Works",
+  "uploadAvatar": "Upload Avatar",
+  "avatarUploadTip": "jpg / png / webp / gif, up to 2MB"
 }

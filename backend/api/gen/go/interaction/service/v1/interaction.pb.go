@@ -700,7 +700,7 @@ var File_interaction_service_v1_interaction_proto protoreflect.FileDescriptor
 
 const file_interaction_service_v1_interaction_proto_rawDesc = "" +
 	"\n" +
-	"(interaction/service/v1/interaction.proto\x12\x16interaction.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1eidentity/service/v1/user.proto\x1a\x1epagination/v1/pagination.proto\x1a\x1cvideo/service/v1/video.proto\"o\n" +
+	"(interaction/service/v1/interaction.proto\x12\x16interaction.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a$identity/service/v1/user_brief.proto\x1a\x1epagination/v1/pagination.proto\x1a\x1cvideo/service/v1/video.proto\"o\n" +
 	"\vLikeRequest\x12C\n" +
 	"\vtarget_type\x18\x01 \x01(\x0e2\".interaction.service.v1.TargetTypeR\n" +
 	"targetType\x12\x1b\n" +

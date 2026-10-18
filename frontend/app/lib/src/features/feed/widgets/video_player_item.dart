@@ -1,8 +1,9 @@
 import 'dart:async' show StreamSubscription, Timer, unawaited;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:media_kit/media_kit.dart' show Media, Player;
+import 'package:media_kit/media_kit.dart' show Media, Player, PlayerConfiguration;
 import 'package:media_kit_video/media_kit_video.dart' as media_video;
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -69,6 +70,9 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   bool _isBuffering = true;
   bool _opened = false;
 
+  /// 是否静音（仅 Web 有意义：浏览器禁止非静音自动播放，进页面须静音起播）
+  bool _isMuted = kIsWeb;
+
   /// 累计观看毫秒（位置差分累加，seek 跳变不计）
   int _watchMs = 0;
   Duration _lastPosition = Duration.zero;
@@ -77,7 +81,8 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   @override
   void initState() {
     super.initState();
-    _player = Player();
+    // Web 端以静音内核起播（规避浏览器自动播放策略）；移动端内核不受限，等价默认构造
+    _player = Player(configuration: PlayerConfiguration(muted: kIsWeb));
     _controller = media_video.VideoController(_player);
 
     _completedSub = _player.stream.completed.listen(_onCompleted);
@@ -201,6 +206,13 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     }
   }
 
+  /// 静音切换（仅 Web 暴露按钮）。media_kit 无 setMuted，用音量 0/100 表达；
+  /// Web 端 setVolume 内部会先解除 <video> 的 muted 属性，故 100 即恢复声音。
+  Future<void> _toggleMuted() async {
+    await _player.setVolume(_isMuted ? 100.0 : 0.0);
+    if (mounted) setState(() => _isMuted = !_isMuted);
+  }
+
   @override
   Widget build(BuildContext context) {
     final playing = _player.state.playing;
@@ -230,6 +242,23 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                 Icons.play_arrow_rounded,
                 size: 80.sp,
                 color: Colors.white.withAlpha(200),
+              ),
+            ),
+          // 静音切换（仅 Web：自动播放须静音，声音由用户手动开启）
+          if (kIsWeb)
+            Positioned(
+              right: 12.w,
+              top: 12.h,
+              child: IconButton(
+                onPressed: _toggleMuted,
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.black.withAlpha(80),
+                ),
+                icon: Icon(
+                  _isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                  color: Colors.white,
+                  size: 22.sp,
+                ),
               ),
             ),
         ],

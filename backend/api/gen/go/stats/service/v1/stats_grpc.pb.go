@@ -8,6 +8,7 @@ package statspb
 
 import (
 	context "context"
+	v11 "go-wind-shortplay/api/gen/go/identity/service/v1"
 	v1 "go-wind-shortplay/api/gen/go/video/service/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -21,8 +22,10 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	DashboardService_GetOverview_FullMethodName        = "/stats.service.v1.DashboardService/GetOverview"
+	DashboardService_ListTrends_FullMethodName         = "/stats.service.v1.DashboardService/ListTrends"
 	DashboardService_ListTopVideos_FullMethodName      = "/stats.service.v1.DashboardService/ListTopVideos"
 	DashboardService_GetCreatorOverview_FullMethodName = "/stats.service.v1.DashboardService/GetCreatorOverview"
+	DashboardService_GetUserStats_FullMethodName       = "/stats.service.v1.DashboardService/GetUserStats"
 )
 
 // DashboardServiceClient is the client API for DashboardService service.
@@ -33,10 +36,14 @@ const (
 type DashboardServiceClient interface {
 	// 运营总览（视频量 / 播放量 / 互动量 / 用户量 / 今日发布）
 	GetOverview(ctx context.Context, in *GetOverviewRequest, opts ...grpc.CallOption) (*Overview, error)
+	// 近 N 日趋势（发布 / 播放 / 点赞按日落桶，管理端看板折线图）
+	ListTrends(ctx context.Context, in *ListTrendsRequest, opts ...grpc.CallOption) (*ListTrendsResponse, error)
 	// 视频 TOP 排行（按播放 / 点赞 / 收藏 / 评论）
 	ListTopVideos(ctx context.Context, in *ListTopVideosRequest, opts ...grpc.CallOption) (*v1.ListVideoResponse, error)
 	// 创作者中心总览（viewer 本人作品聚合：播放 / 点赞 / 收藏 / 评论）
 	GetCreatorOverview(ctx context.Context, in *GetCreatorOverviewRequest, opts ...grpc.CallOption) (*CreatorOverview, error)
+	// 用户统计（作品 / 粉丝 / 关注 / 获赞；用户主页用）
+	GetUserStats(ctx context.Context, in *v11.GetUserStatsRequest, opts ...grpc.CallOption) (*v11.UserStats, error)
 }
 
 type dashboardServiceClient struct {
@@ -51,6 +58,16 @@ func (c *dashboardServiceClient) GetOverview(ctx context.Context, in *GetOvervie
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Overview)
 	err := c.cc.Invoke(ctx, DashboardService_GetOverview_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dashboardServiceClient) ListTrends(ctx context.Context, in *ListTrendsRequest, opts ...grpc.CallOption) (*ListTrendsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTrendsResponse)
+	err := c.cc.Invoke(ctx, DashboardService_ListTrends_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -77,6 +94,16 @@ func (c *dashboardServiceClient) GetCreatorOverview(ctx context.Context, in *Get
 	return out, nil
 }
 
+func (c *dashboardServiceClient) GetUserStats(ctx context.Context, in *v11.GetUserStatsRequest, opts ...grpc.CallOption) (*v11.UserStats, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v11.UserStats)
+	err := c.cc.Invoke(ctx, DashboardService_GetUserStats_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DashboardServiceServer is the server API for DashboardService service.
 // All implementations must embed UnimplementedDashboardServiceServer
 // for forward compatibility.
@@ -85,10 +112,14 @@ func (c *dashboardServiceClient) GetCreatorOverview(ctx context.Context, in *Get
 type DashboardServiceServer interface {
 	// 运营总览（视频量 / 播放量 / 互动量 / 用户量 / 今日发布）
 	GetOverview(context.Context, *GetOverviewRequest) (*Overview, error)
+	// 近 N 日趋势（发布 / 播放 / 点赞按日落桶，管理端看板折线图）
+	ListTrends(context.Context, *ListTrendsRequest) (*ListTrendsResponse, error)
 	// 视频 TOP 排行（按播放 / 点赞 / 收藏 / 评论）
 	ListTopVideos(context.Context, *ListTopVideosRequest) (*v1.ListVideoResponse, error)
 	// 创作者中心总览（viewer 本人作品聚合：播放 / 点赞 / 收藏 / 评论）
 	GetCreatorOverview(context.Context, *GetCreatorOverviewRequest) (*CreatorOverview, error)
+	// 用户统计（作品 / 粉丝 / 关注 / 获赞；用户主页用）
+	GetUserStats(context.Context, *v11.GetUserStatsRequest) (*v11.UserStats, error)
 	mustEmbedUnimplementedDashboardServiceServer()
 }
 
@@ -102,11 +133,17 @@ type UnimplementedDashboardServiceServer struct{}
 func (UnimplementedDashboardServiceServer) GetOverview(context.Context, *GetOverviewRequest) (*Overview, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetOverview not implemented")
 }
+func (UnimplementedDashboardServiceServer) ListTrends(context.Context, *ListTrendsRequest) (*ListTrendsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListTrends not implemented")
+}
 func (UnimplementedDashboardServiceServer) ListTopVideos(context.Context, *ListTopVideosRequest) (*v1.ListVideoResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListTopVideos not implemented")
 }
 func (UnimplementedDashboardServiceServer) GetCreatorOverview(context.Context, *GetCreatorOverviewRequest) (*CreatorOverview, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCreatorOverview not implemented")
+}
+func (UnimplementedDashboardServiceServer) GetUserStats(context.Context, *v11.GetUserStatsRequest) (*v11.UserStats, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetUserStats not implemented")
 }
 func (UnimplementedDashboardServiceServer) mustEmbedUnimplementedDashboardServiceServer() {}
 func (UnimplementedDashboardServiceServer) testEmbeddedByValue()                          {}
@@ -147,6 +184,24 @@ func _DashboardService_GetOverview_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DashboardService_ListTrends_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTrendsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DashboardServiceServer).ListTrends(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DashboardService_ListTrends_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DashboardServiceServer).ListTrends(ctx, req.(*ListTrendsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _DashboardService_ListTopVideos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListTopVideosRequest)
 	if err := dec(in); err != nil {
@@ -183,6 +238,24 @@ func _DashboardService_GetCreatorOverview_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DashboardService_GetUserStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v11.GetUserStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DashboardServiceServer).GetUserStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DashboardService_GetUserStats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DashboardServiceServer).GetUserStats(ctx, req.(*v11.GetUserStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DashboardService_ServiceDesc is the grpc.ServiceDesc for DashboardService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -195,12 +268,20 @@ var DashboardService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _DashboardService_GetOverview_Handler,
 		},
 		{
+			MethodName: "ListTrends",
+			Handler:    _DashboardService_ListTrends_Handler,
+		},
+		{
 			MethodName: "ListTopVideos",
 			Handler:    _DashboardService_ListTopVideos_Handler,
 		},
 		{
 			MethodName: "GetCreatorOverview",
 			Handler:    _DashboardService_GetCreatorOverview_Handler,
+		},
+		{
+			MethodName: "GetUserStats",
+			Handler:    _DashboardService_GetUserStats_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

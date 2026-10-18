@@ -28,8 +28,11 @@ export const transformRoutesToMenu = (
 ): NonNullable<ProLayoutProps['route']>['routes'] => {
   const menus = routes
     .filter((route) => {
+      // index 子路由（后端模式目录节点合成的重定向）与无 meta 节点不进菜单
+      if (route.index || !route.meta) return false;
+
       // 过滤隐藏菜单
-      if (route.meta?.hideInMenu) return false;
+      if (route.meta.hideInMenu) return false;
 
       const meta = route.meta;
       // 权限过滤与路由闸（generate-routes-frontend.hasPermission）同语义：

@@ -69,6 +69,11 @@ func DeletedAt(v time.Time) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldEQ(FieldDeletedAt, v))
 }
 
+// TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
+func TenantID(v uint32) predicate.VideoCollect {
+	return predicate.VideoCollect(sql.FieldEQ(FieldTenantID, v))
+}
+
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v uint32) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldEQ(FieldUserID, v))
@@ -229,6 +234,56 @@ func DeletedAtNotNil() predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldNotNull(FieldDeletedAt))
 }
 
+// TenantIDEQ applies the EQ predicate on the "tenant_id" field.
+func TenantIDEQ(v uint32) predicate.VideoCollect {
+	return predicate.VideoCollect(sql.FieldEQ(FieldTenantID, v))
+}
+
+// TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
+func TenantIDNEQ(v uint32) predicate.VideoCollect {
+	return predicate.VideoCollect(sql.FieldNEQ(FieldTenantID, v))
+}
+
+// TenantIDIn applies the In predicate on the "tenant_id" field.
+func TenantIDIn(vs ...uint32) predicate.VideoCollect {
+	return predicate.VideoCollect(sql.FieldIn(FieldTenantID, vs...))
+}
+
+// TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
+func TenantIDNotIn(vs ...uint32) predicate.VideoCollect {
+	return predicate.VideoCollect(sql.FieldNotIn(FieldTenantID, vs...))
+}
+
+// TenantIDGT applies the GT predicate on the "tenant_id" field.
+func TenantIDGT(v uint32) predicate.VideoCollect {
+	return predicate.VideoCollect(sql.FieldGT(FieldTenantID, v))
+}
+
+// TenantIDGTE applies the GTE predicate on the "tenant_id" field.
+func TenantIDGTE(v uint32) predicate.VideoCollect {
+	return predicate.VideoCollect(sql.FieldGTE(FieldTenantID, v))
+}
+
+// TenantIDLT applies the LT predicate on the "tenant_id" field.
+func TenantIDLT(v uint32) predicate.VideoCollect {
+	return predicate.VideoCollect(sql.FieldLT(FieldTenantID, v))
+}
+
+// TenantIDLTE applies the LTE predicate on the "tenant_id" field.
+func TenantIDLTE(v uint32) predicate.VideoCollect {
+	return predicate.VideoCollect(sql.FieldLTE(FieldTenantID, v))
+}
+
+// TenantIDIsNil applies the IsNil predicate on the "tenant_id" field.
+func TenantIDIsNil() predicate.VideoCollect {
+	return predicate.VideoCollect(sql.FieldIsNull(FieldTenantID))
+}
+
+// TenantIDNotNil applies the NotNil predicate on the "tenant_id" field.
+func TenantIDNotNil() predicate.VideoCollect {
+	return predicate.VideoCollect(sql.FieldNotNull(FieldTenantID))
+}
+
 // UserIDEQ applies the EQ predicate on the "user_id" field.
 func UserIDEQ(v uint32) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldEQ(FieldUserID, v))
@@ -269,16 +324,6 @@ func UserIDLTE(v uint32) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldLTE(FieldUserID, v))
 }
 
-// UserIDIsNil applies the IsNil predicate on the "user_id" field.
-func UserIDIsNil() predicate.VideoCollect {
-	return predicate.VideoCollect(sql.FieldIsNull(FieldUserID))
-}
-
-// UserIDNotNil applies the NotNil predicate on the "user_id" field.
-func UserIDNotNil() predicate.VideoCollect {
-	return predicate.VideoCollect(sql.FieldNotNull(FieldUserID))
-}
-
 // VideoIDEQ applies the EQ predicate on the "video_id" field.
 func VideoIDEQ(v uint32) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldEQ(FieldVideoID, v))
@@ -317,16 +362,6 @@ func VideoIDLT(v uint32) predicate.VideoCollect {
 // VideoIDLTE applies the LTE predicate on the "video_id" field.
 func VideoIDLTE(v uint32) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldLTE(FieldVideoID, v))
-}
-
-// VideoIDIsNil applies the IsNil predicate on the "video_id" field.
-func VideoIDIsNil() predicate.VideoCollect {
-	return predicate.VideoCollect(sql.FieldIsNull(FieldVideoID))
-}
-
-// VideoIDNotNil applies the NotNil predicate on the "video_id" field.
-func VideoIDNotNil() predicate.VideoCollect {
-	return predicate.VideoCollect(sql.FieldNotNull(FieldVideoID))
 }
 
 // And groups predicates with the AND operator between them.

@@ -3,6 +3,7 @@
 package userfollow
 
 import (
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -17,12 +18,14 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// FieldTenantID holds the string denoting the tenant_id field in the database.
+	FieldTenantID = "tenant_id"
 	// FieldFollowerID holds the string denoting the follower_id field in the database.
 	FieldFollowerID = "follower_id"
 	// FieldFolloweeID holds the string denoting the followee_id field in the database.
 	FieldFolloweeID = "followee_id"
 	// Table holds the table name of the userfollow in the database.
-	Table = "user_follows"
+	Table = "sp_user_follows"
 )
 
 // Columns holds all SQL columns for userfollow fields.
@@ -31,6 +34,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
+	FieldTenantID,
 	FieldFollowerID,
 	FieldFolloweeID,
 }
@@ -45,7 +49,20 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+// Note that the variables below are initialized by the runtime
+// package on the initialization of the application. Therefore,
+// it should be imported in the main as follows:
+//
+//	import _ "go-wind-shortplay/app/core/service/internal/data/ent/runtime"
 var (
+	Hooks  [1]ent.Hook
+	Policy ent.Policy
+	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
+	DefaultTenantID uint32
+	// DefaultFollowerID holds the default value on creation for the "follower_id" field.
+	DefaultFollowerID uint32
+	// DefaultFolloweeID holds the default value on creation for the "followee_id" field.
+	DefaultFolloweeID uint32
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
@@ -71,6 +88,11 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByDeletedAt orders the results by the deleted_at field.
 func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByTenantID orders the results by the tenant_id field.
+func ByTenantID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTenantID, opts...).ToFunc()
 }
 
 // ByFollowerID orders the results by the follower_id field.

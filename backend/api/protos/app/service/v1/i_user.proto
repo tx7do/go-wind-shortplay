@@ -3,27 +3,28 @@ syntax = "proto3";
 package app.service.v1;
 
 import "google/api/annotations.proto";
-import "identity/service/v1/user.proto";
+import "google/protobuf/timestamp.proto";
+import "identity/service/v1/user_brief.proto";
 import "video/service/v1/video.proto";
 
-// 用户主页服务（App 端）
+// 用户主页服务（App 端，shortplay 业务）
 service UserService {
-  // 用户主页（本人 / 他人通用：资料 + 统计）
-  rpc GetUser (identity.service.v1.GetUserRequest) returns (identity.service.v1.User) {
+  // 用户主页（本人 / 他人通用：资料；游客可访问）
+  rpc GetUser (GetAppUserRequest) returns (UserDetail) {
     option (google.api.http) = {
       get: "/app/v1/users/{id}"
     };
   }
 
-  // 用户统计（粉丝 / 关注 / 作品 / 获赞）
+  // 用户统计（粉丝 / 关注 / 作品 / 获赞；游客可访问）
   rpc GetUserStats (identity.service.v1.GetUserStatsRequest) returns (identity.service.v1.UserStats) {
     option (google.api.http) = {
       get: "/app/v1/users/{user_id}/stats"
     };
   }
 
-  // 编辑我的资料
-  rpc UpdateProfile (identity.service.v1.UpdateUserRequest) returns (identity.service.v1.User) {
+  // 编辑我的资料（id 取令牌）
+  rpc UpdateProfile (UpdateProfileRequest) returns (UserDetail) {
     option (google.api.http) = {
       put: "/app/v1/profile"
       body: "*"
@@ -36,6 +37,26 @@ service UserService {
       get: "/app/v1/users/{user_id}/videos"
     };
   }
+}
+
+// 用户主页资料（旧版契约形状：avatarUrl/bio）
+message UserDetail {
+  optional uint32 id = 1 [json_name = "id"];                 // 用户ID
+  optional string username = 2 [json_name = "username"];     // 登录名
+  optional string nickname = 3 [json_name = "nickname"];     // 昵称
+  optional string avatar_url = 4 [json_name = "avatarUrl"];  // 头像
+  optional string bio = 5 [json_name = "bio"];               // 简介
+  optional google.protobuf.Timestamp created_at = 20 [json_name = "createdAt"]; // 注册时间
+}
+
+message GetAppUserRequest {
+  uint32 id = 1 [json_name = "id"]; // 用户ID
+}
+
+message UpdateProfileRequest {
+  optional string nickname = 1 [json_name = "nickname"];    // 昵称
+  optional string avatar_url = 2 [json_name = "avatarUrl"]; // 头像
+  optional string bio = 3 [json_name = "bio"];              // 简介
 }
 
 message ListUserVideosRequest {

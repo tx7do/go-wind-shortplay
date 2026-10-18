@@ -5,6 +5,12 @@
   "reports": "Report Management",
   "users": "User Management",
   "sysconf": "System Settings",
+  "permission": "Organization & Permission",
+  "permission-roles": "Role Management",
+  "permission-menus": "Menu Management",
+  "permission-apis": "API Permission Management",
+  "permission-departments": "Department Management",
+  "profile": "Profile",
   "auth": "Auth",
   "login": "Login",
   "error-pages": "Error",
@@ -14,5 +20,101 @@
   "offline": "Offline",
   "coming-soon": "Coming Soon",
   "not-found": "404",
-  "home": "Home"
+  "home": "Home",
+  "page": {
+    "dashboard": {
+      "title": "Dashboard",
+      "analytics": "Dashboard"
+    }
+  },
+  "menu": {
+    "profile": {
+      "settings": "Profile",
+      "internalMessage": "Inbox"
+    },
+    "tenant": {
+      "moduleName": "Tenant Management",
+      "member": "Tenant Members"
+    },
+    "opm": {
+      "moduleName": "Organization & Personnel",
+      "orgUnit": "Organization Structure",
+      "position": "Position Management",
+      "user": "User Management",
+      "userDetail": "User Details"
+    },
+    "permission": {
+      "moduleName": "Permission Management",
+      "permission": "API Management",
+      "role": "Role Management",
+      "menu": "Menu Management",
+      "department": "Department Management"
+    },
+    "internalMessage": {
+      "moduleName": "Internal Messages",
+      "internalMessage": "Message List",
+      "internalMessageCategory": "Message Categories"
+    },
+    "log": {
+      "moduleName": "Log Audit",
+      "loginAuditLog": "Login Audit Log",
+      "apiAuditLog": "API Audit Log",
+      "operationAuditLog": "Operation Audit Log",
+      "dataAccessAuditLog": "Data Access Audit Log",
+      "permissionAuditLog": "Permission Audit Log"
+    },
+    "system": {
+      "moduleName": "System Management",
+      "menu": "Menu Management",
+      "api": "API Management",
+      "dict": "Dictionary Management",
+      "file": "File Management",
+      "task": "Task Management",
+      "loginPolicy": "Login Policies",
+      "language": "Language Management"
+    },
+    "shortPlay": {
+      "moduleName": "ShortPlay Management",
+      "video": "Video Management",
+      "comment": "Comment Management",
+      "report": "Report Management",
+      "sysconf": "System Settings"
+    }
+  },
+  "profile.settings": "Profile",
+  "profile.internalMessage": "Inbox",
+  "tenant.moduleName": "Tenant Management",
+  "tenant.member": "Tenant Members",
+  "opm.moduleName": "Organization & Personnel",
+  "opm.orgUnit": "Organization Structure",
+  "opm.position": "Position Management",
+  "opm.user": "User Management",
+  "opm.userDetail": "User Details",
+  "permission.moduleName": "Permission Management",
+  "permission.permission": "API Management",
+  "permission.role": "Role Management",
+  "permission.menu": "Menu Management",
+  "permission.department": "Department Management",
+  "internalMessage.moduleName": "Internal Messages",
+  "internalMessage.internalMessage": "Message List",
+  "internalMessage.internalMessageCategory": "Message Categories",
+  "log.moduleName": "Log Audit",
+  "log.loginAuditLog": "Login Audit Log",
+  "log.apiAuditLog": "API Audit Log",
+  "log.operationAuditLog": "Operation Audit Log",
+  "log.dataAccessAuditLog": "Data Access Audit Log",
+  "log.permissionAuditLog": "Permission Audit Log",
+  "system.moduleName": "System Management",
+  "system.menu": "Menu Management",
+  "system.api": "API Management",
+  "system.dict": "Dictionary Management",
+  "system.file": "File Management",
+  "system.task": "Task Management",
+  "system.loginPolicy": "Login Policies",
+  "system.language": "Language Management",
+  "shortPlay.moduleName": "ShortPlay Management",
+  "shortPlay.video": "Video Management",
+  "shortPlay.comment": "Comment Management",
+  "shortPlay.report": "Report Management",
+  "shortPlay.sysconf": "System Settings"
 }

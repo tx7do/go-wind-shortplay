@@ -4,13 +4,13 @@
 // - protoc             (unknown)
 // source: app/service/v1/i_authentication.proto
 
-package apppb
+package servicev1
 
 import (
 	context "context"
 	http "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
-	v1 "go-wind-shortplay/api/gen/go/identity/service/v1"
+	v1 "go-wind-shortplay/api/gen/go/authentication/service/v1"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -21,28 +21,44 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationAuthenticationServiceAuthLogin = "/app.service.v1.AuthenticationService/AuthLogin"
+const OperationAuthenticationServiceAuthLogout = "/app.service.v1.AuthenticationService/AuthLogout"
+const OperationAuthenticationServiceAuthRefresh = "/app.service.v1.AuthenticationService/AuthRefresh"
+const OperationAuthenticationServiceAuthRegister = "/app.service.v1.AuthenticationService/AuthRegister"
+const OperationAuthenticationServiceGetOidcAuthorizeUrl = "/app.service.v1.AuthenticationService/GetOidcAuthorizeUrl"
 const OperationAuthenticationServiceLogin = "/app.service.v1.AuthenticationService/Login"
 const OperationAuthenticationServiceLogout = "/app.service.v1.AuthenticationService/Logout"
 const OperationAuthenticationServiceRefreshToken = "/app.service.v1.AuthenticationService/RefreshToken"
-const OperationAuthenticationServiceRegister = "/app.service.v1.AuthenticationService/Register"
 
 type AuthenticationServiceHTTPServer interface {
-	// Login 账号密码登录
+	// AuthLogin 账号密码登录（旧契约：/auth/login，返回 authenticator + user 包装）
+	AuthLogin(context.Context, *v1.LoginRequest) (*AuthLoginResponse, error)
+	// AuthLogout 登出（需登录）
+	AuthLogout(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	// AuthRefresh 刷新令牌（旧契约：仅凭 refreshToken，无 bearer）
+	AuthRefresh(context.Context, *AuthRefreshRequest) (*AuthLoginResponse, error)
+	// AuthRegister 注册（开放注册开关由系统配置决定；成功即登录，返回 authenticator + user 包装）
+	AuthRegister(context.Context, *AuthRegisterRequest) (*AuthLoginResponse, error)
+	// GetOidcAuthorizeUrl 获取 OIDC 授权跳转地址（core 生成 state 暂存 Redis，防 CSRF；免鉴权）
+	GetOidcAuthorizeUrl(context.Context, *v1.GetOidcAuthorizeUrlRequest) (*v1.GetOidcAuthorizeUrlResponse, error)
+	// Login 登录
 	Login(context.Context, *v1.LoginRequest) (*v1.LoginResponse, error)
 	// Logout 登出
-	Logout(context.Context, *v1.LogoutRequest) (*emptypb.Empty, error)
-	// RefreshToken 刷新令牌
-	RefreshToken(context.Context, *v1.RefreshTokenRequest) (*v1.LoginResponse, error)
-	// Register 注册（是否开放由系统配置决定）
-	Register(context.Context, *v1.RegisterRequest) (*v1.LoginResponse, error)
+	Logout(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	// RefreshToken 刷新认证令牌
+	RefreshToken(context.Context, *v1.LoginRequest) (*v1.LoginResponse, error)
 }
 
 func RegisterAuthenticationServiceHTTPServer(s *http.Server, srv AuthenticationServiceHTTPServer) {
 	r := s.Route("/")
-	r.POST("/app/v1/auth/login", _AuthenticationService_Login0_HTTP_Handler(srv))
-	r.POST("/app/v1/auth/register", _AuthenticationService_Register0_HTTP_Handler(srv))
-	r.POST("/app/v1/auth/refresh", _AuthenticationService_RefreshToken0_HTTP_Handler(srv))
-	r.POST("/app/v1/auth/logout", _AuthenticationService_Logout0_HTTP_Handler(srv))
+	r.POST("/app/v1/login", _AuthenticationService_Login0_HTTP_Handler(srv))
+	r.POST("/app/v1/logout", _AuthenticationService_Logout0_HTTP_Handler(srv))
+	r.POST("/app/v1/refresh-token", _AuthenticationService_RefreshToken0_HTTP_Handler(srv))
+	r.POST("/app/v1/oidc/authorize-url", _AuthenticationService_GetOidcAuthorizeUrl0_HTTP_Handler(srv))
+	r.POST("/app/v1/auth/login", _AuthenticationService_AuthLogin0_HTTP_Handler(srv))
+	r.POST("/app/v1/auth/register", _AuthenticationService_AuthRegister0_HTTP_Handler(srv))
+	r.POST("/app/v1/auth/refresh", _AuthenticationService_AuthRefresh0_HTTP_Handler(srv))
+	r.POST("/app/v1/auth/logout", _AuthenticationService_AuthLogout0_HTTP_Handler(srv))
 }
 
 func _AuthenticationService_Login0_HTTP_Handler(srv AuthenticationServiceHTTPServer) func(ctx http.Context) error {
@@ -67,53 +83,9 @@ func _AuthenticationService_Login0_HTTP_Handler(srv AuthenticationServiceHTTPSer
 	}
 }
 
-func _AuthenticationService_Register0_HTTP_Handler(srv AuthenticationServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in v1.RegisterRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationAuthenticationServiceRegister)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.Register(ctx, req.(*v1.RegisterRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*v1.LoginResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _AuthenticationService_RefreshToken0_HTTP_Handler(srv AuthenticationServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in v1.RefreshTokenRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationAuthenticationServiceRefreshToken)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.RefreshToken(ctx, req.(*v1.RefreshTokenRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*v1.LoginResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
 func _AuthenticationService_Logout0_HTTP_Handler(srv AuthenticationServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v1.LogoutRequest
+		var in emptypb.Empty
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
@@ -122,7 +94,139 @@ func _AuthenticationService_Logout0_HTTP_Handler(srv AuthenticationServiceHTTPSe
 		}
 		http.SetOperation(ctx, OperationAuthenticationServiceLogout)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.Logout(ctx, req.(*v1.LogoutRequest))
+			return srv.Logout(ctx, req.(*emptypb.Empty))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*emptypb.Empty)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AuthenticationService_RefreshToken0_HTTP_Handler(srv AuthenticationServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.LoginRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthenticationServiceRefreshToken)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RefreshToken(ctx, req.(*v1.LoginRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.LoginResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AuthenticationService_GetOidcAuthorizeUrl0_HTTP_Handler(srv AuthenticationServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.GetOidcAuthorizeUrlRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthenticationServiceGetOidcAuthorizeUrl)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetOidcAuthorizeUrl(ctx, req.(*v1.GetOidcAuthorizeUrlRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.GetOidcAuthorizeUrlResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AuthenticationService_AuthLogin0_HTTP_Handler(srv AuthenticationServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.LoginRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthenticationServiceAuthLogin)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AuthLogin(ctx, req.(*v1.LoginRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AuthLoginResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AuthenticationService_AuthRegister0_HTTP_Handler(srv AuthenticationServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AuthRegisterRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthenticationServiceAuthRegister)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AuthRegister(ctx, req.(*AuthRegisterRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AuthLoginResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AuthenticationService_AuthRefresh0_HTTP_Handler(srv AuthenticationServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AuthRefreshRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthenticationServiceAuthRefresh)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AuthRefresh(ctx, req.(*AuthRefreshRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AuthLoginResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AuthenticationService_AuthLogout0_HTTP_Handler(srv AuthenticationServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in emptypb.Empty
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthenticationServiceAuthLogout)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AuthLogout(ctx, req.(*emptypb.Empty))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -134,14 +238,22 @@ func _AuthenticationService_Logout0_HTTP_Handler(srv AuthenticationServiceHTTPSe
 }
 
 type AuthenticationServiceHTTPClient interface {
-	// Login 账号密码登录
+	// AuthLogin 账号密码登录（旧契约：/auth/login，返回 authenticator + user 包装）
+	AuthLogin(ctx context.Context, req *v1.LoginRequest, opts ...http.CallOption) (rsp *AuthLoginResponse, err error)
+	// AuthLogout 登出（需登录）
+	AuthLogout(ctx context.Context, req *emptypb.Empty, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
+	// AuthRefresh 刷新令牌（旧契约：仅凭 refreshToken，无 bearer）
+	AuthRefresh(ctx context.Context, req *AuthRefreshRequest, opts ...http.CallOption) (rsp *AuthLoginResponse, err error)
+	// AuthRegister 注册（开放注册开关由系统配置决定；成功即登录，返回 authenticator + user 包装）
+	AuthRegister(ctx context.Context, req *AuthRegisterRequest, opts ...http.CallOption) (rsp *AuthLoginResponse, err error)
+	// GetOidcAuthorizeUrl 获取 OIDC 授权跳转地址（core 生成 state 暂存 Redis，防 CSRF；免鉴权）
+	GetOidcAuthorizeUrl(ctx context.Context, req *v1.GetOidcAuthorizeUrlRequest, opts ...http.CallOption) (rsp *v1.GetOidcAuthorizeUrlResponse, err error)
+	// Login 登录
 	Login(ctx context.Context, req *v1.LoginRequest, opts ...http.CallOption) (rsp *v1.LoginResponse, err error)
 	// Logout 登出
-	Logout(ctx context.Context, req *v1.LogoutRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
-	// RefreshToken 刷新令牌
-	RefreshToken(ctx context.Context, req *v1.RefreshTokenRequest, opts ...http.CallOption) (rsp *v1.LoginResponse, err error)
-	// Register 注册（是否开放由系统配置决定）
-	Register(ctx context.Context, req *v1.RegisterRequest, opts ...http.CallOption) (rsp *v1.LoginResponse, err error)
+	Logout(ctx context.Context, req *emptypb.Empty, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
+	// RefreshToken 刷新认证令牌
+	RefreshToken(ctx context.Context, req *v1.LoginRequest, opts ...http.CallOption) (rsp *v1.LoginResponse, err error)
 }
 
 type AuthenticationServiceHTTPClientImpl struct {
@@ -152,10 +264,80 @@ func NewAuthenticationServiceHTTPClient(client *http.Client) AuthenticationServi
 	return &AuthenticationServiceHTTPClientImpl{client}
 }
 
-// Login 账号密码登录
+// AuthLogin 账号密码登录（旧契约：/auth/login，返回 authenticator + user 包装）
+func (c *AuthenticationServiceHTTPClientImpl) AuthLogin(ctx context.Context, in *v1.LoginRequest, opts ...http.CallOption) (*AuthLoginResponse, error) {
+	var out AuthLoginResponse
+	pattern := "/app/v1/auth/login"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAuthenticationServiceAuthLogin))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// AuthLogout 登出（需登录）
+func (c *AuthenticationServiceHTTPClientImpl) AuthLogout(ctx context.Context, in *emptypb.Empty, opts ...http.CallOption) (*emptypb.Empty, error) {
+	var out emptypb.Empty
+	pattern := "/app/v1/auth/logout"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAuthenticationServiceAuthLogout))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// AuthRefresh 刷新令牌（旧契约：仅凭 refreshToken，无 bearer）
+func (c *AuthenticationServiceHTTPClientImpl) AuthRefresh(ctx context.Context, in *AuthRefreshRequest, opts ...http.CallOption) (*AuthLoginResponse, error) {
+	var out AuthLoginResponse
+	pattern := "/app/v1/auth/refresh"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAuthenticationServiceAuthRefresh))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// AuthRegister 注册（开放注册开关由系统配置决定；成功即登录，返回 authenticator + user 包装）
+func (c *AuthenticationServiceHTTPClientImpl) AuthRegister(ctx context.Context, in *AuthRegisterRequest, opts ...http.CallOption) (*AuthLoginResponse, error) {
+	var out AuthLoginResponse
+	pattern := "/app/v1/auth/register"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAuthenticationServiceAuthRegister))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetOidcAuthorizeUrl 获取 OIDC 授权跳转地址（core 生成 state 暂存 Redis，防 CSRF；免鉴权）
+func (c *AuthenticationServiceHTTPClientImpl) GetOidcAuthorizeUrl(ctx context.Context, in *v1.GetOidcAuthorizeUrlRequest, opts ...http.CallOption) (*v1.GetOidcAuthorizeUrlResponse, error) {
+	var out v1.GetOidcAuthorizeUrlResponse
+	pattern := "/app/v1/oidc/authorize-url"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAuthenticationServiceGetOidcAuthorizeUrl))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Login 登录
 func (c *AuthenticationServiceHTTPClientImpl) Login(ctx context.Context, in *v1.LoginRequest, opts ...http.CallOption) (*v1.LoginResponse, error) {
 	var out v1.LoginResponse
-	pattern := "/app/v1/auth/login"
+	pattern := "/app/v1/login"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthenticationServiceLogin))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -167,9 +349,9 @@ func (c *AuthenticationServiceHTTPClientImpl) Login(ctx context.Context, in *v1.
 }
 
 // Logout 登出
-func (c *AuthenticationServiceHTTPClientImpl) Logout(ctx context.Context, in *v1.LogoutRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
+func (c *AuthenticationServiceHTTPClientImpl) Logout(ctx context.Context, in *emptypb.Empty, opts ...http.CallOption) (*emptypb.Empty, error) {
 	var out emptypb.Empty
-	pattern := "/app/v1/auth/logout"
+	pattern := "/app/v1/logout"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthenticationServiceLogout))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -180,26 +362,12 @@ func (c *AuthenticationServiceHTTPClientImpl) Logout(ctx context.Context, in *v1
 	return &out, nil
 }
 
-// RefreshToken 刷新令牌
-func (c *AuthenticationServiceHTTPClientImpl) RefreshToken(ctx context.Context, in *v1.RefreshTokenRequest, opts ...http.CallOption) (*v1.LoginResponse, error) {
+// RefreshToken 刷新认证令牌
+func (c *AuthenticationServiceHTTPClientImpl) RefreshToken(ctx context.Context, in *v1.LoginRequest, opts ...http.CallOption) (*v1.LoginResponse, error) {
 	var out v1.LoginResponse
-	pattern := "/app/v1/auth/refresh"
+	pattern := "/app/v1/refresh-token"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthenticationServiceRefreshToken))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// Register 注册（是否开放由系统配置决定）
-func (c *AuthenticationServiceHTTPClientImpl) Register(ctx context.Context, in *v1.RegisterRequest, opts ...http.CallOption) (*v1.LoginResponse, error) {
-	var out v1.LoginResponse
-	pattern := "/app/v1/auth/register"
-	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationAuthenticationServiceRegister))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

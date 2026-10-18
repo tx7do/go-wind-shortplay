@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"go-wind-shortplay/app/core/service/internal/data/ent/predicate"
 	"go-wind-shortplay/app/core/service/internal/data/ent/user"
@@ -265,12 +266,12 @@ func (_q *UserQuery) Clone() *UserQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreatedBy uint32 `json:"created_by,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		GroupBy(user.FieldCreatedAt).
+//		GroupBy(user.FieldCreatedBy).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
@@ -288,11 +289,11 @@ func (_q *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreatedBy uint32 `json:"created_by,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		Select(user.FieldCreatedAt).
+//		Select(user.FieldCreatedBy).
 //		Scan(ctx, &v)
 func (_q *UserQuery) Select(fields ...string) *UserSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
@@ -329,6 +330,12 @@ func (_q *UserQuery) prepareQuery(ctx context.Context) error {
 			return err
 		}
 		_q.sql = prev
+	}
+	if user.Policy == nil {
+		return errors.New("ent: uninitialized user.Policy (forgotten import ent/runtime?)")
+	}
+	if err := user.Policy.EvalQuery(ctx, _q); err != nil {
+		return err
 	}
 	return nil
 }

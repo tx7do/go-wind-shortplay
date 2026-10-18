@@ -6,10 +6,11 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+
 	"github.com/tx7do/go-crud/entgo/mixin"
 )
 
-// VideoReport 举报工单表
+// VideoReport holds the schema definition for the VideoReport entity.
 type VideoReport struct {
 	ent.Schema
 }
@@ -17,7 +18,7 @@ type VideoReport struct {
 func (VideoReport) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entsql.Annotation{
-			Table:     "video_reports",
+			Table:     "sp_video_reports",
 			Charset:   "utf8mb4",
 			Collation: "utf8mb4_bin",
 		},
@@ -26,40 +27,53 @@ func (VideoReport) Annotations() []schema.Annotation {
 	}
 }
 
+// Fields of the VideoReport.
 func (VideoReport) Fields() []ent.Field {
 	return []ent.Field{
 		field.Uint32("reporter_id").
-			Comment("举报人ID").
-			Optional().
-			Nillable(),
-		field.Uint8("target_type").
-			Comment("目标类型：1 视频 2 评论 3 用户").
-			Optional().
-			Nillable(),
+			Comment("举报人用户ID").
+			Default(0),
+
+		field.Enum("target_type").
+			Comment("目标类型").
+			NamedValues(
+				"Video", "VIDEO",
+				"Comment", "COMMENT",
+				"User", "USER",
+			).
+			Default("VIDEO"),
+
 		field.Uint32("target_id").
 			Comment("目标ID").
-			Optional().
-			Nillable(),
+			Default(0),
+
 		field.String("reason").
 			Comment("举报原因（枚举码）").
 			NotEmpty(),
+
 		field.String("description").
 			Comment("补充说明").
 			Optional().
 			Nillable(),
-		field.Uint8("status").
-			Comment("状态：1 待处理 2 已通过 3 已驳回").
-			Default(1).
-			Optional().
-			Nillable(),
+
+		field.Enum("status").
+			Comment("工单状态").
+			NamedValues(
+				"Pending", "PENDING",
+				"Resolved", "RESOLVED",
+				"Dismissed", "DISMISSED",
+			).
+			Default("PENDING"),
+
 		field.Uint32("handled_by").
-			Comment("处理人（管理员ID）").
-			Optional().
-			Nillable(),
+			Comment("处理人（管理员）").
+			Default(0),
+
 		field.String("handle_note").
 			Comment("处理备注").
 			Optional().
 			Nillable(),
+
 		field.Time("handled_at").
 			Comment("处理时间").
 			Optional().
@@ -67,16 +81,25 @@ func (VideoReport) Fields() []ent.Field {
 	}
 }
 
+// Mixin of the VideoReport.
 func (VideoReport) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixin.AutoIncrementId{},
 		mixin.TimeAt{},
+		mixin.OperatorID{},
+		mixin.TenantID[uint32]{},
 	}
 }
 
 func (VideoReport) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("status", "created_at"),
-		index.Fields("target_type", "target_id"),
+		index.Fields("status", "created_at").
+			StorageKey("idx_sp_video_report_status_created_at"),
+
+		index.Fields("target_type", "target_id").
+			StorageKey("idx_sp_video_report_target"),
+
+		index.Fields("reporter_id").
+			StorageKey("idx_sp_video_report_reporter"),
 	}
 }

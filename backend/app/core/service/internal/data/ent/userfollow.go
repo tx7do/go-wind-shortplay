@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 用户关注关系表
+// 关注关系表
 type UserFollow struct {
 	config `json:"-"`
 	// ID of the ent.
@@ -24,10 +24,12 @@ type UserFollow struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
-	// 关注人ID
-	FollowerID *uint32 `json:"follower_id,omitempty"`
-	// 被关注人ID
-	FolloweeID   *uint32 `json:"followee_id,omitempty"`
+	// 租户ID
+	TenantID *uint32 `json:"tenant_id,omitempty"`
+	// 关注人用户ID
+	FollowerID uint32 `json:"follower_id,omitempty"`
+	// 被关注人用户ID
+	FolloweeID   uint32 `json:"followee_id,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -36,7 +38,7 @@ func (*UserFollow) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case userfollow.FieldID, userfollow.FieldFollowerID, userfollow.FieldFolloweeID:
+		case userfollow.FieldID, userfollow.FieldTenantID, userfollow.FieldFollowerID, userfollow.FieldFolloweeID:
 			values[i] = new(sql.NullInt64)
 		case userfollow.FieldCreatedAt, userfollow.FieldUpdatedAt, userfollow.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -82,19 +84,24 @@ func (_m *UserFollow) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
+		case userfollow.FieldTenantID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
+			} else if value.Valid {
+				_m.TenantID = new(uint32)
+				*_m.TenantID = uint32(value.Int64)
+			}
 		case userfollow.FieldFollowerID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field follower_id", values[i])
 			} else if value.Valid {
-				_m.FollowerID = new(uint32)
-				*_m.FollowerID = uint32(value.Int64)
+				_m.FollowerID = uint32(value.Int64)
 			}
 		case userfollow.FieldFolloweeID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field followee_id", values[i])
 			} else if value.Valid {
-				_m.FolloweeID = new(uint32)
-				*_m.FolloweeID = uint32(value.Int64)
+				_m.FolloweeID = uint32(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -147,15 +154,16 @@ func (_m *UserFollow) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	if v := _m.FollowerID; v != nil {
-		builder.WriteString("follower_id=")
+	if v := _m.TenantID; v != nil {
+		builder.WriteString("tenant_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := _m.FolloweeID; v != nil {
-		builder.WriteString("followee_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("follower_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.FollowerID))
+	builder.WriteString(", ")
+	builder.WriteString("followee_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.FolloweeID))
 	builder.WriteByte(')')
 	return builder.String()
 }

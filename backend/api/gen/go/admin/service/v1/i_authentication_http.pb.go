@@ -10,7 +10,7 @@ import (
 	context "context"
 	http "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
-	v1 "go-wind-shortplay/api/gen/go/identity/service/v1"
+	v1 "go-wind-shortplay/api/gen/go/authentication/service/v1"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -21,20 +21,36 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationAuthenticationServiceGenerateCaptcha = "/admin.service.v1.AuthenticationService/GenerateCaptcha"
+const OperationAuthenticationServiceGetOidcAuthorizeUrl = "/admin.service.v1.AuthenticationService/GetOidcAuthorizeUrl"
 const OperationAuthenticationServiceLogin = "/admin.service.v1.AuthenticationService/Login"
 const OperationAuthenticationServiceLogout = "/admin.service.v1.AuthenticationService/Logout"
+const OperationAuthenticationServiceRefreshToken = "/admin.service.v1.AuthenticationService/RefreshToken"
+const OperationAuthenticationServiceVerifyCaptcha = "/admin.service.v1.AuthenticationService/VerifyCaptcha"
 
 type AuthenticationServiceHTTPServer interface {
+	// GenerateCaptcha 生成验证码
+	GenerateCaptcha(context.Context, *emptypb.Empty) (*v1.GenerateCaptchaResponse, error)
+	// GetOidcAuthorizeUrl 获取 OIDC 授权跳转地址（core 生成 state 暂存 Redis，防 CSRF；免鉴权）
+	GetOidcAuthorizeUrl(context.Context, *v1.GetOidcAuthorizeUrlRequest) (*v1.GetOidcAuthorizeUrlResponse, error)
 	// Login 登录
 	Login(context.Context, *v1.LoginRequest) (*v1.LoginResponse, error)
 	// Logout 登出
-	Logout(context.Context, *v1.LogoutRequest) (*emptypb.Empty, error)
+	Logout(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	// RefreshToken 刷新认证令牌
+	RefreshToken(context.Context, *v1.LoginRequest) (*v1.LoginResponse, error)
+	// VerifyCaptcha 验证验证码
+	VerifyCaptcha(context.Context, *v1.VerifyCaptchaRequest) (*v1.VerifyCaptchaResponse, error)
 }
 
 func RegisterAuthenticationServiceHTTPServer(s *http.Server, srv AuthenticationServiceHTTPServer) {
 	r := s.Route("/")
 	r.POST("/admin/v1/login", _AuthenticationService_Login0_HTTP_Handler(srv))
+	r.POST("/admin/v1/oidc/authorize-url", _AuthenticationService_GetOidcAuthorizeUrl0_HTTP_Handler(srv))
 	r.POST("/admin/v1/logout", _AuthenticationService_Logout0_HTTP_Handler(srv))
+	r.POST("/admin/v1/refresh-token", _AuthenticationService_RefreshToken0_HTTP_Handler(srv))
+	r.GET("/admin/v1/captcha", _AuthenticationService_GenerateCaptcha0_HTTP_Handler(srv))
+	r.POST("/admin/v1/captcha/verify", _AuthenticationService_VerifyCaptcha0_HTTP_Handler(srv))
 }
 
 func _AuthenticationService_Login0_HTTP_Handler(srv AuthenticationServiceHTTPServer) func(ctx http.Context) error {
@@ -59,9 +75,31 @@ func _AuthenticationService_Login0_HTTP_Handler(srv AuthenticationServiceHTTPSer
 	}
 }
 
+func _AuthenticationService_GetOidcAuthorizeUrl0_HTTP_Handler(srv AuthenticationServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.GetOidcAuthorizeUrlRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthenticationServiceGetOidcAuthorizeUrl)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetOidcAuthorizeUrl(ctx, req.(*v1.GetOidcAuthorizeUrlRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.GetOidcAuthorizeUrlResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _AuthenticationService_Logout0_HTTP_Handler(srv AuthenticationServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v1.LogoutRequest
+		var in emptypb.Empty
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
@@ -70,7 +108,7 @@ func _AuthenticationService_Logout0_HTTP_Handler(srv AuthenticationServiceHTTPSe
 		}
 		http.SetOperation(ctx, OperationAuthenticationServiceLogout)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.Logout(ctx, req.(*v1.LogoutRequest))
+			return srv.Logout(ctx, req.(*emptypb.Empty))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -81,11 +119,82 @@ func _AuthenticationService_Logout0_HTTP_Handler(srv AuthenticationServiceHTTPSe
 	}
 }
 
+func _AuthenticationService_RefreshToken0_HTTP_Handler(srv AuthenticationServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.LoginRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthenticationServiceRefreshToken)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RefreshToken(ctx, req.(*v1.LoginRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.LoginResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AuthenticationService_GenerateCaptcha0_HTTP_Handler(srv AuthenticationServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in emptypb.Empty
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthenticationServiceGenerateCaptcha)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GenerateCaptcha(ctx, req.(*emptypb.Empty))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.GenerateCaptchaResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AuthenticationService_VerifyCaptcha0_HTTP_Handler(srv AuthenticationServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.VerifyCaptchaRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthenticationServiceVerifyCaptcha)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.VerifyCaptcha(ctx, req.(*v1.VerifyCaptchaRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.VerifyCaptchaResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type AuthenticationServiceHTTPClient interface {
+	// GenerateCaptcha 生成验证码
+	GenerateCaptcha(ctx context.Context, req *emptypb.Empty, opts ...http.CallOption) (rsp *v1.GenerateCaptchaResponse, err error)
+	// GetOidcAuthorizeUrl 获取 OIDC 授权跳转地址（core 生成 state 暂存 Redis，防 CSRF；免鉴权）
+	GetOidcAuthorizeUrl(ctx context.Context, req *v1.GetOidcAuthorizeUrlRequest, opts ...http.CallOption) (rsp *v1.GetOidcAuthorizeUrlResponse, err error)
 	// Login 登录
 	Login(ctx context.Context, req *v1.LoginRequest, opts ...http.CallOption) (rsp *v1.LoginResponse, err error)
 	// Logout 登出
-	Logout(ctx context.Context, req *v1.LogoutRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
+	Logout(ctx context.Context, req *emptypb.Empty, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
+	// RefreshToken 刷新认证令牌
+	RefreshToken(ctx context.Context, req *v1.LoginRequest, opts ...http.CallOption) (rsp *v1.LoginResponse, err error)
+	// VerifyCaptcha 验证验证码
+	VerifyCaptcha(ctx context.Context, req *v1.VerifyCaptchaRequest, opts ...http.CallOption) (rsp *v1.VerifyCaptchaResponse, err error)
 }
 
 type AuthenticationServiceHTTPClientImpl struct {
@@ -94,6 +203,34 @@ type AuthenticationServiceHTTPClientImpl struct {
 
 func NewAuthenticationServiceHTTPClient(client *http.Client) AuthenticationServiceHTTPClient {
 	return &AuthenticationServiceHTTPClientImpl{client}
+}
+
+// GenerateCaptcha 生成验证码
+func (c *AuthenticationServiceHTTPClientImpl) GenerateCaptcha(ctx context.Context, in *emptypb.Empty, opts ...http.CallOption) (*v1.GenerateCaptchaResponse, error) {
+	var out v1.GenerateCaptchaResponse
+	pattern := "/admin/v1/captcha"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAuthenticationServiceGenerateCaptcha))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetOidcAuthorizeUrl 获取 OIDC 授权跳转地址（core 生成 state 暂存 Redis，防 CSRF；免鉴权）
+func (c *AuthenticationServiceHTTPClientImpl) GetOidcAuthorizeUrl(ctx context.Context, in *v1.GetOidcAuthorizeUrlRequest, opts ...http.CallOption) (*v1.GetOidcAuthorizeUrlResponse, error) {
+	var out v1.GetOidcAuthorizeUrlResponse
+	pattern := "/admin/v1/oidc/authorize-url"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAuthenticationServiceGetOidcAuthorizeUrl))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // Login 登录
@@ -111,11 +248,39 @@ func (c *AuthenticationServiceHTTPClientImpl) Login(ctx context.Context, in *v1.
 }
 
 // Logout 登出
-func (c *AuthenticationServiceHTTPClientImpl) Logout(ctx context.Context, in *v1.LogoutRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
+func (c *AuthenticationServiceHTTPClientImpl) Logout(ctx context.Context, in *emptypb.Empty, opts ...http.CallOption) (*emptypb.Empty, error) {
 	var out emptypb.Empty
 	pattern := "/admin/v1/logout"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthenticationServiceLogout))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// RefreshToken 刷新认证令牌
+func (c *AuthenticationServiceHTTPClientImpl) RefreshToken(ctx context.Context, in *v1.LoginRequest, opts ...http.CallOption) (*v1.LoginResponse, error) {
+	var out v1.LoginResponse
+	pattern := "/admin/v1/refresh-token"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAuthenticationServiceRefreshToken))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// VerifyCaptcha 验证验证码
+func (c *AuthenticationServiceHTTPClientImpl) VerifyCaptcha(ctx context.Context, in *v1.VerifyCaptchaRequest, opts ...http.CallOption) (*v1.VerifyCaptchaResponse, error) {
+	var out v1.VerifyCaptchaResponse
+	pattern := "/admin/v1/captcha/verify"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAuthenticationServiceVerifyCaptcha))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

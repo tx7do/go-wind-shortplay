@@ -7,7 +7,7 @@
 package interactionpb
 
 import (
-	_ "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
+	v11 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
 	v1 "go-wind-shortplay/api/gen/go/identity/service/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -413,7 +413,7 @@ var File_interaction_service_v1_comment_proto protoreflect.FileDescriptor
 
 const file_interaction_service_v1_comment_proto_rawDesc = "" +
 	"\n" +
-	"$interaction/service/v1/comment.proto\x12\x16interaction.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1eidentity/service/v1/user.proto\x1a\x1epagination/v1/pagination.proto\"\xc3\x03\n" +
+	"$interaction/service/v1/comment.proto\x12\x16interaction.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a$identity/service/v1/user_brief.proto\x1a\x1epagination/v1/pagination.proto\"\xc3\x03\n" +
 	"\aComment\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\rH\x00R\x02id\x88\x01\x01\x12\x1e\n" +
 	"\bvideo_id\x18\x02 \x01(\rH\x01R\avideoId\x88\x01\x01\x12\x1c\n" +
@@ -464,12 +464,13 @@ const file_interaction_service_v1_comment_proto_rawDesc = "" +
 	"\x13ListCommentResponse\x125\n" +
 	"\x05items\x18\x01 \x03(\v2\x1f.interaction.service.v1.CommentR\x05items\x12\x19\n" +
 	"\x05total\x18\x02 \x01(\x03H\x00R\x05total\x88\x01\x01B\b\n" +
-	"\x06_total2\x9b\x03\n" +
+	"\x06_total2\xf2\x03\n" +
 	"\x0eCommentService\x12`\n" +
 	"\rCreateComment\x12,.interaction.service.v1.CreateCommentRequest\x1a\x1f.interaction.service.v1.Comment\"\x00\x12W\n" +
 	"\rDeleteComment\x12,.interaction.service.v1.DeleteCommentRequest\x1a\x16.google.protobuf.Empty\"\x00\x12h\n" +
 	"\vListComment\x12*.interaction.service.v1.ListCommentRequest\x1a+.interaction.service.v1.ListCommentResponse\"\x00\x12d\n" +
-	"\tListReply\x12(.interaction.service.v1.ListReplyRequest\x1a+.interaction.service.v1.ListCommentResponse\"\x00B\xe7\x01\n" +
+	"\tListReply\x12(.interaction.service.v1.ListReplyRequest\x1a+.interaction.service.v1.ListCommentResponse\"\x00\x12U\n" +
+	"\tAdminList\x12\x19.pagination.PagingRequest\x1a+.interaction.service.v1.ListCommentResponse\"\x00B\xe7\x01\n" +
 	"\x1acom.interaction.service.v1B\fCommentProtoP\x01ZAgo-wind-shortplay/api/gen/go/interaction/service/v1;interactionpb\xa2\x02\x03ISX\xaa\x02\x16Interaction.Service.V1\xca\x02\x16Interaction\\Service\\V1\xe2\x02\"Interaction\\Service\\V1\\GPBMetadata\xea\x02\x18Interaction::Service::V1b\x06proto3"
 
 var (
@@ -494,7 +495,8 @@ var file_interaction_service_v1_comment_proto_goTypes = []any{
 	(*ListCommentResponse)(nil),   // 5: interaction.service.v1.ListCommentResponse
 	(*v1.UserBrief)(nil),          // 6: identity.service.v1.UserBrief
 	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),         // 8: google.protobuf.Empty
+	(*v11.PagingRequest)(nil),     // 8: pagination.PagingRequest
+	(*emptypb.Empty)(nil),         // 9: google.protobuf.Empty
 }
 var file_interaction_service_v1_comment_proto_depIdxs = []int32{
 	6, // 0: interaction.service.v1.Comment.user:type_name -> identity.service.v1.UserBrief
@@ -504,12 +506,14 @@ var file_interaction_service_v1_comment_proto_depIdxs = []int32{
 	2, // 4: interaction.service.v1.CommentService.DeleteComment:input_type -> interaction.service.v1.DeleteCommentRequest
 	3, // 5: interaction.service.v1.CommentService.ListComment:input_type -> interaction.service.v1.ListCommentRequest
 	4, // 6: interaction.service.v1.CommentService.ListReply:input_type -> interaction.service.v1.ListReplyRequest
-	0, // 7: interaction.service.v1.CommentService.CreateComment:output_type -> interaction.service.v1.Comment
-	8, // 8: interaction.service.v1.CommentService.DeleteComment:output_type -> google.protobuf.Empty
-	5, // 9: interaction.service.v1.CommentService.ListComment:output_type -> interaction.service.v1.ListCommentResponse
-	5, // 10: interaction.service.v1.CommentService.ListReply:output_type -> interaction.service.v1.ListCommentResponse
-	7, // [7:11] is the sub-list for method output_type
-	3, // [3:7] is the sub-list for method input_type
+	8, // 7: interaction.service.v1.CommentService.AdminList:input_type -> pagination.PagingRequest
+	0, // 8: interaction.service.v1.CommentService.CreateComment:output_type -> interaction.service.v1.Comment
+	9, // 9: interaction.service.v1.CommentService.DeleteComment:output_type -> google.protobuf.Empty
+	5, // 10: interaction.service.v1.CommentService.ListComment:output_type -> interaction.service.v1.ListCommentResponse
+	5, // 11: interaction.service.v1.CommentService.ListReply:output_type -> interaction.service.v1.ListCommentResponse
+	5, // 12: interaction.service.v1.CommentService.AdminList:output_type -> interaction.service.v1.ListCommentResponse
+	8, // [8:13] is the sub-list for method output_type
+	3, // [3:8] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
 	3, // [3:3] is the sub-list for extension extendee
 	0, // [0:3] is the sub-list for field type_name

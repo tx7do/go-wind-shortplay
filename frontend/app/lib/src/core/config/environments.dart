@@ -53,6 +53,12 @@ class Environments {
     return dotenv.maybeGet('MEDIA_BASE_URL') ?? '';
   }
 
+  /// 密码传输加密 AES 密钥（同时用作 IV，16 字节）
+  ///
+  /// 与后端 `crypto.DefaultAESKey` 保持一致；可用 AES_KEY 环境变量覆盖。
+  static String get aesKey =>
+      dotenv.maybeGet('AES_KEY') ?? 'f51d66a73d8a0927';
+
   /// 连接超时时间（秒）
   static Duration get connectionTimeout =>
       secondStringToDuration(dotenv.maybeGet('CONNECTION_TIMEOUT') ?? '');

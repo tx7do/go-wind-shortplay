@@ -64,6 +64,20 @@ func (_c *UploadTaskCreate) SetNillableDeletedAt(v *time.Time) *UploadTaskCreate
 	return _c
 }
 
+// SetTenantID sets the "tenant_id" field.
+func (_c *UploadTaskCreate) SetTenantID(v uint32) *UploadTaskCreate {
+	_c.mutation.SetTenantID(v)
+	return _c
+}
+
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_c *UploadTaskCreate) SetNillableTenantID(v *uint32) *UploadTaskCreate {
+	if v != nil {
+		_c.SetTenantID(*v)
+	}
+	return _c
+}
+
 // SetTaskID sets the "task_id" field.
 func (_c *UploadTaskCreate) SetTaskID(v string) *UploadTaskCreate {
 	_c.mutation.SetTaskID(v)
@@ -77,13 +91,13 @@ func (_c *UploadTaskCreate) SetFileName(v string) *UploadTaskCreate {
 }
 
 // SetFileSize sets the "file_size" field.
-func (_c *UploadTaskCreate) SetFileSize(v int64) *UploadTaskCreate {
+func (_c *UploadTaskCreate) SetFileSize(v uint64) *UploadTaskCreate {
 	_c.mutation.SetFileSize(v)
 	return _c
 }
 
 // SetNillableFileSize sets the "file_size" field if the given value is not nil.
-func (_c *UploadTaskCreate) SetNillableFileSize(v *int64) *UploadTaskCreate {
+func (_c *UploadTaskCreate) SetNillableFileSize(v *uint64) *UploadTaskCreate {
 	if v != nil {
 		_c.SetFileSize(*v)
 	}
@@ -125,13 +139,13 @@ func (_c *UploadTaskCreate) SetUploadedChunks(v []uint32) *UploadTaskCreate {
 }
 
 // SetStatus sets the "status" field.
-func (_c *UploadTaskCreate) SetStatus(v uint8) *UploadTaskCreate {
+func (_c *UploadTaskCreate) SetStatus(v uploadtask.Status) *UploadTaskCreate {
 	_c.mutation.SetStatus(v)
 	return _c
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_c *UploadTaskCreate) SetNillableStatus(v *uint8) *UploadTaskCreate {
+func (_c *UploadTaskCreate) SetNillableStatus(v *uploadtask.Status) *UploadTaskCreate {
 	if v != nil {
 		_c.SetStatus(*v)
 	}
@@ -193,7 +207,9 @@ func (_c *UploadTaskCreate) Mutation() *UploadTaskMutation {
 
 // Save creates the UploadTask in the database.
 func (_c *UploadTaskCreate) Save(ctx context.Context) (*UploadTask, error) {
-	_c.defaults()
+	if err := _c.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -220,7 +236,11 @@ func (_c *UploadTaskCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *UploadTaskCreate) defaults() {
+func (_c *UploadTaskCreate) defaults() error {
+	if _, ok := _c.mutation.TenantID(); !ok {
+		v := uploadtask.DefaultTenantID
+		_c.mutation.SetTenantID(v)
+	}
 	if _, ok := _c.mutation.FileSize(); !ok {
 		v := uploadtask.DefaultFileSize
 		_c.mutation.SetFileSize(v)
@@ -241,6 +261,11 @@ func (_c *UploadTaskCreate) defaults() {
 		v := uploadtask.DefaultVideoID
 		_c.mutation.SetVideoID(v)
 	}
+	if _, ok := _c.mutation.AuthorID(); !ok {
+		v := uploadtask.DefaultAuthorID
+		_c.mutation.SetAuthorID(v)
+	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -260,6 +285,29 @@ func (_c *UploadTaskCreate) check() error {
 		if err := uploadtask.FileNameValidator(v); err != nil {
 			return &ValidationError{Name: "file_name", err: fmt.Errorf(`ent: validator failed for field "UploadTask.file_name": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.FileSize(); !ok {
+		return &ValidationError{Name: "file_size", err: errors.New(`ent: missing required field "UploadTask.file_size"`)}
+	}
+	if _, ok := _c.mutation.ChunkSize(); !ok {
+		return &ValidationError{Name: "chunk_size", err: errors.New(`ent: missing required field "UploadTask.chunk_size"`)}
+	}
+	if _, ok := _c.mutation.TotalChunks(); !ok {
+		return &ValidationError{Name: "total_chunks", err: errors.New(`ent: missing required field "UploadTask.total_chunks"`)}
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "UploadTask.status"`)}
+	}
+	if v, ok := _c.mutation.Status(); ok {
+		if err := uploadtask.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "UploadTask.status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.VideoID(); !ok {
+		return &ValidationError{Name: "video_id", err: errors.New(`ent: missing required field "UploadTask.video_id"`)}
+	}
+	if _, ok := _c.mutation.AuthorID(); !ok {
+		return &ValidationError{Name: "author_id", err: errors.New(`ent: missing required field "UploadTask.author_id"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := uploadtask.IDValidator(v); err != nil {
@@ -311,6 +359,10 @@ func (_c *UploadTaskCreate) createSpec() (*UploadTask, *sqlgraph.CreateSpec) {
 		_spec.SetField(uploadtask.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
+	if value, ok := _c.mutation.TenantID(); ok {
+		_spec.SetField(uploadtask.FieldTenantID, field.TypeUint32, value)
+		_node.TenantID = &value
+	}
 	if value, ok := _c.mutation.TaskID(); ok {
 		_spec.SetField(uploadtask.FieldTaskID, field.TypeString, value)
 		_node.TaskID = value
@@ -320,24 +372,24 @@ func (_c *UploadTaskCreate) createSpec() (*UploadTask, *sqlgraph.CreateSpec) {
 		_node.FileName = value
 	}
 	if value, ok := _c.mutation.FileSize(); ok {
-		_spec.SetField(uploadtask.FieldFileSize, field.TypeInt64, value)
-		_node.FileSize = &value
+		_spec.SetField(uploadtask.FieldFileSize, field.TypeUint64, value)
+		_node.FileSize = value
 	}
 	if value, ok := _c.mutation.ChunkSize(); ok {
 		_spec.SetField(uploadtask.FieldChunkSize, field.TypeUint32, value)
-		_node.ChunkSize = &value
+		_node.ChunkSize = value
 	}
 	if value, ok := _c.mutation.TotalChunks(); ok {
 		_spec.SetField(uploadtask.FieldTotalChunks, field.TypeUint32, value)
-		_node.TotalChunks = &value
+		_node.TotalChunks = value
 	}
 	if value, ok := _c.mutation.UploadedChunks(); ok {
 		_spec.SetField(uploadtask.FieldUploadedChunks, field.TypeJSON, value)
 		_node.UploadedChunks = value
 	}
 	if value, ok := _c.mutation.Status(); ok {
-		_spec.SetField(uploadtask.FieldStatus, field.TypeUint8, value)
-		_node.Status = &value
+		_spec.SetField(uploadtask.FieldStatus, field.TypeEnum, value)
+		_node.Status = value
 	}
 	if value, ok := _c.mutation.FileKey(); ok {
 		_spec.SetField(uploadtask.FieldFileKey, field.TypeString, value)
@@ -345,11 +397,11 @@ func (_c *UploadTaskCreate) createSpec() (*UploadTask, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := _c.mutation.VideoID(); ok {
 		_spec.SetField(uploadtask.FieldVideoID, field.TypeUint32, value)
-		_node.VideoID = &value
+		_node.VideoID = value
 	}
 	if value, ok := _c.mutation.AuthorID(); ok {
 		_spec.SetField(uploadtask.FieldAuthorID, field.TypeUint32, value)
-		_node.AuthorID = &value
+		_node.AuthorID = value
 	}
 	return _node, _spec
 }
@@ -464,7 +516,7 @@ func (u *UploadTaskUpsert) UpdateFileName() *UploadTaskUpsert {
 }
 
 // SetFileSize sets the "file_size" field.
-func (u *UploadTaskUpsert) SetFileSize(v int64) *UploadTaskUpsert {
+func (u *UploadTaskUpsert) SetFileSize(v uint64) *UploadTaskUpsert {
 	u.Set(uploadtask.FieldFileSize, v)
 	return u
 }
@@ -476,14 +528,8 @@ func (u *UploadTaskUpsert) UpdateFileSize() *UploadTaskUpsert {
 }
 
 // AddFileSize adds v to the "file_size" field.
-func (u *UploadTaskUpsert) AddFileSize(v int64) *UploadTaskUpsert {
+func (u *UploadTaskUpsert) AddFileSize(v uint64) *UploadTaskUpsert {
 	u.Add(uploadtask.FieldFileSize, v)
-	return u
-}
-
-// ClearFileSize clears the value of the "file_size" field.
-func (u *UploadTaskUpsert) ClearFileSize() *UploadTaskUpsert {
-	u.SetNull(uploadtask.FieldFileSize)
 	return u
 }
 
@@ -505,12 +551,6 @@ func (u *UploadTaskUpsert) AddChunkSize(v uint32) *UploadTaskUpsert {
 	return u
 }
 
-// ClearChunkSize clears the value of the "chunk_size" field.
-func (u *UploadTaskUpsert) ClearChunkSize() *UploadTaskUpsert {
-	u.SetNull(uploadtask.FieldChunkSize)
-	return u
-}
-
 // SetTotalChunks sets the "total_chunks" field.
 func (u *UploadTaskUpsert) SetTotalChunks(v uint32) *UploadTaskUpsert {
 	u.Set(uploadtask.FieldTotalChunks, v)
@@ -526,12 +566,6 @@ func (u *UploadTaskUpsert) UpdateTotalChunks() *UploadTaskUpsert {
 // AddTotalChunks adds v to the "total_chunks" field.
 func (u *UploadTaskUpsert) AddTotalChunks(v uint32) *UploadTaskUpsert {
 	u.Add(uploadtask.FieldTotalChunks, v)
-	return u
-}
-
-// ClearTotalChunks clears the value of the "total_chunks" field.
-func (u *UploadTaskUpsert) ClearTotalChunks() *UploadTaskUpsert {
-	u.SetNull(uploadtask.FieldTotalChunks)
 	return u
 }
 
@@ -554,7 +588,7 @@ func (u *UploadTaskUpsert) ClearUploadedChunks() *UploadTaskUpsert {
 }
 
 // SetStatus sets the "status" field.
-func (u *UploadTaskUpsert) SetStatus(v uint8) *UploadTaskUpsert {
+func (u *UploadTaskUpsert) SetStatus(v uploadtask.Status) *UploadTaskUpsert {
 	u.Set(uploadtask.FieldStatus, v)
 	return u
 }
@@ -562,18 +596,6 @@ func (u *UploadTaskUpsert) SetStatus(v uint8) *UploadTaskUpsert {
 // UpdateStatus sets the "status" field to the value that was provided on create.
 func (u *UploadTaskUpsert) UpdateStatus() *UploadTaskUpsert {
 	u.SetExcluded(uploadtask.FieldStatus)
-	return u
-}
-
-// AddStatus adds v to the "status" field.
-func (u *UploadTaskUpsert) AddStatus(v uint8) *UploadTaskUpsert {
-	u.Add(uploadtask.FieldStatus, v)
-	return u
-}
-
-// ClearStatus clears the value of the "status" field.
-func (u *UploadTaskUpsert) ClearStatus() *UploadTaskUpsert {
-	u.SetNull(uploadtask.FieldStatus)
 	return u
 }
 
@@ -613,12 +635,6 @@ func (u *UploadTaskUpsert) AddVideoID(v uint32) *UploadTaskUpsert {
 	return u
 }
 
-// ClearVideoID clears the value of the "video_id" field.
-func (u *UploadTaskUpsert) ClearVideoID() *UploadTaskUpsert {
-	u.SetNull(uploadtask.FieldVideoID)
-	return u
-}
-
 // SetAuthorID sets the "author_id" field.
 func (u *UploadTaskUpsert) SetAuthorID(v uint32) *UploadTaskUpsert {
 	u.Set(uploadtask.FieldAuthorID, v)
@@ -634,12 +650,6 @@ func (u *UploadTaskUpsert) UpdateAuthorID() *UploadTaskUpsert {
 // AddAuthorID adds v to the "author_id" field.
 func (u *UploadTaskUpsert) AddAuthorID(v uint32) *UploadTaskUpsert {
 	u.Add(uploadtask.FieldAuthorID, v)
-	return u
-}
-
-// ClearAuthorID clears the value of the "author_id" field.
-func (u *UploadTaskUpsert) ClearAuthorID() *UploadTaskUpsert {
-	u.SetNull(uploadtask.FieldAuthorID)
 	return u
 }
 
@@ -662,6 +672,9 @@ func (u *UploadTaskUpsertOne) UpdateNewValues() *UploadTaskUpsertOne {
 		}
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(uploadtask.FieldCreatedAt)
+		}
+		if _, exists := u.create.mutation.TenantID(); exists {
+			s.SetIgnore(uploadtask.FieldTenantID)
 		}
 	}))
 	return u
@@ -765,14 +778,14 @@ func (u *UploadTaskUpsertOne) UpdateFileName() *UploadTaskUpsertOne {
 }
 
 // SetFileSize sets the "file_size" field.
-func (u *UploadTaskUpsertOne) SetFileSize(v int64) *UploadTaskUpsertOne {
+func (u *UploadTaskUpsertOne) SetFileSize(v uint64) *UploadTaskUpsertOne {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.SetFileSize(v)
 	})
 }
 
 // AddFileSize adds v to the "file_size" field.
-func (u *UploadTaskUpsertOne) AddFileSize(v int64) *UploadTaskUpsertOne {
+func (u *UploadTaskUpsertOne) AddFileSize(v uint64) *UploadTaskUpsertOne {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.AddFileSize(v)
 	})
@@ -782,13 +795,6 @@ func (u *UploadTaskUpsertOne) AddFileSize(v int64) *UploadTaskUpsertOne {
 func (u *UploadTaskUpsertOne) UpdateFileSize() *UploadTaskUpsertOne {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.UpdateFileSize()
-	})
-}
-
-// ClearFileSize clears the value of the "file_size" field.
-func (u *UploadTaskUpsertOne) ClearFileSize() *UploadTaskUpsertOne {
-	return u.Update(func(s *UploadTaskUpsert) {
-		s.ClearFileSize()
 	})
 }
 
@@ -813,13 +819,6 @@ func (u *UploadTaskUpsertOne) UpdateChunkSize() *UploadTaskUpsertOne {
 	})
 }
 
-// ClearChunkSize clears the value of the "chunk_size" field.
-func (u *UploadTaskUpsertOne) ClearChunkSize() *UploadTaskUpsertOne {
-	return u.Update(func(s *UploadTaskUpsert) {
-		s.ClearChunkSize()
-	})
-}
-
 // SetTotalChunks sets the "total_chunks" field.
 func (u *UploadTaskUpsertOne) SetTotalChunks(v uint32) *UploadTaskUpsertOne {
 	return u.Update(func(s *UploadTaskUpsert) {
@@ -838,13 +837,6 @@ func (u *UploadTaskUpsertOne) AddTotalChunks(v uint32) *UploadTaskUpsertOne {
 func (u *UploadTaskUpsertOne) UpdateTotalChunks() *UploadTaskUpsertOne {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.UpdateTotalChunks()
-	})
-}
-
-// ClearTotalChunks clears the value of the "total_chunks" field.
-func (u *UploadTaskUpsertOne) ClearTotalChunks() *UploadTaskUpsertOne {
-	return u.Update(func(s *UploadTaskUpsert) {
-		s.ClearTotalChunks()
 	})
 }
 
@@ -870,16 +862,9 @@ func (u *UploadTaskUpsertOne) ClearUploadedChunks() *UploadTaskUpsertOne {
 }
 
 // SetStatus sets the "status" field.
-func (u *UploadTaskUpsertOne) SetStatus(v uint8) *UploadTaskUpsertOne {
+func (u *UploadTaskUpsertOne) SetStatus(v uploadtask.Status) *UploadTaskUpsertOne {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.SetStatus(v)
-	})
-}
-
-// AddStatus adds v to the "status" field.
-func (u *UploadTaskUpsertOne) AddStatus(v uint8) *UploadTaskUpsertOne {
-	return u.Update(func(s *UploadTaskUpsert) {
-		s.AddStatus(v)
 	})
 }
 
@@ -887,13 +872,6 @@ func (u *UploadTaskUpsertOne) AddStatus(v uint8) *UploadTaskUpsertOne {
 func (u *UploadTaskUpsertOne) UpdateStatus() *UploadTaskUpsertOne {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.UpdateStatus()
-	})
-}
-
-// ClearStatus clears the value of the "status" field.
-func (u *UploadTaskUpsertOne) ClearStatus() *UploadTaskUpsertOne {
-	return u.Update(func(s *UploadTaskUpsert) {
-		s.ClearStatus()
 	})
 }
 
@@ -939,13 +917,6 @@ func (u *UploadTaskUpsertOne) UpdateVideoID() *UploadTaskUpsertOne {
 	})
 }
 
-// ClearVideoID clears the value of the "video_id" field.
-func (u *UploadTaskUpsertOne) ClearVideoID() *UploadTaskUpsertOne {
-	return u.Update(func(s *UploadTaskUpsert) {
-		s.ClearVideoID()
-	})
-}
-
 // SetAuthorID sets the "author_id" field.
 func (u *UploadTaskUpsertOne) SetAuthorID(v uint32) *UploadTaskUpsertOne {
 	return u.Update(func(s *UploadTaskUpsert) {
@@ -964,13 +935,6 @@ func (u *UploadTaskUpsertOne) AddAuthorID(v uint32) *UploadTaskUpsertOne {
 func (u *UploadTaskUpsertOne) UpdateAuthorID() *UploadTaskUpsertOne {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.UpdateAuthorID()
-	})
-}
-
-// ClearAuthorID clears the value of the "author_id" field.
-func (u *UploadTaskUpsertOne) ClearAuthorID() *UploadTaskUpsertOne {
-	return u.Update(func(s *UploadTaskUpsert) {
-		s.ClearAuthorID()
 	})
 }
 
@@ -1159,6 +1123,9 @@ func (u *UploadTaskUpsertBulk) UpdateNewValues() *UploadTaskUpsertBulk {
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(uploadtask.FieldCreatedAt)
 			}
+			if _, exists := b.mutation.TenantID(); exists {
+				s.SetIgnore(uploadtask.FieldTenantID)
+			}
 		}
 	}))
 	return u
@@ -1262,14 +1229,14 @@ func (u *UploadTaskUpsertBulk) UpdateFileName() *UploadTaskUpsertBulk {
 }
 
 // SetFileSize sets the "file_size" field.
-func (u *UploadTaskUpsertBulk) SetFileSize(v int64) *UploadTaskUpsertBulk {
+func (u *UploadTaskUpsertBulk) SetFileSize(v uint64) *UploadTaskUpsertBulk {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.SetFileSize(v)
 	})
 }
 
 // AddFileSize adds v to the "file_size" field.
-func (u *UploadTaskUpsertBulk) AddFileSize(v int64) *UploadTaskUpsertBulk {
+func (u *UploadTaskUpsertBulk) AddFileSize(v uint64) *UploadTaskUpsertBulk {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.AddFileSize(v)
 	})
@@ -1279,13 +1246,6 @@ func (u *UploadTaskUpsertBulk) AddFileSize(v int64) *UploadTaskUpsertBulk {
 func (u *UploadTaskUpsertBulk) UpdateFileSize() *UploadTaskUpsertBulk {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.UpdateFileSize()
-	})
-}
-
-// ClearFileSize clears the value of the "file_size" field.
-func (u *UploadTaskUpsertBulk) ClearFileSize() *UploadTaskUpsertBulk {
-	return u.Update(func(s *UploadTaskUpsert) {
-		s.ClearFileSize()
 	})
 }
 
@@ -1310,13 +1270,6 @@ func (u *UploadTaskUpsertBulk) UpdateChunkSize() *UploadTaskUpsertBulk {
 	})
 }
 
-// ClearChunkSize clears the value of the "chunk_size" field.
-func (u *UploadTaskUpsertBulk) ClearChunkSize() *UploadTaskUpsertBulk {
-	return u.Update(func(s *UploadTaskUpsert) {
-		s.ClearChunkSize()
-	})
-}
-
 // SetTotalChunks sets the "total_chunks" field.
 func (u *UploadTaskUpsertBulk) SetTotalChunks(v uint32) *UploadTaskUpsertBulk {
 	return u.Update(func(s *UploadTaskUpsert) {
@@ -1335,13 +1288,6 @@ func (u *UploadTaskUpsertBulk) AddTotalChunks(v uint32) *UploadTaskUpsertBulk {
 func (u *UploadTaskUpsertBulk) UpdateTotalChunks() *UploadTaskUpsertBulk {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.UpdateTotalChunks()
-	})
-}
-
-// ClearTotalChunks clears the value of the "total_chunks" field.
-func (u *UploadTaskUpsertBulk) ClearTotalChunks() *UploadTaskUpsertBulk {
-	return u.Update(func(s *UploadTaskUpsert) {
-		s.ClearTotalChunks()
 	})
 }
 
@@ -1367,16 +1313,9 @@ func (u *UploadTaskUpsertBulk) ClearUploadedChunks() *UploadTaskUpsertBulk {
 }
 
 // SetStatus sets the "status" field.
-func (u *UploadTaskUpsertBulk) SetStatus(v uint8) *UploadTaskUpsertBulk {
+func (u *UploadTaskUpsertBulk) SetStatus(v uploadtask.Status) *UploadTaskUpsertBulk {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.SetStatus(v)
-	})
-}
-
-// AddStatus adds v to the "status" field.
-func (u *UploadTaskUpsertBulk) AddStatus(v uint8) *UploadTaskUpsertBulk {
-	return u.Update(func(s *UploadTaskUpsert) {
-		s.AddStatus(v)
 	})
 }
 
@@ -1384,13 +1323,6 @@ func (u *UploadTaskUpsertBulk) AddStatus(v uint8) *UploadTaskUpsertBulk {
 func (u *UploadTaskUpsertBulk) UpdateStatus() *UploadTaskUpsertBulk {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.UpdateStatus()
-	})
-}
-
-// ClearStatus clears the value of the "status" field.
-func (u *UploadTaskUpsertBulk) ClearStatus() *UploadTaskUpsertBulk {
-	return u.Update(func(s *UploadTaskUpsert) {
-		s.ClearStatus()
 	})
 }
 
@@ -1436,13 +1368,6 @@ func (u *UploadTaskUpsertBulk) UpdateVideoID() *UploadTaskUpsertBulk {
 	})
 }
 
-// ClearVideoID clears the value of the "video_id" field.
-func (u *UploadTaskUpsertBulk) ClearVideoID() *UploadTaskUpsertBulk {
-	return u.Update(func(s *UploadTaskUpsert) {
-		s.ClearVideoID()
-	})
-}
-
 // SetAuthorID sets the "author_id" field.
 func (u *UploadTaskUpsertBulk) SetAuthorID(v uint32) *UploadTaskUpsertBulk {
 	return u.Update(func(s *UploadTaskUpsert) {
@@ -1461,13 +1386,6 @@ func (u *UploadTaskUpsertBulk) AddAuthorID(v uint32) *UploadTaskUpsertBulk {
 func (u *UploadTaskUpsertBulk) UpdateAuthorID() *UploadTaskUpsertBulk {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.UpdateAuthorID()
-	})
-}
-
-// ClearAuthorID clears the value of the "author_id" field.
-func (u *UploadTaskUpsertBulk) ClearAuthorID() *UploadTaskUpsertBulk {
-	return u.Update(func(s *UploadTaskUpsert) {
-		s.ClearAuthorID()
 	})
 }
 

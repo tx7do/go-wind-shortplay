@@ -2,42 +2,132 @@ syntax = "proto3";
 
 package app.service.v1;
 
+import "gnostic/openapi/v3/annotations.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
-import "identity/service/v1/authentication.proto";
+
 import "identity/service/v1/user.proto";
+import "authentication/service/v1/authentication.proto";
 
-// App 认证服务（注册 / 登录 / 登出 / 我的资料）
+// 用户前台登录认证服务
 service AuthenticationService {
-  // 账号密码登录
-  rpc Login (identity.service.v1.LoginRequest) returns (identity.service.v1.LoginResponse) {
+  // 登录
+  rpc Login (authentication.service.v1.LoginRequest) returns (authentication.service.v1.LoginResponse) {
     option (google.api.http) = {
-      post: "/app/v1/auth/login"
+      post: "/app/v1/login"
       body: "*"
     };
-  }
 
-  // 注册（是否开放由系统配置决定）
-  rpc Register (identity.service.v1.RegisterRequest) returns (identity.service.v1.LoginResponse) {
-    option (google.api.http) = {
-      post: "/app/v1/auth/register"
-      body: "*"
-    };
-  }
-
-  // 刷新令牌
-  rpc RefreshToken (identity.service.v1.RefreshTokenRequest) returns (identity.service.v1.LoginResponse) {
-    option (google.api.http) = {
-      post: "/app/v1/auth/refresh"
-      body: "*"
+    option(gnostic.openapi.v3.operation) = {
+      security: {}
     };
   }
 
   // 登出
-  rpc Logout (identity.service.v1.LogoutRequest) returns (google.protobuf.Empty) {
+  rpc Logout (google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/app/v1/logout"
+      body: "*"
+    };
+  }
+
+  // 刷新认证令牌
+  rpc RefreshToken (authentication.service.v1.LoginRequest) returns (authentication.service.v1.LoginResponse) {
+    option (google.api.http) = {
+      post: "/app/v1/refresh-token"
+      body: "*"
+    };
+  }
+
+  // 获取 OIDC 授权跳转地址（core 生成 state 暂存 Redis，防 CSRF；免鉴权）
+  rpc GetOidcAuthorizeUrl (authentication.service.v1.GetOidcAuthorizeUrlRequest) returns (authentication.service.v1.GetOidcAuthorizeUrlResponse) {
+    option (google.api.http) = {
+      post: "/app/v1/oidc/authorize-url"
+      body: "*"
+    };
+
+    option(gnostic.openapi.v3.operation) = {
+      security: {}
+    };
+  }
+
+  // ── shortplay 旧契约兼容面（/auth/* 路由 + authenticator 包装响应）──
+
+  // 账号密码登录（旧契约：/auth/login，返回 authenticator + user 包装）
+  rpc AuthLogin (authentication.service.v1.LoginRequest) returns (AuthLoginResponse) {
+    option (google.api.http) = {
+      post: "/app/v1/auth/login"
+      body: "*"
+    };
+
+    option(gnostic.openapi.v3.operation) = {
+      security: {}
+    };
+  }
+
+  // 注册（开放注册开关由系统配置决定；成功即登录，返回 authenticator + user 包装）
+  rpc AuthRegister (AuthRegisterRequest) returns (AuthLoginResponse) {
+    option (google.api.http) = {
+      post: "/app/v1/auth/register"
+      body: "*"
+    };
+
+    option(gnostic.openapi.v3.operation) = {
+      security: {}
+    };
+  }
+
+  // 刷新令牌（旧契约：仅凭 refreshToken，无 bearer）
+  rpc AuthRefresh (AuthRefreshRequest) returns (AuthLoginResponse) {
+    option (google.api.http) = {
+      post: "/app/v1/auth/refresh"
+      body: "*"
+    };
+
+    option(gnostic.openapi.v3.operation) = {
+      security: {}
+    };
+  }
+
+  // 登出（需登录）
+  rpc AuthLogout (google.protobuf.Empty) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       post: "/app/v1/auth/logout"
       body: "*"
     };
   }
+}
+
+// 认证令牌对（旧契约形状）
+message Authenticator {
+  string token_type = 1 [json_name = "tokenType"];        // 固定 "Bearer"
+  string access_token = 2 [json_name = "accessToken"];    // 访问令牌
+  string refresh_token = 3 [json_name = "refreshToken"];  // 刷新令牌
+  int32 expires_in = 4 [json_name = "expiresIn"];         // 访问令牌有效期（秒）
+}
+
+// 用户摘要（旧契约形状）
+message AuthUserProfile {
+  uint32 id = 1 [json_name = "id"];                  // 用户ID
+  string username = 2 [json_name = "username"];      // 登录名
+  string nickname = 3 [json_name = "nickname"];      // 昵称
+  string avatar_url = 4 [json_name = "avatarUrl"];   // 头像
+}
+
+// 登录/注册/刷新统一响应（旧契约包装）
+message AuthLoginResponse {
+  Authenticator authenticator = 1 [json_name = "authenticator"]; // 令牌对
+  AuthUserProfile user = 2 [json_name = "user"];                 // 用户摘要
+}
+
+// 注册 - 请求
+message AuthRegisterRequest {
+  string username = 1 [json_name = "username"];    // 登录名
+  string password = 2 [json_name = "password"];    // 密码（AES 加密后 base64）
+  string nickname = 3 [json_name = "nickname"];    // 昵称
+}
+
+// 刷新令牌 - 请求
+message AuthRefreshRequest {
+  string refresh_token = 1 [json_name = "refreshToken"]; // 刷新令牌
 }

@@ -8,5 +8,6 @@ export * from './url';
 export * from './diff';
 export * from './tree.ts';
 export * from './format';
+export * from './crypto';
 
 export {default as cloneDeep} from "lodash.clonedeep";

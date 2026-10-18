@@ -4,7 +4,7 @@
 // - protoc             (unknown)
 // source: app/service/v1/i_uba.proto
 
-package apppb
+package servicev1
 
 import (
 	context "context"

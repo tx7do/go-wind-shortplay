@@ -1,7 +1,14 @@
 import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { ConfigProvider, Button, Tooltip } from 'antd';
-import { GlobalOutlined, MoonOutlined, SunOutlined } from '@ant-design/icons';
+import {
+  AuditOutlined,
+  GlobalOutlined,
+  MoonOutlined,
+  PlaySquareOutlined,
+  SafetyOutlined,
+  SunOutlined,
+} from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
 import { useAuthStore } from '@/stores';
@@ -13,6 +20,13 @@ import { startThemeViewTransition } from '@/core/preferences/theme-transition';
 import SloganIcon from '@/components/bussiness/AuthLayout/icons/SloganIcon';
 
 import './UserLayout.style.less';
+
+/** 左侧品牌区特性点（沉浸式视频流 / 完整审核工作流 / RBAC 权限管控） */
+const BRAND_FEATURES = [
+  { icon: <PlaySquareOutlined />, nameKey: 'brandFeatureImmersive', descKey: 'brandFeatureImmersiveDesc' },
+  { icon: <AuditOutlined />, nameKey: 'brandFeatureReview', descKey: 'brandFeatureReviewDesc' },
+  { icon: <SafetyOutlined />, nameKey: 'brandFeatureRbac', descKey: 'brandFeatureRbacDesc' },
+] as const;
 
 interface UserLayoutProps {
   requireAuth?: boolean; // 是否需要登录（用于保护路由）
@@ -120,6 +134,19 @@ export const UserLayout = ({ requireAuth = false }: UserLayoutProps) => {
 
           <h2 className="user-brand-title">{t('systemTitle')}</h2>
           <p className="user-brand-description">{t('systemDescription')}</p>
+
+          {/* 特性点：图标 + 名称 + 一句话说明（文案见 auth 命名空间 brandFeature*） */}
+          <div className="user-brand-features">
+            {BRAND_FEATURES.map((feature) => (
+              <div key={feature.nameKey} className="user-brand-feature">
+                <span className="user-brand-feature-icon">{feature.icon}</span>
+                <span className="user-brand-feature-text">
+                  <span className="user-brand-feature-name">{t(feature.nameKey)}</span>
+                  <span className="user-brand-feature-desc">{t(feature.descKey)}</span>
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* 右侧表单区 */}

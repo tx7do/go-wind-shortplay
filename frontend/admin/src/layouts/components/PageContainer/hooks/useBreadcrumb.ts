@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import React from 'react';
 import { useMatches, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getIconFromName } from '@/layouts/MainLayout/utils/iconResolver';
 
 import { useI18n } from '@/core/i18n';
@@ -29,6 +30,8 @@ export const useBreadcrumb = ({
   const navigate = useNavigate();
   const matches = useMatches();
   const { t } = useI18n('common');
+  // 基座菜单键（menu.xxx.yyy / routes:xxx）在 routes 命名空间解析
+  const { t: tRoutes } = useTranslation('routes');
 
   // 手动传入优先
   if (manual === false) return false;
@@ -37,6 +40,18 @@ export const useBreadcrumb = ({
   // 自动计算：基于 react-router-dom useMatches
 
   return useMemo(() => {
+    // 标题翻译：优先完整键（menu.opm.user），退回去 'menu.' 前缀键，最后原样
+    const translateTitle = (title: string): string => {
+      if (title.startsWith('menu.')) {
+        return (
+          tRoutes(title, { defaultValue: '' }) ||
+          tRoutes(title.substring(5), { defaultValue: '' }) ||
+          title
+        );
+      }
+      return tRoutes(title, { defaultValue: title });
+    };
+
     // 类型定义：为 handle 扩展类型
     type MatchWithHandle = {
       pathname: string;
@@ -57,7 +72,8 @@ export const useBreadcrumb = ({
       .filter((match: MatchWithHandle) => match.handle?.title || match.pathname === '/')
       .map((match: MatchWithHandle, index: number, arr: MatchWithHandle[]) => {
         const isLast = index === arr.length - 1;
-        const title = match.handle?.title || route?.meta?.title || t('pageContainer.defaultTitle');
+        const rawTitle = match.handle?.title || route?.meta?.title || t('pageContainer.defaultTitle');
+        const title = typeof rawTitle === 'string' ? translateTitle(rawTitle) : rawTitle;
         
         // 将图标字符串转换为 React 组件（支持 Iconify 和 Ant Design）
         let icon: React.ReactNode = undefined;
@@ -85,5 +101,5 @@ export const useBreadcrumb = ({
     }
 
     return items;
-  }, [matches, route?.meta?.title, navigate, showHomeIcon, showIcon]);
+  }, [matches, route?.meta?.title, navigate, showHomeIcon, showIcon, t, tRoutes]);
 };

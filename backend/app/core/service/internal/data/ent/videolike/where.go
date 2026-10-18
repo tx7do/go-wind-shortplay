@@ -69,14 +69,14 @@ func DeletedAt(v time.Time) predicate.VideoLike {
 	return predicate.VideoLike(sql.FieldEQ(FieldDeletedAt, v))
 }
 
+// TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
+func TenantID(v uint32) predicate.VideoLike {
+	return predicate.VideoLike(sql.FieldEQ(FieldTenantID, v))
+}
+
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v uint32) predicate.VideoLike {
 	return predicate.VideoLike(sql.FieldEQ(FieldUserID, v))
-}
-
-// TargetType applies equality check predicate on the "target_type" field. It's identical to TargetTypeEQ.
-func TargetType(v uint8) predicate.VideoLike {
-	return predicate.VideoLike(sql.FieldEQ(FieldTargetType, v))
 }
 
 // TargetID applies equality check predicate on the "target_id" field. It's identical to TargetIDEQ.
@@ -234,6 +234,56 @@ func DeletedAtNotNil() predicate.VideoLike {
 	return predicate.VideoLike(sql.FieldNotNull(FieldDeletedAt))
 }
 
+// TenantIDEQ applies the EQ predicate on the "tenant_id" field.
+func TenantIDEQ(v uint32) predicate.VideoLike {
+	return predicate.VideoLike(sql.FieldEQ(FieldTenantID, v))
+}
+
+// TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
+func TenantIDNEQ(v uint32) predicate.VideoLike {
+	return predicate.VideoLike(sql.FieldNEQ(FieldTenantID, v))
+}
+
+// TenantIDIn applies the In predicate on the "tenant_id" field.
+func TenantIDIn(vs ...uint32) predicate.VideoLike {
+	return predicate.VideoLike(sql.FieldIn(FieldTenantID, vs...))
+}
+
+// TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
+func TenantIDNotIn(vs ...uint32) predicate.VideoLike {
+	return predicate.VideoLike(sql.FieldNotIn(FieldTenantID, vs...))
+}
+
+// TenantIDGT applies the GT predicate on the "tenant_id" field.
+func TenantIDGT(v uint32) predicate.VideoLike {
+	return predicate.VideoLike(sql.FieldGT(FieldTenantID, v))
+}
+
+// TenantIDGTE applies the GTE predicate on the "tenant_id" field.
+func TenantIDGTE(v uint32) predicate.VideoLike {
+	return predicate.VideoLike(sql.FieldGTE(FieldTenantID, v))
+}
+
+// TenantIDLT applies the LT predicate on the "tenant_id" field.
+func TenantIDLT(v uint32) predicate.VideoLike {
+	return predicate.VideoLike(sql.FieldLT(FieldTenantID, v))
+}
+
+// TenantIDLTE applies the LTE predicate on the "tenant_id" field.
+func TenantIDLTE(v uint32) predicate.VideoLike {
+	return predicate.VideoLike(sql.FieldLTE(FieldTenantID, v))
+}
+
+// TenantIDIsNil applies the IsNil predicate on the "tenant_id" field.
+func TenantIDIsNil() predicate.VideoLike {
+	return predicate.VideoLike(sql.FieldIsNull(FieldTenantID))
+}
+
+// TenantIDNotNil applies the NotNil predicate on the "tenant_id" field.
+func TenantIDNotNil() predicate.VideoLike {
+	return predicate.VideoLike(sql.FieldNotNull(FieldTenantID))
+}
+
 // UserIDEQ applies the EQ predicate on the "user_id" field.
 func UserIDEQ(v uint32) predicate.VideoLike {
 	return predicate.VideoLike(sql.FieldEQ(FieldUserID, v))
@@ -274,64 +324,24 @@ func UserIDLTE(v uint32) predicate.VideoLike {
 	return predicate.VideoLike(sql.FieldLTE(FieldUserID, v))
 }
 
-// UserIDIsNil applies the IsNil predicate on the "user_id" field.
-func UserIDIsNil() predicate.VideoLike {
-	return predicate.VideoLike(sql.FieldIsNull(FieldUserID))
-}
-
-// UserIDNotNil applies the NotNil predicate on the "user_id" field.
-func UserIDNotNil() predicate.VideoLike {
-	return predicate.VideoLike(sql.FieldNotNull(FieldUserID))
-}
-
 // TargetTypeEQ applies the EQ predicate on the "target_type" field.
-func TargetTypeEQ(v uint8) predicate.VideoLike {
+func TargetTypeEQ(v TargetType) predicate.VideoLike {
 	return predicate.VideoLike(sql.FieldEQ(FieldTargetType, v))
 }
 
 // TargetTypeNEQ applies the NEQ predicate on the "target_type" field.
-func TargetTypeNEQ(v uint8) predicate.VideoLike {
+func TargetTypeNEQ(v TargetType) predicate.VideoLike {
 	return predicate.VideoLike(sql.FieldNEQ(FieldTargetType, v))
 }
 
 // TargetTypeIn applies the In predicate on the "target_type" field.
-func TargetTypeIn(vs ...uint8) predicate.VideoLike {
+func TargetTypeIn(vs ...TargetType) predicate.VideoLike {
 	return predicate.VideoLike(sql.FieldIn(FieldTargetType, vs...))
 }
 
 // TargetTypeNotIn applies the NotIn predicate on the "target_type" field.
-func TargetTypeNotIn(vs ...uint8) predicate.VideoLike {
+func TargetTypeNotIn(vs ...TargetType) predicate.VideoLike {
 	return predicate.VideoLike(sql.FieldNotIn(FieldTargetType, vs...))
-}
-
-// TargetTypeGT applies the GT predicate on the "target_type" field.
-func TargetTypeGT(v uint8) predicate.VideoLike {
-	return predicate.VideoLike(sql.FieldGT(FieldTargetType, v))
-}
-
-// TargetTypeGTE applies the GTE predicate on the "target_type" field.
-func TargetTypeGTE(v uint8) predicate.VideoLike {
-	return predicate.VideoLike(sql.FieldGTE(FieldTargetType, v))
-}
-
-// TargetTypeLT applies the LT predicate on the "target_type" field.
-func TargetTypeLT(v uint8) predicate.VideoLike {
-	return predicate.VideoLike(sql.FieldLT(FieldTargetType, v))
-}
-
-// TargetTypeLTE applies the LTE predicate on the "target_type" field.
-func TargetTypeLTE(v uint8) predicate.VideoLike {
-	return predicate.VideoLike(sql.FieldLTE(FieldTargetType, v))
-}
-
-// TargetTypeIsNil applies the IsNil predicate on the "target_type" field.
-func TargetTypeIsNil() predicate.VideoLike {
-	return predicate.VideoLike(sql.FieldIsNull(FieldTargetType))
-}
-
-// TargetTypeNotNil applies the NotNil predicate on the "target_type" field.
-func TargetTypeNotNil() predicate.VideoLike {
-	return predicate.VideoLike(sql.FieldNotNull(FieldTargetType))
 }
 
 // TargetIDEQ applies the EQ predicate on the "target_id" field.
@@ -372,16 +382,6 @@ func TargetIDLT(v uint32) predicate.VideoLike {
 // TargetIDLTE applies the LTE predicate on the "target_id" field.
 func TargetIDLTE(v uint32) predicate.VideoLike {
 	return predicate.VideoLike(sql.FieldLTE(FieldTargetID, v))
-}
-
-// TargetIDIsNil applies the IsNil predicate on the "target_id" field.
-func TargetIDIsNil() predicate.VideoLike {
-	return predicate.VideoLike(sql.FieldIsNull(FieldTargetID))
-}
-
-// TargetIDNotNil applies the NotNil predicate on the "target_id" field.
-func TargetIDNotNil() predicate.VideoLike {
-	return predicate.VideoLike(sql.FieldNotNull(FieldTargetID))
 }
 
 // And groups predicates with the AND operator between them.

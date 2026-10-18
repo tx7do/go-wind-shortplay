@@ -284,11 +284,74 @@
     "csv": "CSV (逗号分隔)",
     "xlsx": "Excel 工作簿",
     "success": "已导出 {count} 行",
-    "failed": "导出失败"
+    "failed": "导出失败",
+    "serverXlsx": "服务端全量 (XLSX)",
+    "serverSuccess": "已请求服务端导出",
+    "serverFailed": "服务端导出失败"
   },
   "uploadFeedback": {
     "uploading": "图片上传中",
     "fileTooLarge": "文件过大，服务器拒绝接收，请压缩后重试",
     "uploadFailed": "上传失败，请稍后重试"
+  },
+  "menu": {
+    "profile": {
+      "settings": "个人资料",
+      "internalMessage": "收件中心"
+    },
+    "tenant": {
+      "moduleName": "租户管理",
+      "member": "租户成员"
+    },
+    "opm": {
+      "moduleName": "组织人事",
+      "orgUnit": "组织架构",
+      "position": "职位管理",
+      "user": "用户管理",
+      "userDetail": "用户详情"
+    },
+    "permission": {
+      "moduleName": "权限管理",
+      "permission": "接口管理",
+      "role": "角色管理",
+      "menu": "菜单管理",
+      "department": "部门管理"
+    },
+    "internalMessage": {
+      "moduleName": "内部消息",
+      "internalMessage": "消息列表",
+      "internalMessageCategory": "消息分类"
+    },
+    "log": {
+      "moduleName": "日志审计",
+      "loginAuditLog": "登录日志",
+      "apiAuditLog": "接口日志",
+      "operationAuditLog": "操作日志",
+      "dataAccessAuditLog": "数据日志",
+      "permissionAuditLog": "权限日志"
+    },
+    "system": {
+      "moduleName": "系统管理",
+      "menu": "菜单管理",
+      "api": "接口管理",
+      "dict": "字典管理",
+      "file": "文件管理",
+      "task": "任务管理",
+      "loginPolicy": "登录策略",
+      "language": "语言管理"
+    },
+    "shortPlay": {
+      "moduleName": "短剧管理",
+      "video": "视频管理",
+      "comment": "评论管理",
+      "report": "举报管理",
+      "sysconf": "系统配置"
+    }
+  },
+  "page": {
+    "dashboard": {
+      "title": "数据看板",
+      "analytics": "数据看板"
+    }
   }
 }

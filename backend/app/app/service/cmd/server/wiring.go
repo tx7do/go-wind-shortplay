@@ -1,8 +1,6 @@
 package main
 
 import (
-	"os"
-
 	"github.com/go-kratos/kratos/v2"
 	"github.com/tx7do/kratos-bootstrap/bootstrap"
 
@@ -12,8 +10,26 @@ import (
 	"go-wind-shortplay/pkg/middleware/auth"
 )
 
-// initApp 手写装配前台网关（瘦 BFF：参数校验 + gRPC 转发到 core，不碰数据库）
+// initApp 手写装配整个应用,是本服务的依赖注入点(替代原 google/wire 生成)。
+// initApp assembles the whole application by hand — the dependency injection point.
+//
+// 装配严格单向分层,自上而下的阅读顺序即依赖方向:
+// The wiring is strictly layered; reading top-down follows the dependency direction:
+//
+//	基础设施 → 服务客户端(data) → 服务层(service) → 传输层(server)
+//
+// 本服务是 C 端 BFF 网关:不直连数据库,仓储层由对 core-service 的 gRPC 服务客户端替代。
+// 约定 / Conventions:
+//   - 新增模块:先加服务客户端行,再加服务构造行,并传给 NewRestServer;漏接由编译器在调用处报错。
+//     To add a module: append a service-client line, then a service constructor, then pass it to
+//     NewRestServer; a missing connection is a compile error at the call site.
+//   - 本文件只做构造与传参,不写业务逻辑。
+//     Construction and parameter passing only; no business logic in this file.
 func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
+	// cleanup 注册表:本服务无持有 cleanup 的资源,rollback 为空实现,保持与
+	// admin/core 两服务同构的返回签名。
+	// No cleanup-owning resources in this service; rollback is a no-op kept for
+	// signature parity with the admin/core wiring.
 	var cleanups []func()
 	rollback := func() {
 		for i := len(cleanups) - 1; i >= 0; i-- {
@@ -23,66 +39,107 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 
 	// ═══════════════════════ 一、基础设施 ═══════════════════════
 
-	authSigningKey := os.Getenv("JWT_SIGNING_KEY")
-	if authSigningKey == "" {
-		authSigningKey = "dev_only_change_me_in_prod"
-	}
-	authenticator, err := auth.NewAuthenticator(authSigningKey)
+	// 服务发现与鉴权基建
+	discovery := data.NewDiscovery(ctx)
+	clientType := data.NewClientType()
+	engine := data.NewAuthorizer()
+	minIOClient := data.NewMinIoClient(ctx)
+
+	// Redis（站内信通知订阅 / shortplay 旧契约刷新令牌反查共用）
+	redisClient, cleanupRedis, err := data.NewRedisClient(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
+	cleanups = append(cleanups, cleanupRedis)
 
-	coreConn, cleanupConn, err := data.NewCoreConn(ctx)
-	if err != nil {
-		return nil, nil, err
-	}
-	cleanups = append(cleanups, cleanupConn)
+	// 认证:认证服务客户端 → 访问令牌校验器;租户解析器供中间件解析 Host→租户
+	authenticationServiceClient := data.NewAuthenticationServiceClient(ctx, discovery)
+	accessTokenChecker := auth.NewTokenChecker(ctx, authenticationServiceClient, clientType)
+	tenantServiceClient := data.NewTenantServiceClient(ctx, discovery)
+	tenantResolver := data.NewTenantResolver(tenantServiceClient)
 
-	// ═══════════════════════ 二、gRPC 客户端 ═══════════════════════
+	// ═══════════════════════ 二、服务客户端(internal/data) ═══════════════════════
 
-	authenticationServiceClient := data.NewAuthenticationServiceClient(coreConn)
-	userServiceClient := data.NewUserServiceClient(coreConn)
-	videoServiceClient := data.NewVideoServiceClient(coreConn)
-	feedServiceClient := data.NewFeedServiceClient(coreConn)
-	interactionServiceClient := data.NewInteractionServiceClient(coreConn)
-	commentServiceClient := data.NewCommentServiceClient(coreConn)
-	notifyServiceClient := data.NewNotifyServiceClient(coreConn)
-	reportServiceClient := data.NewReportServiceClient(coreConn)
-	ubaServiceClient := data.NewUbaServiceClient(coreConn)
-	dashboardServiceClient := data.NewDashboardServiceClient(coreConn)
+	// 身份
+	userServiceClient := data.NewUserServiceClient(ctx, discovery)
+	roleServiceClient := data.NewRoleServiceClient(ctx, discovery)
+	orgUnitServiceClient := data.NewOrgUnitServiceClient(ctx, discovery)
+	positionServiceClient := data.NewPositionServiceClient(ctx, discovery)
+	userCredentialServiceClient := data.NewUserCredentialServiceClient(ctx, discovery)
+
+	// 文件 / 媒体
+	fileServiceClient := data.NewFileServiceClient(ctx, discovery)
+	mediaAssetServiceClient := data.NewMediaAssetServiceClient(ctx, discovery)
+
+	// 评论（业务评论面：interaction 域）
+	commentServiceClient := data.NewSpCommentServiceClient(ctx, discovery)
+
+	// shortplay 业务域
+	spVideoServiceClient := data.NewSpVideoServiceClient(ctx, discovery)
+	spFeedServiceClient := data.NewSpFeedServiceClient(ctx, discovery)
+	spInteractionServiceClient := data.NewSpInteractionServiceClient(ctx, discovery)
+	spReportServiceClient := data.NewSpReportServiceClient(ctx, discovery)
+	spUbaServiceClient := data.NewSpUbaServiceClient(ctx, discovery)
+	spDashboardServiceClient := data.NewSpDashboardServiceClient(ctx, discovery)
+	spSysConfServiceClient := data.NewSpSysConfServiceClient(ctx, discovery)
+
+	// 站内信（基座 internal_message 域收件箱，App 消息通知面）
+	internalMessageRecipientServiceClient := data.NewInternalMessageRecipientServiceClient(ctx, discovery)
+
+	// ── register:client ── 新模块服务客户端在此行后注册(make register 工具锚点,勿删)
 
 	// ═══════════════════════ 三、服务层(internal/service) ═══════════════════════
 
-	authenticationService := service.NewAuthenticationService(ctx, authenticationServiceClient)
-	userService := service.NewUserService(ctx, userServiceClient, videoServiceClient)
-	feedService := service.NewFeedService(ctx, feedServiceClient)
-	videoService := service.NewVideoService(ctx, videoServiceClient, dashboardServiceClient)
-	interactionService := service.NewInteractionService(ctx, interactionServiceClient, videoServiceClient)
+	// 认证
+	authenticationService := service.NewAuthenticationService(ctx, authenticationServiceClient, tenantServiceClient, tenantResolver, userServiceClient, spSysConfServiceClient, redisClient)
+
+	// 文件
+	fileTransferService := service.NewFileTransferService(ctx, minIOClient, fileServiceClient)
+
+	// 身份
+	userProfileService := service.NewUserProfileService(ctx, userServiceClient, tenantServiceClient, orgUnitServiceClient, positionServiceClient, roleServiceClient, userCredentialServiceClient)
+
+	// 媒体与评论
+	mediaAssetService := service.NewMediaAssetService(ctx, mediaAssetServiceClient, minIOClient)
 	commentService := service.NewCommentService(ctx, commentServiceClient)
-	notifyService := service.NewNotifyService(ctx, notifyServiceClient)
-	reportService := service.NewAppReportService(ctx, reportServiceClient)
-	ubaService := service.NewUbaService(ctx, ubaServiceClient)
+
+	// shortplay 业务域服务
+	spFeedService := service.NewFeedService(ctx, spFeedServiceClient)
+	spVideoService := service.NewVideoService(ctx, spVideoServiceClient, spDashboardServiceClient)
+	spInteractionService := service.NewInteractionService(ctx, spInteractionServiceClient, accessTokenChecker)
+	spReportService := service.NewReportService(ctx, spReportServiceClient)
+	spUbaService := service.NewUbaService(ctx, spUbaServiceClient)
+	spUserService := service.NewUserService(ctx, userServiceClient, spDashboardServiceClient, spVideoServiceClient)
+
+	// 消息通知（基座 internal_message 域收件箱薄转发）
+	notificationService := service.NewNotificationService(ctx, internalMessageRecipientServiceClient)
+
+	// ── register:service ── 新模块服务在此行后注册(make register 工具锚点,勿删)
 
 	// ═══════════════════════ 四、传输层(internal/server) ═══════════════════════
 
-	restMiddlewares := server.NewRestMiddleware(ctx, authenticator)
+	restMiddlewares := server.NewRestMiddleware(ctx, accessTokenChecker, engine, tenantResolver)
 
-	httpServer, err := server.NewRestServer(ctx, restMiddlewares,
+	httpServer := server.NewRestServer(ctx, restMiddlewares,
 		authenticationService,
-		userService,
-		feedService,
-		videoService,
-		interactionService,
+		fileTransferService,
+		userProfileService,
+		mediaAssetService,
 		commentService,
-		notifyService,
-		reportService,
-		ubaService,
-		feedServiceClient,
+		spFeedService, spVideoService, spInteractionService,
+		spReportService, spUbaService, spUserService,
+		notificationService,
+		// register:rest-arg ── 新模块服务实参在此行后追加(make register 工具锚点,勿删)
 	)
+
+	grpcMiddlewares := server.NewGrpcMiddleware(ctx)
+	grpcServer, err := server.NewGrpcServer(ctx, grpcMiddlewares)
 	if err != nil {
 		rollback()
 		return nil, nil, err
 	}
 
-	return newApp(ctx, httpServer), rollback, nil
+	sseServer := server.NewSseServer(ctx, authenticationServiceClient)
+
+	return newApp(ctx, httpServer, grpcServer, sseServer), rollback, nil
 }

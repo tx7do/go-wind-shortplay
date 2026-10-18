@@ -4,15 +4,18 @@
 // 	protoc        (unknown)
 // source: app/service/v1/i_authentication.proto
 
-package apppb
+package servicev1
 
 import (
-	v1 "go-wind-shortplay/api/gen/go/identity/service/v1"
+	_ "github.com/google/gnostic/openapiv3"
+	v1 "go-wind-shortplay/api/gen/go/authentication/service/v1"
+	_ "go-wind-shortplay/api/gen/go/identity/service/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
+	sync "sync"
 	unsafe "unsafe"
 )
 
@@ -23,40 +26,391 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// 认证令牌对（旧契约形状）
+type Authenticator struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TokenType     string                 `protobuf:"bytes,1,opt,name=token_type,json=tokenType,proto3" json:"token_type,omitempty"`          // 固定 "Bearer"
+	AccessToken   string                 `protobuf:"bytes,2,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`    // 访问令牌
+	RefreshToken  string                 `protobuf:"bytes,3,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"` // 刷新令牌
+	ExpiresIn     int32                  `protobuf:"varint,4,opt,name=expires_in,json=expiresIn,proto3" json:"expires_in,omitempty"`         // 访问令牌有效期（秒）
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Authenticator) Reset() {
+	*x = Authenticator{}
+	mi := &file_app_service_v1_i_authentication_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Authenticator) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Authenticator) ProtoMessage() {}
+
+func (x *Authenticator) ProtoReflect() protoreflect.Message {
+	mi := &file_app_service_v1_i_authentication_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Authenticator.ProtoReflect.Descriptor instead.
+func (*Authenticator) Descriptor() ([]byte, []int) {
+	return file_app_service_v1_i_authentication_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Authenticator) GetTokenType() string {
+	if x != nil {
+		return x.TokenType
+	}
+	return ""
+}
+
+func (x *Authenticator) GetAccessToken() string {
+	if x != nil {
+		return x.AccessToken
+	}
+	return ""
+}
+
+func (x *Authenticator) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
+func (x *Authenticator) GetExpiresIn() int32 {
+	if x != nil {
+		return x.ExpiresIn
+	}
+	return 0
+}
+
+// 用户摘要（旧契约形状）
+type AuthUserProfile struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                               // 用户ID
+	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`                    // 登录名
+	Nickname      string                 `protobuf:"bytes,3,opt,name=nickname,proto3" json:"nickname,omitempty"`                    // 昵称
+	AvatarUrl     string                 `protobuf:"bytes,4,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"` // 头像
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AuthUserProfile) Reset() {
+	*x = AuthUserProfile{}
+	mi := &file_app_service_v1_i_authentication_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AuthUserProfile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AuthUserProfile) ProtoMessage() {}
+
+func (x *AuthUserProfile) ProtoReflect() protoreflect.Message {
+	mi := &file_app_service_v1_i_authentication_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AuthUserProfile.ProtoReflect.Descriptor instead.
+func (*AuthUserProfile) Descriptor() ([]byte, []int) {
+	return file_app_service_v1_i_authentication_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *AuthUserProfile) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *AuthUserProfile) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *AuthUserProfile) GetNickname() string {
+	if x != nil {
+		return x.Nickname
+	}
+	return ""
+}
+
+func (x *AuthUserProfile) GetAvatarUrl() string {
+	if x != nil {
+		return x.AvatarUrl
+	}
+	return ""
+}
+
+// 登录/注册/刷新统一响应（旧契约包装）
+type AuthLoginResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Authenticator *Authenticator         `protobuf:"bytes,1,opt,name=authenticator,proto3" json:"authenticator,omitempty"` // 令牌对
+	User          *AuthUserProfile       `protobuf:"bytes,2,opt,name=user,proto3" json:"user,omitempty"`                   // 用户摘要
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AuthLoginResponse) Reset() {
+	*x = AuthLoginResponse{}
+	mi := &file_app_service_v1_i_authentication_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AuthLoginResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AuthLoginResponse) ProtoMessage() {}
+
+func (x *AuthLoginResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_app_service_v1_i_authentication_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AuthLoginResponse.ProtoReflect.Descriptor instead.
+func (*AuthLoginResponse) Descriptor() ([]byte, []int) {
+	return file_app_service_v1_i_authentication_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *AuthLoginResponse) GetAuthenticator() *Authenticator {
+	if x != nil {
+		return x.Authenticator
+	}
+	return nil
+}
+
+func (x *AuthLoginResponse) GetUser() *AuthUserProfile {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+// 注册 - 请求
+type AuthRegisterRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Username      string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"` // 登录名
+	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"` // 密码（AES 加密后 base64）
+	Nickname      string                 `protobuf:"bytes,3,opt,name=nickname,proto3" json:"nickname,omitempty"` // 昵称
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AuthRegisterRequest) Reset() {
+	*x = AuthRegisterRequest{}
+	mi := &file_app_service_v1_i_authentication_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AuthRegisterRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AuthRegisterRequest) ProtoMessage() {}
+
+func (x *AuthRegisterRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_app_service_v1_i_authentication_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AuthRegisterRequest.ProtoReflect.Descriptor instead.
+func (*AuthRegisterRequest) Descriptor() ([]byte, []int) {
+	return file_app_service_v1_i_authentication_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *AuthRegisterRequest) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *AuthRegisterRequest) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *AuthRegisterRequest) GetNickname() string {
+	if x != nil {
+		return x.Nickname
+	}
+	return ""
+}
+
+// 刷新令牌 - 请求
+type AuthRefreshRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RefreshToken  string                 `protobuf:"bytes,1,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"` // 刷新令牌
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AuthRefreshRequest) Reset() {
+	*x = AuthRefreshRequest{}
+	mi := &file_app_service_v1_i_authentication_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AuthRefreshRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AuthRefreshRequest) ProtoMessage() {}
+
+func (x *AuthRefreshRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_app_service_v1_i_authentication_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AuthRefreshRequest.ProtoReflect.Descriptor instead.
+func (*AuthRefreshRequest) Descriptor() ([]byte, []int) {
+	return file_app_service_v1_i_authentication_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *AuthRefreshRequest) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
 var File_app_service_v1_i_authentication_proto protoreflect.FileDescriptor
 
 const file_app_service_v1_i_authentication_proto_rawDesc = "" +
 	"\n" +
-	"%app/service/v1/i_authentication.proto\x12\x0eapp.service.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a(identity/service/v1/authentication.proto\x1a\x1eidentity/service/v1/user.proto2\xe3\x03\n" +
-	"\x15AuthenticationService\x12m\n" +
-	"\x05Login\x12!.identity.service.v1.LoginRequest\x1a\".identity.service.v1.LoginResponse\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/app/v1/auth/login\x12v\n" +
-	"\bRegister\x12$.identity.service.v1.RegisterRequest\x1a\".identity.service.v1.LoginResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/app/v1/auth/register\x12}\n" +
-	"\fRefreshToken\x12(.identity.service.v1.RefreshTokenRequest\x1a\".identity.service.v1.LoginResponse\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/app/v1/auth/refresh\x12d\n" +
-	"\x06Logout\x12\".identity.service.v1.LogoutRequest\x1a\x16.google.protobuf.Empty\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/app/v1/auth/logoutB\xb7\x01\n" +
-	"\x12com.app.service.v1B\x14IAuthenticationProtoP\x01Z1go-wind-shortplay/api/gen/go/app/service/v1;apppb\xa2\x02\x03ASX\xaa\x02\x0eApp.Service.V1\xca\x02\x0eApp\\Service\\V1\xe2\x02\x1aApp\\Service\\V1\\GPBMetadata\xea\x02\x10App::Service::V1b\x06proto3"
+	"%app/service/v1/i_authentication.proto\x12\x0eapp.service.v1\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1eidentity/service/v1/user.proto\x1a.authentication/service/v1/authentication.proto\"\x95\x01\n" +
+	"\rAuthenticator\x12\x1d\n" +
+	"\n" +
+	"token_type\x18\x01 \x01(\tR\ttokenType\x12!\n" +
+	"\faccess_token\x18\x02 \x01(\tR\vaccessToken\x12#\n" +
+	"\rrefresh_token\x18\x03 \x01(\tR\frefreshToken\x12\x1d\n" +
+	"\n" +
+	"expires_in\x18\x04 \x01(\x05R\texpiresIn\"x\n" +
+	"\x0fAuthUserProfile\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12\x1a\n" +
+	"\busername\x18\x02 \x01(\tR\busername\x12\x1a\n" +
+	"\bnickname\x18\x03 \x01(\tR\bnickname\x12\x1d\n" +
+	"\n" +
+	"avatar_url\x18\x04 \x01(\tR\tavatarUrl\"\x8d\x01\n" +
+	"\x11AuthLoginResponse\x12C\n" +
+	"\rauthenticator\x18\x01 \x01(\v2\x1d.app.service.v1.AuthenticatorR\rauthenticator\x123\n" +
+	"\x04user\x18\x02 \x01(\v2\x1f.app.service.v1.AuthUserProfileR\x04user\"i\n" +
+	"\x13AuthRegisterRequest\x12\x1a\n" +
+	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x1a\n" +
+	"\bnickname\x18\x03 \x01(\tR\bnickname\"9\n" +
+	"\x12AuthRefreshRequest\x12#\n" +
+	"\rrefresh_token\x18\x01 \x01(\tR\frefreshToken2\xf6\a\n" +
+	"\x15AuthenticationService\x12y\n" +
+	"\x05Login\x12'.authentication.service.v1.LoginRequest\x1a(.authentication.service.v1.LoginResponse\"\x1d\xbaG\x02Z\x00\x82\xd3\xe4\x93\x02\x12:\x01*\"\r/app/v1/login\x12S\n" +
+	"\x06Logout\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/app/v1/logout\x12\x83\x01\n" +
+	"\fRefreshToken\x12'.authentication.service.v1.LoginRequest\x1a(.authentication.service.v1.LoginResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/app/v1/refresh-token\x12\xb0\x01\n" +
+	"\x13GetOidcAuthorizeUrl\x125.authentication.service.v1.GetOidcAuthorizeUrlRequest\x1a6.authentication.service.v1.GetOidcAuthorizeUrlResponse\"*\xbaG\x02Z\x00\x82\xd3\xe4\x93\x02\x1f:\x01*\"\x1a/app/v1/oidc/authorize-url\x12{\n" +
+	"\tAuthLogin\x12'.authentication.service.v1.LoginRequest\x1a!.app.service.v1.AuthLoginResponse\"\"\xbaG\x02Z\x00\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/app/v1/auth/login\x12}\n" +
+	"\fAuthRegister\x12#.app.service.v1.AuthRegisterRequest\x1a!.app.service.v1.AuthLoginResponse\"%\xbaG\x02Z\x00\x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/app/v1/auth/register\x12z\n" +
+	"\vAuthRefresh\x12\".app.service.v1.AuthRefreshRequest\x1a!.app.service.v1.AuthLoginResponse\"$\xbaG\x02Z\x00\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/app/v1/auth/refresh\x12\\\n" +
+	"\n" +
+	"AuthLogout\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/app/v1/auth/logoutB\xbb\x01\n" +
+	"\x12com.app.service.v1B\x14IAuthenticationProtoP\x01Z5go-wind-shortplay/api/gen/go/app/service/v1;servicev1\xa2\x02\x03ASX\xaa\x02\x0eApp.Service.V1\xca\x02\x0eApp\\Service\\V1\xe2\x02\x1aApp\\Service\\V1\\GPBMetadata\xea\x02\x10App::Service::V1b\x06proto3"
 
+var (
+	file_app_service_v1_i_authentication_proto_rawDescOnce sync.Once
+	file_app_service_v1_i_authentication_proto_rawDescData []byte
+)
+
+func file_app_service_v1_i_authentication_proto_rawDescGZIP() []byte {
+	file_app_service_v1_i_authentication_proto_rawDescOnce.Do(func() {
+		file_app_service_v1_i_authentication_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_app_service_v1_i_authentication_proto_rawDesc), len(file_app_service_v1_i_authentication_proto_rawDesc)))
+	})
+	return file_app_service_v1_i_authentication_proto_rawDescData
+}
+
+var file_app_service_v1_i_authentication_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_app_service_v1_i_authentication_proto_goTypes = []any{
-	(*v1.LoginRequest)(nil),        // 0: identity.service.v1.LoginRequest
-	(*v1.RegisterRequest)(nil),     // 1: identity.service.v1.RegisterRequest
-	(*v1.RefreshTokenRequest)(nil), // 2: identity.service.v1.RefreshTokenRequest
-	(*v1.LogoutRequest)(nil),       // 3: identity.service.v1.LogoutRequest
-	(*v1.LoginResponse)(nil),       // 4: identity.service.v1.LoginResponse
-	(*emptypb.Empty)(nil),          // 5: google.protobuf.Empty
+	(*Authenticator)(nil),                  // 0: app.service.v1.Authenticator
+	(*AuthUserProfile)(nil),                // 1: app.service.v1.AuthUserProfile
+	(*AuthLoginResponse)(nil),              // 2: app.service.v1.AuthLoginResponse
+	(*AuthRegisterRequest)(nil),            // 3: app.service.v1.AuthRegisterRequest
+	(*AuthRefreshRequest)(nil),             // 4: app.service.v1.AuthRefreshRequest
+	(*v1.LoginRequest)(nil),                // 5: authentication.service.v1.LoginRequest
+	(*emptypb.Empty)(nil),                  // 6: google.protobuf.Empty
+	(*v1.GetOidcAuthorizeUrlRequest)(nil),  // 7: authentication.service.v1.GetOidcAuthorizeUrlRequest
+	(*v1.LoginResponse)(nil),               // 8: authentication.service.v1.LoginResponse
+	(*v1.GetOidcAuthorizeUrlResponse)(nil), // 9: authentication.service.v1.GetOidcAuthorizeUrlResponse
 }
 var file_app_service_v1_i_authentication_proto_depIdxs = []int32{
-	0, // 0: app.service.v1.AuthenticationService.Login:input_type -> identity.service.v1.LoginRequest
-	1, // 1: app.service.v1.AuthenticationService.Register:input_type -> identity.service.v1.RegisterRequest
-	2, // 2: app.service.v1.AuthenticationService.RefreshToken:input_type -> identity.service.v1.RefreshTokenRequest
-	3, // 3: app.service.v1.AuthenticationService.Logout:input_type -> identity.service.v1.LogoutRequest
-	4, // 4: app.service.v1.AuthenticationService.Login:output_type -> identity.service.v1.LoginResponse
-	4, // 5: app.service.v1.AuthenticationService.Register:output_type -> identity.service.v1.LoginResponse
-	4, // 6: app.service.v1.AuthenticationService.RefreshToken:output_type -> identity.service.v1.LoginResponse
-	5, // 7: app.service.v1.AuthenticationService.Logout:output_type -> google.protobuf.Empty
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: app.service.v1.AuthLoginResponse.authenticator:type_name -> app.service.v1.Authenticator
+	1,  // 1: app.service.v1.AuthLoginResponse.user:type_name -> app.service.v1.AuthUserProfile
+	5,  // 2: app.service.v1.AuthenticationService.Login:input_type -> authentication.service.v1.LoginRequest
+	6,  // 3: app.service.v1.AuthenticationService.Logout:input_type -> google.protobuf.Empty
+	5,  // 4: app.service.v1.AuthenticationService.RefreshToken:input_type -> authentication.service.v1.LoginRequest
+	7,  // 5: app.service.v1.AuthenticationService.GetOidcAuthorizeUrl:input_type -> authentication.service.v1.GetOidcAuthorizeUrlRequest
+	5,  // 6: app.service.v1.AuthenticationService.AuthLogin:input_type -> authentication.service.v1.LoginRequest
+	3,  // 7: app.service.v1.AuthenticationService.AuthRegister:input_type -> app.service.v1.AuthRegisterRequest
+	4,  // 8: app.service.v1.AuthenticationService.AuthRefresh:input_type -> app.service.v1.AuthRefreshRequest
+	6,  // 9: app.service.v1.AuthenticationService.AuthLogout:input_type -> google.protobuf.Empty
+	8,  // 10: app.service.v1.AuthenticationService.Login:output_type -> authentication.service.v1.LoginResponse
+	6,  // 11: app.service.v1.AuthenticationService.Logout:output_type -> google.protobuf.Empty
+	8,  // 12: app.service.v1.AuthenticationService.RefreshToken:output_type -> authentication.service.v1.LoginResponse
+	9,  // 13: app.service.v1.AuthenticationService.GetOidcAuthorizeUrl:output_type -> authentication.service.v1.GetOidcAuthorizeUrlResponse
+	2,  // 14: app.service.v1.AuthenticationService.AuthLogin:output_type -> app.service.v1.AuthLoginResponse
+	2,  // 15: app.service.v1.AuthenticationService.AuthRegister:output_type -> app.service.v1.AuthLoginResponse
+	2,  // 16: app.service.v1.AuthenticationService.AuthRefresh:output_type -> app.service.v1.AuthLoginResponse
+	6,  // 17: app.service.v1.AuthenticationService.AuthLogout:output_type -> google.protobuf.Empty
+	10, // [10:18] is the sub-list for method output_type
+	2,  // [2:10] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_app_service_v1_i_authentication_proto_init() }
@@ -70,12 +424,13 @@ func file_app_service_v1_i_authentication_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_app_service_v1_i_authentication_proto_rawDesc), len(file_app_service_v1_i_authentication_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   0,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_app_service_v1_i_authentication_proto_goTypes,
 		DependencyIndexes: file_app_service_v1_i_authentication_proto_depIdxs,
+		MessageInfos:      file_app_service_v1_i_authentication_proto_msgTypes,
 	}.Build()
 	File_app_service_v1_i_authentication_proto = out.File
 	file_app_service_v1_i_authentication_proto_goTypes = nil

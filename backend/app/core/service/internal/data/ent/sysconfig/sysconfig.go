@@ -17,6 +17,12 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// FieldCreatedBy holds the string denoting the created_by field in the database.
+	FieldCreatedBy = "created_by"
+	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
+	FieldUpdatedBy = "updated_by"
+	// FieldDeletedBy holds the string denoting the deleted_by field in the database.
+	FieldDeletedBy = "deleted_by"
 	// FieldMaxUploadSizeMB holds the string denoting the max_upload_size_mb field in the database.
 	FieldMaxUploadSizeMB = "max_upload_size_mb"
 	// FieldMaxDurationSeconds holds the string denoting the max_duration_seconds field in the database.
@@ -28,7 +34,7 @@ const (
 	// FieldAllowedVideoTypes holds the string denoting the allowed_video_types field in the database.
 	FieldAllowedVideoTypes = "allowed_video_types"
 	// Table holds the table name of the sysconfig in the database.
-	Table = "sys_configs"
+	Table = "sp_sys_configs"
 )
 
 // Columns holds all SQL columns for sysconfig fields.
@@ -37,6 +43,9 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
+	FieldCreatedBy,
+	FieldUpdatedBy,
+	FieldDeletedBy,
 	FieldMaxUploadSizeMB,
 	FieldMaxDurationSeconds,
 	FieldManualReviewEnabled,
@@ -88,6 +97,21 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByDeletedAt orders the results by the deleted_at field.
 func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByCreatedBy orders the results by the created_by field.
+func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
+}
+
+// ByUpdatedBy orders the results by the updated_by field.
+func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedBy, opts...).ToFunc()
+}
+
+// ByDeletedBy orders the results by the deleted_by field.
+func ByDeletedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedBy, opts...).ToFunc()
 }
 
 // ByMaxUploadSizeMB orders the results by the max_upload_size_mb field.

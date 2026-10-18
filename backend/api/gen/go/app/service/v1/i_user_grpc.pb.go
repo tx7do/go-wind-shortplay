@@ -4,7 +4,7 @@
 // - protoc             (unknown)
 // source: app/service/v1/i_user.proto
 
-package apppb
+package servicev1
 
 import (
 	context "context"
@@ -31,14 +31,14 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// 用户主页服务（App 端）
+// 用户主页服务（App 端，shortplay 业务）
 type UserServiceClient interface {
-	// 用户主页（本人 / 他人通用：资料 + 统计）
-	GetUser(ctx context.Context, in *v1.GetUserRequest, opts ...grpc.CallOption) (*v1.User, error)
-	// 用户统计（粉丝 / 关注 / 作品 / 获赞）
+	// 用户主页（本人 / 他人通用：资料；游客可访问）
+	GetUser(ctx context.Context, in *GetAppUserRequest, opts ...grpc.CallOption) (*UserDetail, error)
+	// 用户统计（粉丝 / 关注 / 作品 / 获赞；游客可访问）
 	GetUserStats(ctx context.Context, in *v1.GetUserStatsRequest, opts ...grpc.CallOption) (*v1.UserStats, error)
-	// 编辑我的资料
-	UpdateProfile(ctx context.Context, in *v1.UpdateUserRequest, opts ...grpc.CallOption) (*v1.User, error)
+	// 编辑我的资料（id 取令牌）
+	UpdateProfile(ctx context.Context, in *UpdateProfileRequest, opts ...grpc.CallOption) (*UserDetail, error)
 	// 用户作品列表（主页「作品」Tab；本人可见全部状态，他人仅已发布）
 	ListUserVideos(ctx context.Context, in *ListUserVideosRequest, opts ...grpc.CallOption) (*v11.ListVideoResponse, error)
 }
@@ -51,9 +51,9 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) GetUser(ctx context.Context, in *v1.GetUserRequest, opts ...grpc.CallOption) (*v1.User, error) {
+func (c *userServiceClient) GetUser(ctx context.Context, in *GetAppUserRequest, opts ...grpc.CallOption) (*UserDetail, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.User)
+	out := new(UserDetail)
 	err := c.cc.Invoke(ctx, UserService_GetUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -71,9 +71,9 @@ func (c *userServiceClient) GetUserStats(ctx context.Context, in *v1.GetUserStat
 	return out, nil
 }
 
-func (c *userServiceClient) UpdateProfile(ctx context.Context, in *v1.UpdateUserRequest, opts ...grpc.CallOption) (*v1.User, error) {
+func (c *userServiceClient) UpdateProfile(ctx context.Context, in *UpdateProfileRequest, opts ...grpc.CallOption) (*UserDetail, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.User)
+	out := new(UserDetail)
 	err := c.cc.Invoke(ctx, UserService_UpdateProfile_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -95,14 +95,14 @@ func (c *userServiceClient) ListUserVideos(ctx context.Context, in *ListUserVide
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
 //
-// 用户主页服务（App 端）
+// 用户主页服务（App 端，shortplay 业务）
 type UserServiceServer interface {
-	// 用户主页（本人 / 他人通用：资料 + 统计）
-	GetUser(context.Context, *v1.GetUserRequest) (*v1.User, error)
-	// 用户统计（粉丝 / 关注 / 作品 / 获赞）
+	// 用户主页（本人 / 他人通用：资料；游客可访问）
+	GetUser(context.Context, *GetAppUserRequest) (*UserDetail, error)
+	// 用户统计（粉丝 / 关注 / 作品 / 获赞；游客可访问）
 	GetUserStats(context.Context, *v1.GetUserStatsRequest) (*v1.UserStats, error)
-	// 编辑我的资料
-	UpdateProfile(context.Context, *v1.UpdateUserRequest) (*v1.User, error)
+	// 编辑我的资料（id 取令牌）
+	UpdateProfile(context.Context, *UpdateProfileRequest) (*UserDetail, error)
 	// 用户作品列表（主页「作品」Tab；本人可见全部状态，他人仅已发布）
 	ListUserVideos(context.Context, *ListUserVideosRequest) (*v11.ListVideoResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
@@ -115,13 +115,13 @@ type UserServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedUserServiceServer struct{}
 
-func (UnimplementedUserServiceServer) GetUser(context.Context, *v1.GetUserRequest) (*v1.User, error) {
+func (UnimplementedUserServiceServer) GetUser(context.Context, *GetAppUserRequest) (*UserDetail, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUser not implemented")
 }
 func (UnimplementedUserServiceServer) GetUserStats(context.Context, *v1.GetUserStatsRequest) (*v1.UserStats, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUserStats not implemented")
 }
-func (UnimplementedUserServiceServer) UpdateProfile(context.Context, *v1.UpdateUserRequest) (*v1.User, error) {
+func (UnimplementedUserServiceServer) UpdateProfile(context.Context, *UpdateProfileRequest) (*UserDetail, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateProfile not implemented")
 }
 func (UnimplementedUserServiceServer) ListUserVideos(context.Context, *ListUserVideosRequest) (*v11.ListVideoResponse, error) {
@@ -149,7 +149,7 @@ func RegisterUserServiceServer(s grpc.ServiceRegistrar, srv UserServiceServer) {
 }
 
 func _UserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.GetUserRequest)
+	in := new(GetAppUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -161,7 +161,7 @@ func _UserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: UserService_GetUser_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GetUser(ctx, req.(*v1.GetUserRequest))
+		return srv.(UserServiceServer).GetUser(ctx, req.(*GetAppUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -185,7 +185,7 @@ func _UserService_GetUserStats_Handler(srv interface{}, ctx context.Context, dec
 }
 
 func _UserService_UpdateProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.UpdateUserRequest)
+	in := new(UpdateProfileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -197,7 +197,7 @@ func _UserService_UpdateProfile_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: UserService_UpdateProfile_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).UpdateProfile(ctx, req.(*v1.UpdateUserRequest))
+		return srv.(UserServiceServer).UpdateProfile(ctx, req.(*UpdateProfileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

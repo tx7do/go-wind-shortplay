@@ -33,11 +33,11 @@ type SysConfServiceHTTPServer interface {
 
 func RegisterSysConfServiceHTTPServer(s *http.Server, srv SysConfServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/v1/sysconf", _SysConfService_Get1_HTTP_Handler(srv))
-	r.PUT("/admin/v1/sysconf", _SysConfService_Update0_HTTP_Handler(srv))
+	r.GET("/admin/v1/sysconf", _SysConfService_Get24_HTTP_Handler(srv))
+	r.PUT("/admin/v1/sysconf", _SysConfService_Update17_HTTP_Handler(srv))
 }
 
-func _SysConfService_Get1_HTTP_Handler(srv SysConfServiceHTTPServer) func(ctx http.Context) error {
+func _SysConfService_Get24_HTTP_Handler(srv SysConfServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in emptypb.Empty
 		if err := ctx.BindQuery(&in); err != nil {
@@ -56,7 +56,7 @@ func _SysConfService_Get1_HTTP_Handler(srv SysConfServiceHTTPServer) func(ctx ht
 	}
 }
 
-func _SysConfService_Update0_HTTP_Handler(srv SysConfServiceHTTPServer) func(ctx http.Context) error {
+func _SysConfService_Update17_HTTP_Handler(srv SysConfServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v1.UpdateSysConfRequest
 		if err := ctx.Bind(&in); err != nil {

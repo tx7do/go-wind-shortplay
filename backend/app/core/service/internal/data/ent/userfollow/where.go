@@ -69,6 +69,11 @@ func DeletedAt(v time.Time) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldEQ(FieldDeletedAt, v))
 }
 
+// TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
+func TenantID(v uint32) predicate.UserFollow {
+	return predicate.UserFollow(sql.FieldEQ(FieldTenantID, v))
+}
+
 // FollowerID applies equality check predicate on the "follower_id" field. It's identical to FollowerIDEQ.
 func FollowerID(v uint32) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldEQ(FieldFollowerID, v))
@@ -229,6 +234,56 @@ func DeletedAtNotNil() predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldNotNull(FieldDeletedAt))
 }
 
+// TenantIDEQ applies the EQ predicate on the "tenant_id" field.
+func TenantIDEQ(v uint32) predicate.UserFollow {
+	return predicate.UserFollow(sql.FieldEQ(FieldTenantID, v))
+}
+
+// TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
+func TenantIDNEQ(v uint32) predicate.UserFollow {
+	return predicate.UserFollow(sql.FieldNEQ(FieldTenantID, v))
+}
+
+// TenantIDIn applies the In predicate on the "tenant_id" field.
+func TenantIDIn(vs ...uint32) predicate.UserFollow {
+	return predicate.UserFollow(sql.FieldIn(FieldTenantID, vs...))
+}
+
+// TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
+func TenantIDNotIn(vs ...uint32) predicate.UserFollow {
+	return predicate.UserFollow(sql.FieldNotIn(FieldTenantID, vs...))
+}
+
+// TenantIDGT applies the GT predicate on the "tenant_id" field.
+func TenantIDGT(v uint32) predicate.UserFollow {
+	return predicate.UserFollow(sql.FieldGT(FieldTenantID, v))
+}
+
+// TenantIDGTE applies the GTE predicate on the "tenant_id" field.
+func TenantIDGTE(v uint32) predicate.UserFollow {
+	return predicate.UserFollow(sql.FieldGTE(FieldTenantID, v))
+}
+
+// TenantIDLT applies the LT predicate on the "tenant_id" field.
+func TenantIDLT(v uint32) predicate.UserFollow {
+	return predicate.UserFollow(sql.FieldLT(FieldTenantID, v))
+}
+
+// TenantIDLTE applies the LTE predicate on the "tenant_id" field.
+func TenantIDLTE(v uint32) predicate.UserFollow {
+	return predicate.UserFollow(sql.FieldLTE(FieldTenantID, v))
+}
+
+// TenantIDIsNil applies the IsNil predicate on the "tenant_id" field.
+func TenantIDIsNil() predicate.UserFollow {
+	return predicate.UserFollow(sql.FieldIsNull(FieldTenantID))
+}
+
+// TenantIDNotNil applies the NotNil predicate on the "tenant_id" field.
+func TenantIDNotNil() predicate.UserFollow {
+	return predicate.UserFollow(sql.FieldNotNull(FieldTenantID))
+}
+
 // FollowerIDEQ applies the EQ predicate on the "follower_id" field.
 func FollowerIDEQ(v uint32) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldEQ(FieldFollowerID, v))
@@ -269,16 +324,6 @@ func FollowerIDLTE(v uint32) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldLTE(FieldFollowerID, v))
 }
 
-// FollowerIDIsNil applies the IsNil predicate on the "follower_id" field.
-func FollowerIDIsNil() predicate.UserFollow {
-	return predicate.UserFollow(sql.FieldIsNull(FieldFollowerID))
-}
-
-// FollowerIDNotNil applies the NotNil predicate on the "follower_id" field.
-func FollowerIDNotNil() predicate.UserFollow {
-	return predicate.UserFollow(sql.FieldNotNull(FieldFollowerID))
-}
-
 // FolloweeIDEQ applies the EQ predicate on the "followee_id" field.
 func FolloweeIDEQ(v uint32) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldEQ(FieldFolloweeID, v))
@@ -317,16 +362,6 @@ func FolloweeIDLT(v uint32) predicate.UserFollow {
 // FolloweeIDLTE applies the LTE predicate on the "followee_id" field.
 func FolloweeIDLTE(v uint32) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldLTE(FieldFolloweeID, v))
-}
-
-// FolloweeIDIsNil applies the IsNil predicate on the "followee_id" field.
-func FolloweeIDIsNil() predicate.UserFollow {
-	return predicate.UserFollow(sql.FieldIsNull(FieldFolloweeID))
-}
-
-// FolloweeIDNotNil applies the NotNil predicate on the "followee_id" field.
-func FolloweeIDNotNil() predicate.UserFollow {
-	return predicate.UserFollow(sql.FieldNotNull(FieldFolloweeID))
 }
 
 // And groups predicates with the AND operator between them.

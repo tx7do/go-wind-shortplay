@@ -5,6 +5,12 @@
   "reports": "举报管理",
   "users": "用户管理",
   "sysconf": "系统配置",
+  "permission": "组织与权限",
+  "permission-roles": "角色管理",
+  "permission-menus": "菜单管理",
+  "permission-apis": "权限点管理",
+  "permission-departments": "部门管理",
+  "profile": "个人中心",
   "auth": "认证",
   "login": "登录",
   "error-pages": "错误",
@@ -14,5 +20,101 @@
   "offline": "离线",
   "coming-soon": "即将上线",
   "not-found": "404",
-  "home": "首页"
+  "home": "首页",
+  "page": {
+    "dashboard": {
+      "title": "数据看板",
+      "analytics": "数据看板"
+    }
+  },
+  "menu": {
+    "profile": {
+      "settings": "个人资料",
+      "internalMessage": "收件中心"
+    },
+    "tenant": {
+      "moduleName": "租户管理",
+      "member": "租户成员"
+    },
+    "opm": {
+      "moduleName": "组织人事",
+      "orgUnit": "组织架构",
+      "position": "职位管理",
+      "user": "用户管理",
+      "userDetail": "用户详情"
+    },
+    "permission": {
+      "moduleName": "权限管理",
+      "permission": "接口管理",
+      "role": "角色管理",
+      "menu": "菜单管理",
+      "department": "部门管理"
+    },
+    "internalMessage": {
+      "moduleName": "内部消息",
+      "internalMessage": "消息列表",
+      "internalMessageCategory": "消息分类"
+    },
+    "log": {
+      "moduleName": "日志审计",
+      "loginAuditLog": "登录日志",
+      "apiAuditLog": "接口日志",
+      "operationAuditLog": "操作日志",
+      "dataAccessAuditLog": "数据日志",
+      "permissionAuditLog": "权限日志"
+    },
+    "system": {
+      "moduleName": "系统管理",
+      "menu": "菜单管理",
+      "api": "接口管理",
+      "dict": "字典管理",
+      "file": "文件管理",
+      "task": "任务管理",
+      "loginPolicy": "登录策略",
+      "language": "语言管理"
+    },
+    "shortPlay": {
+      "moduleName": "短剧管理",
+      "video": "视频管理",
+      "comment": "评论管理",
+      "report": "举报管理",
+      "sysconf": "系统配置"
+    }
+  },
+  "profile.settings": "个人资料",
+  "profile.internalMessage": "收件中心",
+  "tenant.moduleName": "租户管理",
+  "tenant.member": "租户成员",
+  "opm.moduleName": "组织人事",
+  "opm.orgUnit": "组织架构",
+  "opm.position": "职位管理",
+  "opm.user": "用户管理",
+  "opm.userDetail": "用户详情",
+  "permission.moduleName": "权限管理",
+  "permission.permission": "接口管理",
+  "permission.role": "角色管理",
+  "permission.menu": "菜单管理",
+  "permission.department": "部门管理",
+  "internalMessage.moduleName": "内部消息",
+  "internalMessage.internalMessage": "消息列表",
+  "internalMessage.internalMessageCategory": "消息分类",
+  "log.moduleName": "日志审计",
+  "log.loginAuditLog": "登录日志",
+  "log.apiAuditLog": "接口日志",
+  "log.operationAuditLog": "操作日志",
+  "log.dataAccessAuditLog": "数据日志",
+  "log.permissionAuditLog": "权限日志",
+  "system.moduleName": "系统管理",
+  "system.menu": "菜单管理",
+  "system.api": "接口管理",
+  "system.dict": "字典管理",
+  "system.file": "文件管理",
+  "system.task": "任务管理",
+  "system.loginPolicy": "登录策略",
+  "system.language": "语言管理",
+  "shortPlay.moduleName": "短剧管理",
+  "shortPlay.video": "视频管理",
+  "shortPlay.comment": "评论管理",
+  "shortPlay.report": "举报管理",
+  "shortPlay.sysconf": "系统配置"
 }

@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 用户行为埋点事件表
+// UBA 行为事件表
 type UbaEvent struct {
 	config `json:"-"`
 	// ID of the ent.
@@ -20,19 +20,25 @@ type UbaEvent struct {
 	ID uint32 `json:"id,omitempty"`
 	// 创建时间
 	CreatedAt *time.Time `json:"created_at,omitempty"`
-	// 事件类型，对应 uba.EventType 枚举
-	EventType *uint8 `json:"event_type,omitempty"`
-	// 视频ID（非视频事件为 0）
-	VideoID *uint32 `json:"video_id,omitempty"`
-	// 用户ID（游客为 0）
-	UserID *uint32 `json:"user_id,omitempty"`
+	// 更新时间
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	// 删除时间
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// 租户ID
+	TenantID *uint32 `json:"tenant_id,omitempty"`
+	// 行为人用户ID（游客为0）
+	UserID uint32 `json:"user_id,omitempty"`
+	// 事件类型
+	EventType ubaevent.EventType `json:"event_type,omitempty"`
+	// 视频ID（非视频事件为0）
+	VideoID uint32 `json:"video_id,omitempty"`
 	// 对方用户ID（关注事件）
-	TargetUserID *uint32 `json:"target_user_id,omitempty"`
+	TargetUserID uint32 `json:"target_user_id,omitempty"`
 	// 观看时长（毫秒）
-	DurationMs *int64 `json:"duration_ms,omitempty"`
+	DurationMs uint64 `json:"duration_ms,omitempty"`
 	// 观看进度百分比（0-100）
-	WatchPercent *uint32 `json:"watch_percent,omitempty"`
-	// 扩展参数（JSON）
+	WatchPercent uint32 `json:"watch_percent,omitempty"`
+	// 扩展参数（JSON 字符串）
 	Extra *string `json:"extra,omitempty"`
 	// 发生时间
 	OccurredAt   *time.Time `json:"occurred_at,omitempty"`
@@ -44,11 +50,11 @@ func (*UbaEvent) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case ubaevent.FieldID, ubaevent.FieldEventType, ubaevent.FieldVideoID, ubaevent.FieldUserID, ubaevent.FieldTargetUserID, ubaevent.FieldDurationMs, ubaevent.FieldWatchPercent:
+		case ubaevent.FieldID, ubaevent.FieldTenantID, ubaevent.FieldUserID, ubaevent.FieldVideoID, ubaevent.FieldTargetUserID, ubaevent.FieldDurationMs, ubaevent.FieldWatchPercent:
 			values[i] = new(sql.NullInt64)
-		case ubaevent.FieldExtra:
+		case ubaevent.FieldEventType, ubaevent.FieldExtra:
 			values[i] = new(sql.NullString)
-		case ubaevent.FieldCreatedAt, ubaevent.FieldOccurredAt:
+		case ubaevent.FieldCreatedAt, ubaevent.FieldUpdatedAt, ubaevent.FieldDeletedAt, ubaevent.FieldOccurredAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -78,47 +84,62 @@ func (_m *UbaEvent) assignValues(columns []string, values []any) error {
 				_m.CreatedAt = new(time.Time)
 				*_m.CreatedAt = value.Time
 			}
-		case ubaevent.FieldEventType:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field event_type", values[i])
+		case ubaevent.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				_m.EventType = new(uint8)
-				*_m.EventType = uint8(value.Int64)
+				_m.UpdatedAt = new(time.Time)
+				*_m.UpdatedAt = value.Time
 			}
-		case ubaevent.FieldVideoID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field video_id", values[i])
+		case ubaevent.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
-				_m.VideoID = new(uint32)
-				*_m.VideoID = uint32(value.Int64)
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
+			}
+		case ubaevent.FieldTenantID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
+			} else if value.Valid {
+				_m.TenantID = new(uint32)
+				*_m.TenantID = uint32(value.Int64)
 			}
 		case ubaevent.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.UserID = new(uint32)
-				*_m.UserID = uint32(value.Int64)
+				_m.UserID = uint32(value.Int64)
+			}
+		case ubaevent.FieldEventType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field event_type", values[i])
+			} else if value.Valid {
+				_m.EventType = ubaevent.EventType(value.String)
+			}
+		case ubaevent.FieldVideoID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field video_id", values[i])
+			} else if value.Valid {
+				_m.VideoID = uint32(value.Int64)
 			}
 		case ubaevent.FieldTargetUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field target_user_id", values[i])
 			} else if value.Valid {
-				_m.TargetUserID = new(uint32)
-				*_m.TargetUserID = uint32(value.Int64)
+				_m.TargetUserID = uint32(value.Int64)
 			}
 		case ubaevent.FieldDurationMs:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field duration_ms", values[i])
 			} else if value.Valid {
-				_m.DurationMs = new(int64)
-				*_m.DurationMs = value.Int64
+				_m.DurationMs = uint64(value.Int64)
 			}
 		case ubaevent.FieldWatchPercent:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field watch_percent", values[i])
 			} else if value.Valid {
-				_m.WatchPercent = new(uint32)
-				*_m.WatchPercent = uint32(value.Int64)
+				_m.WatchPercent = uint32(value.Int64)
 			}
 		case ubaevent.FieldExtra:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -175,35 +196,38 @@ func (_m *UbaEvent) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	if v := _m.EventType; v != nil {
-		builder.WriteString("event_type=")
+	if v := _m.UpdatedAt; v != nil {
+		builder.WriteString("updated_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.TenantID; v != nil {
+		builder.WriteString("tenant_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := _m.VideoID; v != nil {
-		builder.WriteString("video_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("user_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteString(", ")
-	if v := _m.UserID; v != nil {
-		builder.WriteString("user_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("event_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.EventType))
 	builder.WriteString(", ")
-	if v := _m.TargetUserID; v != nil {
-		builder.WriteString("target_user_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("video_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.VideoID))
 	builder.WriteString(", ")
-	if v := _m.DurationMs; v != nil {
-		builder.WriteString("duration_ms=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("target_user_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TargetUserID))
 	builder.WriteString(", ")
-	if v := _m.WatchPercent; v != nil {
-		builder.WriteString("watch_percent=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("duration_ms=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DurationMs))
+	builder.WriteString(", ")
+	builder.WriteString("watch_percent=")
+	builder.WriteString(fmt.Sprintf("%v", _m.WatchPercent))
 	builder.WriteString(", ")
 	if v := _m.Extra; v != nil {
 		builder.WriteString("extra=")

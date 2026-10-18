@@ -64,6 +64,20 @@ func (_c *VideoTagRelCreate) SetNillableDeletedAt(v *time.Time) *VideoTagRelCrea
 	return _c
 }
 
+// SetTenantID sets the "tenant_id" field.
+func (_c *VideoTagRelCreate) SetTenantID(v uint32) *VideoTagRelCreate {
+	_c.mutation.SetTenantID(v)
+	return _c
+}
+
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_c *VideoTagRelCreate) SetNillableTenantID(v *uint32) *VideoTagRelCreate {
+	if v != nil {
+		_c.SetTenantID(*v)
+	}
+	return _c
+}
+
 // SetVideoID sets the "video_id" field.
 func (_c *VideoTagRelCreate) SetVideoID(v uint32) *VideoTagRelCreate {
 	_c.mutation.SetVideoID(v)
@@ -105,6 +119,9 @@ func (_c *VideoTagRelCreate) Mutation() *VideoTagRelMutation {
 
 // Save creates the VideoTagRel in the database.
 func (_c *VideoTagRelCreate) Save(ctx context.Context) (*VideoTagRel, error) {
+	if err := _c.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -130,8 +147,31 @@ func (_c *VideoTagRelCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_c *VideoTagRelCreate) defaults() error {
+	if _, ok := _c.mutation.TenantID(); !ok {
+		v := videotagrel.DefaultTenantID
+		_c.mutation.SetTenantID(v)
+	}
+	if _, ok := _c.mutation.VideoID(); !ok {
+		v := videotagrel.DefaultVideoID
+		_c.mutation.SetVideoID(v)
+	}
+	if _, ok := _c.mutation.TagID(); !ok {
+		v := videotagrel.DefaultTagID
+		_c.mutation.SetTagID(v)
+	}
+	return nil
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_c *VideoTagRelCreate) check() error {
+	if _, ok := _c.mutation.VideoID(); !ok {
+		return &ValidationError{Name: "video_id", err: errors.New(`ent: missing required field "VideoTagRel.video_id"`)}
+	}
+	if _, ok := _c.mutation.TagID(); !ok {
+		return &ValidationError{Name: "tag_id", err: errors.New(`ent: missing required field "VideoTagRel.tag_id"`)}
+	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := videotagrel.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "VideoTagRel.id": %w`, err)}
@@ -182,13 +222,17 @@ func (_c *VideoTagRelCreate) createSpec() (*VideoTagRel, *sqlgraph.CreateSpec) {
 		_spec.SetField(videotagrel.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
+	if value, ok := _c.mutation.TenantID(); ok {
+		_spec.SetField(videotagrel.FieldTenantID, field.TypeUint32, value)
+		_node.TenantID = &value
+	}
 	if value, ok := _c.mutation.VideoID(); ok {
 		_spec.SetField(videotagrel.FieldVideoID, field.TypeUint32, value)
-		_node.VideoID = &value
+		_node.VideoID = value
 	}
 	if value, ok := _c.mutation.TagID(); ok {
 		_spec.SetField(videotagrel.FieldTagID, field.TypeUint32, value)
-		_node.TagID = &value
+		_node.TagID = value
 	}
 	return _node, _spec
 }
@@ -296,12 +340,6 @@ func (u *VideoTagRelUpsert) AddVideoID(v uint32) *VideoTagRelUpsert {
 	return u
 }
 
-// ClearVideoID clears the value of the "video_id" field.
-func (u *VideoTagRelUpsert) ClearVideoID() *VideoTagRelUpsert {
-	u.SetNull(videotagrel.FieldVideoID)
-	return u
-}
-
 // SetTagID sets the "tag_id" field.
 func (u *VideoTagRelUpsert) SetTagID(v uint32) *VideoTagRelUpsert {
 	u.Set(videotagrel.FieldTagID, v)
@@ -317,12 +355,6 @@ func (u *VideoTagRelUpsert) UpdateTagID() *VideoTagRelUpsert {
 // AddTagID adds v to the "tag_id" field.
 func (u *VideoTagRelUpsert) AddTagID(v uint32) *VideoTagRelUpsert {
 	u.Add(videotagrel.FieldTagID, v)
-	return u
-}
-
-// ClearTagID clears the value of the "tag_id" field.
-func (u *VideoTagRelUpsert) ClearTagID() *VideoTagRelUpsert {
-	u.SetNull(videotagrel.FieldTagID)
 	return u
 }
 
@@ -345,6 +377,9 @@ func (u *VideoTagRelUpsertOne) UpdateNewValues() *VideoTagRelUpsertOne {
 		}
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(videotagrel.FieldCreatedAt)
+		}
+		if _, exists := u.create.mutation.TenantID(); exists {
+			s.SetIgnore(videotagrel.FieldTenantID)
 		}
 	}))
 	return u
@@ -440,13 +475,6 @@ func (u *VideoTagRelUpsertOne) UpdateVideoID() *VideoTagRelUpsertOne {
 	})
 }
 
-// ClearVideoID clears the value of the "video_id" field.
-func (u *VideoTagRelUpsertOne) ClearVideoID() *VideoTagRelUpsertOne {
-	return u.Update(func(s *VideoTagRelUpsert) {
-		s.ClearVideoID()
-	})
-}
-
 // SetTagID sets the "tag_id" field.
 func (u *VideoTagRelUpsertOne) SetTagID(v uint32) *VideoTagRelUpsertOne {
 	return u.Update(func(s *VideoTagRelUpsert) {
@@ -465,13 +493,6 @@ func (u *VideoTagRelUpsertOne) AddTagID(v uint32) *VideoTagRelUpsertOne {
 func (u *VideoTagRelUpsertOne) UpdateTagID() *VideoTagRelUpsertOne {
 	return u.Update(func(s *VideoTagRelUpsert) {
 		s.UpdateTagID()
-	})
-}
-
-// ClearTagID clears the value of the "tag_id" field.
-func (u *VideoTagRelUpsertOne) ClearTagID() *VideoTagRelUpsertOne {
-	return u.Update(func(s *VideoTagRelUpsert) {
-		s.ClearTagID()
 	})
 }
 
@@ -527,6 +548,7 @@ func (_c *VideoTagRelCreateBulk) Save(ctx context.Context) ([]*VideoTagRel, erro
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*VideoTagRelMutation)
 				if !ok {
@@ -659,6 +681,9 @@ func (u *VideoTagRelUpsertBulk) UpdateNewValues() *VideoTagRelUpsertBulk {
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(videotagrel.FieldCreatedAt)
 			}
+			if _, exists := b.mutation.TenantID(); exists {
+				s.SetIgnore(videotagrel.FieldTenantID)
+			}
 		}
 	}))
 	return u
@@ -754,13 +779,6 @@ func (u *VideoTagRelUpsertBulk) UpdateVideoID() *VideoTagRelUpsertBulk {
 	})
 }
 
-// ClearVideoID clears the value of the "video_id" field.
-func (u *VideoTagRelUpsertBulk) ClearVideoID() *VideoTagRelUpsertBulk {
-	return u.Update(func(s *VideoTagRelUpsert) {
-		s.ClearVideoID()
-	})
-}
-
 // SetTagID sets the "tag_id" field.
 func (u *VideoTagRelUpsertBulk) SetTagID(v uint32) *VideoTagRelUpsertBulk {
 	return u.Update(func(s *VideoTagRelUpsert) {
@@ -779,13 +797,6 @@ func (u *VideoTagRelUpsertBulk) AddTagID(v uint32) *VideoTagRelUpsertBulk {
 func (u *VideoTagRelUpsertBulk) UpdateTagID() *VideoTagRelUpsertBulk {
 	return u.Update(func(s *VideoTagRelUpsert) {
 		s.UpdateTagID()
-	})
-}
-
-// ClearTagID clears the value of the "tag_id" field.
-func (u *VideoTagRelUpsertBulk) ClearTagID() *VideoTagRelUpsertBulk {
-	return u.Update(func(s *VideoTagRelUpsert) {
-		s.ClearTagID()
 	})
 }
 

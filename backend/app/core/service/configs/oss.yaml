@@ -1,6 +1,9 @@
 oss:
   minio:
-    endpoint: "127.0.0.1:9100"
-    access_key: "minioadmin"
-    secret_key: "minioadmin"
+    endpoint: "${OSS_ENDPOINT:127.0.0.1:9000}"
+    upload_host: "${OSS_ENDPOINT:127.0.0.1:9000}"
+    download_host: "${OSS_PUBLIC_ENDPOINT:http://127.0.0.1:9000}"
+    access_key: "${OSS_ACCESS_KEY:root}"
+    secret_key: "${OSS_SECRET_KEY:*Abcd123456}"
+    token: ""
     use_ssl: false

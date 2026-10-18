@@ -36,12 +36,12 @@ type ReportServiceHTTPServer interface {
 
 func RegisterReportServiceHTTPServer(s *http.Server, srv ReportServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/v1/reports", _ReportService_List1_HTTP_Handler(srv))
-	r.GET("/admin/v1/reports/{id}", _ReportService_Get0_HTTP_Handler(srv))
+	r.GET("/admin/v1/reports", _ReportService_List23_HTTP_Handler(srv))
+	r.GET("/admin/v1/reports/{id}", _ReportService_Get22_HTTP_Handler(srv))
 	r.PUT("/admin/v1/reports/{id}/handle", _ReportService_Handle0_HTTP_Handler(srv))
 }
 
-func _ReportService_List1_HTTP_Handler(srv ReportServiceHTTPServer) func(ctx http.Context) error {
+func _ReportService_List23_HTTP_Handler(srv ReportServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v1.PagingRequest
 		if err := ctx.BindQuery(&in); err != nil {
@@ -60,7 +60,7 @@ func _ReportService_List1_HTTP_Handler(srv ReportServiceHTTPServer) func(ctx htt
 	}
 }
 
-func _ReportService_Get0_HTTP_Handler(srv ReportServiceHTTPServer) func(ctx http.Context) error {
+func _ReportService_Get22_HTTP_Handler(srv ReportServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v11.GetReportRequest
 		if err := ctx.BindQuery(&in); err != nil {

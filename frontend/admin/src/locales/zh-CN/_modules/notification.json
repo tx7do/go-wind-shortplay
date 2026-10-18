@@ -1,0 +1,19 @@
+{
+  "pageTitle": "通知",
+  "unreadCount": "{{count}} 条未读",
+  "markAllRead": "全部已读",
+  "markAllReadSuccess": "已全部标记为已读",
+  "markAllReadFailed": "操作失败",
+  "markRead": "标记已读",
+  "noMessages": "暂无通知",
+  "loading": "加载中...",
+  "viewAll": "查看全部",
+  "unreadOnly": "只看未读",
+  "prevPage": "上一页",
+  "nextPage": "下一页",
+  "hasVideo": "相关视频",
+  "type.LIKE": "点赞",
+  "type.COMMENT": "评论",
+  "type.FOLLOW": "关注",
+  "type.SYSTEM": "系统"
+}

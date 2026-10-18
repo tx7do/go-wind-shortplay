@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 评论表
+// 短视频评论表
 type VideoComment struct {
 	config `json:"-"`
 	// ID of the ent.
@@ -24,18 +24,26 @@ type VideoComment struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// 创建者ID
+	CreatedBy *uint32 `json:"created_by,omitempty"`
+	// 更新者ID
+	UpdatedBy *uint32 `json:"updated_by,omitempty"`
+	// 删除者ID
+	DeletedBy *uint32 `json:"deleted_by,omitempty"`
+	// 租户ID
+	TenantID *uint32 `json:"tenant_id,omitempty"`
 	// 视频ID
-	VideoID *uint32 `json:"video_id,omitempty"`
-	// 评论人ID
-	UserID *uint32 `json:"user_id,omitempty"`
-	// 评论内容
+	VideoID uint32 `json:"video_id,omitempty"`
+	// 评论人用户ID
+	UserID uint32 `json:"user_id,omitempty"`
+	// 内容
 	Content string `json:"content,omitempty"`
-	// 父评论ID（Phase 2 楼中楼）
-	ParentID *uint32 `json:"parent_id,omitempty"`
-	// 点赞数
-	LikeCount *int64 `json:"like_count,omitempty"`
+	// 父评论ID（0=一级评论）
+	ParentID uint32 `json:"parent_id,omitempty"`
+	// 点赞数（ledger 事务内增减）
+	LikeCount uint64 `json:"like_count,omitempty"`
 	// 回复数（仅一级评论维护）
-	ReplyCount   *int64 `json:"reply_count,omitempty"`
+	ReplyCount   uint64 `json:"reply_count,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -44,7 +52,7 @@ func (*VideoComment) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case videocomment.FieldID, videocomment.FieldVideoID, videocomment.FieldUserID, videocomment.FieldParentID, videocomment.FieldLikeCount, videocomment.FieldReplyCount:
+		case videocomment.FieldID, videocomment.FieldCreatedBy, videocomment.FieldUpdatedBy, videocomment.FieldDeletedBy, videocomment.FieldTenantID, videocomment.FieldVideoID, videocomment.FieldUserID, videocomment.FieldParentID, videocomment.FieldLikeCount, videocomment.FieldReplyCount:
 			values[i] = new(sql.NullInt64)
 		case videocomment.FieldContent:
 			values[i] = new(sql.NullString)
@@ -92,19 +100,45 @@ func (_m *VideoComment) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
+		case videocomment.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				_m.CreatedBy = new(uint32)
+				*_m.CreatedBy = uint32(value.Int64)
+			}
+		case videocomment.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				_m.UpdatedBy = new(uint32)
+				*_m.UpdatedBy = uint32(value.Int64)
+			}
+		case videocomment.FieldDeletedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_by", values[i])
+			} else if value.Valid {
+				_m.DeletedBy = new(uint32)
+				*_m.DeletedBy = uint32(value.Int64)
+			}
+		case videocomment.FieldTenantID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
+			} else if value.Valid {
+				_m.TenantID = new(uint32)
+				*_m.TenantID = uint32(value.Int64)
+			}
 		case videocomment.FieldVideoID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field video_id", values[i])
 			} else if value.Valid {
-				_m.VideoID = new(uint32)
-				*_m.VideoID = uint32(value.Int64)
+				_m.VideoID = uint32(value.Int64)
 			}
 		case videocomment.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.UserID = new(uint32)
-				*_m.UserID = uint32(value.Int64)
+				_m.UserID = uint32(value.Int64)
 			}
 		case videocomment.FieldContent:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -116,22 +150,19 @@ func (_m *VideoComment) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
 			} else if value.Valid {
-				_m.ParentID = new(uint32)
-				*_m.ParentID = uint32(value.Int64)
+				_m.ParentID = uint32(value.Int64)
 			}
 		case videocomment.FieldLikeCount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field like_count", values[i])
 			} else if value.Valid {
-				_m.LikeCount = new(int64)
-				*_m.LikeCount = value.Int64
+				_m.LikeCount = uint64(value.Int64)
 			}
 		case videocomment.FieldReplyCount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field reply_count", values[i])
 			} else if value.Valid {
-				_m.ReplyCount = new(int64)
-				*_m.ReplyCount = value.Int64
+				_m.ReplyCount = uint64(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -184,33 +215,43 @@ func (_m *VideoComment) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	if v := _m.VideoID; v != nil {
-		builder.WriteString("video_id=")
+	if v := _m.CreatedBy; v != nil {
+		builder.WriteString("created_by=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := _m.UserID; v != nil {
-		builder.WriteString("user_id=")
+	if v := _m.UpdatedBy; v != nil {
+		builder.WriteString("updated_by=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	if v := _m.DeletedBy; v != nil {
+		builder.WriteString("deleted_by=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.TenantID; v != nil {
+		builder.WriteString("tenant_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("video_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.VideoID))
+	builder.WriteString(", ")
+	builder.WriteString("user_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("content=")
 	builder.WriteString(_m.Content)
 	builder.WriteString(", ")
-	if v := _m.ParentID; v != nil {
-		builder.WriteString("parent_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("parent_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ParentID))
 	builder.WriteString(", ")
-	if v := _m.LikeCount; v != nil {
-		builder.WriteString("like_count=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("like_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.LikeCount))
 	builder.WriteString(", ")
-	if v := _m.ReplyCount; v != nil {
-		builder.WriteString("reply_count=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("reply_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ReplyCount))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -12,18 +12,106 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// Notification is the client for interacting with the Notification builders.
-	Notification *NotificationClient
+	// Api is the client for interacting with the Api builders.
+	Api *APIClient
+	// ApiAuditLog is the client for interacting with the ApiAuditLog builders.
+	ApiAuditLog *ApiAuditLogClient
+	// Comment is the client for interacting with the Comment builders.
+	Comment *CommentClient
+	// DataAccessAuditLog is the client for interacting with the DataAccessAuditLog builders.
+	DataAccessAuditLog *DataAccessAuditLogClient
+	// DictEntry is the client for interacting with the DictEntry builders.
+	DictEntry *DictEntryClient
+	// DictEntryI18n is the client for interacting with the DictEntryI18n builders.
+	DictEntryI18n *DictEntryI18nClient
+	// DictType is the client for interacting with the DictType builders.
+	DictType *DictTypeClient
+	// File is the client for interacting with the File builders.
+	File *FileClient
+	// InternalMessage is the client for interacting with the InternalMessage builders.
+	InternalMessage *InternalMessageClient
+	// InternalMessageCategory is the client for interacting with the InternalMessageCategory builders.
+	InternalMessageCategory *InternalMessageCategoryClient
+	// InternalMessageRecipient is the client for interacting with the InternalMessageRecipient builders.
+	InternalMessageRecipient *InternalMessageRecipientClient
+	// Language is the client for interacting with the Language builders.
+	Language *LanguageClient
+	// LoginAuditLog is the client for interacting with the LoginAuditLog builders.
+	LoginAuditLog *LoginAuditLogClient
+	// LoginPolicy is the client for interacting with the LoginPolicy builders.
+	LoginPolicy *LoginPolicyClient
+	// MediaAsset is the client for interacting with the MediaAsset builders.
+	MediaAsset *MediaAssetClient
+	// MediaVariant is the client for interacting with the MediaVariant builders.
+	MediaVariant *MediaVariantClient
+	// Membership is the client for interacting with the Membership builders.
+	Membership *MembershipClient
+	// MembershipOrgUnit is the client for interacting with the MembershipOrgUnit builders.
+	MembershipOrgUnit *MembershipOrgUnitClient
+	// MembershipPosition is the client for interacting with the MembershipPosition builders.
+	MembershipPosition *MembershipPositionClient
+	// MembershipRole is the client for interacting with the MembershipRole builders.
+	MembershipRole *MembershipRoleClient
+	// Menu is the client for interacting with the Menu builders.
+	Menu *MenuClient
+	// NotificationChannel is the client for interacting with the NotificationChannel builders.
+	NotificationChannel *NotificationChannelClient
+	// NotificationDelivery is the client for interacting with the NotificationDelivery builders.
+	NotificationDelivery *NotificationDeliveryClient
+	// NotificationPreference is the client for interacting with the NotificationPreference builders.
+	NotificationPreference *NotificationPreferenceClient
+	// NotificationRule is the client for interacting with the NotificationRule builders.
+	NotificationRule *NotificationRuleClient
+	// NotificationTemplate is the client for interacting with the NotificationTemplate builders.
+	NotificationTemplate *NotificationTemplateClient
+	// OperationAuditLog is the client for interacting with the OperationAuditLog builders.
+	OperationAuditLog *OperationAuditLogClient
+	// OrgUnit is the client for interacting with the OrgUnit builders.
+	OrgUnit *OrgUnitClient
+	// Permission is the client for interacting with the Permission builders.
+	Permission *PermissionClient
+	// PermissionApi is the client for interacting with the PermissionApi builders.
+	PermissionApi *PermissionApiClient
+	// PermissionAuditLog is the client for interacting with the PermissionAuditLog builders.
+	PermissionAuditLog *PermissionAuditLogClient
+	// PermissionGroup is the client for interacting with the PermissionGroup builders.
+	PermissionGroup *PermissionGroupClient
+	// PermissionMenu is the client for interacting with the PermissionMenu builders.
+	PermissionMenu *PermissionMenuClient
+	// PermissionPolicy is the client for interacting with the PermissionPolicy builders.
+	PermissionPolicy *PermissionPolicyClient
+	// PolicyEvaluationLog is the client for interacting with the PolicyEvaluationLog builders.
+	PolicyEvaluationLog *PolicyEvaluationLogClient
+	// Position is the client for interacting with the Position builders.
+	Position *PositionClient
+	// Role is the client for interacting with the Role builders.
+	Role *RoleClient
+	// RoleMetadata is the client for interacting with the RoleMetadata builders.
+	RoleMetadata *RoleMetadataClient
+	// RolePermission is the client for interacting with the RolePermission builders.
+	RolePermission *RolePermissionClient
 	// SysConfig is the client for interacting with the SysConfig builders.
 	SysConfig *SysConfigClient
+	// Task is the client for interacting with the Task builders.
+	Task *TaskClient
+	// Tenant is the client for interacting with the Tenant builders.
+	Tenant *TenantClient
 	// UbaEvent is the client for interacting with the UbaEvent builders.
 	UbaEvent *UbaEventClient
 	// UploadTask is the client for interacting with the UploadTask builders.
 	UploadTask *UploadTaskClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserCredential is the client for interacting with the UserCredential builders.
+	UserCredential *UserCredentialClient
 	// UserFollow is the client for interacting with the UserFollow builders.
 	UserFollow *UserFollowClient
+	// UserOrgUnit is the client for interacting with the UserOrgUnit builders.
+	UserOrgUnit *UserOrgUnitClient
+	// UserPosition is the client for interacting with the UserPosition builders.
+	UserPosition *UserPositionClient
+	// UserRole is the client for interacting with the UserRole builders.
+	UserRole *UserRoleClient
 	// Video is the client for interacting with the Video builders.
 	Video *VideoClient
 	// VideoCollect is the client for interacting with the VideoCollect builders.
@@ -171,12 +259,56 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.Notification = NewNotificationClient(tx.config)
+	tx.Api = NewAPIClient(tx.config)
+	tx.ApiAuditLog = NewApiAuditLogClient(tx.config)
+	tx.Comment = NewCommentClient(tx.config)
+	tx.DataAccessAuditLog = NewDataAccessAuditLogClient(tx.config)
+	tx.DictEntry = NewDictEntryClient(tx.config)
+	tx.DictEntryI18n = NewDictEntryI18nClient(tx.config)
+	tx.DictType = NewDictTypeClient(tx.config)
+	tx.File = NewFileClient(tx.config)
+	tx.InternalMessage = NewInternalMessageClient(tx.config)
+	tx.InternalMessageCategory = NewInternalMessageCategoryClient(tx.config)
+	tx.InternalMessageRecipient = NewInternalMessageRecipientClient(tx.config)
+	tx.Language = NewLanguageClient(tx.config)
+	tx.LoginAuditLog = NewLoginAuditLogClient(tx.config)
+	tx.LoginPolicy = NewLoginPolicyClient(tx.config)
+	tx.MediaAsset = NewMediaAssetClient(tx.config)
+	tx.MediaVariant = NewMediaVariantClient(tx.config)
+	tx.Membership = NewMembershipClient(tx.config)
+	tx.MembershipOrgUnit = NewMembershipOrgUnitClient(tx.config)
+	tx.MembershipPosition = NewMembershipPositionClient(tx.config)
+	tx.MembershipRole = NewMembershipRoleClient(tx.config)
+	tx.Menu = NewMenuClient(tx.config)
+	tx.NotificationChannel = NewNotificationChannelClient(tx.config)
+	tx.NotificationDelivery = NewNotificationDeliveryClient(tx.config)
+	tx.NotificationPreference = NewNotificationPreferenceClient(tx.config)
+	tx.NotificationRule = NewNotificationRuleClient(tx.config)
+	tx.NotificationTemplate = NewNotificationTemplateClient(tx.config)
+	tx.OperationAuditLog = NewOperationAuditLogClient(tx.config)
+	tx.OrgUnit = NewOrgUnitClient(tx.config)
+	tx.Permission = NewPermissionClient(tx.config)
+	tx.PermissionApi = NewPermissionApiClient(tx.config)
+	tx.PermissionAuditLog = NewPermissionAuditLogClient(tx.config)
+	tx.PermissionGroup = NewPermissionGroupClient(tx.config)
+	tx.PermissionMenu = NewPermissionMenuClient(tx.config)
+	tx.PermissionPolicy = NewPermissionPolicyClient(tx.config)
+	tx.PolicyEvaluationLog = NewPolicyEvaluationLogClient(tx.config)
+	tx.Position = NewPositionClient(tx.config)
+	tx.Role = NewRoleClient(tx.config)
+	tx.RoleMetadata = NewRoleMetadataClient(tx.config)
+	tx.RolePermission = NewRolePermissionClient(tx.config)
 	tx.SysConfig = NewSysConfigClient(tx.config)
+	tx.Task = NewTaskClient(tx.config)
+	tx.Tenant = NewTenantClient(tx.config)
 	tx.UbaEvent = NewUbaEventClient(tx.config)
 	tx.UploadTask = NewUploadTaskClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.UserCredential = NewUserCredentialClient(tx.config)
 	tx.UserFollow = NewUserFollowClient(tx.config)
+	tx.UserOrgUnit = NewUserOrgUnitClient(tx.config)
+	tx.UserPosition = NewUserPositionClient(tx.config)
+	tx.UserRole = NewUserRoleClient(tx.config)
 	tx.Video = NewVideoClient(tx.config)
 	tx.VideoCollect = NewVideoCollectClient(tx.config)
 	tx.VideoComment = NewVideoCommentClient(tx.config)
@@ -194,7 +326,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Notification.QueryXXX(), the query will be executed
+// applies a query, for example: Api.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

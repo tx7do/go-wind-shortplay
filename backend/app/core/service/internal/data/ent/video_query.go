@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"go-wind-shortplay/app/core/service/internal/data/ent/predicate"
 	"go-wind-shortplay/app/core/service/internal/data/ent/video"
@@ -329,6 +330,12 @@ func (_q *VideoQuery) prepareQuery(ctx context.Context) error {
 			return err
 		}
 		_q.sql = prev
+	}
+	if video.Policy == nil {
+		return errors.New("ent: uninitialized video.Policy (forgotten import ent/runtime?)")
+	}
+	if err := video.Policy.EvalQuery(ctx, _q); err != nil {
+		return err
 	}
 	return nil
 }

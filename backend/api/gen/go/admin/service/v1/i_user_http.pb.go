@@ -26,39 +26,47 @@ const OperationUserServiceCreate = "/admin.service.v1.UserService/Create"
 const OperationUserServiceDelete = "/admin.service.v1.UserService/Delete"
 const OperationUserServiceGet = "/admin.service.v1.UserService/Get"
 const OperationUserServiceGetStats = "/admin.service.v1.UserService/GetStats"
+const OperationUserServiceGetUserRoleIds = "/admin.service.v1.UserService/GetUserRoleIds"
 const OperationUserServiceList = "/admin.service.v1.UserService/List"
+const OperationUserServiceSetUserRoles = "/admin.service.v1.UserService/SetUserRoles"
 const OperationUserServiceUpdate = "/admin.service.v1.UserService/Update"
 const OperationUserServiceUpdateStatus = "/admin.service.v1.UserService/UpdateStatus"
 
 type UserServiceHTTPServer interface {
 	// Create 创建用户
-	Create(context.Context, *v11.CreateUserRequest) (*v11.User, error)
+	Create(context.Context, *CreateAppUserRequest) (*AppUser, error)
 	// Delete 删除用户
-	Delete(context.Context, *v11.DeleteUserRequest) (*emptypb.Empty, error)
+	Delete(context.Context, *GetAppUserRequest) (*emptypb.Empty, error)
 	// Get 用户详情
-	Get(context.Context, *v11.GetUserRequest) (*v11.User, error)
+	Get(context.Context, *GetAppUserRequest) (*AppUser, error)
 	// GetStats 用户统计（作品 / 粉丝 / 关注 / 获赞）
 	GetStats(context.Context, *v11.GetUserStatsRequest) (*v11.UserStats, error)
-	// List 用户列表
-	List(context.Context, *v1.PagingRequest) (*v11.ListUserResponse, error)
+	// GetUserRoleIds 用户已分配角色 ID
+	GetUserRoleIds(context.Context, *GetAppUserRequest) (*GetUserRoleIdsResponse, error)
+	// List 用户列表（昵称/用户名模糊搜索 query + 状态 filter）
+	List(context.Context, *v1.PagingRequest) (*ListAppUserResponse, error)
+	// SetUserRoles 分配角色（全量覆盖）
+	SetUserRoles(context.Context, *SetUserRolesRequest) (*emptypb.Empty, error)
 	// Update 更新用户
-	Update(context.Context, *v11.UpdateUserRequest) (*v11.User, error)
-	// UpdateStatus 启用 / 禁用用户
-	UpdateStatus(context.Context, *v11.UpdateUserStatusRequest) (*v11.User, error)
+	Update(context.Context, *UpdateAppUserRequest) (*AppUser, error)
+	// UpdateStatus 启用 / 禁用用户（status: "1"禁用 "2"正常）
+	UpdateStatus(context.Context, *UpdateAppUserStatusRequest) (*AppUser, error)
 }
 
 func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/v1/users", _UserService_List2_HTTP_Handler(srv))
-	r.GET("/admin/v1/users/{id}", _UserService_Get2_HTTP_Handler(srv))
-	r.GET("/admin/v1/users/{user_id}/stats", _UserService_GetStats0_HTTP_Handler(srv))
-	r.POST("/admin/v1/users", _UserService_Create0_HTTP_Handler(srv))
-	r.PUT("/admin/v1/users/{id}", _UserService_Update1_HTTP_Handler(srv))
-	r.DELETE("/admin/v1/users/{id}", _UserService_Delete1_HTTP_Handler(srv))
+	r.GET("/admin/v1/users", _UserService_List27_HTTP_Handler(srv))
+	r.GET("/admin/v1/users/{id}", _UserService_Get28_HTTP_Handler(srv))
+	r.POST("/admin/v1/users", _UserService_Create19_HTTP_Handler(srv))
+	r.PUT("/admin/v1/users/{id}", _UserService_Update20_HTTP_Handler(srv))
+	r.DELETE("/admin/v1/users/{id}", _UserService_Delete20_HTTP_Handler(srv))
 	r.PUT("/admin/v1/users/{id}/status", _UserService_UpdateStatus0_HTTP_Handler(srv))
+	r.GET("/admin/v1/users/{user_id}/stats", _UserService_GetStats0_HTTP_Handler(srv))
+	r.PUT("/admin/v1/users/{id}/roles", _UserService_SetUserRoles0_HTTP_Handler(srv))
+	r.GET("/admin/v1/users/{id}/role-ids", _UserService_GetUserRoleIds0_HTTP_Handler(srv))
 }
 
-func _UserService_List2_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+func _UserService_List27_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v1.PagingRequest
 		if err := ctx.BindQuery(&in); err != nil {
@@ -72,14 +80,14 @@ func _UserService_List2_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Co
 		if err != nil {
 			return err
 		}
-		reply := out.(*v11.ListUserResponse)
+		reply := out.(*ListAppUserResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _UserService_Get2_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+func _UserService_Get28_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v11.GetUserRequest
+		var in GetAppUserRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
@@ -88,13 +96,107 @@ func _UserService_Get2_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Con
 		}
 		http.SetOperation(ctx, OperationUserServiceGet)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.Get(ctx, req.(*v11.GetUserRequest))
+			return srv.Get(ctx, req.(*GetAppUserRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*v11.User)
+		reply := out.(*AppUser)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _UserService_Create19_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateAppUserRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceCreate)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.Create(ctx, req.(*CreateAppUserRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AppUser)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _UserService_Update20_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateAppUserRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceUpdate)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.Update(ctx, req.(*UpdateAppUserRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AppUser)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _UserService_Delete20_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetAppUserRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceDelete)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.Delete(ctx, req.(*GetAppUserRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*emptypb.Empty)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _UserService_UpdateStatus0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateAppUserStatusRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceUpdateStatus)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateStatus(ctx, req.(*UpdateAppUserStatusRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AppUser)
 		return ctx.Result(200, reply)
 	}
 }
@@ -121,31 +223,9 @@ func _UserService_GetStats0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx htt
 	}
 }
 
-func _UserService_Create0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+func _UserService_SetUserRoles0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v11.CreateUserRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationUserServiceCreate)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.Create(ctx, req.(*v11.CreateUserRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*v11.User)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _UserService_Update1_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in v11.UpdateUserRequest
+		var in SetUserRolesRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
@@ -155,31 +235,9 @@ func _UserService_Update1_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationUserServiceUpdate)
+		http.SetOperation(ctx, OperationUserServiceSetUserRoles)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.Update(ctx, req.(*v11.UpdateUserRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*v11.User)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _UserService_Delete1_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in v11.DeleteUserRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationUserServiceDelete)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.Delete(ctx, req.(*v11.DeleteUserRequest))
+			return srv.SetUserRoles(ctx, req.(*SetUserRolesRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -190,46 +248,47 @@ func _UserService_Delete1_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.
 	}
 }
 
-func _UserService_UpdateStatus0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+func _UserService_GetUserRoleIds0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v11.UpdateUserStatusRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
+		var in GetAppUserRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationUserServiceUpdateStatus)
+		http.SetOperation(ctx, OperationUserServiceGetUserRoleIds)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UpdateStatus(ctx, req.(*v11.UpdateUserStatusRequest))
+			return srv.GetUserRoleIds(ctx, req.(*GetAppUserRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*v11.User)
+		reply := out.(*GetUserRoleIdsResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
 type UserServiceHTTPClient interface {
 	// Create 创建用户
-	Create(ctx context.Context, req *v11.CreateUserRequest, opts ...http.CallOption) (rsp *v11.User, err error)
+	Create(ctx context.Context, req *CreateAppUserRequest, opts ...http.CallOption) (rsp *AppUser, err error)
 	// Delete 删除用户
-	Delete(ctx context.Context, req *v11.DeleteUserRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
+	Delete(ctx context.Context, req *GetAppUserRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
 	// Get 用户详情
-	Get(ctx context.Context, req *v11.GetUserRequest, opts ...http.CallOption) (rsp *v11.User, err error)
+	Get(ctx context.Context, req *GetAppUserRequest, opts ...http.CallOption) (rsp *AppUser, err error)
 	// GetStats 用户统计（作品 / 粉丝 / 关注 / 获赞）
 	GetStats(ctx context.Context, req *v11.GetUserStatsRequest, opts ...http.CallOption) (rsp *v11.UserStats, err error)
-	// List 用户列表
-	List(ctx context.Context, req *v1.PagingRequest, opts ...http.CallOption) (rsp *v11.ListUserResponse, err error)
+	// GetUserRoleIds 用户已分配角色 ID
+	GetUserRoleIds(ctx context.Context, req *GetAppUserRequest, opts ...http.CallOption) (rsp *GetUserRoleIdsResponse, err error)
+	// List 用户列表（昵称/用户名模糊搜索 query + 状态 filter）
+	List(ctx context.Context, req *v1.PagingRequest, opts ...http.CallOption) (rsp *ListAppUserResponse, err error)
+	// SetUserRoles 分配角色（全量覆盖）
+	SetUserRoles(ctx context.Context, req *SetUserRolesRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
 	// Update 更新用户
-	Update(ctx context.Context, req *v11.UpdateUserRequest, opts ...http.CallOption) (rsp *v11.User, err error)
-	// UpdateStatus 启用 / 禁用用户
-	UpdateStatus(ctx context.Context, req *v11.UpdateUserStatusRequest, opts ...http.CallOption) (rsp *v11.User, err error)
+	Update(ctx context.Context, req *UpdateAppUserRequest, opts ...http.CallOption) (rsp *AppUser, err error)
+	// UpdateStatus 启用 / 禁用用户（status: "1"禁用 "2"正常）
+	UpdateStatus(ctx context.Context, req *UpdateAppUserStatusRequest, opts ...http.CallOption) (rsp *AppUser, err error)
 }
 
 type UserServiceHTTPClientImpl struct {
@@ -241,8 +300,8 @@ func NewUserServiceHTTPClient(client *http.Client) UserServiceHTTPClient {
 }
 
 // Create 创建用户
-func (c *UserServiceHTTPClientImpl) Create(ctx context.Context, in *v11.CreateUserRequest, opts ...http.CallOption) (*v11.User, error) {
-	var out v11.User
+func (c *UserServiceHTTPClientImpl) Create(ctx context.Context, in *CreateAppUserRequest, opts ...http.CallOption) (*AppUser, error) {
+	var out AppUser
 	pattern := "/admin/v1/users"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserServiceCreate))
@@ -255,7 +314,7 @@ func (c *UserServiceHTTPClientImpl) Create(ctx context.Context, in *v11.CreateUs
 }
 
 // Delete 删除用户
-func (c *UserServiceHTTPClientImpl) Delete(ctx context.Context, in *v11.DeleteUserRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
+func (c *UserServiceHTTPClientImpl) Delete(ctx context.Context, in *GetAppUserRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
 	var out emptypb.Empty
 	pattern := "/admin/v1/users/{id}"
 	path := binding.EncodeURL(pattern, in, true)
@@ -269,8 +328,8 @@ func (c *UserServiceHTTPClientImpl) Delete(ctx context.Context, in *v11.DeleteUs
 }
 
 // Get 用户详情
-func (c *UserServiceHTTPClientImpl) Get(ctx context.Context, in *v11.GetUserRequest, opts ...http.CallOption) (*v11.User, error) {
-	var out v11.User
+func (c *UserServiceHTTPClientImpl) Get(ctx context.Context, in *GetAppUserRequest, opts ...http.CallOption) (*AppUser, error) {
+	var out AppUser
 	pattern := "/admin/v1/users/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserServiceGet))
@@ -296,9 +355,23 @@ func (c *UserServiceHTTPClientImpl) GetStats(ctx context.Context, in *v11.GetUse
 	return &out, nil
 }
 
-// List 用户列表
-func (c *UserServiceHTTPClientImpl) List(ctx context.Context, in *v1.PagingRequest, opts ...http.CallOption) (*v11.ListUserResponse, error) {
-	var out v11.ListUserResponse
+// GetUserRoleIds 用户已分配角色 ID
+func (c *UserServiceHTTPClientImpl) GetUserRoleIds(ctx context.Context, in *GetAppUserRequest, opts ...http.CallOption) (*GetUserRoleIdsResponse, error) {
+	var out GetUserRoleIdsResponse
+	pattern := "/admin/v1/users/{id}/role-ids"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUserServiceGetUserRoleIds))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// List 用户列表（昵称/用户名模糊搜索 query + 状态 filter）
+func (c *UserServiceHTTPClientImpl) List(ctx context.Context, in *v1.PagingRequest, opts ...http.CallOption) (*ListAppUserResponse, error) {
+	var out ListAppUserResponse
 	pattern := "/admin/v1/users"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserServiceList))
@@ -310,9 +383,23 @@ func (c *UserServiceHTTPClientImpl) List(ctx context.Context, in *v1.PagingReque
 	return &out, nil
 }
 
+// SetUserRoles 分配角色（全量覆盖）
+func (c *UserServiceHTTPClientImpl) SetUserRoles(ctx context.Context, in *SetUserRolesRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
+	var out emptypb.Empty
+	pattern := "/admin/v1/users/{id}/roles"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationUserServiceSetUserRoles))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // Update 更新用户
-func (c *UserServiceHTTPClientImpl) Update(ctx context.Context, in *v11.UpdateUserRequest, opts ...http.CallOption) (*v11.User, error) {
-	var out v11.User
+func (c *UserServiceHTTPClientImpl) Update(ctx context.Context, in *UpdateAppUserRequest, opts ...http.CallOption) (*AppUser, error) {
+	var out AppUser
 	pattern := "/admin/v1/users/{id}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserServiceUpdate))
@@ -324,9 +411,9 @@ func (c *UserServiceHTTPClientImpl) Update(ctx context.Context, in *v11.UpdateUs
 	return &out, nil
 }
 
-// UpdateStatus 启用 / 禁用用户
-func (c *UserServiceHTTPClientImpl) UpdateStatus(ctx context.Context, in *v11.UpdateUserStatusRequest, opts ...http.CallOption) (*v11.User, error) {
-	var out v11.User
+// UpdateStatus 启用 / 禁用用户（status: "1"禁用 "2"正常）
+func (c *UserServiceHTTPClientImpl) UpdateStatus(ctx context.Context, in *UpdateAppUserStatusRequest, opts ...http.CallOption) (*AppUser, error) {
+	var out AppUser
 	pattern := "/admin/v1/users/{id}/status"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserServiceUpdateStatus))

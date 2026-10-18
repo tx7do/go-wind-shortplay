@@ -90,12 +90,6 @@ func (_u *UserFollowUpdate) AddFollowerID(v int32) *UserFollowUpdate {
 	return _u
 }
 
-// ClearFollowerID clears the value of the "follower_id" field.
-func (_u *UserFollowUpdate) ClearFollowerID() *UserFollowUpdate {
-	_u.mutation.ClearFollowerID()
-	return _u
-}
-
 // SetFolloweeID sets the "followee_id" field.
 func (_u *UserFollowUpdate) SetFolloweeID(v uint32) *UserFollowUpdate {
 	_u.mutation.ResetFolloweeID()
@@ -114,12 +108,6 @@ func (_u *UserFollowUpdate) SetNillableFolloweeID(v *uint32) *UserFollowUpdate {
 // AddFolloweeID adds value to the "followee_id" field.
 func (_u *UserFollowUpdate) AddFolloweeID(v int32) *UserFollowUpdate {
 	_u.mutation.AddFolloweeID(v)
-	return _u
-}
-
-// ClearFolloweeID clears the value of the "followee_id" field.
-func (_u *UserFollowUpdate) ClearFolloweeID() *UserFollowUpdate {
-	_u.mutation.ClearFolloweeID()
 	return _u
 }
 
@@ -185,23 +173,20 @@ func (_u *UserFollowUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(userfollow.FieldDeletedAt, field.TypeTime)
 	}
+	if _u.mutation.TenantIDCleared() {
+		_spec.ClearField(userfollow.FieldTenantID, field.TypeUint32)
+	}
 	if value, ok := _u.mutation.FollowerID(); ok {
 		_spec.SetField(userfollow.FieldFollowerID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedFollowerID(); ok {
 		_spec.AddField(userfollow.FieldFollowerID, field.TypeUint32, value)
 	}
-	if _u.mutation.FollowerIDCleared() {
-		_spec.ClearField(userfollow.FieldFollowerID, field.TypeUint32)
-	}
 	if value, ok := _u.mutation.FolloweeID(); ok {
 		_spec.SetField(userfollow.FieldFolloweeID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedFolloweeID(); ok {
 		_spec.AddField(userfollow.FieldFolloweeID, field.TypeUint32, value)
-	}
-	if _u.mutation.FolloweeIDCleared() {
-		_spec.ClearField(userfollow.FieldFolloweeID, field.TypeUint32)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -286,12 +271,6 @@ func (_u *UserFollowUpdateOne) AddFollowerID(v int32) *UserFollowUpdateOne {
 	return _u
 }
 
-// ClearFollowerID clears the value of the "follower_id" field.
-func (_u *UserFollowUpdateOne) ClearFollowerID() *UserFollowUpdateOne {
-	_u.mutation.ClearFollowerID()
-	return _u
-}
-
 // SetFolloweeID sets the "followee_id" field.
 func (_u *UserFollowUpdateOne) SetFolloweeID(v uint32) *UserFollowUpdateOne {
 	_u.mutation.ResetFolloweeID()
@@ -310,12 +289,6 @@ func (_u *UserFollowUpdateOne) SetNillableFolloweeID(v *uint32) *UserFollowUpdat
 // AddFolloweeID adds value to the "followee_id" field.
 func (_u *UserFollowUpdateOne) AddFolloweeID(v int32) *UserFollowUpdateOne {
 	_u.mutation.AddFolloweeID(v)
-	return _u
-}
-
-// ClearFolloweeID clears the value of the "followee_id" field.
-func (_u *UserFollowUpdateOne) ClearFolloweeID() *UserFollowUpdateOne {
-	_u.mutation.ClearFolloweeID()
 	return _u
 }
 
@@ -411,23 +384,20 @@ func (_u *UserFollowUpdateOne) sqlSave(ctx context.Context) (_node *UserFollow, 
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(userfollow.FieldDeletedAt, field.TypeTime)
 	}
+	if _u.mutation.TenantIDCleared() {
+		_spec.ClearField(userfollow.FieldTenantID, field.TypeUint32)
+	}
 	if value, ok := _u.mutation.FollowerID(); ok {
 		_spec.SetField(userfollow.FieldFollowerID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedFollowerID(); ok {
 		_spec.AddField(userfollow.FieldFollowerID, field.TypeUint32, value)
 	}
-	if _u.mutation.FollowerIDCleared() {
-		_spec.ClearField(userfollow.FieldFollowerID, field.TypeUint32)
-	}
 	if value, ok := _u.mutation.FolloweeID(); ok {
 		_spec.SetField(userfollow.FieldFolloweeID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedFolloweeID(); ok {
 		_spec.AddField(userfollow.FieldFolloweeID, field.TypeUint32, value)
-	}
-	if _u.mutation.FolloweeIDCleared() {
-		_spec.ClearField(userfollow.FieldFolloweeID, field.TypeUint32)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &UserFollow{config: _u.config}

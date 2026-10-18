@@ -6,7 +6,13 @@ import enUS from 'antd/locale/en_US';
 // import jaJP from 'antd/locale/ja_JP';
 
 import { usePreferencesStore } from '../../store';
-import { DARK_PALETTE, darkThemeComponents, darkThemeTokens } from '../../config';
+import {
+  DARK_PALETTE,
+  LIGHT_PALETTE,
+  darkThemeComponents,
+  darkThemeTokens,
+  lightThemeTokens,
+} from '../../config';
 import { SECONDARY_TEXT_DARK, SECONDARY_TEXT_LIGHT } from '../../config/constants';
 import { mixColor } from '@/utils/color';
 import type { SupportedLanguagesType } from '../../types';
@@ -78,10 +84,15 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
       colorTextDescription: effectiveMode === 'dark' ? SECONDARY_TEXT_DARK : SECONDARY_TEXT_LIGHT,
     };
 
-    // 暗黑模式叠加蓝调深色色阶（背景/文字/边框/填充分层），亮色保持 antd 默认
+    // 两态各自叠加一套精调 token：暗色是蓝黑分层色阶，浅色是 §2.2 的画布/边框/大圆角档
+    // （浅色的卡片投影不在 token 层，antd 没有对应可覆写 token，落 global.css）。
+    // 浅色这套 2026-10-16 才补上——此前浅色完全走 defaultAlgorithm 派生值，卡片边框 #F0F0F0
+    // 对白底只有 1.045 倍且无任何投影，是"整体生硬/发平"的主因（见 lightTheme.ts 沿革）。
     if (effectiveMode === 'dark') Object.assign(tokens, darkThemeTokens);
+    else Object.assign(tokens, lightThemeTokens);
 
-    // 暗黑模式下输入类控件用 L1 内嵌底色，在卡片上形成「凹陷」层次
+    // 输入类控件的内嵌底色、抽屉遮罩、表格行悬停等组件级精调只在暗色需要：
+    // 浅色的对应档由 defaultAlgorithm 派生即可，额外覆写会形成第二套真相。
     const components: ThemeConfig['components'] =
       effectiveMode === 'dark' ? darkThemeComponents : undefined;
 
@@ -100,7 +111,10 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     const root = document.documentElement;
     const body = document.body;
 
-    const bgLayout = effectiveMode === 'dark' ? DARK_PALETTE.bgLayout : '#f5f5f5';
+    // 根背景写各自动态画布档：暗色 L0，浅色 §2.2 canvas（原先硬编码 antd 的 #f5f5f5，
+    // 与 lightThemeTokens.colorBgLayout 不一致会让首帧/回弹处露出旧画布色）
+    const bgLayout =
+      effectiveMode === 'dark' ? DARK_PALETTE.bgLayout : LIGHT_PALETTE.bgLayout;
     root.style.backgroundColor = bgLayout;
     body.style.backgroundColor = bgLayout;
 
@@ -163,11 +177,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   }, [effectiveMode]);
 
   return (
-    <ConfigProvider
-      theme={themeConfig}
-      locale={locale}
-      wave={{ disabled: true }} // 关闭点击波纹，提升 Admin 操作手感
-    >
+    <ConfigProvider theme={themeConfig} locale={locale}>
       {watermarkText ? (
         <Watermark
           content={watermarkText}

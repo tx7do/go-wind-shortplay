@@ -69,6 +69,11 @@ func DeletedAt(v time.Time) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldDeletedAt, v))
 }
 
+// TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
+func TenantID(v uint32) predicate.UploadTask {
+	return predicate.UploadTask(sql.FieldEQ(FieldTenantID, v))
+}
+
 // TaskID applies equality check predicate on the "task_id" field. It's identical to TaskIDEQ.
 func TaskID(v string) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldTaskID, v))
@@ -80,7 +85,7 @@ func FileName(v string) predicate.UploadTask {
 }
 
 // FileSize applies equality check predicate on the "file_size" field. It's identical to FileSizeEQ.
-func FileSize(v int64) predicate.UploadTask {
+func FileSize(v uint64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldFileSize, v))
 }
 
@@ -92,11 +97,6 @@ func ChunkSize(v uint32) predicate.UploadTask {
 // TotalChunks applies equality check predicate on the "total_chunks" field. It's identical to TotalChunksEQ.
 func TotalChunks(v uint32) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldTotalChunks, v))
-}
-
-// Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
-func Status(v uint8) predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldEQ(FieldStatus, v))
 }
 
 // FileKey applies equality check predicate on the "file_key" field. It's identical to FileKeyEQ.
@@ -264,6 +264,56 @@ func DeletedAtNotNil() predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldNotNull(FieldDeletedAt))
 }
 
+// TenantIDEQ applies the EQ predicate on the "tenant_id" field.
+func TenantIDEQ(v uint32) predicate.UploadTask {
+	return predicate.UploadTask(sql.FieldEQ(FieldTenantID, v))
+}
+
+// TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
+func TenantIDNEQ(v uint32) predicate.UploadTask {
+	return predicate.UploadTask(sql.FieldNEQ(FieldTenantID, v))
+}
+
+// TenantIDIn applies the In predicate on the "tenant_id" field.
+func TenantIDIn(vs ...uint32) predicate.UploadTask {
+	return predicate.UploadTask(sql.FieldIn(FieldTenantID, vs...))
+}
+
+// TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
+func TenantIDNotIn(vs ...uint32) predicate.UploadTask {
+	return predicate.UploadTask(sql.FieldNotIn(FieldTenantID, vs...))
+}
+
+// TenantIDGT applies the GT predicate on the "tenant_id" field.
+func TenantIDGT(v uint32) predicate.UploadTask {
+	return predicate.UploadTask(sql.FieldGT(FieldTenantID, v))
+}
+
+// TenantIDGTE applies the GTE predicate on the "tenant_id" field.
+func TenantIDGTE(v uint32) predicate.UploadTask {
+	return predicate.UploadTask(sql.FieldGTE(FieldTenantID, v))
+}
+
+// TenantIDLT applies the LT predicate on the "tenant_id" field.
+func TenantIDLT(v uint32) predicate.UploadTask {
+	return predicate.UploadTask(sql.FieldLT(FieldTenantID, v))
+}
+
+// TenantIDLTE applies the LTE predicate on the "tenant_id" field.
+func TenantIDLTE(v uint32) predicate.UploadTask {
+	return predicate.UploadTask(sql.FieldLTE(FieldTenantID, v))
+}
+
+// TenantIDIsNil applies the IsNil predicate on the "tenant_id" field.
+func TenantIDIsNil() predicate.UploadTask {
+	return predicate.UploadTask(sql.FieldIsNull(FieldTenantID))
+}
+
+// TenantIDNotNil applies the NotNil predicate on the "tenant_id" field.
+func TenantIDNotNil() predicate.UploadTask {
+	return predicate.UploadTask(sql.FieldNotNull(FieldTenantID))
+}
+
 // TaskIDEQ applies the EQ predicate on the "task_id" field.
 func TaskIDEQ(v string) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldTaskID, v))
@@ -395,53 +445,43 @@ func FileNameContainsFold(v string) predicate.UploadTask {
 }
 
 // FileSizeEQ applies the EQ predicate on the "file_size" field.
-func FileSizeEQ(v int64) predicate.UploadTask {
+func FileSizeEQ(v uint64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldFileSize, v))
 }
 
 // FileSizeNEQ applies the NEQ predicate on the "file_size" field.
-func FileSizeNEQ(v int64) predicate.UploadTask {
+func FileSizeNEQ(v uint64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldNEQ(FieldFileSize, v))
 }
 
 // FileSizeIn applies the In predicate on the "file_size" field.
-func FileSizeIn(vs ...int64) predicate.UploadTask {
+func FileSizeIn(vs ...uint64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldIn(FieldFileSize, vs...))
 }
 
 // FileSizeNotIn applies the NotIn predicate on the "file_size" field.
-func FileSizeNotIn(vs ...int64) predicate.UploadTask {
+func FileSizeNotIn(vs ...uint64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldNotIn(FieldFileSize, vs...))
 }
 
 // FileSizeGT applies the GT predicate on the "file_size" field.
-func FileSizeGT(v int64) predicate.UploadTask {
+func FileSizeGT(v uint64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldGT(FieldFileSize, v))
 }
 
 // FileSizeGTE applies the GTE predicate on the "file_size" field.
-func FileSizeGTE(v int64) predicate.UploadTask {
+func FileSizeGTE(v uint64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldGTE(FieldFileSize, v))
 }
 
 // FileSizeLT applies the LT predicate on the "file_size" field.
-func FileSizeLT(v int64) predicate.UploadTask {
+func FileSizeLT(v uint64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldLT(FieldFileSize, v))
 }
 
 // FileSizeLTE applies the LTE predicate on the "file_size" field.
-func FileSizeLTE(v int64) predicate.UploadTask {
+func FileSizeLTE(v uint64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldLTE(FieldFileSize, v))
-}
-
-// FileSizeIsNil applies the IsNil predicate on the "file_size" field.
-func FileSizeIsNil() predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldIsNull(FieldFileSize))
-}
-
-// FileSizeNotNil applies the NotNil predicate on the "file_size" field.
-func FileSizeNotNil() predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldNotNull(FieldFileSize))
 }
 
 // ChunkSizeEQ applies the EQ predicate on the "chunk_size" field.
@@ -484,16 +524,6 @@ func ChunkSizeLTE(v uint32) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldLTE(FieldChunkSize, v))
 }
 
-// ChunkSizeIsNil applies the IsNil predicate on the "chunk_size" field.
-func ChunkSizeIsNil() predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldIsNull(FieldChunkSize))
-}
-
-// ChunkSizeNotNil applies the NotNil predicate on the "chunk_size" field.
-func ChunkSizeNotNil() predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldNotNull(FieldChunkSize))
-}
-
 // TotalChunksEQ applies the EQ predicate on the "total_chunks" field.
 func TotalChunksEQ(v uint32) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldTotalChunks, v))
@@ -534,16 +564,6 @@ func TotalChunksLTE(v uint32) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldLTE(FieldTotalChunks, v))
 }
 
-// TotalChunksIsNil applies the IsNil predicate on the "total_chunks" field.
-func TotalChunksIsNil() predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldIsNull(FieldTotalChunks))
-}
-
-// TotalChunksNotNil applies the NotNil predicate on the "total_chunks" field.
-func TotalChunksNotNil() predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldNotNull(FieldTotalChunks))
-}
-
 // UploadedChunksIsNil applies the IsNil predicate on the "uploaded_chunks" field.
 func UploadedChunksIsNil() predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldIsNull(FieldUploadedChunks))
@@ -555,53 +575,23 @@ func UploadedChunksNotNil() predicate.UploadTask {
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.
-func StatusEQ(v uint8) predicate.UploadTask {
+func StatusEQ(v Status) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldStatus, v))
 }
 
 // StatusNEQ applies the NEQ predicate on the "status" field.
-func StatusNEQ(v uint8) predicate.UploadTask {
+func StatusNEQ(v Status) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldNEQ(FieldStatus, v))
 }
 
 // StatusIn applies the In predicate on the "status" field.
-func StatusIn(vs ...uint8) predicate.UploadTask {
+func StatusIn(vs ...Status) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldIn(FieldStatus, vs...))
 }
 
 // StatusNotIn applies the NotIn predicate on the "status" field.
-func StatusNotIn(vs ...uint8) predicate.UploadTask {
+func StatusNotIn(vs ...Status) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldNotIn(FieldStatus, vs...))
-}
-
-// StatusGT applies the GT predicate on the "status" field.
-func StatusGT(v uint8) predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldGT(FieldStatus, v))
-}
-
-// StatusGTE applies the GTE predicate on the "status" field.
-func StatusGTE(v uint8) predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldGTE(FieldStatus, v))
-}
-
-// StatusLT applies the LT predicate on the "status" field.
-func StatusLT(v uint8) predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldLT(FieldStatus, v))
-}
-
-// StatusLTE applies the LTE predicate on the "status" field.
-func StatusLTE(v uint8) predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldLTE(FieldStatus, v))
-}
-
-// StatusIsNil applies the IsNil predicate on the "status" field.
-func StatusIsNil() predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldIsNull(FieldStatus))
-}
-
-// StatusNotNil applies the NotNil predicate on the "status" field.
-func StatusNotNil() predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldNotNull(FieldStatus))
 }
 
 // FileKeyEQ applies the EQ predicate on the "file_key" field.
@@ -719,16 +709,6 @@ func VideoIDLTE(v uint32) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldLTE(FieldVideoID, v))
 }
 
-// VideoIDIsNil applies the IsNil predicate on the "video_id" field.
-func VideoIDIsNil() predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldIsNull(FieldVideoID))
-}
-
-// VideoIDNotNil applies the NotNil predicate on the "video_id" field.
-func VideoIDNotNil() predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldNotNull(FieldVideoID))
-}
-
 // AuthorIDEQ applies the EQ predicate on the "author_id" field.
 func AuthorIDEQ(v uint32) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldAuthorID, v))
@@ -767,16 +747,6 @@ func AuthorIDLT(v uint32) predicate.UploadTask {
 // AuthorIDLTE applies the LTE predicate on the "author_id" field.
 func AuthorIDLTE(v uint32) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldLTE(FieldAuthorID, v))
-}
-
-// AuthorIDIsNil applies the IsNil predicate on the "author_id" field.
-func AuthorIDIsNil() predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldIsNull(FieldAuthorID))
-}
-
-// AuthorIDNotNil applies the NotNil predicate on the "author_id" field.
-func AuthorIDNotNil() predicate.UploadTask {
-	return predicate.UploadTask(sql.FieldNotNull(FieldAuthorID))
 }
 
 // And groups predicates with the AND operator between them.

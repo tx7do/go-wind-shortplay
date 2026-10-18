@@ -1,9 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:get_it/get_it.dart' show GetIt;
 import 'package:cached_query/cached_query.dart' show Mutation;
 
 import 'package:shortplay_app/src/app_router/app_router.dart'
     show AppRouter, RouteNames;
+import 'package:shortplay_app/src/core/config/environments.dart'
+    show Environments;
 import 'package:shortplay_app/src/core/repositories/user_auth_cache.dart'
     show UserAuthCache;
 import 'package:shortplay_app/src/core/utilities/convert.dart'
@@ -127,7 +130,7 @@ class AuthenticationService extends AuthService {
       mutationFn: (params) async {
         final result = await _postAuth('/auth/login', {
           'username': params.username,
-          'password': params.password,
+          'password': _encryptPassword(params.password),
         });
         await doLoginSuccess(result);
         return result;
@@ -141,7 +144,7 @@ class AuthenticationService extends AuthService {
       mutationFn: (params) async {
         final result = await _postAuth('/auth/register', {
           'username': params.username,
-          'password': params.password,
+          'password': _encryptPassword(params.password),
           'nickname': params.nickname,
         });
         await doLoginSuccess(result);
@@ -213,6 +216,19 @@ class AuthenticationService extends AuthService {
   void doAuthenticationFailed() {
     GetIt.instance<UserAuthCache>().clearTokens();
     AppRouter.router.goNamed(RouteNames.home);
+  }
+
+  /// 密码传输加密：base64(AES-CBC/PKCS7(明文, key=iv=AES_KEY))
+  ///
+  /// 后端登录校验会先 AES 解密再比对 bcrypt；注册侧同样以密文入库前哈希，
+  /// 两端口径必须一致（与基座 flutter_app 的 _encryptPassword 同款实现）。
+  static String _encryptPassword(String password) {
+    final keyBytes = encrypt.Key.fromUtf8(Environments.aesKey);
+    final iv = encrypt.IV.fromUtf8(Environments.aesKey);
+    final encrypter = encrypt.Encrypter(
+      encrypt.AES(keyBytes, mode: encrypt.AESMode.cbc, padding: 'PKCS7'),
+    );
+    return encrypter.encrypt(password, iv: iv).base64;
   }
 }
 

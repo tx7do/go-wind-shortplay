@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	DashboardService_GetOverview_FullMethodName   = "/admin.service.v1.DashboardService/GetOverview"
 	DashboardService_ListTopVideos_FullMethodName = "/admin.service.v1.DashboardService/ListTopVideos"
+	DashboardService_Trends_FullMethodName        = "/admin.service.v1.DashboardService/Trends"
 )
 
 // DashboardServiceClient is the client API for DashboardService service.
@@ -35,6 +36,8 @@ type DashboardServiceClient interface {
 	GetOverview(ctx context.Context, in *v1.GetOverviewRequest, opts ...grpc.CallOption) (*v1.Overview, error)
 	// 视频 TOP 排行
 	ListTopVideos(ctx context.Context, in *v1.ListTopVideosRequest, opts ...grpc.CallOption) (*v11.ListVideoResponse, error)
+	// 近 N 日趋势（看板折线图）
+	Trends(ctx context.Context, in *v1.ListTrendsRequest, opts ...grpc.CallOption) (*v1.ListTrendsResponse, error)
 }
 
 type dashboardServiceClient struct {
@@ -65,6 +68,16 @@ func (c *dashboardServiceClient) ListTopVideos(ctx context.Context, in *v1.ListT
 	return out, nil
 }
 
+func (c *dashboardServiceClient) Trends(ctx context.Context, in *v1.ListTrendsRequest, opts ...grpc.CallOption) (*v1.ListTrendsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.ListTrendsResponse)
+	err := c.cc.Invoke(ctx, DashboardService_Trends_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DashboardServiceServer is the server API for DashboardService service.
 // All implementations must embed UnimplementedDashboardServiceServer
 // for forward compatibility.
@@ -75,6 +88,8 @@ type DashboardServiceServer interface {
 	GetOverview(context.Context, *v1.GetOverviewRequest) (*v1.Overview, error)
 	// 视频 TOP 排行
 	ListTopVideos(context.Context, *v1.ListTopVideosRequest) (*v11.ListVideoResponse, error)
+	// 近 N 日趋势（看板折线图）
+	Trends(context.Context, *v1.ListTrendsRequest) (*v1.ListTrendsResponse, error)
 	mustEmbedUnimplementedDashboardServiceServer()
 }
 
@@ -90,6 +105,9 @@ func (UnimplementedDashboardServiceServer) GetOverview(context.Context, *v1.GetO
 }
 func (UnimplementedDashboardServiceServer) ListTopVideos(context.Context, *v1.ListTopVideosRequest) (*v11.ListVideoResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListTopVideos not implemented")
+}
+func (UnimplementedDashboardServiceServer) Trends(context.Context, *v1.ListTrendsRequest) (*v1.ListTrendsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Trends not implemented")
 }
 func (UnimplementedDashboardServiceServer) mustEmbedUnimplementedDashboardServiceServer() {}
 func (UnimplementedDashboardServiceServer) testEmbeddedByValue()                          {}
@@ -148,6 +166,24 @@ func _DashboardService_ListTopVideos_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DashboardService_Trends_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ListTrendsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DashboardServiceServer).Trends(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DashboardService_Trends_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DashboardServiceServer).Trends(ctx, req.(*v1.ListTrendsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DashboardService_ServiceDesc is the grpc.ServiceDesc for DashboardService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -162,6 +198,10 @@ var DashboardService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListTopVideos",
 			Handler:    _DashboardService_ListTopVideos_Handler,
+		},
+		{
+			MethodName: "Trends",
+			Handler:    _DashboardService_Trends_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

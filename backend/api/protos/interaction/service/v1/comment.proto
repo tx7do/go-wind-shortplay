@@ -4,7 +4,7 @@ package interaction.service.v1;
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
-import "identity/service/v1/user.proto";
+import "identity/service/v1/user_brief.proto";
 import "pagination/v1/pagination.proto";
 
 // 评论服务
@@ -22,6 +22,9 @@ service CommentService {
 
   // 评论的回复列表（楼中楼，Phase 2）
   rpc ListReply (ListReplyRequest) returns (ListCommentResponse) {}
+
+  // 管理端全量评论列表（admin BFF 评论管理转发入口）
+  rpc AdminList (pagination.PagingRequest) returns (ListCommentResponse) {}
 }
 
 message Comment {

@@ -3,7 +3,7 @@ syntax = "proto3";
 package report.service.v1;
 
 import "google/protobuf/timestamp.proto";
-import "identity/service/v1/user.proto";
+import "identity/service/v1/user_brief.proto";
 import "pagination/v1/pagination.proto";
 
 // 举报服务（App 端提交举报，后台生成工单处理）

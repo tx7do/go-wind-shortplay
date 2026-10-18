@@ -3,6 +3,7 @@
 package videocomment
 
 import (
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -17,6 +18,14 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// FieldCreatedBy holds the string denoting the created_by field in the database.
+	FieldCreatedBy = "created_by"
+	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
+	FieldUpdatedBy = "updated_by"
+	// FieldDeletedBy holds the string denoting the deleted_by field in the database.
+	FieldDeletedBy = "deleted_by"
+	// FieldTenantID holds the string denoting the tenant_id field in the database.
+	FieldTenantID = "tenant_id"
 	// FieldVideoID holds the string denoting the video_id field in the database.
 	FieldVideoID = "video_id"
 	// FieldUserID holds the string denoting the user_id field in the database.
@@ -30,7 +39,7 @@ const (
 	// FieldReplyCount holds the string denoting the reply_count field in the database.
 	FieldReplyCount = "reply_count"
 	// Table holds the table name of the videocomment in the database.
-	Table = "video_comments"
+	Table = "sp_video_comments"
 )
 
 // Columns holds all SQL columns for videocomment fields.
@@ -39,6 +48,10 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
+	FieldCreatedBy,
+	FieldUpdatedBy,
+	FieldDeletedBy,
+	FieldTenantID,
 	FieldVideoID,
 	FieldUserID,
 	FieldContent,
@@ -57,15 +70,28 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+// Note that the variables below are initialized by the runtime
+// package on the initialization of the application. Therefore,
+// it should be imported in the main as follows:
+//
+//	import _ "go-wind-shortplay/app/core/service/internal/data/ent/runtime"
 var (
-	// ContentValidator is a validator for the "content" field. It is called by the builders before save.
-	ContentValidator func(string) error
+	Hooks  [1]ent.Hook
+	Policy ent.Policy
+	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
+	DefaultTenantID uint32
+	// DefaultVideoID holds the default value on creation for the "video_id" field.
+	DefaultVideoID uint32
+	// DefaultUserID holds the default value on creation for the "user_id" field.
+	DefaultUserID uint32
+	// DefaultContent holds the default value on creation for the "content" field.
+	DefaultContent string
 	// DefaultParentID holds the default value on creation for the "parent_id" field.
 	DefaultParentID uint32
 	// DefaultLikeCount holds the default value on creation for the "like_count" field.
-	DefaultLikeCount int64
+	DefaultLikeCount uint64
 	// DefaultReplyCount holds the default value on creation for the "reply_count" field.
-	DefaultReplyCount int64
+	DefaultReplyCount uint64
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
@@ -91,6 +117,26 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByDeletedAt orders the results by the deleted_at field.
 func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByCreatedBy orders the results by the created_by field.
+func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
+}
+
+// ByUpdatedBy orders the results by the updated_by field.
+func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedBy, opts...).ToFunc()
+}
+
+// ByDeletedBy orders the results by the deleted_by field.
+func ByDeletedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedBy, opts...).ToFunc()
+}
+
+// ByTenantID orders the results by the tenant_id field.
+func ByTenantID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTenantID, opts...).ToFunc()
 }
 
 // ByVideoID orders the results by the video_id field.

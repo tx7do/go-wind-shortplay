@@ -1,7 +1,21 @@
 server:
   grpc:
-    addr: "0.0.0.0:7900"
+    addr: "${CORE_GRPC_ADDR:0.0.0.0:7900}"
     timeout: 10s
     middleware:
       enable_logging: true
       enable_recovery: true
+      enable_tracing: true
+      enable_validate: true
+      enable_circuit_breaker: true
+      enable_metadata: true
+
+  asynq:
+    # db2 专库：db1 的 asynq:{default} 队列被本机多个项目共用，外来 asynq
+    # worker 会抢走本项目的任务（handler not found → 重试归档，任务丢失）。
+    # asynq 队列 URI：密码内嵌，${ENV:default} 插值不支持嵌套默认值，此处写死；
+    # 换环境用整体覆盖（如需环境变量化可改为 ${ASYNQ_REDIS_URI:...} 单层插值）。
+    uri: "redis://:*Abcd123456@127.0.0.1:6379/2"
+    enable_gracefully_shutdown: true
+    shutdown_timeout: 3s
+    codec: "json"

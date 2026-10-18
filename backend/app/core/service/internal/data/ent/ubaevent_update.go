@@ -29,57 +29,43 @@ func (_u *UbaEventUpdate) Where(ps ...predicate.UbaEvent) *UbaEventUpdate {
 	return _u
 }
 
-// SetEventType sets the "event_type" field.
-func (_u *UbaEventUpdate) SetEventType(v uint8) *UbaEventUpdate {
-	_u.mutation.ResetEventType()
-	_u.mutation.SetEventType(v)
+// SetUpdatedAt sets the "updated_at" field.
+func (_u *UbaEventUpdate) SetUpdatedAt(v time.Time) *UbaEventUpdate {
+	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
-// SetNillableEventType sets the "event_type" field if the given value is not nil.
-func (_u *UbaEventUpdate) SetNillableEventType(v *uint8) *UbaEventUpdate {
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (_u *UbaEventUpdate) SetNillableUpdatedAt(v *time.Time) *UbaEventUpdate {
 	if v != nil {
-		_u.SetEventType(*v)
+		_u.SetUpdatedAt(*v)
 	}
 	return _u
 }
 
-// AddEventType adds value to the "event_type" field.
-func (_u *UbaEventUpdate) AddEventType(v int8) *UbaEventUpdate {
-	_u.mutation.AddEventType(v)
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (_u *UbaEventUpdate) ClearUpdatedAt() *UbaEventUpdate {
+	_u.mutation.ClearUpdatedAt()
 	return _u
 }
 
-// ClearEventType clears the value of the "event_type" field.
-func (_u *UbaEventUpdate) ClearEventType() *UbaEventUpdate {
-	_u.mutation.ClearEventType()
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *UbaEventUpdate) SetDeletedAt(v time.Time) *UbaEventUpdate {
+	_u.mutation.SetDeletedAt(v)
 	return _u
 }
 
-// SetVideoID sets the "video_id" field.
-func (_u *UbaEventUpdate) SetVideoID(v uint32) *UbaEventUpdate {
-	_u.mutation.ResetVideoID()
-	_u.mutation.SetVideoID(v)
-	return _u
-}
-
-// SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_u *UbaEventUpdate) SetNillableVideoID(v *uint32) *UbaEventUpdate {
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *UbaEventUpdate) SetNillableDeletedAt(v *time.Time) *UbaEventUpdate {
 	if v != nil {
-		_u.SetVideoID(*v)
+		_u.SetDeletedAt(*v)
 	}
 	return _u
 }
 
-// AddVideoID adds value to the "video_id" field.
-func (_u *UbaEventUpdate) AddVideoID(v int32) *UbaEventUpdate {
-	_u.mutation.AddVideoID(v)
-	return _u
-}
-
-// ClearVideoID clears the value of the "video_id" field.
-func (_u *UbaEventUpdate) ClearVideoID() *UbaEventUpdate {
-	_u.mutation.ClearVideoID()
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *UbaEventUpdate) ClearDeletedAt() *UbaEventUpdate {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -104,9 +90,38 @@ func (_u *UbaEventUpdate) AddUserID(v int32) *UbaEventUpdate {
 	return _u
 }
 
-// ClearUserID clears the value of the "user_id" field.
-func (_u *UbaEventUpdate) ClearUserID() *UbaEventUpdate {
-	_u.mutation.ClearUserID()
+// SetEventType sets the "event_type" field.
+func (_u *UbaEventUpdate) SetEventType(v ubaevent.EventType) *UbaEventUpdate {
+	_u.mutation.SetEventType(v)
+	return _u
+}
+
+// SetNillableEventType sets the "event_type" field if the given value is not nil.
+func (_u *UbaEventUpdate) SetNillableEventType(v *ubaevent.EventType) *UbaEventUpdate {
+	if v != nil {
+		_u.SetEventType(*v)
+	}
+	return _u
+}
+
+// SetVideoID sets the "video_id" field.
+func (_u *UbaEventUpdate) SetVideoID(v uint32) *UbaEventUpdate {
+	_u.mutation.ResetVideoID()
+	_u.mutation.SetVideoID(v)
+	return _u
+}
+
+// SetNillableVideoID sets the "video_id" field if the given value is not nil.
+func (_u *UbaEventUpdate) SetNillableVideoID(v *uint32) *UbaEventUpdate {
+	if v != nil {
+		_u.SetVideoID(*v)
+	}
+	return _u
+}
+
+// AddVideoID adds value to the "video_id" field.
+func (_u *UbaEventUpdate) AddVideoID(v int32) *UbaEventUpdate {
+	_u.mutation.AddVideoID(v)
 	return _u
 }
 
@@ -131,21 +146,15 @@ func (_u *UbaEventUpdate) AddTargetUserID(v int32) *UbaEventUpdate {
 	return _u
 }
 
-// ClearTargetUserID clears the value of the "target_user_id" field.
-func (_u *UbaEventUpdate) ClearTargetUserID() *UbaEventUpdate {
-	_u.mutation.ClearTargetUserID()
-	return _u
-}
-
 // SetDurationMs sets the "duration_ms" field.
-func (_u *UbaEventUpdate) SetDurationMs(v int64) *UbaEventUpdate {
+func (_u *UbaEventUpdate) SetDurationMs(v uint64) *UbaEventUpdate {
 	_u.mutation.ResetDurationMs()
 	_u.mutation.SetDurationMs(v)
 	return _u
 }
 
 // SetNillableDurationMs sets the "duration_ms" field if the given value is not nil.
-func (_u *UbaEventUpdate) SetNillableDurationMs(v *int64) *UbaEventUpdate {
+func (_u *UbaEventUpdate) SetNillableDurationMs(v *uint64) *UbaEventUpdate {
 	if v != nil {
 		_u.SetDurationMs(*v)
 	}
@@ -155,12 +164,6 @@ func (_u *UbaEventUpdate) SetNillableDurationMs(v *int64) *UbaEventUpdate {
 // AddDurationMs adds value to the "duration_ms" field.
 func (_u *UbaEventUpdate) AddDurationMs(v int64) *UbaEventUpdate {
 	_u.mutation.AddDurationMs(v)
-	return _u
-}
-
-// ClearDurationMs clears the value of the "duration_ms" field.
-func (_u *UbaEventUpdate) ClearDurationMs() *UbaEventUpdate {
-	_u.mutation.ClearDurationMs()
 	return _u
 }
 
@@ -182,12 +185,6 @@ func (_u *UbaEventUpdate) SetNillableWatchPercent(v *uint32) *UbaEventUpdate {
 // AddWatchPercent adds value to the "watch_percent" field.
 func (_u *UbaEventUpdate) AddWatchPercent(v int32) *UbaEventUpdate {
 	_u.mutation.AddWatchPercent(v)
-	return _u
-}
-
-// ClearWatchPercent clears the value of the "watch_percent" field.
-func (_u *UbaEventUpdate) ClearWatchPercent() *UbaEventUpdate {
-	_u.mutation.ClearWatchPercent()
 	return _u
 }
 
@@ -263,6 +260,16 @@ func (_u *UbaEventUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *UbaEventUpdate) check() error {
+	if v, ok := _u.mutation.EventType(); ok {
+		if err := ubaevent.EventTypeValidator(v); err != nil {
+			return &ValidationError{Name: "event_type", err: fmt.Errorf(`ent: validator failed for field "UbaEvent.event_type": %w`, err)}
+		}
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *UbaEventUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UbaEventUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -270,6 +277,9 @@ func (_u *UbaEventUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UbaEv
 }
 
 func (_u *UbaEventUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(ubaevent.Table, ubaevent.Columns, sqlgraph.NewFieldSpec(ubaevent.FieldID, field.TypeUint32))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -281,23 +291,20 @@ func (_u *UbaEventUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.CreatedAtCleared() {
 		_spec.ClearField(ubaevent.FieldCreatedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.EventType(); ok {
-		_spec.SetField(ubaevent.FieldEventType, field.TypeUint8, value)
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(ubaevent.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.AddedEventType(); ok {
-		_spec.AddField(ubaevent.FieldEventType, field.TypeUint8, value)
+	if _u.mutation.UpdatedAtCleared() {
+		_spec.ClearField(ubaevent.FieldUpdatedAt, field.TypeTime)
 	}
-	if _u.mutation.EventTypeCleared() {
-		_spec.ClearField(ubaevent.FieldEventType, field.TypeUint8)
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(ubaevent.FieldDeletedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.VideoID(); ok {
-		_spec.SetField(ubaevent.FieldVideoID, field.TypeUint32, value)
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(ubaevent.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.AddedVideoID(); ok {
-		_spec.AddField(ubaevent.FieldVideoID, field.TypeUint32, value)
-	}
-	if _u.mutation.VideoIDCleared() {
-		_spec.ClearField(ubaevent.FieldVideoID, field.TypeUint32)
+	if _u.mutation.TenantIDCleared() {
+		_spec.ClearField(ubaevent.FieldTenantID, field.TypeUint32)
 	}
 	if value, ok := _u.mutation.UserID(); ok {
 		_spec.SetField(ubaevent.FieldUserID, field.TypeUint32, value)
@@ -305,8 +312,14 @@ func (_u *UbaEventUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedUserID(); ok {
 		_spec.AddField(ubaevent.FieldUserID, field.TypeUint32, value)
 	}
-	if _u.mutation.UserIDCleared() {
-		_spec.ClearField(ubaevent.FieldUserID, field.TypeUint32)
+	if value, ok := _u.mutation.EventType(); ok {
+		_spec.SetField(ubaevent.FieldEventType, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.VideoID(); ok {
+		_spec.SetField(ubaevent.FieldVideoID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedVideoID(); ok {
+		_spec.AddField(ubaevent.FieldVideoID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.TargetUserID(); ok {
 		_spec.SetField(ubaevent.FieldTargetUserID, field.TypeUint32, value)
@@ -314,26 +327,17 @@ func (_u *UbaEventUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedTargetUserID(); ok {
 		_spec.AddField(ubaevent.FieldTargetUserID, field.TypeUint32, value)
 	}
-	if _u.mutation.TargetUserIDCleared() {
-		_spec.ClearField(ubaevent.FieldTargetUserID, field.TypeUint32)
-	}
 	if value, ok := _u.mutation.DurationMs(); ok {
-		_spec.SetField(ubaevent.FieldDurationMs, field.TypeInt64, value)
+		_spec.SetField(ubaevent.FieldDurationMs, field.TypeUint64, value)
 	}
 	if value, ok := _u.mutation.AddedDurationMs(); ok {
-		_spec.AddField(ubaevent.FieldDurationMs, field.TypeInt64, value)
-	}
-	if _u.mutation.DurationMsCleared() {
-		_spec.ClearField(ubaevent.FieldDurationMs, field.TypeInt64)
+		_spec.AddField(ubaevent.FieldDurationMs, field.TypeUint64, value)
 	}
 	if value, ok := _u.mutation.WatchPercent(); ok {
 		_spec.SetField(ubaevent.FieldWatchPercent, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedWatchPercent(); ok {
 		_spec.AddField(ubaevent.FieldWatchPercent, field.TypeUint32, value)
-	}
-	if _u.mutation.WatchPercentCleared() {
-		_spec.ClearField(ubaevent.FieldWatchPercent, field.TypeUint32)
 	}
 	if value, ok := _u.mutation.Extra(); ok {
 		_spec.SetField(ubaevent.FieldExtra, field.TypeString, value)
@@ -369,57 +373,43 @@ type UbaEventUpdateOne struct {
 	modifiers []func(*sql.UpdateBuilder)
 }
 
-// SetEventType sets the "event_type" field.
-func (_u *UbaEventUpdateOne) SetEventType(v uint8) *UbaEventUpdateOne {
-	_u.mutation.ResetEventType()
-	_u.mutation.SetEventType(v)
+// SetUpdatedAt sets the "updated_at" field.
+func (_u *UbaEventUpdateOne) SetUpdatedAt(v time.Time) *UbaEventUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
-// SetNillableEventType sets the "event_type" field if the given value is not nil.
-func (_u *UbaEventUpdateOne) SetNillableEventType(v *uint8) *UbaEventUpdateOne {
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (_u *UbaEventUpdateOne) SetNillableUpdatedAt(v *time.Time) *UbaEventUpdateOne {
 	if v != nil {
-		_u.SetEventType(*v)
+		_u.SetUpdatedAt(*v)
 	}
 	return _u
 }
 
-// AddEventType adds value to the "event_type" field.
-func (_u *UbaEventUpdateOne) AddEventType(v int8) *UbaEventUpdateOne {
-	_u.mutation.AddEventType(v)
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (_u *UbaEventUpdateOne) ClearUpdatedAt() *UbaEventUpdateOne {
+	_u.mutation.ClearUpdatedAt()
 	return _u
 }
 
-// ClearEventType clears the value of the "event_type" field.
-func (_u *UbaEventUpdateOne) ClearEventType() *UbaEventUpdateOne {
-	_u.mutation.ClearEventType()
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *UbaEventUpdateOne) SetDeletedAt(v time.Time) *UbaEventUpdateOne {
+	_u.mutation.SetDeletedAt(v)
 	return _u
 }
 
-// SetVideoID sets the "video_id" field.
-func (_u *UbaEventUpdateOne) SetVideoID(v uint32) *UbaEventUpdateOne {
-	_u.mutation.ResetVideoID()
-	_u.mutation.SetVideoID(v)
-	return _u
-}
-
-// SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_u *UbaEventUpdateOne) SetNillableVideoID(v *uint32) *UbaEventUpdateOne {
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *UbaEventUpdateOne) SetNillableDeletedAt(v *time.Time) *UbaEventUpdateOne {
 	if v != nil {
-		_u.SetVideoID(*v)
+		_u.SetDeletedAt(*v)
 	}
 	return _u
 }
 
-// AddVideoID adds value to the "video_id" field.
-func (_u *UbaEventUpdateOne) AddVideoID(v int32) *UbaEventUpdateOne {
-	_u.mutation.AddVideoID(v)
-	return _u
-}
-
-// ClearVideoID clears the value of the "video_id" field.
-func (_u *UbaEventUpdateOne) ClearVideoID() *UbaEventUpdateOne {
-	_u.mutation.ClearVideoID()
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *UbaEventUpdateOne) ClearDeletedAt() *UbaEventUpdateOne {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -444,9 +434,38 @@ func (_u *UbaEventUpdateOne) AddUserID(v int32) *UbaEventUpdateOne {
 	return _u
 }
 
-// ClearUserID clears the value of the "user_id" field.
-func (_u *UbaEventUpdateOne) ClearUserID() *UbaEventUpdateOne {
-	_u.mutation.ClearUserID()
+// SetEventType sets the "event_type" field.
+func (_u *UbaEventUpdateOne) SetEventType(v ubaevent.EventType) *UbaEventUpdateOne {
+	_u.mutation.SetEventType(v)
+	return _u
+}
+
+// SetNillableEventType sets the "event_type" field if the given value is not nil.
+func (_u *UbaEventUpdateOne) SetNillableEventType(v *ubaevent.EventType) *UbaEventUpdateOne {
+	if v != nil {
+		_u.SetEventType(*v)
+	}
+	return _u
+}
+
+// SetVideoID sets the "video_id" field.
+func (_u *UbaEventUpdateOne) SetVideoID(v uint32) *UbaEventUpdateOne {
+	_u.mutation.ResetVideoID()
+	_u.mutation.SetVideoID(v)
+	return _u
+}
+
+// SetNillableVideoID sets the "video_id" field if the given value is not nil.
+func (_u *UbaEventUpdateOne) SetNillableVideoID(v *uint32) *UbaEventUpdateOne {
+	if v != nil {
+		_u.SetVideoID(*v)
+	}
+	return _u
+}
+
+// AddVideoID adds value to the "video_id" field.
+func (_u *UbaEventUpdateOne) AddVideoID(v int32) *UbaEventUpdateOne {
+	_u.mutation.AddVideoID(v)
 	return _u
 }
 
@@ -471,21 +490,15 @@ func (_u *UbaEventUpdateOne) AddTargetUserID(v int32) *UbaEventUpdateOne {
 	return _u
 }
 
-// ClearTargetUserID clears the value of the "target_user_id" field.
-func (_u *UbaEventUpdateOne) ClearTargetUserID() *UbaEventUpdateOne {
-	_u.mutation.ClearTargetUserID()
-	return _u
-}
-
 // SetDurationMs sets the "duration_ms" field.
-func (_u *UbaEventUpdateOne) SetDurationMs(v int64) *UbaEventUpdateOne {
+func (_u *UbaEventUpdateOne) SetDurationMs(v uint64) *UbaEventUpdateOne {
 	_u.mutation.ResetDurationMs()
 	_u.mutation.SetDurationMs(v)
 	return _u
 }
 
 // SetNillableDurationMs sets the "duration_ms" field if the given value is not nil.
-func (_u *UbaEventUpdateOne) SetNillableDurationMs(v *int64) *UbaEventUpdateOne {
+func (_u *UbaEventUpdateOne) SetNillableDurationMs(v *uint64) *UbaEventUpdateOne {
 	if v != nil {
 		_u.SetDurationMs(*v)
 	}
@@ -495,12 +508,6 @@ func (_u *UbaEventUpdateOne) SetNillableDurationMs(v *int64) *UbaEventUpdateOne 
 // AddDurationMs adds value to the "duration_ms" field.
 func (_u *UbaEventUpdateOne) AddDurationMs(v int64) *UbaEventUpdateOne {
 	_u.mutation.AddDurationMs(v)
-	return _u
-}
-
-// ClearDurationMs clears the value of the "duration_ms" field.
-func (_u *UbaEventUpdateOne) ClearDurationMs() *UbaEventUpdateOne {
-	_u.mutation.ClearDurationMs()
 	return _u
 }
 
@@ -522,12 +529,6 @@ func (_u *UbaEventUpdateOne) SetNillableWatchPercent(v *uint32) *UbaEventUpdateO
 // AddWatchPercent adds value to the "watch_percent" field.
 func (_u *UbaEventUpdateOne) AddWatchPercent(v int32) *UbaEventUpdateOne {
 	_u.mutation.AddWatchPercent(v)
-	return _u
-}
-
-// ClearWatchPercent clears the value of the "watch_percent" field.
-func (_u *UbaEventUpdateOne) ClearWatchPercent() *UbaEventUpdateOne {
-	_u.mutation.ClearWatchPercent()
 	return _u
 }
 
@@ -616,6 +617,16 @@ func (_u *UbaEventUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *UbaEventUpdateOne) check() error {
+	if v, ok := _u.mutation.EventType(); ok {
+		if err := ubaevent.EventTypeValidator(v); err != nil {
+			return &ValidationError{Name: "event_type", err: fmt.Errorf(`ent: validator failed for field "UbaEvent.event_type": %w`, err)}
+		}
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *UbaEventUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UbaEventUpdateOne {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -623,6 +634,9 @@ func (_u *UbaEventUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Ub
 }
 
 func (_u *UbaEventUpdateOne) sqlSave(ctx context.Context) (_node *UbaEvent, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(ubaevent.Table, ubaevent.Columns, sqlgraph.NewFieldSpec(ubaevent.FieldID, field.TypeUint32))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -651,23 +665,20 @@ func (_u *UbaEventUpdateOne) sqlSave(ctx context.Context) (_node *UbaEvent, err 
 	if _u.mutation.CreatedAtCleared() {
 		_spec.ClearField(ubaevent.FieldCreatedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.EventType(); ok {
-		_spec.SetField(ubaevent.FieldEventType, field.TypeUint8, value)
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(ubaevent.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.AddedEventType(); ok {
-		_spec.AddField(ubaevent.FieldEventType, field.TypeUint8, value)
+	if _u.mutation.UpdatedAtCleared() {
+		_spec.ClearField(ubaevent.FieldUpdatedAt, field.TypeTime)
 	}
-	if _u.mutation.EventTypeCleared() {
-		_spec.ClearField(ubaevent.FieldEventType, field.TypeUint8)
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(ubaevent.FieldDeletedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.VideoID(); ok {
-		_spec.SetField(ubaevent.FieldVideoID, field.TypeUint32, value)
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(ubaevent.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.AddedVideoID(); ok {
-		_spec.AddField(ubaevent.FieldVideoID, field.TypeUint32, value)
-	}
-	if _u.mutation.VideoIDCleared() {
-		_spec.ClearField(ubaevent.FieldVideoID, field.TypeUint32)
+	if _u.mutation.TenantIDCleared() {
+		_spec.ClearField(ubaevent.FieldTenantID, field.TypeUint32)
 	}
 	if value, ok := _u.mutation.UserID(); ok {
 		_spec.SetField(ubaevent.FieldUserID, field.TypeUint32, value)
@@ -675,8 +686,14 @@ func (_u *UbaEventUpdateOne) sqlSave(ctx context.Context) (_node *UbaEvent, err 
 	if value, ok := _u.mutation.AddedUserID(); ok {
 		_spec.AddField(ubaevent.FieldUserID, field.TypeUint32, value)
 	}
-	if _u.mutation.UserIDCleared() {
-		_spec.ClearField(ubaevent.FieldUserID, field.TypeUint32)
+	if value, ok := _u.mutation.EventType(); ok {
+		_spec.SetField(ubaevent.FieldEventType, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.VideoID(); ok {
+		_spec.SetField(ubaevent.FieldVideoID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedVideoID(); ok {
+		_spec.AddField(ubaevent.FieldVideoID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.TargetUserID(); ok {
 		_spec.SetField(ubaevent.FieldTargetUserID, field.TypeUint32, value)
@@ -684,26 +701,17 @@ func (_u *UbaEventUpdateOne) sqlSave(ctx context.Context) (_node *UbaEvent, err 
 	if value, ok := _u.mutation.AddedTargetUserID(); ok {
 		_spec.AddField(ubaevent.FieldTargetUserID, field.TypeUint32, value)
 	}
-	if _u.mutation.TargetUserIDCleared() {
-		_spec.ClearField(ubaevent.FieldTargetUserID, field.TypeUint32)
-	}
 	if value, ok := _u.mutation.DurationMs(); ok {
-		_spec.SetField(ubaevent.FieldDurationMs, field.TypeInt64, value)
+		_spec.SetField(ubaevent.FieldDurationMs, field.TypeUint64, value)
 	}
 	if value, ok := _u.mutation.AddedDurationMs(); ok {
-		_spec.AddField(ubaevent.FieldDurationMs, field.TypeInt64, value)
-	}
-	if _u.mutation.DurationMsCleared() {
-		_spec.ClearField(ubaevent.FieldDurationMs, field.TypeInt64)
+		_spec.AddField(ubaevent.FieldDurationMs, field.TypeUint64, value)
 	}
 	if value, ok := _u.mutation.WatchPercent(); ok {
 		_spec.SetField(ubaevent.FieldWatchPercent, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedWatchPercent(); ok {
 		_spec.AddField(ubaevent.FieldWatchPercent, field.TypeUint32, value)
-	}
-	if _u.mutation.WatchPercentCleared() {
-		_spec.ClearField(ubaevent.FieldWatchPercent, field.TypeUint32)
 	}
 	if value, ok := _u.mutation.Extra(); ok {
 		_spec.SetField(ubaevent.FieldExtra, field.TypeString, value)

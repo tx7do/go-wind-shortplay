@@ -17,9 +17,11 @@
     "@tanstack/react-query": "^5.100.11",
     "antd": "^6.4.3",
     "axios": "^1.16.1",
+    "crypto-js": "^4.2.0",
     "dayjs": "^1.11.20",
     "echarts": "^6.1.0",
     "echarts-for-react": "^3.0.6",
+    "exceljs": "^4.4.0",
     "i18next": "^26.2.0",
     "i18next-browser-languagedetector": "^8.2.1",
     "lodash": "^4.18.1",
@@ -36,6 +38,8 @@
     "@iconify/react": "^6.0.2",
     "@tailwindcss/vite": "4.3.3",
     "@tanstack/react-query-devtools": "^5.100.11",
+    "@types/archiver": "^6.0.4",
+    "@types/crypto-js": "^4.2.2",
     "@types/lodash": "^4.17.21",
     "@types/lodash.clonedeep": "^4.5.9",
     "@types/node": "^24.12.4",
@@ -44,6 +48,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
     "@vitejs/plugin-react-swc": "^4.2.2",
+    "archiver": "^7.0.1",
     "commitlint": "^21.0.1",
     "eslint": "^10.4.0",
     "eslint-plugin-react-hooks": "^7.1.1",
@@ -66,8 +71,6 @@
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-purge-icons": "^0.10.0",
     "vite-plugin-svg-icons": "^2.0.1",
-    "vitest": "^4.1.6",
-    "archiver": "^7.0.1",
-    "@types/archiver": "^6.0.4"
+    "vitest": "^4.1.6"
   }
 }

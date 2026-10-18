@@ -2,231 +2,256 @@ package service
 
 import (
 	"context"
+	"strconv"
+	"strings"
 
+	crudViewer "github.com/tx7do/go-crud/viewer"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/tx7do/go-utils/timeutil"
+	"github.com/tx7do/go-utils/trans"
 	"github.com/tx7do/kratos-bootstrap/bootstrap"
-	"google.golang.org/protobuf/types/known/emptypb"
 
 	paginationV1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
 
-	notifyV1 "go-wind-shortplay/api/gen/go/notify/service/v1"
-	reportV1 "go-wind-shortplay/api/gen/go/report/service/v1"
-	videoV1 "go-wind-shortplay/api/gen/go/video/service/v1"
 	"go-wind-shortplay/app/core/service/internal/data"
 	"go-wind-shortplay/app/core/service/internal/data/ent"
-	"go-wind-shortplay/pkg/authctx"
+	"go-wind-shortplay/app/core/service/internal/data/ent/videoreport"
+
+	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
+	reportV1 "go-wind-shortplay/api/gen/go/report/service/v1"
+	videoV1 "go-wind-shortplay/api/gen/go/video/service/v1"
 )
+
+// InternalMessageNotifier 站内信系统能力（由 InternalMessageService 实现，装配期注入）。
+type InternalMessageNotifier interface {
+	// SendSystemNotification 系统事件通知（基座通知域投递缝，见 internal_message_service.go）。
+	SendSystemNotification(ctx context.Context, title, content string, targetUserIDs []uint32) (uint32, error)
+}
+
+// SuperAdminResolver 超管用户 ID 解析（举报通知收件人，由 RoleService 实现）。
+type SuperAdminResolver interface {
+	ListSuperAdminUserIDs(ctx context.Context) ([]uint32, error)
+}
 
 type ReportService struct {
 	reportV1.UnimplementedReportServiceServer
 
+	log *log.Helper
+
 	reportRepo  *data.ReportRepo
-	userRepo    *data.UserRepo
+	userRepo    data.UserRepo
 	videoRepo   *data.VideoRepo
-	commentRepo *data.CommentRepo
-	log         *log.Helper
+	commentRepo *data.VideoCommentRepo
+
+	internalMessage InternalMessageNotifier
+	superAdmins     SuperAdminResolver
 }
 
-func NewReportService(ctx *bootstrap.Context, reportRepo *data.ReportRepo, userRepo *data.UserRepo, videoRepo *data.VideoRepo, commentRepo *data.CommentRepo) *ReportService {
+func NewReportService(
+	ctx *bootstrap.Context,
+	reportRepo *data.ReportRepo,
+	userRepo data.UserRepo,
+	videoRepo *data.VideoRepo,
+	commentRepo *data.VideoCommentRepo,
+) *ReportService {
 	return &ReportService{
+		log:         ctx.NewLoggerHelper("report/service/core-service"),
 		reportRepo:  reportRepo,
 		userRepo:    userRepo,
 		videoRepo:   videoRepo,
 		commentRepo: commentRepo,
-		log:         ctx.NewLoggerHelper("report/service/core-service"),
 	}
+}
+
+// RegisterNotifier 注入站内信通知能力。
+func (s *ReportService) RegisterNotifier(n InternalMessageNotifier) {
+	s.internalMessage = n
+}
+
+// RegisterSuperAdminResolver 注入超管解析。
+func (s *ReportService) RegisterSuperAdminResolver(r SuperAdminResolver) {
+	s.superAdmins = r
 }
 
 func (s *ReportService) CreateReport(ctx context.Context, req *reportV1.CreateReportRequest) (*reportV1.Report, error) {
-	uid := authctx.UserIDFromContext(ctx)
+	uid := spViewerUserID(ctx)
 	if uid == 0 {
 		return nil, reportV1.ErrorUnauthorized("login required")
 	}
-	// 同目标待处理工单去重
-	pending, err := s.reportRepo.HasPending(ctx, uid, uint8(req.GetTargetType()), req.GetTargetId())
-	if err != nil {
-		return nil, reportV1.ErrorInternalServerError("query report failed")
+	if req.GetTargetId() == 0 || strings.TrimSpace(req.GetReason()) == "" {
+		return nil, reportV1.ErrorBadRequest("invalid parameter")
 	}
-	if pending {
+	if req.GetTargetType() == reportV1.ReportTargetType_REPORT_TARGET_TYPE_UNSPECIFIED {
+		return nil, reportV1.ErrorBadRequest("invalid target type")
+	}
+
+	// 同目标同举报人的待处理工单视为重复
+	dup, err := s.reportRepo.HasPendingOfTarget(ctx, uid, req.GetTargetType(), req.GetTargetId())
+	if err != nil {
+		return nil, err
+	}
+	if dup {
 		return nil, reportV1.ErrorDuplicateReport("duplicate report")
 	}
-	r, err := s.reportRepo.Create(ctx, uid, uint8(req.GetTargetType()), req.GetTargetId(), ptr(req.GetReason()), req.Description)
+
+	e, err := s.reportRepo.Create(ctx, uid, req.GetTargetType(), req.GetTargetId(), req.GetReason(), req.GetDescription())
 	if err != nil {
-		return nil, reportV1.ErrorInternalServerError("create report failed")
+		return nil, err
 	}
-	u, _ := s.userRepo.GetByID(ctx, uid)
-	return toReport(r, toUserBrief(u)), nil
+
+	// 通知所有超管（基座 internal_message 机制，尽力而为不阻塞）
+	s.notifySuperAdmins(ctx, e.ID, req)
+
+	dto := reportEntityToDTO(e)
+	if u, uerr := s.userRepo.Get(ctx, &identityV1.GetUserRequest{
+		QueryBy: &identityV1.GetUserRequest_Id{Id: uid},
+	}); uerr == nil {
+		dto.Reporter = toUserBriefSP(u)
+	}
+	return dto, nil
+}
+
+// notifySuperAdmins 经基座通知域投递缝给全部超管发站内信。
+func (s *ReportService) notifySuperAdmins(ctx context.Context, reportID uint32, req *reportV1.CreateReportRequest) {
+	if s.internalMessage == nil || s.superAdmins == nil {
+		return
+	}
+	adminIDs, err := s.superAdmins.ListSuperAdminUserIDs(ctx)
+	if err != nil || len(adminIDs) == 0 {
+		s.log.Warnf("report notify: no super admins resolved (err=%v)", err)
+		return
+	}
+	title := "新举报工单待处理"
+	content := "工单 #" + strconv.FormatUint(uint64(reportID), 10) +
+		"：目标类型=" + req.GetTargetType().String() +
+		"，目标ID=" + strconv.FormatUint(uint64(req.GetTargetId()), 10) +
+		"，原因=" + req.GetReason()
+	if _, err = s.internalMessage.SendSystemNotification(ctx, title, content, adminIDs); err != nil {
+		s.log.Errorf("report notify super admins failed: %v", err)
+	}
 }
 
 func (s *ReportService) GetReport(ctx context.Context, req *reportV1.GetReportRequest) (*reportV1.Report, error) {
-	r, err := s.reportRepo.GetByID(ctx, req.GetId())
+	e, err := s.reportRepo.Get(ctx, req.GetId())
 	if err != nil {
-		return nil, reportV1.ErrorReportNotFound("report not found")
+		return nil, err
 	}
-	return s.toReportWithUser(ctx, r), nil
+	dto := reportEntityToDTO(e)
+	if e.ReporterID > 0 {
+		if u, uerr := s.userRepo.Get(ctx, &identityV1.GetUserRequest{
+			QueryBy: &identityV1.GetUserRequest_Id{Id: e.ReporterID},
+		}); uerr == nil {
+			dto.Reporter = toUserBriefSP(u)
+		}
+	}
+	dto.HandledAt = timeutil.TimeToTimestamppb(e.HandledAt)
+	dto.CreatedAt = timeutil.TimeToTimestamppb(e.CreatedAt)
+	return dto, nil
 }
 
 func (s *ReportService) ListReport(ctx context.Context, req *paginationV1.PagingRequest) (*reportV1.ListReportResponse, error) {
-	offset, limit := pageArgs(req.GetPage(), req.GetPageSize())
-	var status *uint8
-	if req.GetFilter() != "" {
-		// 约定：filter 传状态数字（1 待处理 / 2 已通过 / 3 已驳回）
-		v := parseUint8(req.GetFilter())
-		status = &v
-	}
-	items, total, err := s.reportRepo.List(ctx, status, offset, limit)
+	resp, err := s.reportRepo.List(ctx, req)
 	if err != nil {
-		return nil, reportV1.ErrorInternalServerError("list reports failed")
+		return nil, err
 	}
-	out := make([]*reportV1.Report, 0, len(items))
-	for _, it := range items {
-		out = append(out, s.toReportWithUser(ctx, it))
+	for _, item := range resp.GetItems() {
+		if item.GetReporterId() == 0 {
+			continue
+		}
+		if u, uerr := s.userRepo.Get(ctx, &identityV1.GetUserRequest{
+			QueryBy: &identityV1.GetUserRequest_Id{Id: item.GetReporterId()},
+		}); uerr == nil {
+			item.Reporter = toUserBriefSP(u)
+		}
 	}
-	return &reportV1.ListReportResponse{Items: out, Total: ptr(int64(total))}, nil
+	return resp, nil
 }
 
-// HandleReport 处理工单：通过 → 联动处置目标（视频下架 / 评论删除）；驳回 → 仅关闭
+// HandleReport 处理工单：RESOLVE 联动处置目标；DISMISS 仅关闭工单。
 func (s *ReportService) HandleReport(ctx context.Context, req *reportV1.HandleReportRequest) (*reportV1.Report, error) {
-	r, err := s.reportRepo.GetByID(ctx, req.GetId())
+	e, err := s.reportRepo.Get(ctx, req.GetId())
 	if err != nil {
-		return nil, reportV1.ErrorReportNotFound("report not found")
+		return nil, err
 	}
-	if r.Status != nil && *r.Status != 1 {
+	if e.Status != videoreport.StatusPending {
 		return nil, reportV1.ErrorReportAlreadyHandled("report already handled")
 	}
 
-	newStatus := uint8(3) // dismissed
+	handlerID := spViewerUserID(ctx)
+	status := reportV1.ReportStatus_REPORT_STATUS_DISMISSED
 	if req.GetAction() == reportV1.HandleAction_HANDLE_ACTION_RESOLVE {
-		newStatus = uint8(2) // resolved
-		if err := s.resolveTarget(ctx, r); err != nil {
-			return nil, err
+		status = reportV1.ReportStatus_REPORT_STATUS_RESOLVED
+		// 联动处置目标（尽力而为，失败不阻塞工单关闭）
+		s.disposeTarget(ctx, e)
+	}
+
+	e2, err := s.reportRepo.UpdateHandle(ctx, req.GetId(), status, handlerID, req.GetNote())
+	if err != nil {
+		return nil, err
+	}
+	dto := reportEntityToDTO(e2)
+	if e.ReporterID > 0 {
+		if u, uerr := s.userRepo.Get(ctx, &identityV1.GetUserRequest{
+			QueryBy: &identityV1.GetUserRequest_Id{Id: e.ReporterID},
+		}); uerr == nil {
+			dto.Reporter = toUserBriefSP(u)
 		}
 	}
-
-	handledBy := authctx.UserIDFromContext(ctx)
-	var note *string
-	if req.Note != nil {
-		note = req.Note
-	}
-	updated, err := s.reportRepo.Handle(ctx, req.GetId(), newStatus, handledBy, note)
-	if err != nil {
-		return nil, reportV1.ErrorInternalServerError("handle report failed")
-	}
-	return s.toReportWithUser(ctx, updated), nil
+	dto.HandledAt = timeutil.TimeToTimestamppb(e2.HandledAt)
+	dto.CreatedAt = timeutil.TimeToTimestamppb(e2.CreatedAt)
+	return dto, nil
 }
 
-// resolveTarget 处置举报目标
-func (s *ReportService) resolveTarget(ctx context.Context, r *ent.VideoReport) error {
-	if r.TargetType == nil || r.TargetID == nil {
+// disposeTarget 处置举报目标：视频下架、评论删除；用户类目标交由管理员人工处理。
+func (s *ReportService) disposeTarget(ctx context.Context, e *ent.VideoReport) {
+	switch e.TargetType {
+	case videoreport.TargetTypeVideo:
+		offline := videoV1.VideoStatus_VIDEO_STATUS_OFFLINE
+		if _, err := s.videoRepo.Update(ctx, e.TargetID, &videoV1.Video{Status: offline.Enum()}, nil); err != nil {
+			s.log.Errorf("dispose report target video failed: %s", err.Error())
+		}
+	case videoreport.TargetTypeComment:
+		if c, err := s.commentRepo.Get(ctx, e.TargetID); err == nil {
+			_ = s.commentRepo.DeleteWithCounter(ctx, c)
+		}
+	}
+}
+
+// reportEntityToDTO 服务层 Report 实体 → DTO（枚举显式映射）
+func reportEntityToDTO(e *ent.VideoReport) *reportV1.Report {
+	if e == nil {
 		return nil
 	}
-	switch *r.TargetType {
-	case 1: // 视频 → 下架
-		if _, err := s.videoRepo.ChangeStatus(ctx, *r.TargetID, uint8(videoV1.VideoStatus_VIDEO_STATUS_OFFLINE), ptr("举报处置下架")); err != nil {
-			return reportV1.ErrorInternalServerError("offline video failed")
-		}
-	case 2: // 评论 → 删除
-		if err := s.commentRepo.Delete(ctx, *r.TargetID); err != nil {
-			return reportV1.ErrorInternalServerError("delete comment failed")
-		}
+	var status reportV1.ReportStatus
+	switch e.Status {
+	case videoreport.StatusResolved:
+		status = reportV1.ReportStatus_REPORT_STATUS_RESOLVED
+	case videoreport.StatusDismissed:
+		status = reportV1.ReportStatus_REPORT_STATUS_DISMISSED
+	default:
+		status = reportV1.ReportStatus_REPORT_STATUS_PENDING
 	}
-	return nil
-}
-
-func (s *ReportService) toReportWithUser(ctx context.Context, r *ent.VideoReport) *reportV1.Report {
-	var reporter *ent.User
-	if r.ReporterID != nil {
-		reporter, _ = s.userRepo.GetByID(ctx, *r.ReporterID)
+	var t reportV1.ReportTargetType
+	switch e.TargetType {
+	case videoreport.TargetTypeComment:
+		t = reportV1.ReportTargetType_REPORT_TARGET_TYPE_COMMENT
+	case videoreport.TargetTypeUser:
+		t = reportV1.ReportTargetType_REPORT_TARGET_TYPE_USER
+	default:
+		t = reportV1.ReportTargetType_REPORT_TARGET_TYPE_VIDEO
 	}
-	return toReport(r, toUserBrief(reporter))
-}
-
-func parseUint8(s string) uint8 {
-	var v uint64
-	for i := 0; i < len(s); i++ {
-		if s[i] < '0' || s[i] > '9' {
-			return 0
-		}
-		v = v*10 + uint64(s[i]-'0')
-	}
-	return uint8(v)
-}
-
-// ── NotificationService ──
-
-type NotificationService struct {
-	notifyV1.UnimplementedNotifyServiceServer
-
-	notifyRepo *data.NotificationRepo
-	userRepo   *data.UserRepo
-	log        *log.Helper
-}
-
-func NewNotificationService(ctx *bootstrap.Context, notifyRepo *data.NotificationRepo, userRepo *data.UserRepo) *NotificationService {
-	return &NotificationService{
-		notifyRepo: notifyRepo,
-		userRepo:   userRepo,
-		log:        ctx.NewLoggerHelper("notify/service/core-service"),
+	return &reportV1.Report{
+		Id:          trans.Ptr(e.ID),
+		ReporterId:  trans.Ptr(e.ReporterID),
+		TargetType:  t.Enum(),
+		TargetId:    trans.Ptr(e.TargetID),
+		Reason:      trans.Ptr(e.Reason),
+		Description: e.Description,
+		Status:      status.Enum(),
+		HandledBy:   trans.Ptr(e.HandledBy),
+		HandleNote:  e.HandleNote,
 	}
 }
 
-func (s *NotificationService) ListNotification(ctx context.Context, req *notifyV1.ListNotificationRequest) (*notifyV1.ListNotificationResponse, error) {
-	uid := authctx.UserIDFromContext(ctx)
-	if uid == 0 {
-		return nil, notifyV1.ErrorUnauthorized("login required")
-	}
-	offset, limit := pageArgs(req.GetPageNum(), req.GetPageSize())
-	items, total, err := s.notifyRepo.List(ctx, uid, req.GetUnreadOnly(), offset, limit)
-	if err != nil {
-		return nil, notifyV1.ErrorInternalServerError("list notifications failed")
-	}
-	unread, _ := s.notifyRepo.UnreadCount(ctx, uid)
-
-	out := make([]*notifyV1.Notification, 0, len(items))
-	for _, it := range items {
-		var sender *ent.User
-		if it.SenderID != nil && *it.SenderID > 0 {
-			sender, _ = s.userRepo.GetByID(ctx, *it.SenderID)
-		}
-		out = append(out, toNotification(it, toUserBrief(sender)))
-	}
-	return &notifyV1.ListNotificationResponse{
-		Items:       out,
-		Total:       ptr(int64(total)),
-		UnreadCount: ptr(int64(unread)),
-	}, nil
-}
-
-func (s *NotificationService) MarkRead(ctx context.Context, req *notifyV1.MarkReadRequest) (*emptypb.Empty, error) {
-	uid := authctx.UserIDFromContext(ctx)
-	if uid == 0 {
-		return nil, notifyV1.ErrorUnauthorized("login required")
-	}
-	if err := s.notifyRepo.MarkRead(ctx, uid, req.GetIds()); err != nil {
-		return nil, notifyV1.ErrorInternalServerError("mark read failed")
-	}
-	return &emptypb.Empty{}, nil
-}
-
-func (s *NotificationService) MarkAllRead(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
-	uid := authctx.UserIDFromContext(ctx)
-	if uid == 0 {
-		return nil, notifyV1.ErrorUnauthorized("login required")
-	}
-	if err := s.notifyRepo.MarkAllRead(ctx, uid); err != nil {
-		return nil, notifyV1.ErrorInternalServerError("mark all read failed")
-	}
-	return &emptypb.Empty{}, nil
-}
-
-func (s *NotificationService) GetUnreadCount(ctx context.Context, _ *emptypb.Empty) (*notifyV1.GetUnreadCountResponse, error) {
-	uid := authctx.UserIDFromContext(ctx)
-	if uid == 0 {
-		return nil, notifyV1.ErrorUnauthorized("login required")
-	}
-	n, err := s.notifyRepo.UnreadCount(ctx, uid)
-	if err != nil {
-		return nil, notifyV1.ErrorInternalServerError("query unread count failed")
-	}
-	return &notifyV1.GetUnreadCountResponse{Count: int64(n)}, nil
-}
+// 保持 go-crud viewer 引用（与 base 服务同款上下文提取口径）
+var _ = crudViewer.FromContext

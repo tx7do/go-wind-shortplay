@@ -1,4 +1,4 @@
-package client
+﻿package client
 
 import (
 	"github.com/redis/go-redis/v9"
@@ -6,7 +6,7 @@ import (
 	redisClient "github.com/tx7do/kratos-bootstrap/cache/redis"
 )
 
-// NewRedisClient 创建 Redis 客户端（计数缓存 / 已看过滤 / UBA 缓冲）
+// NewRedisClient 创建Redis客户端
 func NewRedisClient(ctx *bootstrap.Context) (*redis.Client, func(), error) {
 	cfg := ctx.GetConfig()
 	if cfg == nil {

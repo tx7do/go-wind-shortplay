@@ -39,8 +39,11 @@ export const usePageTitle = ({
         const keyName = title.substring(7);
         return tMenu(keyName, { defaultValue: title });
       } else if (title.startsWith('menu.')) {
-        const keyName = title.substring(5);
-        return tMenu(keyName, { defaultValue: title });
+        // 基座点分键：routes 命名空间按完整键存放，优先完整键再退回去前缀键
+        return (
+          tMenu(title, { defaultValue: '' }) ||
+          tMenu(title.substring(5), { defaultValue: title })
+        );
       } else if (title.startsWith('routes.')) {
         const keyName = title.substring(7);
         return tMenu(keyName, { defaultValue: title });

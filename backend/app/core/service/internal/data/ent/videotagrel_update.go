@@ -90,12 +90,6 @@ func (_u *VideoTagRelUpdate) AddVideoID(v int32) *VideoTagRelUpdate {
 	return _u
 }
 
-// ClearVideoID clears the value of the "video_id" field.
-func (_u *VideoTagRelUpdate) ClearVideoID() *VideoTagRelUpdate {
-	_u.mutation.ClearVideoID()
-	return _u
-}
-
 // SetTagID sets the "tag_id" field.
 func (_u *VideoTagRelUpdate) SetTagID(v uint32) *VideoTagRelUpdate {
 	_u.mutation.ResetTagID()
@@ -114,12 +108,6 @@ func (_u *VideoTagRelUpdate) SetNillableTagID(v *uint32) *VideoTagRelUpdate {
 // AddTagID adds value to the "tag_id" field.
 func (_u *VideoTagRelUpdate) AddTagID(v int32) *VideoTagRelUpdate {
 	_u.mutation.AddTagID(v)
-	return _u
-}
-
-// ClearTagID clears the value of the "tag_id" field.
-func (_u *VideoTagRelUpdate) ClearTagID() *VideoTagRelUpdate {
-	_u.mutation.ClearTagID()
 	return _u
 }
 
@@ -185,23 +173,20 @@ func (_u *VideoTagRelUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(videotagrel.FieldDeletedAt, field.TypeTime)
 	}
+	if _u.mutation.TenantIDCleared() {
+		_spec.ClearField(videotagrel.FieldTenantID, field.TypeUint32)
+	}
 	if value, ok := _u.mutation.VideoID(); ok {
 		_spec.SetField(videotagrel.FieldVideoID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedVideoID(); ok {
 		_spec.AddField(videotagrel.FieldVideoID, field.TypeUint32, value)
 	}
-	if _u.mutation.VideoIDCleared() {
-		_spec.ClearField(videotagrel.FieldVideoID, field.TypeUint32)
-	}
 	if value, ok := _u.mutation.TagID(); ok {
 		_spec.SetField(videotagrel.FieldTagID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedTagID(); ok {
 		_spec.AddField(videotagrel.FieldTagID, field.TypeUint32, value)
-	}
-	if _u.mutation.TagIDCleared() {
-		_spec.ClearField(videotagrel.FieldTagID, field.TypeUint32)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -286,12 +271,6 @@ func (_u *VideoTagRelUpdateOne) AddVideoID(v int32) *VideoTagRelUpdateOne {
 	return _u
 }
 
-// ClearVideoID clears the value of the "video_id" field.
-func (_u *VideoTagRelUpdateOne) ClearVideoID() *VideoTagRelUpdateOne {
-	_u.mutation.ClearVideoID()
-	return _u
-}
-
 // SetTagID sets the "tag_id" field.
 func (_u *VideoTagRelUpdateOne) SetTagID(v uint32) *VideoTagRelUpdateOne {
 	_u.mutation.ResetTagID()
@@ -310,12 +289,6 @@ func (_u *VideoTagRelUpdateOne) SetNillableTagID(v *uint32) *VideoTagRelUpdateOn
 // AddTagID adds value to the "tag_id" field.
 func (_u *VideoTagRelUpdateOne) AddTagID(v int32) *VideoTagRelUpdateOne {
 	_u.mutation.AddTagID(v)
-	return _u
-}
-
-// ClearTagID clears the value of the "tag_id" field.
-func (_u *VideoTagRelUpdateOne) ClearTagID() *VideoTagRelUpdateOne {
-	_u.mutation.ClearTagID()
 	return _u
 }
 
@@ -411,23 +384,20 @@ func (_u *VideoTagRelUpdateOne) sqlSave(ctx context.Context) (_node *VideoTagRel
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(videotagrel.FieldDeletedAt, field.TypeTime)
 	}
+	if _u.mutation.TenantIDCleared() {
+		_spec.ClearField(videotagrel.FieldTenantID, field.TypeUint32)
+	}
 	if value, ok := _u.mutation.VideoID(); ok {
 		_spec.SetField(videotagrel.FieldVideoID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedVideoID(); ok {
 		_spec.AddField(videotagrel.FieldVideoID, field.TypeUint32, value)
 	}
-	if _u.mutation.VideoIDCleared() {
-		_spec.ClearField(videotagrel.FieldVideoID, field.TypeUint32)
-	}
 	if value, ok := _u.mutation.TagID(); ok {
 		_spec.SetField(videotagrel.FieldTagID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedTagID(); ok {
 		_spec.AddField(videotagrel.FieldTagID, field.TypeUint32, value)
-	}
-	if _u.mutation.TagIDCleared() {
-		_spec.ClearField(videotagrel.FieldTagID, field.TypeUint32)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &VideoTagRel{config: _u.config}

@@ -1,0 +1,19 @@
+{
+  "pageTitle": "Notifications",
+  "unreadCount": "{{count}} unread",
+  "markAllRead": "Mark all as read",
+  "markAllReadSuccess": "All marked as read",
+  "markAllReadFailed": "Operation failed",
+  "markRead": "Mark as read",
+  "noMessages": "No notifications",
+  "loading": "Loading...",
+  "viewAll": "View all",
+  "unreadOnly": "Unread only",
+  "prevPage": "Prev",
+  "nextPage": "Next",
+  "hasVideo": "Related video",
+  "type.LIKE": "Like",
+  "type.COMMENT": "Comment",
+  "type.FOLLOW": "Follow",
+  "type.SYSTEM": "System"
+}

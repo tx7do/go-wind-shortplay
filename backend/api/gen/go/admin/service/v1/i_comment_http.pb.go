@@ -34,11 +34,11 @@ type CommentServiceHTTPServer interface {
 
 func RegisterCommentServiceHTTPServer(s *http.Server, srv CommentServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/v1/comments", _CommentService_List0_HTTP_Handler(srv))
-	r.DELETE("/admin/v1/comments/{id}", _CommentService_Delete0_HTTP_Handler(srv))
+	r.GET("/admin/v1/comments", _CommentService_List2_HTTP_Handler(srv))
+	r.DELETE("/admin/v1/comments/{id}", _CommentService_Delete1_HTTP_Handler(srv))
 }
 
-func _CommentService_List0_HTTP_Handler(srv CommentServiceHTTPServer) func(ctx http.Context) error {
+func _CommentService_List2_HTTP_Handler(srv CommentServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v1.PagingRequest
 		if err := ctx.BindQuery(&in); err != nil {
@@ -57,7 +57,7 @@ func _CommentService_List0_HTTP_Handler(srv CommentServiceHTTPServer) func(ctx h
 	}
 }
 
-func _CommentService_Delete0_HTTP_Handler(srv CommentServiceHTTPServer) func(ctx http.Context) error {
+func _CommentService_Delete1_HTTP_Handler(srv CommentServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v11.DeleteCommentRequest
 		if err := ctx.BindQuery(&in); err != nil {

@@ -2,21 +2,27 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import i18next from 'i18next';
 
-import { adminHttp } from '@/api/client';
+import { adminHttp, adminPath } from '@/api/client';
 import type { LoginResponse } from '@/api/types';
+import { RequestClient } from '@/core/transport/rest';
+import { encryptPassword } from '@/utils';
 import { useUserStore } from './user';
 import { useTabsStore } from './tabs';
 import { queryClient } from '@/core/query-client';
 
 /**
- * 认证 Store（GoWind shortplay Admin BFF 契约）
+ * 认证 Store（基座链路：cms authentication 移植面）
  *
- * POST /admin/v1/login {username,password} →
- *   {authenticator:{accessToken,refreshToken,expiresIn,tokenType}, user:{id,username,nickname,avatarUrl}}
+ * 登录流程（与 cms 原版一致）：
+ * 1. GET /admin/v1/captcha 取图形验证码（登录页负责展示/刷新）；
+ * 2. POST /admin/v1/login，验证码经 X-Captcha-Id / X-Captcha-Value 请求头
+ *    一次性携带，密码经 AES-128-CBC 加密（utils/crypto，VITE_AES_KEY）后传输；
+ * 3. 成功响应 {access_token, expires_in,...}（snake_case，与 cms 基座一致），
+ *    随后 GET /admin/v1/me 恢复身份与角色、GET /admin/v1/perm-codes 恢复权限码。
  *
  * 与底座差异（裁剪说明）：
- * - 后端无 MFA / 验证码 / SSE / 管理端 refresh 端点，相关链路全部移除；
- * - 登录响应自带 user，无需再调 GetMe；为支撑刷新页面后恢复身份，
+ * - 后端无 MFA / SSE / 管理端 refresh 端点，相关链路全部移除；
+ * - 登录响应不含 user，身份经 /me 获取；为支撑刷新页面后恢复身份，
  *   userInfo 随 accessToken 一并持久化（不含任何凭证信息）；
  * - 401 由 transport 拦截器直接 forceLogout（无静默续期）。
  */
@@ -25,7 +31,7 @@ export interface AuthState {
   accessToken: string | null;
   accessTokenExpireAt: number | null;
 
-  // 用户状态（登录响应中的 user；持久化以便刷新页面恢复身份）
+  // 用户状态（/me 拉取；持久化以便刷新页面恢复身份）
   userInfo: UserInfo | null;
 
   // UI 状态
@@ -36,6 +42,7 @@ export interface AuthState {
   login: (
     params: { username: string; password: string },
     onSuccess?: () => void,
+    captcha?: { id: string; value: string },
   ) => Promise<void>;
   logout: (redirect?: boolean) => Promise<void>;
   reauthenticate: () => void;
@@ -46,20 +53,20 @@ export interface AuthState {
   $reset: () => void;
 }
 
-/** 登录响应 user → 底座 BasicUserInfo（avatar 字段对齐 + 静态管理员角色） */
-function toUserInfo(user: LoginResponse['user']): UserInfo {
+/** /me（基座 i_user）→ 底座 BasicUserInfo（avatar 字段对齐 + 角色码透传） */
+function toUserInfo(me: Partial<UserInfo> & Record<string, any>): UserInfo {
   return {
-    id: user?.id ?? 0,
-    username: user?.username ?? '',
-    nickname: user?.nickname ?? user?.username ?? '',
-    realname: user?.nickname ?? '',
-    avatar: user?.avatarUrl ?? '',
-    avatarUrl: user?.avatarUrl ?? '',
+    id: me.id ?? 0,
+    username: me.username ?? '',
+    nickname: me.nickname ?? me.realname ?? me.username ?? '',
+    realname: me.realname ?? me.nickname ?? '',
+    avatar: me.avatar ?? '',
+    avatarUrl: me.avatar ?? '',
     description: '',
     homePath: '/dashboard',
     token: '',
-    roles: ['super_admin'],
-    tenantId: 0,
+    roles: Array.isArray(me.roles) && me.roles.length > 0 ? me.roles : ['platform:admin'],
+    tenantId: me.tenantId ?? 0,
   };
 }
 
@@ -73,33 +80,86 @@ export const useAuthStore = create<AuthState>()(
       loginLoading: false,
       error: null,
 
-      // 登录
-      login: async (params, onSuccess) => {
+      // 登录（基座链路：验证码头 + AES 加密密码 + /me + /perm-codes）
+      login: async (params, onSuccess, captcha) => {
         set({ loginLoading: true, error: null });
 
         try {
-          const response = await adminHttp.post<LoginResponse>('login', {
-            username: params.username,
-            password: params.password,
-          });
+          // 1. 调用登录接口：验证码经一次性 Header 携带（基座约定），
+          //    密文传输（后端 NeedDecrypt 解密）。
+          const headers: Record<string, string> = {};
+          if (captcha) {
+            headers['X-Captcha-Id'] = captcha.id;
+            headers['X-Captcha-Value'] = captcha.value;
+          }
+          // ⚠ 登录响应是全站唯一的 snake_case 端点（curl 实测：access_token /
+          // expires_in / refresh_expires_in / token_type，与 cms 基座一致），
+          // camelCase 仅作防御性兼容位。
+          const response = await RequestClient.getInstance().post<LoginResponse>(
+            adminPath('login'),
+            {
+              username: params.username,
+              password: encryptPassword(params.password || ''),
+              grantType: 'password',
+            } as never,
+            { headers },
+          );
 
-          const token = response.authenticator?.accessToken || '';
+          const token = response?.access_token || response?.accessToken || '';
           if (!token) {
             throw new Error(i18next.t('auth:loginFailed'));
           }
 
-          const expiresIn = response.authenticator?.expiresIn || 7200;
+          const expiresIn =
+            Number(response?.expires_in ?? response?.expiresIn ?? 0) || 7200;
+
+          // 2. 恢复身份与权限码（/me + /perm-codes，基座登录后聚合链路）。
+          //    ⚠ 必须在 accessToken 落 store 之前完成：AppRouter 订阅
+          //    isAuthenticated，token 一落地就会跑 initRouter →
+          //    getUserPermissionCodes()（userInfo 缺失即抛错 → forceLogout）。
+          //    若先 set(token) 再异步拉 /me，校验必然与登录竞态，把会话拦腰
+          //    打断（实测复现：登录 toast 成功但立即被弹回登录页）。
+          //    这里用原生 fetch 携带显式 Authorization：axios 拦截器会把
+          //    getToken()（此刻为 null）的空值写回 headers，覆盖掉显式头。
+          //    失败不阻断登录但留痕排查。
+          const fetchWithToken = async (path: string) => {
+            const resp = await fetch(`/${adminPath(path)}`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Accept-Language': navigator.language || 'zh-CN',
+              },
+            });
+            if (!resp.ok) {
+              throw new Error(`${path} -> HTTP ${resp.status}`);
+            }
+            return resp.json();
+          };
+          let me: Record<string, any> = {};
+          try {
+            me = (await fetchWithToken('me')) as Record<string, any>;
+          } catch (error) {
+            console.error('fetch /me failed after login:', error);
+          }
+          const userInfo = toUserInfo(me);
+          let permCodes: string[] = [];
+          try {
+            const res = (await fetchWithToken('perm-codes')) as { codes?: string[] };
+            permCodes = res?.codes ?? [];
+          } catch (error) {
+            console.error('fetch /perm-codes failed after login:', error);
+          }
+
+          // 3. 原子落地：token 与身份/角色/权限码同时就绪，AppRouter 校验必过。
           set({
             accessToken: token,
             accessTokenExpireAt: Date.now() + expiresIn * 1000,
-            userInfo: toUserInfo(response.user),
+            userInfo,
           });
 
-          // 同步角色到 userStore（getAccessStatic 从这里读权限）
-          const userInfo = toUserInfo(response.user);
+          // 同步角色/权限码到 userStore（getAccessStatic 从这里读权限）
           useUserStore.getState().setUserInfo(userInfo);
           useUserStore.getState().setUserRoles(userInfo.roles ?? []);
-          useUserStore.getState().setAccessCodes([]);
+          useUserStore.getState().setAccessCodes(permCodes);
 
           if (onSuccess) {
             onSuccess();

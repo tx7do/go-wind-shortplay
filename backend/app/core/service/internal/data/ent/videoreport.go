@@ -24,20 +24,28 @@ type VideoReport struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
-	// 举报人ID
-	ReporterID *uint32 `json:"reporter_id,omitempty"`
-	// 目标类型：1 视频 2 评论 3 用户
-	TargetType *uint8 `json:"target_type,omitempty"`
+	// 创建者ID
+	CreatedBy *uint32 `json:"created_by,omitempty"`
+	// 更新者ID
+	UpdatedBy *uint32 `json:"updated_by,omitempty"`
+	// 删除者ID
+	DeletedBy *uint32 `json:"deleted_by,omitempty"`
+	// 租户ID
+	TenantID *uint32 `json:"tenant_id,omitempty"`
+	// 举报人用户ID
+	ReporterID uint32 `json:"reporter_id,omitempty"`
+	// 目标类型
+	TargetType videoreport.TargetType `json:"target_type,omitempty"`
 	// 目标ID
-	TargetID *uint32 `json:"target_id,omitempty"`
+	TargetID uint32 `json:"target_id,omitempty"`
 	// 举报原因（枚举码）
 	Reason string `json:"reason,omitempty"`
 	// 补充说明
 	Description *string `json:"description,omitempty"`
-	// 状态：1 待处理 2 已通过 3 已驳回
-	Status *uint8 `json:"status,omitempty"`
-	// 处理人（管理员ID）
-	HandledBy *uint32 `json:"handled_by,omitempty"`
+	// 工单状态
+	Status videoreport.Status `json:"status,omitempty"`
+	// 处理人（管理员）
+	HandledBy uint32 `json:"handled_by,omitempty"`
 	// 处理备注
 	HandleNote *string `json:"handle_note,omitempty"`
 	// 处理时间
@@ -50,9 +58,9 @@ func (*VideoReport) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case videoreport.FieldID, videoreport.FieldReporterID, videoreport.FieldTargetType, videoreport.FieldTargetID, videoreport.FieldStatus, videoreport.FieldHandledBy:
+		case videoreport.FieldID, videoreport.FieldCreatedBy, videoreport.FieldUpdatedBy, videoreport.FieldDeletedBy, videoreport.FieldTenantID, videoreport.FieldReporterID, videoreport.FieldTargetID, videoreport.FieldHandledBy:
 			values[i] = new(sql.NullInt64)
-		case videoreport.FieldReason, videoreport.FieldDescription, videoreport.FieldHandleNote:
+		case videoreport.FieldTargetType, videoreport.FieldReason, videoreport.FieldDescription, videoreport.FieldStatus, videoreport.FieldHandleNote:
 			values[i] = new(sql.NullString)
 		case videoreport.FieldCreatedAt, videoreport.FieldUpdatedAt, videoreport.FieldDeletedAt, videoreport.FieldHandledAt:
 			values[i] = new(sql.NullTime)
@@ -98,26 +106,51 @@ func (_m *VideoReport) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
+		case videoreport.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				_m.CreatedBy = new(uint32)
+				*_m.CreatedBy = uint32(value.Int64)
+			}
+		case videoreport.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				_m.UpdatedBy = new(uint32)
+				*_m.UpdatedBy = uint32(value.Int64)
+			}
+		case videoreport.FieldDeletedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_by", values[i])
+			} else if value.Valid {
+				_m.DeletedBy = new(uint32)
+				*_m.DeletedBy = uint32(value.Int64)
+			}
+		case videoreport.FieldTenantID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
+			} else if value.Valid {
+				_m.TenantID = new(uint32)
+				*_m.TenantID = uint32(value.Int64)
+			}
 		case videoreport.FieldReporterID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field reporter_id", values[i])
 			} else if value.Valid {
-				_m.ReporterID = new(uint32)
-				*_m.ReporterID = uint32(value.Int64)
+				_m.ReporterID = uint32(value.Int64)
 			}
 		case videoreport.FieldTargetType:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field target_type", values[i])
 			} else if value.Valid {
-				_m.TargetType = new(uint8)
-				*_m.TargetType = uint8(value.Int64)
+				_m.TargetType = videoreport.TargetType(value.String)
 			}
 		case videoreport.FieldTargetID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field target_id", values[i])
 			} else if value.Valid {
-				_m.TargetID = new(uint32)
-				*_m.TargetID = uint32(value.Int64)
+				_m.TargetID = uint32(value.Int64)
 			}
 		case videoreport.FieldReason:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -133,18 +166,16 @@ func (_m *VideoReport) assignValues(columns []string, values []any) error {
 				*_m.Description = value.String
 			}
 		case videoreport.FieldStatus:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				_m.Status = new(uint8)
-				*_m.Status = uint8(value.Int64)
+				_m.Status = videoreport.Status(value.String)
 			}
 		case videoreport.FieldHandledBy:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field handled_by", values[i])
 			} else if value.Valid {
-				_m.HandledBy = new(uint32)
-				*_m.HandledBy = uint32(value.Int64)
+				_m.HandledBy = uint32(value.Int64)
 			}
 		case videoreport.FieldHandleNote:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -211,20 +242,34 @@ func (_m *VideoReport) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	if v := _m.ReporterID; v != nil {
-		builder.WriteString("reporter_id=")
+	if v := _m.CreatedBy; v != nil {
+		builder.WriteString("created_by=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := _m.TargetType; v != nil {
-		builder.WriteString("target_type=")
+	if v := _m.UpdatedBy; v != nil {
+		builder.WriteString("updated_by=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := _m.TargetID; v != nil {
-		builder.WriteString("target_id=")
+	if v := _m.DeletedBy; v != nil {
+		builder.WriteString("deleted_by=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	if v := _m.TenantID; v != nil {
+		builder.WriteString("tenant_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("reporter_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ReporterID))
+	builder.WriteString(", ")
+	builder.WriteString("target_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TargetType))
+	builder.WriteString(", ")
+	builder.WriteString("target_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TargetID))
 	builder.WriteString(", ")
 	builder.WriteString("reason=")
 	builder.WriteString(_m.Reason)
@@ -234,15 +279,11 @@ func (_m *VideoReport) String() string {
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
-	if v := _m.Status; v != nil {
-		builder.WriteString("status=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
 	builder.WriteString(", ")
-	if v := _m.HandledBy; v != nil {
-		builder.WriteString("handled_by=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("handled_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.HandledBy))
 	builder.WriteString(", ")
 	if v := _m.HandleNote; v != nil {
 		builder.WriteString("handle_note=")

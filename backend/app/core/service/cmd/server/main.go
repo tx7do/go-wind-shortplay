@@ -5,27 +5,32 @@ import (
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/tx7do/kratos-bootstrap/bootstrap"
+	"github.com/tx7do/kratos-transport/transport/asynq"
 
 	conf "github.com/tx7do/kratos-bootstrap/api/gen/go/conf/v1"
+	"github.com/tx7do/kratos-bootstrap/bootstrap"
 
 	_ "github.com/tx7do/kratos-bootstrap/registry/etcd"
 	_ "github.com/tx7do/kratos-bootstrap/tracer"
 
+	authenticationV1 "go-wind-shortplay/api/gen/go/authentication/service/v1"
+
 	"go-wind-shortplay/pkg/serviceid"
 )
 
-var version = "0.1.0"
+var version = "1.0.0"
 
 // go build -ldflags "-X main.version=x.y.z"
 
 func newApp(
 	ctx *bootstrap.Context,
 	gs *grpc.Server,
+	as *asynq.Server,
 ) *kratos.App {
 	return bootstrap.NewApp(
 		ctx,
 		gs,
+		as,
 	)
 }
 
@@ -38,6 +43,8 @@ func runApp() error {
 			Version: version,
 		},
 	)
+
+	ctx.RegisterCustomConfig("Authenticator", &authenticationV1.AuthenticatorOptionWrapper{})
 
 	return bootstrap.RunApp(ctx, initApp)
 }

@@ -7,10 +7,14 @@
 package identitypb
 
 import (
+	_ "github.com/google/gnostic/openapiv3"
 	v1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
+	_ "github.com/tx7do/go-wind-toolkit/protoc-gen-go-redact/redact/v1"
+	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
+	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
@@ -24,133 +28,167 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// 用户状态
-type UserStatus int32
+// 用户性别
+type User_Gender int32
 
 const (
-	UserStatus_USER_STATUS_UNSPECIFIED UserStatus = 0
-	UserStatus_USER_STATUS_DISABLED    UserStatus = 1 // 禁用（管理员手动禁用，禁止登录）
-	UserStatus_USER_STATUS_NORMAL      UserStatus = 2 // 正常
+	User_SECRET User_Gender = 0 // 未知
+	User_MALE   User_Gender = 1 // 男性
+	User_FEMALE User_Gender = 2 // 女性
 )
 
-// Enum value maps for UserStatus.
+// Enum value maps for User_Gender.
 var (
-	UserStatus_name = map[int32]string{
-		0: "USER_STATUS_UNSPECIFIED",
-		1: "USER_STATUS_DISABLED",
-		2: "USER_STATUS_NORMAL",
+	User_Gender_name = map[int32]string{
+		0: "SECRET",
+		1: "MALE",
+		2: "FEMALE",
 	}
-	UserStatus_value = map[string]int32{
-		"USER_STATUS_UNSPECIFIED": 0,
-		"USER_STATUS_DISABLED":    1,
-		"USER_STATUS_NORMAL":      2,
+	User_Gender_value = map[string]int32{
+		"SECRET": 0,
+		"MALE":   1,
+		"FEMALE": 2,
 	}
 )
 
-func (x UserStatus) Enum() *UserStatus {
-	p := new(UserStatus)
+func (x User_Gender) Enum() *User_Gender {
+	p := new(User_Gender)
 	*p = x
 	return p
 }
 
-func (x UserStatus) String() string {
+func (x User_Gender) String() string {
 	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (UserStatus) Descriptor() protoreflect.EnumDescriptor {
+func (User_Gender) Descriptor() protoreflect.EnumDescriptor {
 	return file_identity_service_v1_user_proto_enumTypes[0].Descriptor()
 }
 
-func (UserStatus) Type() protoreflect.EnumType {
+func (User_Gender) Type() protoreflect.EnumType {
 	return &file_identity_service_v1_user_proto_enumTypes[0]
 }
 
-func (x UserStatus) Number() protoreflect.EnumNumber {
+func (x User_Gender) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
-// Deprecated: Use UserStatus.Descriptor instead.
-func (UserStatus) EnumDescriptor() ([]byte, []int) {
-	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{0}
+// Deprecated: Use User_Gender.Descriptor instead.
+func (User_Gender) EnumDescriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{0, 0}
 }
 
-type UserBrief struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *uint32                `protobuf:"varint,1,opt,name=id,proto3,oneof" json:"id,omitempty"`                               // 用户ID
-	Nickname      *string                `protobuf:"bytes,2,opt,name=nickname,proto3,oneof" json:"nickname,omitempty"`                    // 昵称
-	AvatarUrl     *string                `protobuf:"bytes,3,opt,name=avatar_url,json=avatarUrl,proto3,oneof" json:"avatar_url,omitempty"` // 头像
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
+// 用户状态
+type User_Status int32
 
-func (x *UserBrief) Reset() {
-	*x = UserBrief{}
-	mi := &file_identity_service_v1_user_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
+const (
+	User_DISABLED User_Status = 0 // 禁用 (被管理员手动禁用。用户无法登录系统。)
+	User_NORMAL   User_Status = 1 // 正常 (用户可以正常登录并使用系统。)
+	User_PENDING  User_Status = 2 // 待激活 (账号已创建，但尚未通过邮箱/短信验证或 HR 激活。)
+	User_LOCKED   User_Status = 3 // 锁定 (因触发安全策略（如密码连续错误次数过多）被系统自动锁定。)
+	User_EXPIRED  User_Status = 4 // 过期 (账号超过了设定的有效期（常用于临时工、外部顾问）。)
+	User_CLOSED   User_Status = 9 // 注销 (用户主动注销账号。通常在数据脱敏后的软删除状态。)
+)
 
-func (x *UserBrief) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UserBrief) ProtoMessage() {}
-
-func (x *UserBrief) ProtoReflect() protoreflect.Message {
-	mi := &file_identity_service_v1_user_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
+// Enum value maps for User_Status.
+var (
+	User_Status_name = map[int32]string{
+		0: "DISABLED",
+		1: "NORMAL",
+		2: "PENDING",
+		3: "LOCKED",
+		4: "EXPIRED",
+		9: "CLOSED",
 	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UserBrief.ProtoReflect.Descriptor instead.
-func (*UserBrief) Descriptor() ([]byte, []int) {
-	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *UserBrief) GetId() uint32 {
-	if x != nil && x.Id != nil {
-		return *x.Id
+	User_Status_value = map[string]int32{
+		"DISABLED": 0,
+		"NORMAL":   1,
+		"PENDING":  2,
+		"LOCKED":   3,
+		"EXPIRED":  4,
+		"CLOSED":   9,
 	}
-	return 0
+)
+
+func (x User_Status) Enum() *User_Status {
+	p := new(User_Status)
+	*p = x
+	return p
 }
 
-func (x *UserBrief) GetNickname() string {
-	if x != nil && x.Nickname != nil {
-		return *x.Nickname
-	}
-	return ""
+func (x User_Status) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (x *UserBrief) GetAvatarUrl() string {
-	if x != nil && x.AvatarUrl != nil {
-		return *x.AvatarUrl
-	}
-	return ""
+func (User_Status) Descriptor() protoreflect.EnumDescriptor {
+	return file_identity_service_v1_user_proto_enumTypes[1].Descriptor()
 }
 
+func (User_Status) Type() protoreflect.EnumType {
+	return &file_identity_service_v1_user_proto_enumTypes[1]
+}
+
+func (x User_Status) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use User_Status.Descriptor instead.
+func (User_Status) EnumDescriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{0, 1}
+}
+
+// 用户
 type User struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *uint32                `protobuf:"varint,1,opt,name=id,proto3,oneof" json:"id,omitempty"`                                             // 用户ID
-	Username      *string                `protobuf:"bytes,2,opt,name=username,proto3,oneof" json:"username,omitempty"`                                  // 登录名（唯一）
-	Nickname      *string                `protobuf:"bytes,3,opt,name=nickname,proto3,oneof" json:"nickname,omitempty"`                                  // 昵称
-	AvatarUrl     *string                `protobuf:"bytes,4,opt,name=avatar_url,json=avatarUrl,proto3,oneof" json:"avatar_url,omitempty"`               // 头像地址
-	Bio           *string                `protobuf:"bytes,5,opt,name=bio,proto3,oneof" json:"bio,omitempty"`                                            // 个人简介
-	Status        *UserStatus            `protobuf:"varint,6,opt,name=status,proto3,enum=identity.service.v1.UserStatus,oneof" json:"status,omitempty"` // 状态
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,200,opt,name=created_at,json=createdAt,proto3,oneof" json:"created_at,omitempty"`             // 创建时间
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,201,opt,name=updated_at,json=updatedAt,proto3,oneof" json:"updated_at,omitempty"`             // 更新时间
+	Id            *uint32                `protobuf:"varint,1,opt,name=id,proto3,oneof" json:"id,omitempty"`                                               // 用户ID
+	TenantId      *uint32                `protobuf:"varint,2,opt,name=tenant_id,json=tenantId,proto3,oneof" json:"tenant_id,omitempty"`                   // 租户ID
+	TenantName    *string                `protobuf:"bytes,3,opt,name=tenant_name,json=tenantName,proto3,oneof" json:"tenant_name,omitempty"`              // 租户名称
+	OrgUnitId     *uint32                `protobuf:"varint,4,opt,name=org_unit_id,json=orgUnitId,proto3,oneof" json:"org_unit_id,omitempty"`              // 组织ID
+	OrgUnitIds    []uint32               `protobuf:"varint,5,rep,packed,name=org_unit_ids,json=orgUnitIds,proto3" json:"org_unit_ids,omitempty"`          // 归属组织ID列表
+	OrgUnitName   *string                `protobuf:"bytes,6,opt,name=org_unit_name,json=orgUnitName,proto3,oneof" json:"org_unit_name,omitempty"`         // 组织名称
+	OrgUnitNames  []string               `protobuf:"bytes,7,rep,name=org_unit_names,json=orgUnitNames,proto3" json:"org_unit_names,omitempty"`            // 组织名称列表
+	PositionId    *uint32                `protobuf:"varint,8,opt,name=position_id,json=positionId,proto3,oneof" json:"position_id,omitempty"`             // 职位ID
+	PositionIds   []uint32               `protobuf:"varint,9,rep,packed,name=position_ids,json=positionIds,proto3" json:"position_ids,omitempty"`         // 职位列表
+	PositionName  *string                `protobuf:"bytes,10,opt,name=position_name,json=positionName,proto3,oneof" json:"position_name,omitempty"`       // 职位名称
+	PositionNames []string               `protobuf:"bytes,11,rep,name=position_names,json=positionNames,proto3" json:"position_names,omitempty"`          // 职位名称列表
+	RoleId        *uint32                `protobuf:"varint,12,opt,name=role_id,json=roleId,proto3,oneof" json:"role_id,omitempty"`                        // 角色ID
+	RoleIds       []uint32               `protobuf:"varint,13,rep,packed,name=role_ids,json=roleIds,proto3" json:"role_ids,omitempty"`                    // 角色ID列表
+	Roles         []string               `protobuf:"bytes,14,rep,name=roles,proto3" json:"roles,omitempty"`                                               // 角色码列表
+	RoleNames     []string               `protobuf:"bytes,15,rep,name=role_names,json=roleNames,proto3" json:"role_names,omitempty"`                      // 角色名称列表
+	Username      *string                `protobuf:"bytes,20,opt,name=username,proto3,oneof" json:"username,omitempty"`                                   // 用户名
+	Nickname      *string                `protobuf:"bytes,21,opt,name=nickname,proto3,oneof" json:"nickname,omitempty"`                                   // 昵称
+	Realname      *string                `protobuf:"bytes,22,opt,name=realname,proto3,oneof" json:"realname,omitempty"`                                   // 真实姓名
+	Avatar        *string                `protobuf:"bytes,23,opt,name=avatar,proto3,oneof" json:"avatar,omitempty"`                                       // 头像
+	Email         *string                `protobuf:"bytes,24,opt,name=email,proto3,oneof" json:"email,omitempty"`                                         // 邮箱
+	Mobile        *string                `protobuf:"bytes,25,opt,name=mobile,proto3,oneof" json:"mobile,omitempty"`                                       // 手机号
+	Telephone     *string                `protobuf:"bytes,26,opt,name=telephone,proto3,oneof" json:"telephone,omitempty"`                                 // 座机号
+	Gender        *User_Gender           `protobuf:"varint,27,opt,name=gender,proto3,enum=identity.service.v1.User_Gender,oneof" json:"gender,omitempty"` // 性别
+	Address       *string                `protobuf:"bytes,28,opt,name=address,proto3,oneof" json:"address,omitempty"`                                     // 住址
+	Region        *string                `protobuf:"bytes,29,opt,name=region,proto3,oneof" json:"region,omitempty"`                                       // 国家地区
+	Description   *string                `protobuf:"bytes,30,opt,name=description,proto3,oneof" json:"description,omitempty"`                             // 个人描述
+	Remark        *string                `protobuf:"bytes,31,opt,name=remark,proto3,oneof" json:"remark,omitempty"`                                       // 备注
+	LastLoginAt   *timestamppb.Timestamp `protobuf:"bytes,50,opt,name=last_login_at,json=lastLoginAt,proto3,oneof" json:"last_login_at,omitempty"`        // 最后登录时间
+	LastLoginIp   *string                `protobuf:"bytes,51,opt,name=last_login_ip,json=lastLoginIp,proto3,oneof" json:"last_login_ip,omitempty"`        // 最后登录IP
+	Status        *User_Status           `protobuf:"varint,52,opt,name=status,proto3,enum=identity.service.v1.User_Status,oneof" json:"status,omitempty"` // 状态
+	LockedUntil   *timestamppb.Timestamp `protobuf:"bytes,53,opt,name=locked_until,json=lockedUntil,proto3,oneof" json:"locked_until,omitempty"`          // 锁定截止时间
+	Followers     *uint64                `protobuf:"varint,80,opt,name=followers,proto3,oneof" json:"followers,omitempty"`                                // 粉丝数
+	Following     *uint64                `protobuf:"varint,81,opt,name=following,proto3,oneof" json:"following,omitempty"`                                // 关注数
+	PostCount     *uint64                `protobuf:"varint,90,opt,name=post_count,json=postCount,proto3,oneof" json:"post_count,omitempty"`               // 发帖数
+	CommentCount  *uint64                `protobuf:"varint,91,opt,name=comment_count,json=commentCount,proto3,oneof" json:"comment_count,omitempty"`      // 评论数
+	LikeCount     *uint64                `protobuf:"varint,92,opt,name=like_count,json=likeCount,proto3,oneof" json:"like_count,omitempty"`               // 获赞数
+	CreatedBy     *uint32                `protobuf:"varint,100,opt,name=created_by,json=createdBy,proto3,oneof" json:"created_by,omitempty"`              // 创建者用户ID
+	UpdatedBy     *uint32                `protobuf:"varint,101,opt,name=updated_by,json=updatedBy,proto3,oneof" json:"updated_by,omitempty"`              // 更新者用户ID
+	DeletedBy     *uint32                `protobuf:"varint,102,opt,name=deleted_by,json=deletedBy,proto3,oneof" json:"deleted_by,omitempty"`              // 删除者用户ID
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,200,opt,name=created_at,json=createdAt,proto3,oneof" json:"created_at,omitempty"`               // 创建时间
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,201,opt,name=updated_at,json=updatedAt,proto3,oneof" json:"updated_at,omitempty"`               // 更新时间
+	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,202,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`               // 删除时间
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *User) Reset() {
 	*x = User{}
-	mi := &file_identity_service_v1_user_proto_msgTypes[1]
+	mi := &file_identity_service_v1_user_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -162,7 +200,7 @@ func (x *User) String() string {
 func (*User) ProtoMessage() {}
 
 func (x *User) ProtoReflect() protoreflect.Message {
-	mi := &file_identity_service_v1_user_proto_msgTypes[1]
+	mi := &file_identity_service_v1_user_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -175,7 +213,7 @@ func (x *User) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use User.ProtoReflect.Descriptor instead.
 func (*User) Descriptor() ([]byte, []int) {
-	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{1}
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *User) GetId() uint32 {
@@ -183,6 +221,104 @@ func (x *User) GetId() uint32 {
 		return *x.Id
 	}
 	return 0
+}
+
+func (x *User) GetTenantId() uint32 {
+	if x != nil && x.TenantId != nil {
+		return *x.TenantId
+	}
+	return 0
+}
+
+func (x *User) GetTenantName() string {
+	if x != nil && x.TenantName != nil {
+		return *x.TenantName
+	}
+	return ""
+}
+
+func (x *User) GetOrgUnitId() uint32 {
+	if x != nil && x.OrgUnitId != nil {
+		return *x.OrgUnitId
+	}
+	return 0
+}
+
+func (x *User) GetOrgUnitIds() []uint32 {
+	if x != nil {
+		return x.OrgUnitIds
+	}
+	return nil
+}
+
+func (x *User) GetOrgUnitName() string {
+	if x != nil && x.OrgUnitName != nil {
+		return *x.OrgUnitName
+	}
+	return ""
+}
+
+func (x *User) GetOrgUnitNames() []string {
+	if x != nil {
+		return x.OrgUnitNames
+	}
+	return nil
+}
+
+func (x *User) GetPositionId() uint32 {
+	if x != nil && x.PositionId != nil {
+		return *x.PositionId
+	}
+	return 0
+}
+
+func (x *User) GetPositionIds() []uint32 {
+	if x != nil {
+		return x.PositionIds
+	}
+	return nil
+}
+
+func (x *User) GetPositionName() string {
+	if x != nil && x.PositionName != nil {
+		return *x.PositionName
+	}
+	return ""
+}
+
+func (x *User) GetPositionNames() []string {
+	if x != nil {
+		return x.PositionNames
+	}
+	return nil
+}
+
+func (x *User) GetRoleId() uint32 {
+	if x != nil && x.RoleId != nil {
+		return *x.RoleId
+	}
+	return 0
+}
+
+func (x *User) GetRoleIds() []uint32 {
+	if x != nil {
+		return x.RoleIds
+	}
+	return nil
+}
+
+func (x *User) GetRoles() []string {
+	if x != nil {
+		return x.Roles
+	}
+	return nil
+}
+
+func (x *User) GetRoleNames() []string {
+	if x != nil {
+		return x.RoleNames
+	}
+	return nil
 }
 
 func (x *User) GetUsername() string {
@@ -199,25 +335,158 @@ func (x *User) GetNickname() string {
 	return ""
 }
 
-func (x *User) GetAvatarUrl() string {
-	if x != nil && x.AvatarUrl != nil {
-		return *x.AvatarUrl
+func (x *User) GetRealname() string {
+	if x != nil && x.Realname != nil {
+		return *x.Realname
 	}
 	return ""
 }
 
-func (x *User) GetBio() string {
-	if x != nil && x.Bio != nil {
-		return *x.Bio
+func (x *User) GetAvatar() string {
+	if x != nil && x.Avatar != nil {
+		return *x.Avatar
 	}
 	return ""
 }
 
-func (x *User) GetStatus() UserStatus {
+func (x *User) GetEmail() string {
+	if x != nil && x.Email != nil {
+		return *x.Email
+	}
+	return ""
+}
+
+func (x *User) GetMobile() string {
+	if x != nil && x.Mobile != nil {
+		return *x.Mobile
+	}
+	return ""
+}
+
+func (x *User) GetTelephone() string {
+	if x != nil && x.Telephone != nil {
+		return *x.Telephone
+	}
+	return ""
+}
+
+func (x *User) GetGender() User_Gender {
+	if x != nil && x.Gender != nil {
+		return *x.Gender
+	}
+	return User_SECRET
+}
+
+func (x *User) GetAddress() string {
+	if x != nil && x.Address != nil {
+		return *x.Address
+	}
+	return ""
+}
+
+func (x *User) GetRegion() string {
+	if x != nil && x.Region != nil {
+		return *x.Region
+	}
+	return ""
+}
+
+func (x *User) GetDescription() string {
+	if x != nil && x.Description != nil {
+		return *x.Description
+	}
+	return ""
+}
+
+func (x *User) GetRemark() string {
+	if x != nil && x.Remark != nil {
+		return *x.Remark
+	}
+	return ""
+}
+
+func (x *User) GetLastLoginAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.LastLoginAt
+	}
+	return nil
+}
+
+func (x *User) GetLastLoginIp() string {
+	if x != nil && x.LastLoginIp != nil {
+		return *x.LastLoginIp
+	}
+	return ""
+}
+
+func (x *User) GetStatus() User_Status {
 	if x != nil && x.Status != nil {
 		return *x.Status
 	}
-	return UserStatus_USER_STATUS_UNSPECIFIED
+	return User_DISABLED
+}
+
+func (x *User) GetLockedUntil() *timestamppb.Timestamp {
+	if x != nil {
+		return x.LockedUntil
+	}
+	return nil
+}
+
+func (x *User) GetFollowers() uint64 {
+	if x != nil && x.Followers != nil {
+		return *x.Followers
+	}
+	return 0
+}
+
+func (x *User) GetFollowing() uint64 {
+	if x != nil && x.Following != nil {
+		return *x.Following
+	}
+	return 0
+}
+
+func (x *User) GetPostCount() uint64 {
+	if x != nil && x.PostCount != nil {
+		return *x.PostCount
+	}
+	return 0
+}
+
+func (x *User) GetCommentCount() uint64 {
+	if x != nil && x.CommentCount != nil {
+		return *x.CommentCount
+	}
+	return 0
+}
+
+func (x *User) GetLikeCount() uint64 {
+	if x != nil && x.LikeCount != nil {
+		return *x.LikeCount
+	}
+	return 0
+}
+
+func (x *User) GetCreatedBy() uint32 {
+	if x != nil && x.CreatedBy != nil {
+		return *x.CreatedBy
+	}
+	return 0
+}
+
+func (x *User) GetUpdatedBy() uint32 {
+	if x != nil && x.UpdatedBy != nil {
+		return *x.UpdatedBy
+	}
+	return 0
+}
+
+func (x *User) GetDeletedBy() uint32 {
+	if x != nil && x.DeletedBy != nil {
+		return *x.DeletedBy
+	}
+	return 0
 }
 
 func (x *User) GetCreatedAt() *timestamppb.Timestamp {
@@ -234,182 +503,25 @@ func (x *User) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-// 用户创作统计（计数由互动域异步维护，避免用户表与互动表强耦合）
-type UserStats struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	UserId            *uint32                `protobuf:"varint,1,opt,name=user_id,json=userId,proto3,oneof" json:"user_id,omitempty"`                                    // 用户ID
-	VideoCount        *uint64                `protobuf:"varint,2,opt,name=video_count,json=videoCount,proto3,oneof" json:"video_count,omitempty"`                        // 作品数（已发布）
-	FollowerCount     *uint64                `protobuf:"varint,3,opt,name=follower_count,json=followerCount,proto3,oneof" json:"follower_count,omitempty"`               // 粉丝数
-	FollowingCount    *uint64                `protobuf:"varint,4,opt,name=following_count,json=followingCount,proto3,oneof" json:"following_count,omitempty"`            // 关注数
-	LikeReceivedCount *uint64                `protobuf:"varint,5,opt,name=like_received_count,json=likeReceivedCount,proto3,oneof" json:"like_received_count,omitempty"` // 获赞总数
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
-}
-
-func (x *UserStats) Reset() {
-	*x = UserStats{}
-	mi := &file_identity_service_v1_user_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UserStats) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UserStats) ProtoMessage() {}
-
-func (x *UserStats) ProtoReflect() protoreflect.Message {
-	mi := &file_identity_service_v1_user_proto_msgTypes[2]
+func (x *User) GetDeletedAt() *timestamppb.Timestamp {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
+		return x.DeletedAt
 	}
-	return mi.MessageOf(x)
+	return nil
 }
 
-// Deprecated: Use UserStats.ProtoReflect.Descriptor instead.
-func (*UserStats) Descriptor() ([]byte, []int) {
-	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *UserStats) GetUserId() uint32 {
-	if x != nil && x.UserId != nil {
-		return *x.UserId
-	}
-	return 0
-}
-
-func (x *UserStats) GetVideoCount() uint64 {
-	if x != nil && x.VideoCount != nil {
-		return *x.VideoCount
-	}
-	return 0
-}
-
-func (x *UserStats) GetFollowerCount() uint64 {
-	if x != nil && x.FollowerCount != nil {
-		return *x.FollowerCount
-	}
-	return 0
-}
-
-func (x *UserStats) GetFollowingCount() uint64 {
-	if x != nil && x.FollowingCount != nil {
-		return *x.FollowingCount
-	}
-	return 0
-}
-
-func (x *UserStats) GetLikeReceivedCount() uint64 {
-	if x != nil && x.LikeReceivedCount != nil {
-		return *x.LikeReceivedCount
-	}
-	return 0
-}
-
-type GetUserRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"` // 用户ID
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetUserRequest) Reset() {
-	*x = GetUserRequest{}
-	mi := &file_identity_service_v1_user_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetUserRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUserRequest) ProtoMessage() {}
-
-func (x *GetUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_identity_service_v1_user_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUserRequest.ProtoReflect.Descriptor instead.
-func (*GetUserRequest) Descriptor() ([]byte, []int) {
-	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *GetUserRequest) GetId() uint32 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-type GetUserByUsernameRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Username      string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"` // 用户名
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetUserByUsernameRequest) Reset() {
-	*x = GetUserByUsernameRequest{}
-	mi := &file_identity_service_v1_user_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetUserByUsernameRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUserByUsernameRequest) ProtoMessage() {}
-
-func (x *GetUserByUsernameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_identity_service_v1_user_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUserByUsernameRequest.ProtoReflect.Descriptor instead.
-func (*GetUserByUsernameRequest) Descriptor() ([]byte, []int) {
-	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *GetUserByUsernameRequest) GetUsername() string {
-	if x != nil {
-		return x.Username
-	}
-	return ""
-}
-
+// 获取用户列表 - 答复
 type ListUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Items         []*User                `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`        // 用户列表
-	Total         *int64                 `protobuf:"varint,2,opt,name=total,proto3,oneof" json:"total,omitempty"` // 总数
+	Items         []*User                `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	Total         uint64                 `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListUserResponse) Reset() {
 	*x = ListUserResponse{}
-	mi := &file_identity_service_v1_user_proto_msgTypes[5]
+	mi := &file_identity_service_v1_user_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -421,7 +533,7 @@ func (x *ListUserResponse) String() string {
 func (*ListUserResponse) ProtoMessage() {}
 
 func (x *ListUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_identity_service_v1_user_proto_msgTypes[5]
+	mi := &file_identity_service_v1_user_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -434,7 +546,7 @@ func (x *ListUserResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListUserResponse.ProtoReflect.Descriptor instead.
 func (*ListUserResponse) Descriptor() ([]byte, []int) {
-	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{5}
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *ListUserResponse) GetItems() []*User {
@@ -444,27 +556,116 @@ func (x *ListUserResponse) GetItems() []*User {
 	return nil
 }
 
-func (x *ListUserResponse) GetTotal() int64 {
-	if x != nil && x.Total != nil {
-		return *x.Total
+func (x *ListUserResponse) GetTotal() uint64 {
+	if x != nil {
+		return x.Total
 	}
 	return 0
 }
 
+// 获取用户数据 - 请求
+type GetUserRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to QueryBy:
+	//
+	//	*GetUserRequest_Id
+	//	*GetUserRequest_Username
+	QueryBy       isGetUserRequest_QueryBy `protobuf_oneof:"query_by"`
+	ViewMask      *fieldmaskpb.FieldMask   `protobuf:"bytes,100,opt,name=view_mask,json=viewMask,proto3,oneof" json:"view_mask,omitempty"` // 视图字段过滤器，用于控制返回的字段
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserRequest) Reset() {
+	*x = GetUserRequest{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserRequest) ProtoMessage() {}
+
+func (x *GetUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserRequest.ProtoReflect.Descriptor instead.
+func (*GetUserRequest) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *GetUserRequest) GetQueryBy() isGetUserRequest_QueryBy {
+	if x != nil {
+		return x.QueryBy
+	}
+	return nil
+}
+
+func (x *GetUserRequest) GetId() uint32 {
+	if x != nil {
+		if x, ok := x.QueryBy.(*GetUserRequest_Id); ok {
+			return x.Id
+		}
+	}
+	return 0
+}
+
+func (x *GetUserRequest) GetUsername() string {
+	if x != nil {
+		if x, ok := x.QueryBy.(*GetUserRequest_Username); ok {
+			return x.Username
+		}
+	}
+	return ""
+}
+
+func (x *GetUserRequest) GetViewMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.ViewMask
+	}
+	return nil
+}
+
+type isGetUserRequest_QueryBy interface {
+	isGetUserRequest_QueryBy()
+}
+
+type GetUserRequest_Id struct {
+	Id uint32 `protobuf:"varint,1,opt,name=id,proto3,oneof"` // 用户ID
+}
+
+type GetUserRequest_Username struct {
+	Username string `protobuf:"bytes,2,opt,name=username,proto3,oneof"` // 用户登录名
+}
+
+func (*GetUserRequest_Id) isGetUserRequest_QueryBy() {}
+
+func (*GetUserRequest_Username) isGetUserRequest_QueryBy() {}
+
+// 创建用户 - 请求
 type CreateUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Username      string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`                          // 登录名
-	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`                          // 初始密码
-	Nickname      string                 `protobuf:"bytes,3,opt,name=nickname,proto3" json:"nickname,omitempty"`                          // 昵称
-	AvatarUrl     *string                `protobuf:"bytes,4,opt,name=avatar_url,json=avatarUrl,proto3,oneof" json:"avatar_url,omitempty"` // 头像
-	Bio           *string                `protobuf:"bytes,5,opt,name=bio,proto3,oneof" json:"bio,omitempty"`                              // 简介
+	Data          *User                  `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	Password      *string                `protobuf:"bytes,2,opt,name=password,proto3,oneof" json:"password,omitempty"` // 用户登录密码
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateUserRequest) Reset() {
 	*x = CreateUserRequest{}
-	mi := &file_identity_service_v1_user_proto_msgTypes[6]
+	mi := &file_identity_service_v1_user_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -476,7 +677,7 @@ func (x *CreateUserRequest) String() string {
 func (*CreateUserRequest) ProtoMessage() {}
 
 func (x *CreateUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_identity_service_v1_user_proto_msgTypes[6]
+	mi := &file_identity_service_v1_user_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -489,58 +690,38 @@ func (x *CreateUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateUserRequest.ProtoReflect.Descriptor instead.
 func (*CreateUserRequest) Descriptor() ([]byte, []int) {
-	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{6}
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *CreateUserRequest) GetUsername() string {
+func (x *CreateUserRequest) GetData() *User {
 	if x != nil {
-		return x.Username
+		return x.Data
 	}
-	return ""
+	return nil
 }
 
 func (x *CreateUserRequest) GetPassword() string {
-	if x != nil {
-		return x.Password
+	if x != nil && x.Password != nil {
+		return *x.Password
 	}
 	return ""
 }
 
-func (x *CreateUserRequest) GetNickname() string {
-	if x != nil {
-		return x.Nickname
-	}
-	return ""
-}
-
-func (x *CreateUserRequest) GetAvatarUrl() string {
-	if x != nil && x.AvatarUrl != nil {
-		return *x.AvatarUrl
-	}
-	return ""
-}
-
-func (x *CreateUserRequest) GetBio() string {
-	if x != nil && x.Bio != nil {
-		return *x.Bio
-	}
-	return ""
-}
-
+// 更新用户 - 请求
 type UpdateUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                     // 用户ID
-	Nickname      *string                `protobuf:"bytes,2,opt,name=nickname,proto3,oneof" json:"nickname,omitempty"`                    // 昵称
-	AvatarUrl     *string                `protobuf:"bytes,3,opt,name=avatar_url,json=avatarUrl,proto3,oneof" json:"avatar_url,omitempty"` // 头像
-	Bio           *string                `protobuf:"bytes,4,opt,name=bio,proto3,oneof" json:"bio,omitempty"`                              // 简介
-	Password      *string                `protobuf:"bytes,5,opt,name=password,proto3,oneof" json:"password,omitempty"`                    // 新密码（管理端重置）
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Data          *User                  `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`                                            // 用户的数据
+	Password      *string                `protobuf:"bytes,3,opt,name=password,proto3,oneof" json:"password,omitempty"`                              // 用户登录密码
+	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`              // 要更新的字段列表
+	AllowMissing  *bool                  `protobuf:"varint,5,opt,name=allow_missing,json=allowMissing,proto3,oneof" json:"allow_missing,omitempty"` // 如果设置为true的时候，资源不存在则会新增(插入)，并且在这种情况下`updateMask`字段将会被忽略。
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateUserRequest) Reset() {
 	*x = UpdateUserRequest{}
-	mi := &file_identity_service_v1_user_proto_msgTypes[7]
+	mi := &file_identity_service_v1_user_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -552,7 +733,7 @@ func (x *UpdateUserRequest) String() string {
 func (*UpdateUserRequest) ProtoMessage() {}
 
 func (x *UpdateUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_identity_service_v1_user_proto_msgTypes[7]
+	mi := &file_identity_service_v1_user_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -565,7 +746,7 @@ func (x *UpdateUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUserRequest.ProtoReflect.Descriptor instead.
 func (*UpdateUserRequest) Descriptor() ([]byte, []int) {
-	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{7}
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *UpdateUserRequest) GetId() uint32 {
@@ -575,25 +756,11 @@ func (x *UpdateUserRequest) GetId() uint32 {
 	return 0
 }
 
-func (x *UpdateUserRequest) GetNickname() string {
-	if x != nil && x.Nickname != nil {
-		return *x.Nickname
+func (x *UpdateUserRequest) GetData() *User {
+	if x != nil {
+		return x.Data
 	}
-	return ""
-}
-
-func (x *UpdateUserRequest) GetAvatarUrl() string {
-	if x != nil && x.AvatarUrl != nil {
-		return *x.AvatarUrl
-	}
-	return ""
-}
-
-func (x *UpdateUserRequest) GetBio() string {
-	if x != nil && x.Bio != nil {
-		return *x.Bio
-	}
-	return ""
+	return nil
 }
 
 func (x *UpdateUserRequest) GetPassword() string {
@@ -603,16 +770,36 @@ func (x *UpdateUserRequest) GetPassword() string {
 	return ""
 }
 
+func (x *UpdateUserRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.UpdateMask
+	}
+	return nil
+}
+
+func (x *UpdateUserRequest) GetAllowMissing() bool {
+	if x != nil && x.AllowMissing != nil {
+		return *x.AllowMissing
+	}
+	return false
+}
+
+// 删除用户 - 请求
 type DeleteUserRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"` // 用户ID
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to QueryBy:
+	//
+	//	*DeleteUserRequest_Id
+	//	*DeleteUserRequest_Username
+	QueryBy       isDeleteUserRequest_QueryBy `protobuf_oneof:"query_by"`
+	DeletedBy     *uint32                     `protobuf:"varint,100,opt,name=deleted_by,json=deletedBy,proto3,oneof" json:"deleted_by,omitempty"` // 删除者用户ID
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeleteUserRequest) Reset() {
 	*x = DeleteUserRequest{}
-	mi := &file_identity_service_v1_user_proto_msgTypes[8]
+	mi := &file_identity_service_v1_user_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -624,7 +811,7 @@ func (x *DeleteUserRequest) String() string {
 func (*DeleteUserRequest) ProtoMessage() {}
 
 func (x *DeleteUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_identity_service_v1_user_proto_msgTypes[8]
+	mi := &file_identity_service_v1_user_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -637,38 +824,250 @@ func (x *DeleteUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteUserRequest.ProtoReflect.Descriptor instead.
 func (*DeleteUserRequest) Descriptor() ([]byte, []int) {
-	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{8}
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *DeleteUserRequest) GetQueryBy() isDeleteUserRequest_QueryBy {
+	if x != nil {
+		return x.QueryBy
+	}
+	return nil
 }
 
 func (x *DeleteUserRequest) GetId() uint32 {
 	if x != nil {
-		return x.Id
+		if x, ok := x.QueryBy.(*DeleteUserRequest_Id); ok {
+			return x.Id
+		}
 	}
 	return 0
 }
 
-type UpdateUserStatusRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                             // 用户ID
-	Status        UserStatus             `protobuf:"varint,2,opt,name=status,proto3,enum=identity.service.v1.UserStatus" json:"status,omitempty"` // 目标状态
+func (x *DeleteUserRequest) GetUsername() string {
+	if x != nil {
+		if x, ok := x.QueryBy.(*DeleteUserRequest_Username); ok {
+			return x.Username
+		}
+	}
+	return ""
+}
+
+func (x *DeleteUserRequest) GetDeletedBy() uint32 {
+	if x != nil && x.DeletedBy != nil {
+		return *x.DeletedBy
+	}
+	return 0
+}
+
+type isDeleteUserRequest_QueryBy interface {
+	isDeleteUserRequest_QueryBy()
+}
+
+type DeleteUserRequest_Id struct {
+	Id uint32 `protobuf:"varint,1,opt,name=id,proto3,oneof"` // 用户ID
+}
+
+type DeleteUserRequest_Username struct {
+	Username string `protobuf:"bytes,2,opt,name=username,proto3,oneof"` // 用户登录名
+}
+
+func (*DeleteUserRequest_Id) isDeleteUserRequest_QueryBy() {}
+
+func (*DeleteUserRequest_Username) isDeleteUserRequest_QueryBy() {}
+
+// 用户是否存在 - 请求
+type UserExistsRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to QueryBy:
+	//
+	//	*UserExistsRequest_Id
+	//	*UserExistsRequest_Username
+	QueryBy       isUserExistsRequest_QueryBy `protobuf_oneof:"query_by"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UpdateUserStatusRequest) Reset() {
-	*x = UpdateUserStatusRequest{}
+func (x *UserExistsRequest) Reset() {
+	*x = UserExistsRequest{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserExistsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserExistsRequest) ProtoMessage() {}
+
+func (x *UserExistsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserExistsRequest.ProtoReflect.Descriptor instead.
+func (*UserExistsRequest) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *UserExistsRequest) GetQueryBy() isUserExistsRequest_QueryBy {
+	if x != nil {
+		return x.QueryBy
+	}
+	return nil
+}
+
+func (x *UserExistsRequest) GetId() uint32 {
+	if x != nil {
+		if x, ok := x.QueryBy.(*UserExistsRequest_Id); ok {
+			return x.Id
+		}
+	}
+	return 0
+}
+
+func (x *UserExistsRequest) GetUsername() string {
+	if x != nil {
+		if x, ok := x.QueryBy.(*UserExistsRequest_Username); ok {
+			return x.Username
+		}
+	}
+	return ""
+}
+
+type isUserExistsRequest_QueryBy interface {
+	isUserExistsRequest_QueryBy()
+}
+
+type UserExistsRequest_Id struct {
+	Id uint32 `protobuf:"varint,1,opt,name=id,proto3,oneof"` // 用户ID
+}
+
+type UserExistsRequest_Username struct {
+	Username string `protobuf:"bytes,2,opt,name=username,proto3,oneof"` // 用户登录名
+}
+
+func (*UserExistsRequest_Id) isUserExistsRequest_QueryBy() {}
+
+func (*UserExistsRequest_Username) isUserExistsRequest_QueryBy() {}
+
+// 用户是否存在 - 答复
+type UserExistsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Exist         bool                   `protobuf:"varint,1,opt,name=exist,proto3" json:"exist,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UserExistsResponse) Reset() {
+	*x = UserExistsResponse{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserExistsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserExistsResponse) ProtoMessage() {}
+
+func (x *UserExistsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserExistsResponse.ProtoReflect.Descriptor instead.
+func (*UserExistsResponse) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *UserExistsResponse) GetExist() bool {
+	if x != nil {
+		return x.Exist
+	}
+	return false
+}
+
+type BatchCreateUsersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*User                `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BatchCreateUsersRequest) Reset() {
+	*x = BatchCreateUsersRequest{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BatchCreateUsersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BatchCreateUsersRequest) ProtoMessage() {}
+
+func (x *BatchCreateUsersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BatchCreateUsersRequest.ProtoReflect.Descriptor instead.
+func (*BatchCreateUsersRequest) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *BatchCreateUsersRequest) GetItems() []*User {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type BatchCreateUsersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CreatedIds    []int32                `protobuf:"varint,1,rep,packed,name=created_ids,json=createdIds,proto3" json:"created_ids,omitempty"` // 创建成功的用户ID列表
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BatchCreateUsersResponse) Reset() {
+	*x = BatchCreateUsersResponse{}
 	mi := &file_identity_service_v1_user_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdateUserStatusRequest) String() string {
+func (x *BatchCreateUsersResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdateUserStatusRequest) ProtoMessage() {}
+func (*BatchCreateUsersResponse) ProtoMessage() {}
 
-func (x *UpdateUserStatusRequest) ProtoReflect() protoreflect.Message {
+func (x *BatchCreateUsersResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_identity_service_v1_user_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -680,46 +1079,39 @@ func (x *UpdateUserStatusRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UpdateUserStatusRequest.ProtoReflect.Descriptor instead.
-func (*UpdateUserStatusRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use BatchCreateUsersResponse.ProtoReflect.Descriptor instead.
+func (*BatchCreateUsersResponse) Descriptor() ([]byte, []int) {
 	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *UpdateUserStatusRequest) GetId() uint32 {
+func (x *BatchCreateUsersResponse) GetCreatedIds() []int32 {
 	if x != nil {
-		return x.Id
+		return x.CreatedIds
 	}
-	return 0
+	return nil
 }
 
-func (x *UpdateUserStatusRequest) GetStatus() UserStatus {
-	if x != nil {
-		return x.Status
-	}
-	return UserStatus_USER_STATUS_UNSPECIFIED
-}
-
-type GetUserStatsRequest struct {
+type GetUsersByIdsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        uint32                 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // 用户ID
+	Ids           []uint32               `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetUserStatsRequest) Reset() {
-	*x = GetUserStatsRequest{}
+func (x *GetUsersByIdsRequest) Reset() {
+	*x = GetUsersByIdsRequest{}
 	mi := &file_identity_service_v1_user_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetUserStatsRequest) String() string {
+func (x *GetUsersByIdsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetUserStatsRequest) ProtoMessage() {}
+func (*GetUsersByIdsRequest) ProtoMessage() {}
 
-func (x *GetUserStatsRequest) ProtoReflect() protoreflect.Message {
+func (x *GetUsersByIdsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_identity_service_v1_user_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -731,116 +1123,1146 @@ func (x *GetUserStatsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetUserStatsRequest.ProtoReflect.Descriptor instead.
-func (*GetUserStatsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetUsersByIdsRequest.ProtoReflect.Descriptor instead.
+func (*GetUsersByIdsRequest) Descriptor() ([]byte, []int) {
 	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *GetUserStatsRequest) GetUserId() uint32 {
+func (x *GetUsersByIdsRequest) GetIds() []uint32 {
+	if x != nil {
+		return x.Ids
+	}
+	return nil
+}
+
+// 强制修改用户密码（不验证） - 请求
+type EditUserPasswordRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        uint32                 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`               // 用户ID
+	NewPassword   string                 `protobuf:"bytes,2,opt,name=new_password,json=newPassword,proto3" json:"new_password,omitempty"` // 新密码
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EditUserPasswordRequest) Reset() {
+	*x = EditUserPasswordRequest{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EditUserPasswordRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EditUserPasswordRequest) ProtoMessage() {}
+
+func (x *EditUserPasswordRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EditUserPasswordRequest.ProtoReflect.Descriptor instead.
+func (*EditUserPasswordRequest) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *EditUserPasswordRequest) GetUserId() uint32 {
 	if x != nil {
 		return x.UserId
 	}
 	return 0
 }
 
+func (x *EditUserPasswordRequest) GetNewPassword() string {
+	if x != nil {
+		return x.NewPassword
+	}
+	return ""
+}
+
+// 修改用户密码（需要验证旧密码） - 请求
+type ChangePasswordRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OldPassword   string                 `protobuf:"bytes,1,opt,name=old_password,json=oldPassword,proto3" json:"old_password,omitempty"` // 旧密码
+	NewPassword   string                 `protobuf:"bytes,2,opt,name=new_password,json=newPassword,proto3" json:"new_password,omitempty"` // 新密码
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChangePasswordRequest) Reset() {
+	*x = ChangePasswordRequest{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangePasswordRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangePasswordRequest) ProtoMessage() {}
+
+func (x *ChangePasswordRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangePasswordRequest.ProtoReflect.Descriptor instead.
+func (*ChangePasswordRequest) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ChangePasswordRequest) GetOldPassword() string {
+	if x != nil {
+		return x.OldPassword
+	}
+	return ""
+}
+
+func (x *ChangePasswordRequest) GetNewPassword() string {
+	if x != nil {
+		return x.NewPassword
+	}
+	return ""
+}
+
+type UploadAvatarRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Source:
+	//
+	//	*UploadAvatarRequest_ImageBase64
+	//	*UploadAvatarRequest_ImageUrl
+	Source        isUploadAvatarRequest_Source `protobuf_oneof:"source"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UploadAvatarRequest) Reset() {
+	*x = UploadAvatarRequest{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UploadAvatarRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UploadAvatarRequest) ProtoMessage() {}
+
+func (x *UploadAvatarRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UploadAvatarRequest.ProtoReflect.Descriptor instead.
+func (*UploadAvatarRequest) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *UploadAvatarRequest) GetSource() isUploadAvatarRequest_Source {
+	if x != nil {
+		return x.Source
+	}
+	return nil
+}
+
+func (x *UploadAvatarRequest) GetImageBase64() string {
+	if x != nil {
+		if x, ok := x.Source.(*UploadAvatarRequest_ImageBase64); ok {
+			return x.ImageBase64
+		}
+	}
+	return ""
+}
+
+func (x *UploadAvatarRequest) GetImageUrl() string {
+	if x != nil {
+		if x, ok := x.Source.(*UploadAvatarRequest_ImageUrl); ok {
+			return x.ImageUrl
+		}
+	}
+	return ""
+}
+
+type isUploadAvatarRequest_Source interface {
+	isUploadAvatarRequest_Source()
+}
+
+type UploadAvatarRequest_ImageBase64 struct {
+	ImageBase64 string `protobuf:"bytes,1,opt,name=image_base64,json=imageBase64,proto3,oneof"` // 图片的Base64编码
+}
+
+type UploadAvatarRequest_ImageUrl struct {
+	ImageUrl string `protobuf:"bytes,2,opt,name=image_url,json=imageUrl,proto3,oneof"` // 图片的URL地址
+}
+
+func (*UploadAvatarRequest_ImageBase64) isUploadAvatarRequest_Source() {}
+
+func (*UploadAvatarRequest_ImageUrl) isUploadAvatarRequest_Source() {}
+
+type UploadAvatarResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UploadAvatarResponse) Reset() {
+	*x = UploadAvatarResponse{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UploadAvatarResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UploadAvatarResponse) ProtoMessage() {}
+
+func (x *UploadAvatarResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UploadAvatarResponse.ProtoReflect.Descriptor instead.
+func (*UploadAvatarResponse) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *UploadAvatarResponse) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+type BindContactRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Contact:
+	//
+	//	*BindContactRequest_Phone
+	//	*BindContactRequest_Email
+	Contact       isBindContactRequest_Contact `protobuf_oneof:"contact"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BindContactRequest) Reset() {
+	*x = BindContactRequest{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BindContactRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BindContactRequest) ProtoMessage() {}
+
+func (x *BindContactRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BindContactRequest.ProtoReflect.Descriptor instead.
+func (*BindContactRequest) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *BindContactRequest) GetContact() isBindContactRequest_Contact {
+	if x != nil {
+		return x.Contact
+	}
+	return nil
+}
+
+func (x *BindContactRequest) GetPhone() *BindPhoneRequest {
+	if x != nil {
+		if x, ok := x.Contact.(*BindContactRequest_Phone); ok {
+			return x.Phone
+		}
+	}
+	return nil
+}
+
+func (x *BindContactRequest) GetEmail() *BindEmailRequest {
+	if x != nil {
+		if x, ok := x.Contact.(*BindContactRequest_Email); ok {
+			return x.Email
+		}
+	}
+	return nil
+}
+
+type isBindContactRequest_Contact interface {
+	isBindContactRequest_Contact()
+}
+
+type BindContactRequest_Phone struct {
+	Phone *BindPhoneRequest `protobuf:"bytes,1,opt,name=phone,proto3,oneof"`
+}
+
+type BindContactRequest_Email struct {
+	Email *BindEmailRequest `protobuf:"bytes,2,opt,name=email,proto3,oneof"`
+}
+
+func (*BindContactRequest_Phone) isBindContactRequest_Contact() {}
+
+func (*BindContactRequest_Email) isBindContactRequest_Contact() {}
+
+type BindPhoneRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Phone         string                 `protobuf:"bytes,1,opt,name=phone,proto3" json:"phone,omitempty"`
+	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BindPhoneRequest) Reset() {
+	*x = BindPhoneRequest{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BindPhoneRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BindPhoneRequest) ProtoMessage() {}
+
+func (x *BindPhoneRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BindPhoneRequest.ProtoReflect.Descriptor instead.
+func (*BindPhoneRequest) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *BindPhoneRequest) GetPhone() string {
+	if x != nil {
+		return x.Phone
+	}
+	return ""
+}
+
+func (x *BindPhoneRequest) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+type BindEmailRequest struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Email            string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	VerificationCode *string                `protobuf:"bytes,2,opt,name=verification_code,json=verificationCode,proto3,oneof" json:"verification_code,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *BindEmailRequest) Reset() {
+	*x = BindEmailRequest{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BindEmailRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BindEmailRequest) ProtoMessage() {}
+
+func (x *BindEmailRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BindEmailRequest.ProtoReflect.Descriptor instead.
+func (*BindEmailRequest) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *BindEmailRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *BindEmailRequest) GetVerificationCode() string {
+	if x != nil && x.VerificationCode != nil {
+		return *x.VerificationCode
+	}
+	return ""
+}
+
+type VerifyContactRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Contact:
+	//
+	//	*VerifyContactRequest_Phone
+	//	*VerifyContactRequest_Email
+	Contact isVerifyContactRequest_Contact `protobuf_oneof:"contact"`
+	// 可选：服务端生成的验证码会话 id（用于多步骤或回调验证）
+	VerificationId *string `protobuf:"bytes,3,opt,name=verification_id,json=verificationId,proto3,oneof" json:"verification_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *VerifyContactRequest) Reset() {
+	*x = VerifyContactRequest{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifyContactRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyContactRequest) ProtoMessage() {}
+
+func (x *VerifyContactRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyContactRequest.ProtoReflect.Descriptor instead.
+func (*VerifyContactRequest) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *VerifyContactRequest) GetContact() isVerifyContactRequest_Contact {
+	if x != nil {
+		return x.Contact
+	}
+	return nil
+}
+
+func (x *VerifyContactRequest) GetPhone() *PhoneVerification {
+	if x != nil {
+		if x, ok := x.Contact.(*VerifyContactRequest_Phone); ok {
+			return x.Phone
+		}
+	}
+	return nil
+}
+
+func (x *VerifyContactRequest) GetEmail() *EmailVerification {
+	if x != nil {
+		if x, ok := x.Contact.(*VerifyContactRequest_Email); ok {
+			return x.Email
+		}
+	}
+	return nil
+}
+
+func (x *VerifyContactRequest) GetVerificationId() string {
+	if x != nil && x.VerificationId != nil {
+		return *x.VerificationId
+	}
+	return ""
+}
+
+type isVerifyContactRequest_Contact interface {
+	isVerifyContactRequest_Contact()
+}
+
+type VerifyContactRequest_Phone struct {
+	Phone *PhoneVerification `protobuf:"bytes,1,opt,name=phone,proto3,oneof"`
+}
+
+type VerifyContactRequest_Email struct {
+	Email *EmailVerification `protobuf:"bytes,2,opt,name=email,proto3,oneof"`
+}
+
+func (*VerifyContactRequest_Phone) isVerifyContactRequest_Contact() {}
+
+func (*VerifyContactRequest_Email) isVerifyContactRequest_Contact() {}
+
+// 手机验证
+type PhoneVerification struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Phone         string                 `protobuf:"bytes,1,opt,name=phone,proto3" json:"phone,omitempty"`
+	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PhoneVerification) Reset() {
+	*x = PhoneVerification{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PhoneVerification) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PhoneVerification) ProtoMessage() {}
+
+func (x *PhoneVerification) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PhoneVerification.ProtoReflect.Descriptor instead.
+func (*PhoneVerification) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *PhoneVerification) GetPhone() string {
+	if x != nil {
+		return x.Phone
+	}
+	return ""
+}
+
+func (x *PhoneVerification) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+// 邮箱验证
+type EmailVerification struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EmailVerification) Reset() {
+	*x = EmailVerification{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmailVerification) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmailVerification) ProtoMessage() {}
+
+func (x *EmailVerification) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmailVerification.ProtoReflect.Descriptor instead.
+func (*EmailVerification) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *EmailVerification) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *EmailVerification) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+type CountUserResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Count         uint64                 `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CountUserResponse) Reset() {
+	*x = CountUserResponse{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CountUserResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CountUserResponse) ProtoMessage() {}
+
+func (x *CountUserResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CountUserResponse.ProtoReflect.Descriptor instead.
+func (*CountUserResponse) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *CountUserResponse) GetCount() uint64 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+type ListUserOrgUintIDsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrgUnitIds    []uint32               `protobuf:"varint,1,rep,packed,name=org_unit_ids,json=orgUnitIds,proto3" json:"org_unit_ids,omitempty"` // 组织ID列表
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListUserOrgUintIDsResponse) Reset() {
+	*x = ListUserOrgUintIDsResponse{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListUserOrgUintIDsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUserOrgUintIDsResponse) ProtoMessage() {}
+
+func (x *ListUserOrgUintIDsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUserOrgUintIDsResponse.ProtoReflect.Descriptor instead.
+func (*ListUserOrgUintIDsResponse) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *ListUserOrgUintIDsResponse) GetOrgUnitIds() []uint32 {
+	if x != nil {
+		return x.OrgUnitIds
+	}
+	return nil
+}
+
+type ListUserPositionIDsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PositionIds   []uint32               `protobuf:"varint,1,rep,packed,name=position_ids,json=positionIds,proto3" json:"position_ids,omitempty"` // 职位ID列表
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListUserPositionIDsResponse) Reset() {
+	*x = ListUserPositionIDsResponse{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListUserPositionIDsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUserPositionIDsResponse) ProtoMessage() {}
+
+func (x *ListUserPositionIDsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUserPositionIDsResponse.ProtoReflect.Descriptor instead.
+func (*ListUserPositionIDsResponse) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *ListUserPositionIDsResponse) GetPositionIds() []uint32 {
+	if x != nil {
+		return x.PositionIds
+	}
+	return nil
+}
+
+type ListUserIDsByOrgUnitIDsRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	OrgUnitIds     []uint32               `protobuf:"varint,1,rep,packed,name=org_unit_ids,json=orgUnitIds,proto3" json:"org_unit_ids,omitempty"`          // 组织ID列表
+	ExcludeExpired *bool                  `protobuf:"varint,2,opt,name=exclude_expired,json=excludeExpired,proto3,oneof" json:"exclude_expired,omitempty"` // 是否排除过期用户，默认值：false
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ListUserIDsByOrgUnitIDsRequest) Reset() {
+	*x = ListUserIDsByOrgUnitIDsRequest{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListUserIDsByOrgUnitIDsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUserIDsByOrgUnitIDsRequest) ProtoMessage() {}
+
+func (x *ListUserIDsByOrgUnitIDsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUserIDsByOrgUnitIDsRequest.ProtoReflect.Descriptor instead.
+func (*ListUserIDsByOrgUnitIDsRequest) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *ListUserIDsByOrgUnitIDsRequest) GetOrgUnitIds() []uint32 {
+	if x != nil {
+		return x.OrgUnitIds
+	}
+	return nil
+}
+
+func (x *ListUserIDsByOrgUnitIDsRequest) GetExcludeExpired() bool {
+	if x != nil && x.ExcludeExpired != nil {
+		return *x.ExcludeExpired
+	}
+	return false
+}
+
+type ListUserIDsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserIds       []uint32               `protobuf:"varint,1,rep,packed,name=user_ids,json=userIds,proto3" json:"user_ids,omitempty"` // 用户ID列表
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListUserIDsResponse) Reset() {
+	*x = ListUserIDsResponse{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListUserIDsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUserIDsResponse) ProtoMessage() {}
+
+func (x *ListUserIDsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUserIDsResponse.ProtoReflect.Descriptor instead.
+func (*ListUserIDsResponse) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *ListUserIDsResponse) GetUserIds() []uint32 {
+	if x != nil {
+		return x.UserIds
+	}
+	return nil
+}
+
+type ListUserIDsByPositionIDsRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	PositionIds    []uint32               `protobuf:"varint,1,rep,packed,name=position_ids,json=positionIds,proto3" json:"position_ids,omitempty"`         // 职位ID列表
+	ExcludeExpired *bool                  `protobuf:"varint,2,opt,name=exclude_expired,json=excludeExpired,proto3,oneof" json:"exclude_expired,omitempty"` // 是否排除过期用户，默认值：false
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ListUserIDsByPositionIDsRequest) Reset() {
+	*x = ListUserIDsByPositionIDsRequest{}
+	mi := &file_identity_service_v1_user_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListUserIDsByPositionIDsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUserIDsByPositionIDsRequest) ProtoMessage() {}
+
+func (x *ListUserIDsByPositionIDsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_identity_service_v1_user_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUserIDsByPositionIDsRequest.ProtoReflect.Descriptor instead.
+func (*ListUserIDsByPositionIDsRequest) Descriptor() ([]byte, []int) {
+	return file_identity_service_v1_user_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *ListUserIDsByPositionIDsRequest) GetPositionIds() []uint32 {
+	if x != nil {
+		return x.PositionIds
+	}
+	return nil
+}
+
+func (x *ListUserIDsByPositionIDsRequest) GetExcludeExpired() bool {
+	if x != nil && x.ExcludeExpired != nil {
+		return *x.ExcludeExpired
+	}
+	return false
+}
+
 var File_identity_service_v1_user_proto protoreflect.FileDescriptor
 
 const file_identity_service_v1_user_proto_rawDesc = "" +
 	"\n" +
-	"\x1eidentity/service/v1/user.proto\x12\x13identity.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1epagination/v1/pagination.proto\"\x88\x01\n" +
-	"\tUserBrief\x12\x13\n" +
-	"\x02id\x18\x01 \x01(\rH\x00R\x02id\x88\x01\x01\x12\x1f\n" +
-	"\bnickname\x18\x02 \x01(\tH\x01R\bnickname\x88\x01\x01\x12\"\n" +
+	"\x1eidentity/service/v1/user.proto\x12\x13identity.service.v1\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x16redact/v1/redact.proto\x1a\x1epagination/v1/pagination.proto\"\x9e\x18\n" +
+	"\x04User\x12#\n" +
+	"\x02id\x18\x01 \x01(\rB\x0e\xbaG\v\x92\x02\b用户IDH\x00R\x02id\x88\x01\x01\x120\n" +
+	"\ttenant_id\x18\x02 \x01(\rB\x0e\xbaG\v\x92\x02\b租户IDH\x01R\btenantId\x88\x01\x01\x128\n" +
+	"\vtenant_name\x18\x03 \x01(\tB\x12\xbaG\x0f\x92\x02\f租户名称H\x02R\n" +
+	"tenantName\x88\x01\x01\x123\n" +
+	"\vorg_unit_id\x18\x04 \x01(\rB\x0e\xbaG\v\x92\x02\b组织IDH\x03R\torgUnitId\x88\x01\x01\x12<\n" +
+	"\forg_unit_ids\x18\x05 \x03(\rB\x1a\xbaG\x17\x92\x02\x14归属组织ID列表R\n" +
+	"orgUnitIds\x12;\n" +
+	"\rorg_unit_name\x18\x06 \x01(\tB\x12\xbaG\x0f\x92\x02\f组织名称H\x04R\vorgUnitName\x88\x01\x01\x12>\n" +
+	"\x0eorg_unit_names\x18\a \x03(\tB\x18\xbaG\x15\x92\x02\x12组织名称列表R\forgUnitNames\x124\n" +
+	"\vposition_id\x18\b \x01(\rB\x0e\xbaG\v\x92\x02\b职位IDH\x05R\n" +
+	"positionId\x88\x01\x01\x125\n" +
+	"\fposition_ids\x18\t \x03(\rB\x12\xbaG\x0f\x92\x02\f职位列表R\vpositionIds\x12<\n" +
+	"\rposition_name\x18\n" +
+	" \x01(\tB\x12\xbaG\x0f\x92\x02\f职位名称H\x06R\fpositionName\x88\x01\x01\x12?\n" +
+	"\x0eposition_names\x18\v \x03(\tB\x18\xbaG\x15\x92\x02\x12职位名称列表R\rpositionNames\x12,\n" +
+	"\arole_id\x18\f \x01(\rB\x0e\xbaG\v\x92\x02\b角色IDH\aR\x06roleId\x88\x01\x01\x12/\n" +
+	"\brole_ids\x18\r \x03(\rB\x14\xbaG\x11\x92\x02\x0e角色ID列表R\aroleIds\x12+\n" +
+	"\x05roles\x18\x0e \x03(\tB\x15\xbaG\x12\x92\x02\x0f角色码列表R\x05roles\x127\n" +
 	"\n" +
-	"avatar_url\x18\x03 \x01(\tH\x02R\tavatarUrl\x88\x01\x01B\x05\n" +
-	"\x03_idB\v\n" +
-	"\t_nicknameB\r\n" +
-	"\v_avatar_url\"\xb9\x03\n" +
-	"\x04User\x12\x13\n" +
-	"\x02id\x18\x01 \x01(\rH\x00R\x02id\x88\x01\x01\x12\x1f\n" +
-	"\busername\x18\x02 \x01(\tH\x01R\busername\x88\x01\x01\x12\x1f\n" +
-	"\bnickname\x18\x03 \x01(\tH\x02R\bnickname\x88\x01\x01\x12\"\n" +
+	"role_names\x18\x0f \x03(\tB\x18\xbaG\x15\x92\x02\x12角色名称列表R\troleNames\x120\n" +
+	"\busername\x18\x14 \x01(\tB\x0f\xbaG\f\x92\x02\t用户名H\bR\busername\x88\x01\x01\x12-\n" +
+	"\bnickname\x18\x15 \x01(\tB\f\xbaG\t\x92\x02\x06昵称H\tR\bnickname\x88\x01\x01\x123\n" +
+	"\brealname\x18\x16 \x01(\tB\x12\xbaG\x0f\x92\x02\f真实姓名H\n" +
+	"R\brealname\x88\x01\x01\x12)\n" +
+	"\x06avatar\x18\x17 \x01(\tB\f\xbaG\t\x92\x02\x06头像H\vR\x06avatar\x88\x01\x01\x125\n" +
+	"\x05email\x18\x18 \x01(\tB\x1a\xbaG\t\x92\x02\x06邮箱ڶ\x1a\n" +
+	"z\br*d@ct*dH\fR\x05email\x88\x01\x01\x12,\n" +
+	"\x06mobile\x18\x19 \x01(\tB\x0f\xbaG\f\x92\x02\t手机号H\rR\x06mobile\x88\x01\x01\x122\n" +
+	"\ttelephone\x18\x1a \x01(\tB\x0f\xbaG\f\x92\x02\t座机号H\x0eR\ttelephone\x88\x01\x01\x12K\n" +
+	"\x06gender\x18\x1b \x01(\x0e2 .identity.service.v1.User.GenderB\f\xbaG\t\x92\x02\x06性别H\x0fR\x06gender\x88\x01\x01\x12+\n" +
+	"\aaddress\x18\x1c \x01(\tB\f\xbaG\t\x92\x02\x06住址H\x10R\aaddress\x88\x01\x01\x12/\n" +
+	"\x06region\x18\x1d \x01(\tB\x12\xbaG\x0f\x92\x02\f国家地区H\x11R\x06region\x88\x01\x01\x129\n" +
+	"\vdescription\x18\x1e \x01(\tB\x12\xbaG\x0f\x92\x02\f个人描述H\x12R\vdescription\x88\x01\x01\x12)\n" +
+	"\x06remark\x18\x1f \x01(\tB\f\xbaG\t\x92\x02\x06备注H\x13R\x06remark\x88\x01\x01\x12]\n" +
+	"\rlast_login_at\x182 \x01(\v2\x1a.google.protobuf.TimestampB\x18\xbaG\x15\x92\x02\x12最后登录时间H\x14R\vlastLoginAt\x88\x01\x01\x12=\n" +
+	"\rlast_login_ip\x183 \x01(\tB\x14\xbaG\x11\x92\x02\x0e最后登录IPH\x15R\vlastLoginIp\x88\x01\x01\x12K\n" +
+	"\x06status\x184 \x01(\x0e2 .identity.service.v1.User.StatusB\f\xbaG\t\x92\x02\x06状态H\x16R\x06status\x88\x01\x01\x12\\\n" +
+	"\flocked_until\x185 \x01(\v2\x1a.google.protobuf.TimestampB\x18\xbaG\x15\x92\x02\x12锁定截止时间H\x17R\vlockedUntil\x88\x01\x01\x122\n" +
+	"\tfollowers\x18P \x01(\x04B\x0f\xbaG\f\x92\x02\t粉丝数H\x18R\tfollowers\x88\x01\x01\x122\n" +
+	"\tfollowing\x18Q \x01(\x04B\x0f\xbaG\f\x92\x02\t关注数H\x19R\tfollowing\x88\x01\x01\x123\n" +
 	"\n" +
-	"avatar_url\x18\x04 \x01(\tH\x03R\tavatarUrl\x88\x01\x01\x12\x15\n" +
-	"\x03bio\x18\x05 \x01(\tH\x04R\x03bio\x88\x01\x01\x12<\n" +
-	"\x06status\x18\x06 \x01(\x0e2\x1f.identity.service.v1.UserStatusH\x05R\x06status\x88\x01\x01\x12?\n" +
+	"post_count\x18Z \x01(\x04B\x0f\xbaG\f\x92\x02\t发帖数H\x1aR\tpostCount\x88\x01\x01\x129\n" +
+	"\rcomment_count\x18[ \x01(\x04B\x0f\xbaG\f\x92\x02\t评论数H\x1bR\fcommentCount\x88\x01\x01\x123\n" +
 	"\n" +
-	"created_at\x18\xc8\x01 \x01(\v2\x1a.google.protobuf.TimestampH\x06R\tcreatedAt\x88\x01\x01\x12?\n" +
+	"like_count\x18\\ \x01(\x04B\x0f\xbaG\f\x92\x02\t获赞数H\x1cR\tlikeCount\x88\x01\x01\x12;\n" +
 	"\n" +
-	"updated_at\x18\xc9\x01 \x01(\v2\x1a.google.protobuf.TimestampH\aR\tupdatedAt\x88\x01\x01B\x05\n" +
-	"\x03_idB\v\n" +
+	"created_by\x18d \x01(\rB\x17\xbaG\x14\x92\x02\x11创建者用户IDH\x1dR\tcreatedBy\x88\x01\x01\x12;\n" +
+	"\n" +
+	"updated_by\x18e \x01(\rB\x17\xbaG\x14\x92\x02\x11更新者用户IDH\x1eR\tupdatedBy\x88\x01\x01\x12;\n" +
+	"\n" +
+	"deleted_by\x18f \x01(\rB\x17\xbaG\x14\x92\x02\x11删除者用户IDH\x1fR\tdeletedBy\x88\x01\x01\x12S\n" +
+	"\n" +
+	"created_at\x18\xc8\x01 \x01(\v2\x1a.google.protobuf.TimestampB\x12\xbaG\x0f\x92\x02\f创建时间H R\tcreatedAt\x88\x01\x01\x12S\n" +
+	"\n" +
+	"updated_at\x18\xc9\x01 \x01(\v2\x1a.google.protobuf.TimestampB\x12\xbaG\x0f\x92\x02\f更新时间H!R\tupdatedAt\x88\x01\x01\x12S\n" +
+	"\n" +
+	"deleted_at\x18\xca\x01 \x01(\v2\x1a.google.protobuf.TimestampB\x12\xbaG\x0f\x92\x02\f删除时间H\"R\tdeletedAt\x88\x01\x01\"*\n" +
+	"\x06Gender\x12\n" +
+	"\n" +
+	"\x06SECRET\x10\x00\x12\b\n" +
+	"\x04MALE\x10\x01\x12\n" +
+	"\n" +
+	"\x06FEMALE\x10\x02\"T\n" +
+	"\x06Status\x12\f\n" +
+	"\bDISABLED\x10\x00\x12\n" +
+	"\n" +
+	"\x06NORMAL\x10\x01\x12\v\n" +
+	"\aPENDING\x10\x02\x12\n" +
+	"\n" +
+	"\x06LOCKED\x10\x03\x12\v\n" +
+	"\aEXPIRED\x10\x04\x12\n" +
+	"\n" +
+	"\x06CLOSED\x10\tB\x05\n" +
+	"\x03_idB\f\n" +
+	"\n" +
+	"_tenant_idB\x0e\n" +
+	"\f_tenant_nameB\x0e\n" +
+	"\f_org_unit_idB\x10\n" +
+	"\x0e_org_unit_nameB\x0e\n" +
+	"\f_position_idB\x10\n" +
+	"\x0e_position_nameB\n" +
+	"\n" +
+	"\b_role_idB\v\n" +
 	"\t_usernameB\v\n" +
-	"\t_nicknameB\r\n" +
-	"\v_avatar_urlB\x06\n" +
-	"\x04_bioB\t\n" +
-	"\a_statusB\r\n" +
+	"\t_nicknameB\v\n" +
+	"\t_realnameB\t\n" +
+	"\a_avatarB\b\n" +
+	"\x06_emailB\t\n" +
+	"\a_mobileB\f\n" +
+	"\n" +
+	"_telephoneB\t\n" +
+	"\a_genderB\n" +
+	"\n" +
+	"\b_addressB\t\n" +
+	"\a_regionB\x0e\n" +
+	"\f_descriptionB\t\n" +
+	"\a_remarkB\x10\n" +
+	"\x0e_last_login_atB\x10\n" +
+	"\x0e_last_login_ipB\t\n" +
+	"\a_statusB\x0f\n" +
+	"\r_locked_untilB\f\n" +
+	"\n" +
+	"_followersB\f\n" +
+	"\n" +
+	"_followingB\r\n" +
+	"\v_post_countB\x10\n" +
+	"\x0e_comment_countB\r\n" +
+	"\v_like_countB\r\n" +
+	"\v_created_byB\r\n" +
+	"\v_updated_byB\r\n" +
+	"\v_deleted_byB\r\n" +
 	"\v_created_atB\r\n" +
-	"\v_updated_at\"\xb9\x02\n" +
-	"\tUserStats\x12\x1c\n" +
-	"\auser_id\x18\x01 \x01(\rH\x00R\x06userId\x88\x01\x01\x12$\n" +
-	"\vvideo_count\x18\x02 \x01(\x04H\x01R\n" +
-	"videoCount\x88\x01\x01\x12*\n" +
-	"\x0efollower_count\x18\x03 \x01(\x04H\x02R\rfollowerCount\x88\x01\x01\x12,\n" +
-	"\x0ffollowing_count\x18\x04 \x01(\x04H\x03R\x0efollowingCount\x88\x01\x01\x123\n" +
-	"\x13like_received_count\x18\x05 \x01(\x04H\x04R\x11likeReceivedCount\x88\x01\x01B\n" +
-	"\n" +
-	"\b_user_idB\x0e\n" +
-	"\f_video_countB\x11\n" +
-	"\x0f_follower_countB\x12\n" +
-	"\x10_following_countB\x16\n" +
-	"\x14_like_received_count\" \n" +
-	"\x0eGetUserRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\rR\x02id\"6\n" +
-	"\x18GetUserByUsernameRequest\x12\x1a\n" +
-	"\busername\x18\x01 \x01(\tR\busername\"h\n" +
+	"\v_updated_atB\r\n" +
+	"\v_deleted_at\"Y\n" +
 	"\x10ListUserResponse\x12/\n" +
-	"\x05items\x18\x01 \x03(\v2\x19.identity.service.v1.UserR\x05items\x12\x19\n" +
-	"\x05total\x18\x02 \x01(\x03H\x00R\x05total\x88\x01\x01B\b\n" +
-	"\x06_total\"\xb9\x01\n" +
-	"\x11CreateUserRequest\x12\x1a\n" +
-	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x1a\n" +
-	"\bnickname\x18\x03 \x01(\tR\bnickname\x12\"\n" +
+	"\x05items\x18\x01 \x03(\v2\x19.identity.service.v1.UserR\x05items\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x04R\x05total\"\xfe\x01\n" +
+	"\x0eGetUserRequest\x12\"\n" +
+	"\x02id\x18\x01 \x01(\rB\x10\xbaG\r\x18\x01\x92\x02\b用户IDH\x00R\x02id\x125\n" +
+	"\busername\x18\x02 \x01(\tB\x17\xbaG\x14\x18\x01\x92\x02\x0f用户登录名H\x00R\busername\x12w\n" +
+	"\tview_mask\x18d \x01(\v2\x1a.google.protobuf.FieldMaskB9\xbaG6\x92\x023视图字段过滤器，用于控制返回的字段H\x01R\bviewMask\x88\x01\x01B\n" +
 	"\n" +
-	"avatar_url\x18\x04 \x01(\tH\x00R\tavatarUrl\x88\x01\x01\x12\x15\n" +
-	"\x03bio\x18\x05 \x01(\tH\x01R\x03bio\x88\x01\x01B\r\n" +
-	"\v_avatar_urlB\x06\n" +
-	"\x04_bio\"\xd1\x01\n" +
+	"\bquery_byB\f\n" +
+	"\n" +
+	"_view_mask\"\x8c\x01\n" +
+	"\x11CreateUserRequest\x12-\n" +
+	"\x04data\x18\x01 \x01(\v2\x19.identity.service.v1.UserR\x04data\x12;\n" +
+	"\bpassword\x18\x02 \x01(\tB\x1a\xbaG\x17\x18\x01\x92\x02\x12用户登录密码H\x00R\bpassword\x88\x01\x01B\v\n" +
+	"\t_password\"\xf4\x03\n" +
 	"\x11UpdateUserRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\rR\x02id\x12\x1f\n" +
-	"\bnickname\x18\x02 \x01(\tH\x00R\bnickname\x88\x01\x01\x12\"\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12G\n" +
+	"\x04data\x18\x02 \x01(\v2\x19.identity.service.v1.UserB\x18\xe0A\x02\xbaG\x12\x92\x02\x0f用户的数据R\x04data\x12;\n" +
+	"\bpassword\x18\x03 \x01(\tB\x1a\xbaG\x17\x18\x01\x92\x02\x12用户登录密码H\x00R\bpassword\x88\x01\x01\x12s\n" +
+	"\vupdate_mask\x18\x04 \x01(\v2\x1a.google.protobuf.FieldMaskB6\xbaG3:\x16\x12\x14id,realname,username\x92\x02\x18要更新的字段列表R\n" +
+	"updateMask\x12\xb4\x01\n" +
+	"\rallow_missing\x18\x05 \x01(\bB\x89\x01\xbaG\x85\x01\x92\x02\x81\x01如果设置为true的时候，资源不存在则会新增(插入)，并且在这种情况下`updateMask`字段将会被忽略。H\x01R\fallowMissing\x88\x01\x01B\v\n" +
+	"\t_passwordB\x10\n" +
+	"\x0e_allow_missing\"\xc6\x01\n" +
+	"\x11DeleteUserRequest\x12\"\n" +
+	"\x02id\x18\x01 \x01(\rB\x10\xbaG\r\x18\x01\x92\x02\b用户IDH\x00R\x02id\x125\n" +
+	"\busername\x18\x02 \x01(\tB\x17\xbaG\x14\x18\x01\x92\x02\x0f用户登录名H\x00R\busername\x12;\n" +
 	"\n" +
-	"avatar_url\x18\x03 \x01(\tH\x01R\tavatarUrl\x88\x01\x01\x12\x15\n" +
-	"\x03bio\x18\x04 \x01(\tH\x02R\x03bio\x88\x01\x01\x12\x1f\n" +
-	"\bpassword\x18\x05 \x01(\tH\x03R\bpassword\x88\x01\x01B\v\n" +
-	"\t_nicknameB\r\n" +
-	"\v_avatar_urlB\x06\n" +
-	"\x04_bioB\v\n" +
-	"\t_password\"#\n" +
-	"\x11DeleteUserRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\rR\x02id\"b\n" +
-	"\x17UpdateUserStatusRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\rR\x02id\x127\n" +
-	"\x06status\x18\x02 \x01(\x0e2\x1f.identity.service.v1.UserStatusR\x06status\".\n" +
-	"\x13GetUserStatsRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\rR\x06userId*[\n" +
+	"deleted_by\x18d \x01(\rB\x17\xbaG\x14\x92\x02\x11删除者用户IDH\x01R\tdeletedBy\x88\x01\x01B\n" +
 	"\n" +
-	"UserStatus\x12\x1b\n" +
-	"\x17USER_STATUS_UNSPECIFIED\x10\x00\x12\x18\n" +
-	"\x14USER_STATUS_DISABLED\x10\x01\x12\x16\n" +
-	"\x12USER_STATUS_NORMAL\x10\x022\xbc\x05\n" +
-	"\vUserService\x12K\n" +
-	"\aGetUser\x12#.identity.service.v1.GetUserRequest\x1a\x19.identity.service.v1.User\"\x00\x12_\n" +
-	"\x11GetUserByUsername\x12-.identity.service.v1.GetUserByUsernameRequest\x1a\x19.identity.service.v1.User\"\x00\x12N\n" +
-	"\bListUser\x12\x19.pagination.PagingRequest\x1a%.identity.service.v1.ListUserResponse\"\x00\x12Q\n" +
+	"\bquery_byB\r\n" +
+	"\v_deleted_by\"z\n" +
+	"\x11UserExistsRequest\x12\"\n" +
+	"\x02id\x18\x01 \x01(\rB\x10\xbaG\r\x18\x01\x92\x02\b用户IDH\x00R\x02id\x125\n" +
+	"\busername\x18\x02 \x01(\tB\x17\xbaG\x14\x18\x01\x92\x02\x0f用户登录名H\x00R\busernameB\n" +
 	"\n" +
-	"CreateUser\x12&.identity.service.v1.CreateUserRequest\x1a\x19.identity.service.v1.User\"\x00\x12Q\n" +
+	"\bquery_by\"*\n" +
+	"\x12UserExistsResponse\x12\x14\n" +
+	"\x05exist\x18\x01 \x01(\bR\x05exist\"J\n" +
+	"\x17BatchCreateUsersRequest\x12/\n" +
+	"\x05items\x18\x01 \x03(\v2\x19.identity.service.v1.UserR\x05items\"`\n" +
+	"\x18BatchCreateUsersResponse\x12D\n" +
+	"\vcreated_ids\x18\x01 \x03(\x05B#\xbaG \x92\x02\x1d创建成功的用户ID列表R\n" +
+	"createdIds\"(\n" +
+	"\x14GetUsersByIdsRequest\x12\x10\n" +
+	"\x03ids\x18\x01 \x03(\rR\x03ids\"v\n" +
+	"\x17EditUserPasswordRequest\x12'\n" +
+	"\auser_id\x18\x01 \x01(\rB\x0e\xbaG\v\x92\x02\b用户IDR\x06userId\x122\n" +
+	"\fnew_password\x18\x02 \x01(\tB\x0f\xbaG\f\x92\x02\t新密码R\vnewPassword\"\x7f\n" +
+	"\x15ChangePasswordRequest\x122\n" +
+	"\fold_password\x18\x01 \x01(\tB\x0f\xbaG\f\x92\x02\t旧密码R\voldPassword\x122\n" +
+	"\fnew_password\x18\x02 \x01(\tB\x0f\xbaG\f\x92\x02\t新密码R\vnewPassword\"\x9a\x01\n" +
+	"\x13UploadAvatarRequest\x12@\n" +
+	"\fimage_base64\x18\x01 \x01(\tB\x1b\xbaG\x18\x92\x02\x15图片的Base64编码H\x00R\vimageBase64\x127\n" +
+	"\timage_url\x18\x02 \x01(\tB\x18\xbaG\x15\x92\x02\x12图片的URL地址H\x00R\bimageUrlB\b\n" +
+	"\x06source\"(\n" +
+	"\x14UploadAvatarResponse\x12\x10\n" +
+	"\x03url\x18\x01 \x01(\tR\x03url\"\x9d\x01\n" +
+	"\x12BindContactRequest\x12=\n" +
+	"\x05phone\x18\x01 \x01(\v2%.identity.service.v1.BindPhoneRequestH\x00R\x05phone\x12=\n" +
+	"\x05email\x18\x02 \x01(\v2%.identity.service.v1.BindEmailRequestH\x00R\x05emailB\t\n" +
+	"\acontact\"a\n" +
+	"\x10BindPhoneRequest\x12(\n" +
+	"\x05phone\x18\x01 \x01(\tB\x12\xbaG\x0f\x92\x02\f手机号码R\x05phone\x12#\n" +
+	"\x04code\x18\x02 \x01(\tB\x0f\xbaG\f\x92\x02\t验证码R\x04code\"\xa7\x01\n" +
+	"\x10BindEmailRequest\x12(\n" +
+	"\x05email\x18\x01 \x01(\tB\x12\xbaG\x0f\x92\x02\f邮箱地址R\x05email\x12S\n" +
+	"\x11verification_code\x18\x02 \x01(\tB!\xbaG\x1e\x92\x02\x1b邮箱验证码（可选）H\x00R\x10verificationCode\x88\x01\x01B\x14\n" +
+	"\x12_verification_code\"\x9a\x02\n" +
+	"\x14VerifyContactRequest\x12>\n" +
+	"\x05phone\x18\x01 \x01(\v2&.identity.service.v1.PhoneVerificationH\x00R\x05phone\x12>\n" +
+	"\x05email\x18\x02 \x01(\v2&.identity.service.v1.EmailVerificationH\x00R\x05email\x12c\n" +
+	"\x0fverification_id\x18\x03 \x01(\tB5\xbaG2\x92\x02/服务端生成的验证码会话ID（可选）H\x01R\x0everificationId\x88\x01\x01B\t\n" +
+	"\acontactB\x12\n" +
+	"\x10_verification_id\"z\n" +
+	"\x11PhoneVerification\x127\n" +
+	"\x05phone\x18\x01 \x01(\tB!\xbaG\x1e\x92\x02\x1b手机号码，带国家码R\x05phone\x12,\n" +
+	"\x04code\x18\x02 \x01(\tB\x18\xe0A\x02\xbaG\x12\x92\x02\x0f短信验证码R\x04code\"k\n" +
+	"\x11EmailVerification\x12(\n" +
+	"\x05email\x18\x01 \x01(\tB\x12\xbaG\x0f\x92\x02\f邮箱地址R\x05email\x12,\n" +
+	"\x04code\x18\x02 \x01(\tB\x18\xe0A\x02\xbaG\x12\x92\x02\x0f邮箱验证码R\x04code\")\n" +
+	"\x11CountUserResponse\x12\x14\n" +
+	"\x05count\x18\x01 \x01(\x04R\x05count\"T\n" +
+	"\x1aListUserOrgUintIDsResponse\x126\n" +
+	"\forg_unit_ids\x18\x01 \x03(\rB\x14\xbaG\x11\x92\x02\x0e组织ID列表R\n" +
+	"orgUnitIds\"V\n" +
+	"\x1bListUserPositionIDsResponse\x127\n" +
+	"\fposition_ids\x18\x01 \x03(\rB\x14\xbaG\x11\x92\x02\x0e职位ID列表R\vpositionIds\"\xce\x01\n" +
+	"\x1eListUserIDsByOrgUnitIDsRequest\x126\n" +
+	"\forg_unit_ids\x18\x01 \x03(\rB\x14\xbaG\x11\x92\x02\x0e组织ID列表R\n" +
+	"orgUnitIds\x12`\n" +
+	"\x0fexclude_expired\x18\x02 \x01(\bB2\xbaG/\x92\x02,是否排除过期用户，默认值：falseH\x00R\x0eexcludeExpired\x88\x01\x01B\x12\n" +
+	"\x10_exclude_expired\"F\n" +
+	"\x13ListUserIDsResponse\x12/\n" +
+	"\buser_ids\x18\x01 \x03(\rB\x14\xbaG\x11\x92\x02\x0e用户ID列表R\auserIds\"\xd0\x01\n" +
+	"\x1fListUserIDsByPositionIDsRequest\x127\n" +
+	"\fposition_ids\x18\x01 \x03(\rB\x14\xbaG\x11\x92\x02\x0e职位ID列表R\vpositionIds\x12`\n" +
+	"\x0fexclude_expired\x18\x02 \x01(\bB2\xbaG/\x92\x02,是否排除过期用户，默认值：falseH\x00R\x0eexcludeExpired\x88\x01\x01B\x12\n" +
+	"\x10_exclude_expired2\xfe\b\n" +
+	"\vUserService\x12J\n" +
+	"\x04List\x12\x19.pagination.PagingRequest\x1a%.identity.service.v1.ListUserResponse\"\x00\x12L\n" +
+	"\x05Count\x12\x19.pagination.PagingRequest\x1a&.identity.service.v1.CountUserResponse\"\x00\x12G\n" +
+	"\x03Get\x12#.identity.service.v1.GetUserRequest\x1a\x19.identity.service.v1.User\"\x00\x12M\n" +
+	"\x06Create\x12&.identity.service.v1.CreateUserRequest\x1a\x19.identity.service.v1.User\"\x00\x12l\n" +
+	"\vBatchCreate\x12,.identity.service.v1.BatchCreateUsersRequest\x1a-.identity.service.v1.BatchCreateUsersResponse\"\x00\x12J\n" +
+	"\x06Update\x12&.identity.service.v1.UpdateUserRequest\x1a\x16.google.protobuf.Empty\"\x00\x12J\n" +
+	"\x06Delete\x12&.identity.service.v1.DeleteUserRequest\x1a\x16.google.protobuf.Empty\"\x00\x12_\n" +
 	"\n" +
-	"UpdateUser\x12&.identity.service.v1.UpdateUserRequest\x1a\x19.identity.service.v1.User\"\x00\x12N\n" +
-	"\n" +
-	"DeleteUser\x12&.identity.service.v1.DeleteUserRequest\x1a\x16.google.protobuf.Empty\"\x00\x12]\n" +
-	"\x10UpdateUserStatus\x12,.identity.service.v1.UpdateUserStatusRequest\x1a\x19.identity.service.v1.User\"\x00\x12Z\n" +
-	"\fGetUserStats\x12(.identity.service.v1.GetUserStatsRequest\x1a\x1e.identity.service.v1.UserStats\"\x00B\xcf\x01\n" +
+	"UserExists\x12&.identity.service.v1.UserExistsRequest\x1a'.identity.service.v1.UserExistsResponse\"\x00\x12l\n" +
+	"\x12ListUserOrgUintIDs\x12#.identity.service.v1.GetUserRequest\x1a/.identity.service.v1.ListUserOrgUintIDsResponse\"\x00\x12z\n" +
+	"\x17ListUserIDsByOrgUnitIDs\x123.identity.service.v1.ListUserIDsByOrgUnitIDsRequest\x1a(.identity.service.v1.ListUserIDsResponse\"\x00\x12n\n" +
+	"\x13ListUserPositionIDs\x12#.identity.service.v1.GetUserRequest\x1a0.identity.service.v1.ListUserPositionIDsResponse\"\x00\x12|\n" +
+	"\x18ListUserIDsByPositionIDs\x124.identity.service.v1.ListUserIDsByPositionIDsRequest\x1a(.identity.service.v1.ListUserIDsResponse\"\x00B\xcf\x01\n" +
 	"\x17com.identity.service.v1B\tUserProtoP\x01Z;go-wind-shortplay/api/gen/go/identity/service/v1;identitypb\xa2\x02\x03ISX\xaa\x02\x13Identity.Service.V1\xca\x02\x13Identity\\Service\\V1\xe2\x02\x1fIdentity\\Service\\V1\\GPBMetadata\xea\x02\x15Identity::Service::V1b\x06proto3"
 
 var (
@@ -855,52 +2277,90 @@ func file_identity_service_v1_user_proto_rawDescGZIP() []byte {
 	return file_identity_service_v1_user_proto_rawDescData
 }
 
-var file_identity_service_v1_user_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_identity_service_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_identity_service_v1_user_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_identity_service_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
 var file_identity_service_v1_user_proto_goTypes = []any{
-	(UserStatus)(0),                  // 0: identity.service.v1.UserStatus
-	(*UserBrief)(nil),                // 1: identity.service.v1.UserBrief
-	(*User)(nil),                     // 2: identity.service.v1.User
-	(*UserStats)(nil),                // 3: identity.service.v1.UserStats
-	(*GetUserRequest)(nil),           // 4: identity.service.v1.GetUserRequest
-	(*GetUserByUsernameRequest)(nil), // 5: identity.service.v1.GetUserByUsernameRequest
-	(*ListUserResponse)(nil),         // 6: identity.service.v1.ListUserResponse
-	(*CreateUserRequest)(nil),        // 7: identity.service.v1.CreateUserRequest
-	(*UpdateUserRequest)(nil),        // 8: identity.service.v1.UpdateUserRequest
-	(*DeleteUserRequest)(nil),        // 9: identity.service.v1.DeleteUserRequest
-	(*UpdateUserStatusRequest)(nil),  // 10: identity.service.v1.UpdateUserStatusRequest
-	(*GetUserStatsRequest)(nil),      // 11: identity.service.v1.GetUserStatsRequest
-	(*timestamppb.Timestamp)(nil),    // 12: google.protobuf.Timestamp
-	(*v1.PagingRequest)(nil),         // 13: pagination.PagingRequest
-	(*emptypb.Empty)(nil),            // 14: google.protobuf.Empty
+	(User_Gender)(0),                        // 0: identity.service.v1.User.Gender
+	(User_Status)(0),                        // 1: identity.service.v1.User.Status
+	(*User)(nil),                            // 2: identity.service.v1.User
+	(*ListUserResponse)(nil),                // 3: identity.service.v1.ListUserResponse
+	(*GetUserRequest)(nil),                  // 4: identity.service.v1.GetUserRequest
+	(*CreateUserRequest)(nil),               // 5: identity.service.v1.CreateUserRequest
+	(*UpdateUserRequest)(nil),               // 6: identity.service.v1.UpdateUserRequest
+	(*DeleteUserRequest)(nil),               // 7: identity.service.v1.DeleteUserRequest
+	(*UserExistsRequest)(nil),               // 8: identity.service.v1.UserExistsRequest
+	(*UserExistsResponse)(nil),              // 9: identity.service.v1.UserExistsResponse
+	(*BatchCreateUsersRequest)(nil),         // 10: identity.service.v1.BatchCreateUsersRequest
+	(*BatchCreateUsersResponse)(nil),        // 11: identity.service.v1.BatchCreateUsersResponse
+	(*GetUsersByIdsRequest)(nil),            // 12: identity.service.v1.GetUsersByIdsRequest
+	(*EditUserPasswordRequest)(nil),         // 13: identity.service.v1.EditUserPasswordRequest
+	(*ChangePasswordRequest)(nil),           // 14: identity.service.v1.ChangePasswordRequest
+	(*UploadAvatarRequest)(nil),             // 15: identity.service.v1.UploadAvatarRequest
+	(*UploadAvatarResponse)(nil),            // 16: identity.service.v1.UploadAvatarResponse
+	(*BindContactRequest)(nil),              // 17: identity.service.v1.BindContactRequest
+	(*BindPhoneRequest)(nil),                // 18: identity.service.v1.BindPhoneRequest
+	(*BindEmailRequest)(nil),                // 19: identity.service.v1.BindEmailRequest
+	(*VerifyContactRequest)(nil),            // 20: identity.service.v1.VerifyContactRequest
+	(*PhoneVerification)(nil),               // 21: identity.service.v1.PhoneVerification
+	(*EmailVerification)(nil),               // 22: identity.service.v1.EmailVerification
+	(*CountUserResponse)(nil),               // 23: identity.service.v1.CountUserResponse
+	(*ListUserOrgUintIDsResponse)(nil),      // 24: identity.service.v1.ListUserOrgUintIDsResponse
+	(*ListUserPositionIDsResponse)(nil),     // 25: identity.service.v1.ListUserPositionIDsResponse
+	(*ListUserIDsByOrgUnitIDsRequest)(nil),  // 26: identity.service.v1.ListUserIDsByOrgUnitIDsRequest
+	(*ListUserIDsResponse)(nil),             // 27: identity.service.v1.ListUserIDsResponse
+	(*ListUserIDsByPositionIDsRequest)(nil), // 28: identity.service.v1.ListUserIDsByPositionIDsRequest
+	(*timestamppb.Timestamp)(nil),           // 29: google.protobuf.Timestamp
+	(*fieldmaskpb.FieldMask)(nil),           // 30: google.protobuf.FieldMask
+	(*v1.PagingRequest)(nil),                // 31: pagination.PagingRequest
+	(*emptypb.Empty)(nil),                   // 32: google.protobuf.Empty
 }
 var file_identity_service_v1_user_proto_depIdxs = []int32{
-	0,  // 0: identity.service.v1.User.status:type_name -> identity.service.v1.UserStatus
-	12, // 1: identity.service.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	12, // 2: identity.service.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	2,  // 3: identity.service.v1.ListUserResponse.items:type_name -> identity.service.v1.User
-	0,  // 4: identity.service.v1.UpdateUserStatusRequest.status:type_name -> identity.service.v1.UserStatus
-	4,  // 5: identity.service.v1.UserService.GetUser:input_type -> identity.service.v1.GetUserRequest
-	5,  // 6: identity.service.v1.UserService.GetUserByUsername:input_type -> identity.service.v1.GetUserByUsernameRequest
-	13, // 7: identity.service.v1.UserService.ListUser:input_type -> pagination.PagingRequest
-	7,  // 8: identity.service.v1.UserService.CreateUser:input_type -> identity.service.v1.CreateUserRequest
-	8,  // 9: identity.service.v1.UserService.UpdateUser:input_type -> identity.service.v1.UpdateUserRequest
-	9,  // 10: identity.service.v1.UserService.DeleteUser:input_type -> identity.service.v1.DeleteUserRequest
-	10, // 11: identity.service.v1.UserService.UpdateUserStatus:input_type -> identity.service.v1.UpdateUserStatusRequest
-	11, // 12: identity.service.v1.UserService.GetUserStats:input_type -> identity.service.v1.GetUserStatsRequest
-	2,  // 13: identity.service.v1.UserService.GetUser:output_type -> identity.service.v1.User
-	2,  // 14: identity.service.v1.UserService.GetUserByUsername:output_type -> identity.service.v1.User
-	6,  // 15: identity.service.v1.UserService.ListUser:output_type -> identity.service.v1.ListUserResponse
-	2,  // 16: identity.service.v1.UserService.CreateUser:output_type -> identity.service.v1.User
-	2,  // 17: identity.service.v1.UserService.UpdateUser:output_type -> identity.service.v1.User
-	14, // 18: identity.service.v1.UserService.DeleteUser:output_type -> google.protobuf.Empty
-	2,  // 19: identity.service.v1.UserService.UpdateUserStatus:output_type -> identity.service.v1.User
-	3,  // 20: identity.service.v1.UserService.GetUserStats:output_type -> identity.service.v1.UserStats
-	13, // [13:21] is the sub-list for method output_type
-	5,  // [5:13] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	0,  // 0: identity.service.v1.User.gender:type_name -> identity.service.v1.User.Gender
+	29, // 1: identity.service.v1.User.last_login_at:type_name -> google.protobuf.Timestamp
+	1,  // 2: identity.service.v1.User.status:type_name -> identity.service.v1.User.Status
+	29, // 3: identity.service.v1.User.locked_until:type_name -> google.protobuf.Timestamp
+	29, // 4: identity.service.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	29, // 5: identity.service.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	29, // 6: identity.service.v1.User.deleted_at:type_name -> google.protobuf.Timestamp
+	2,  // 7: identity.service.v1.ListUserResponse.items:type_name -> identity.service.v1.User
+	30, // 8: identity.service.v1.GetUserRequest.view_mask:type_name -> google.protobuf.FieldMask
+	2,  // 9: identity.service.v1.CreateUserRequest.data:type_name -> identity.service.v1.User
+	2,  // 10: identity.service.v1.UpdateUserRequest.data:type_name -> identity.service.v1.User
+	30, // 11: identity.service.v1.UpdateUserRequest.update_mask:type_name -> google.protobuf.FieldMask
+	2,  // 12: identity.service.v1.BatchCreateUsersRequest.items:type_name -> identity.service.v1.User
+	18, // 13: identity.service.v1.BindContactRequest.phone:type_name -> identity.service.v1.BindPhoneRequest
+	19, // 14: identity.service.v1.BindContactRequest.email:type_name -> identity.service.v1.BindEmailRequest
+	21, // 15: identity.service.v1.VerifyContactRequest.phone:type_name -> identity.service.v1.PhoneVerification
+	22, // 16: identity.service.v1.VerifyContactRequest.email:type_name -> identity.service.v1.EmailVerification
+	31, // 17: identity.service.v1.UserService.List:input_type -> pagination.PagingRequest
+	31, // 18: identity.service.v1.UserService.Count:input_type -> pagination.PagingRequest
+	4,  // 19: identity.service.v1.UserService.Get:input_type -> identity.service.v1.GetUserRequest
+	5,  // 20: identity.service.v1.UserService.Create:input_type -> identity.service.v1.CreateUserRequest
+	10, // 21: identity.service.v1.UserService.BatchCreate:input_type -> identity.service.v1.BatchCreateUsersRequest
+	6,  // 22: identity.service.v1.UserService.Update:input_type -> identity.service.v1.UpdateUserRequest
+	7,  // 23: identity.service.v1.UserService.Delete:input_type -> identity.service.v1.DeleteUserRequest
+	8,  // 24: identity.service.v1.UserService.UserExists:input_type -> identity.service.v1.UserExistsRequest
+	4,  // 25: identity.service.v1.UserService.ListUserOrgUintIDs:input_type -> identity.service.v1.GetUserRequest
+	26, // 26: identity.service.v1.UserService.ListUserIDsByOrgUnitIDs:input_type -> identity.service.v1.ListUserIDsByOrgUnitIDsRequest
+	4,  // 27: identity.service.v1.UserService.ListUserPositionIDs:input_type -> identity.service.v1.GetUserRequest
+	28, // 28: identity.service.v1.UserService.ListUserIDsByPositionIDs:input_type -> identity.service.v1.ListUserIDsByPositionIDsRequest
+	3,  // 29: identity.service.v1.UserService.List:output_type -> identity.service.v1.ListUserResponse
+	23, // 30: identity.service.v1.UserService.Count:output_type -> identity.service.v1.CountUserResponse
+	2,  // 31: identity.service.v1.UserService.Get:output_type -> identity.service.v1.User
+	2,  // 32: identity.service.v1.UserService.Create:output_type -> identity.service.v1.User
+	11, // 33: identity.service.v1.UserService.BatchCreate:output_type -> identity.service.v1.BatchCreateUsersResponse
+	32, // 34: identity.service.v1.UserService.Update:output_type -> google.protobuf.Empty
+	32, // 35: identity.service.v1.UserService.Delete:output_type -> google.protobuf.Empty
+	9,  // 36: identity.service.v1.UserService.UserExists:output_type -> identity.service.v1.UserExistsResponse
+	24, // 37: identity.service.v1.UserService.ListUserOrgUintIDs:output_type -> identity.service.v1.ListUserOrgUintIDsResponse
+	27, // 38: identity.service.v1.UserService.ListUserIDsByOrgUnitIDs:output_type -> identity.service.v1.ListUserIDsResponse
+	25, // 39: identity.service.v1.UserService.ListUserPositionIDs:output_type -> identity.service.v1.ListUserPositionIDsResponse
+	27, // 40: identity.service.v1.UserService.ListUserIDsByPositionIDs:output_type -> identity.service.v1.ListUserIDsResponse
+	29, // [29:41] is the sub-list for method output_type
+	17, // [17:29] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_identity_service_v1_user_proto_init() }
@@ -909,18 +2369,42 @@ func file_identity_service_v1_user_proto_init() {
 		return
 	}
 	file_identity_service_v1_user_proto_msgTypes[0].OneofWrappers = []any{}
-	file_identity_service_v1_user_proto_msgTypes[1].OneofWrappers = []any{}
-	file_identity_service_v1_user_proto_msgTypes[2].OneofWrappers = []any{}
-	file_identity_service_v1_user_proto_msgTypes[5].OneofWrappers = []any{}
-	file_identity_service_v1_user_proto_msgTypes[6].OneofWrappers = []any{}
-	file_identity_service_v1_user_proto_msgTypes[7].OneofWrappers = []any{}
+	file_identity_service_v1_user_proto_msgTypes[2].OneofWrappers = []any{
+		(*GetUserRequest_Id)(nil),
+		(*GetUserRequest_Username)(nil),
+	}
+	file_identity_service_v1_user_proto_msgTypes[3].OneofWrappers = []any{}
+	file_identity_service_v1_user_proto_msgTypes[4].OneofWrappers = []any{}
+	file_identity_service_v1_user_proto_msgTypes[5].OneofWrappers = []any{
+		(*DeleteUserRequest_Id)(nil),
+		(*DeleteUserRequest_Username)(nil),
+	}
+	file_identity_service_v1_user_proto_msgTypes[6].OneofWrappers = []any{
+		(*UserExistsRequest_Id)(nil),
+		(*UserExistsRequest_Username)(nil),
+	}
+	file_identity_service_v1_user_proto_msgTypes[13].OneofWrappers = []any{
+		(*UploadAvatarRequest_ImageBase64)(nil),
+		(*UploadAvatarRequest_ImageUrl)(nil),
+	}
+	file_identity_service_v1_user_proto_msgTypes[15].OneofWrappers = []any{
+		(*BindContactRequest_Phone)(nil),
+		(*BindContactRequest_Email)(nil),
+	}
+	file_identity_service_v1_user_proto_msgTypes[17].OneofWrappers = []any{}
+	file_identity_service_v1_user_proto_msgTypes[18].OneofWrappers = []any{
+		(*VerifyContactRequest_Phone)(nil),
+		(*VerifyContactRequest_Email)(nil),
+	}
+	file_identity_service_v1_user_proto_msgTypes[24].OneofWrappers = []any{}
+	file_identity_service_v1_user_proto_msgTypes[26].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_identity_service_v1_user_proto_rawDesc), len(file_identity_service_v1_user_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   11,
+			NumEnums:      2,
+			NumMessages:   27,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -64,6 +64,62 @@ func (_c *VideoCommentCreate) SetNillableDeletedAt(v *time.Time) *VideoCommentCr
 	return _c
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_c *VideoCommentCreate) SetCreatedBy(v uint32) *VideoCommentCreate {
+	_c.mutation.SetCreatedBy(v)
+	return _c
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_c *VideoCommentCreate) SetNillableCreatedBy(v *uint32) *VideoCommentCreate {
+	if v != nil {
+		_c.SetCreatedBy(*v)
+	}
+	return _c
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_c *VideoCommentCreate) SetUpdatedBy(v uint32) *VideoCommentCreate {
+	_c.mutation.SetUpdatedBy(v)
+	return _c
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_c *VideoCommentCreate) SetNillableUpdatedBy(v *uint32) *VideoCommentCreate {
+	if v != nil {
+		_c.SetUpdatedBy(*v)
+	}
+	return _c
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (_c *VideoCommentCreate) SetDeletedBy(v uint32) *VideoCommentCreate {
+	_c.mutation.SetDeletedBy(v)
+	return _c
+}
+
+// SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
+func (_c *VideoCommentCreate) SetNillableDeletedBy(v *uint32) *VideoCommentCreate {
+	if v != nil {
+		_c.SetDeletedBy(*v)
+	}
+	return _c
+}
+
+// SetTenantID sets the "tenant_id" field.
+func (_c *VideoCommentCreate) SetTenantID(v uint32) *VideoCommentCreate {
+	_c.mutation.SetTenantID(v)
+	return _c
+}
+
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_c *VideoCommentCreate) SetNillableTenantID(v *uint32) *VideoCommentCreate {
+	if v != nil {
+		_c.SetTenantID(*v)
+	}
+	return _c
+}
+
 // SetVideoID sets the "video_id" field.
 func (_c *VideoCommentCreate) SetVideoID(v uint32) *VideoCommentCreate {
 	_c.mutation.SetVideoID(v)
@@ -98,6 +154,14 @@ func (_c *VideoCommentCreate) SetContent(v string) *VideoCommentCreate {
 	return _c
 }
 
+// SetNillableContent sets the "content" field if the given value is not nil.
+func (_c *VideoCommentCreate) SetNillableContent(v *string) *VideoCommentCreate {
+	if v != nil {
+		_c.SetContent(*v)
+	}
+	return _c
+}
+
 // SetParentID sets the "parent_id" field.
 func (_c *VideoCommentCreate) SetParentID(v uint32) *VideoCommentCreate {
 	_c.mutation.SetParentID(v)
@@ -113,13 +177,13 @@ func (_c *VideoCommentCreate) SetNillableParentID(v *uint32) *VideoCommentCreate
 }
 
 // SetLikeCount sets the "like_count" field.
-func (_c *VideoCommentCreate) SetLikeCount(v int64) *VideoCommentCreate {
+func (_c *VideoCommentCreate) SetLikeCount(v uint64) *VideoCommentCreate {
 	_c.mutation.SetLikeCount(v)
 	return _c
 }
 
 // SetNillableLikeCount sets the "like_count" field if the given value is not nil.
-func (_c *VideoCommentCreate) SetNillableLikeCount(v *int64) *VideoCommentCreate {
+func (_c *VideoCommentCreate) SetNillableLikeCount(v *uint64) *VideoCommentCreate {
 	if v != nil {
 		_c.SetLikeCount(*v)
 	}
@@ -127,13 +191,13 @@ func (_c *VideoCommentCreate) SetNillableLikeCount(v *int64) *VideoCommentCreate
 }
 
 // SetReplyCount sets the "reply_count" field.
-func (_c *VideoCommentCreate) SetReplyCount(v int64) *VideoCommentCreate {
+func (_c *VideoCommentCreate) SetReplyCount(v uint64) *VideoCommentCreate {
 	_c.mutation.SetReplyCount(v)
 	return _c
 }
 
 // SetNillableReplyCount sets the "reply_count" field if the given value is not nil.
-func (_c *VideoCommentCreate) SetNillableReplyCount(v *int64) *VideoCommentCreate {
+func (_c *VideoCommentCreate) SetNillableReplyCount(v *uint64) *VideoCommentCreate {
 	if v != nil {
 		_c.SetReplyCount(*v)
 	}
@@ -153,7 +217,9 @@ func (_c *VideoCommentCreate) Mutation() *VideoCommentMutation {
 
 // Save creates the VideoComment in the database.
 func (_c *VideoCommentCreate) Save(ctx context.Context) (*VideoComment, error) {
-	_c.defaults()
+	if err := _c.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -180,7 +246,23 @@ func (_c *VideoCommentCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *VideoCommentCreate) defaults() {
+func (_c *VideoCommentCreate) defaults() error {
+	if _, ok := _c.mutation.TenantID(); !ok {
+		v := videocomment.DefaultTenantID
+		_c.mutation.SetTenantID(v)
+	}
+	if _, ok := _c.mutation.VideoID(); !ok {
+		v := videocomment.DefaultVideoID
+		_c.mutation.SetVideoID(v)
+	}
+	if _, ok := _c.mutation.UserID(); !ok {
+		v := videocomment.DefaultUserID
+		_c.mutation.SetUserID(v)
+	}
+	if _, ok := _c.mutation.Content(); !ok {
+		v := videocomment.DefaultContent
+		_c.mutation.SetContent(v)
+	}
 	if _, ok := _c.mutation.ParentID(); !ok {
 		v := videocomment.DefaultParentID
 		_c.mutation.SetParentID(v)
@@ -193,17 +275,28 @@ func (_c *VideoCommentCreate) defaults() {
 		v := videocomment.DefaultReplyCount
 		_c.mutation.SetReplyCount(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *VideoCommentCreate) check() error {
+	if _, ok := _c.mutation.VideoID(); !ok {
+		return &ValidationError{Name: "video_id", err: errors.New(`ent: missing required field "VideoComment.video_id"`)}
+	}
+	if _, ok := _c.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "VideoComment.user_id"`)}
+	}
 	if _, ok := _c.mutation.Content(); !ok {
 		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "VideoComment.content"`)}
 	}
-	if v, ok := _c.mutation.Content(); ok {
-		if err := videocomment.ContentValidator(v); err != nil {
-			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "VideoComment.content": %w`, err)}
-		}
+	if _, ok := _c.mutation.ParentID(); !ok {
+		return &ValidationError{Name: "parent_id", err: errors.New(`ent: missing required field "VideoComment.parent_id"`)}
+	}
+	if _, ok := _c.mutation.LikeCount(); !ok {
+		return &ValidationError{Name: "like_count", err: errors.New(`ent: missing required field "VideoComment.like_count"`)}
+	}
+	if _, ok := _c.mutation.ReplyCount(); !ok {
+		return &ValidationError{Name: "reply_count", err: errors.New(`ent: missing required field "VideoComment.reply_count"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := videocomment.IDValidator(v); err != nil {
@@ -255,13 +348,29 @@ func (_c *VideoCommentCreate) createSpec() (*VideoComment, *sqlgraph.CreateSpec)
 		_spec.SetField(videocomment.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
+	if value, ok := _c.mutation.CreatedBy(); ok {
+		_spec.SetField(videocomment.FieldCreatedBy, field.TypeUint32, value)
+		_node.CreatedBy = &value
+	}
+	if value, ok := _c.mutation.UpdatedBy(); ok {
+		_spec.SetField(videocomment.FieldUpdatedBy, field.TypeUint32, value)
+		_node.UpdatedBy = &value
+	}
+	if value, ok := _c.mutation.DeletedBy(); ok {
+		_spec.SetField(videocomment.FieldDeletedBy, field.TypeUint32, value)
+		_node.DeletedBy = &value
+	}
+	if value, ok := _c.mutation.TenantID(); ok {
+		_spec.SetField(videocomment.FieldTenantID, field.TypeUint32, value)
+		_node.TenantID = &value
+	}
 	if value, ok := _c.mutation.VideoID(); ok {
 		_spec.SetField(videocomment.FieldVideoID, field.TypeUint32, value)
-		_node.VideoID = &value
+		_node.VideoID = value
 	}
 	if value, ok := _c.mutation.UserID(); ok {
 		_spec.SetField(videocomment.FieldUserID, field.TypeUint32, value)
-		_node.UserID = &value
+		_node.UserID = value
 	}
 	if value, ok := _c.mutation.Content(); ok {
 		_spec.SetField(videocomment.FieldContent, field.TypeString, value)
@@ -269,15 +378,15 @@ func (_c *VideoCommentCreate) createSpec() (*VideoComment, *sqlgraph.CreateSpec)
 	}
 	if value, ok := _c.mutation.ParentID(); ok {
 		_spec.SetField(videocomment.FieldParentID, field.TypeUint32, value)
-		_node.ParentID = &value
+		_node.ParentID = value
 	}
 	if value, ok := _c.mutation.LikeCount(); ok {
-		_spec.SetField(videocomment.FieldLikeCount, field.TypeInt64, value)
-		_node.LikeCount = &value
+		_spec.SetField(videocomment.FieldLikeCount, field.TypeUint64, value)
+		_node.LikeCount = value
 	}
 	if value, ok := _c.mutation.ReplyCount(); ok {
-		_spec.SetField(videocomment.FieldReplyCount, field.TypeInt64, value)
-		_node.ReplyCount = &value
+		_spec.SetField(videocomment.FieldReplyCount, field.TypeUint64, value)
+		_node.ReplyCount = value
 	}
 	return _node, _spec
 }
@@ -367,6 +476,78 @@ func (u *VideoCommentUpsert) ClearDeletedAt() *VideoCommentUpsert {
 	return u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (u *VideoCommentUpsert) SetCreatedBy(v uint32) *VideoCommentUpsert {
+	u.Set(videocomment.FieldCreatedBy, v)
+	return u
+}
+
+// UpdateCreatedBy sets the "created_by" field to the value that was provided on create.
+func (u *VideoCommentUpsert) UpdateCreatedBy() *VideoCommentUpsert {
+	u.SetExcluded(videocomment.FieldCreatedBy)
+	return u
+}
+
+// AddCreatedBy adds v to the "created_by" field.
+func (u *VideoCommentUpsert) AddCreatedBy(v uint32) *VideoCommentUpsert {
+	u.Add(videocomment.FieldCreatedBy, v)
+	return u
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (u *VideoCommentUpsert) ClearCreatedBy() *VideoCommentUpsert {
+	u.SetNull(videocomment.FieldCreatedBy)
+	return u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (u *VideoCommentUpsert) SetUpdatedBy(v uint32) *VideoCommentUpsert {
+	u.Set(videocomment.FieldUpdatedBy, v)
+	return u
+}
+
+// UpdateUpdatedBy sets the "updated_by" field to the value that was provided on create.
+func (u *VideoCommentUpsert) UpdateUpdatedBy() *VideoCommentUpsert {
+	u.SetExcluded(videocomment.FieldUpdatedBy)
+	return u
+}
+
+// AddUpdatedBy adds v to the "updated_by" field.
+func (u *VideoCommentUpsert) AddUpdatedBy(v uint32) *VideoCommentUpsert {
+	u.Add(videocomment.FieldUpdatedBy, v)
+	return u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (u *VideoCommentUpsert) ClearUpdatedBy() *VideoCommentUpsert {
+	u.SetNull(videocomment.FieldUpdatedBy)
+	return u
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (u *VideoCommentUpsert) SetDeletedBy(v uint32) *VideoCommentUpsert {
+	u.Set(videocomment.FieldDeletedBy, v)
+	return u
+}
+
+// UpdateDeletedBy sets the "deleted_by" field to the value that was provided on create.
+func (u *VideoCommentUpsert) UpdateDeletedBy() *VideoCommentUpsert {
+	u.SetExcluded(videocomment.FieldDeletedBy)
+	return u
+}
+
+// AddDeletedBy adds v to the "deleted_by" field.
+func (u *VideoCommentUpsert) AddDeletedBy(v uint32) *VideoCommentUpsert {
+	u.Add(videocomment.FieldDeletedBy, v)
+	return u
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (u *VideoCommentUpsert) ClearDeletedBy() *VideoCommentUpsert {
+	u.SetNull(videocomment.FieldDeletedBy)
+	return u
+}
+
 // SetVideoID sets the "video_id" field.
 func (u *VideoCommentUpsert) SetVideoID(v uint32) *VideoCommentUpsert {
 	u.Set(videocomment.FieldVideoID, v)
@@ -385,12 +566,6 @@ func (u *VideoCommentUpsert) AddVideoID(v uint32) *VideoCommentUpsert {
 	return u
 }
 
-// ClearVideoID clears the value of the "video_id" field.
-func (u *VideoCommentUpsert) ClearVideoID() *VideoCommentUpsert {
-	u.SetNull(videocomment.FieldVideoID)
-	return u
-}
-
 // SetUserID sets the "user_id" field.
 func (u *VideoCommentUpsert) SetUserID(v uint32) *VideoCommentUpsert {
 	u.Set(videocomment.FieldUserID, v)
@@ -406,12 +581,6 @@ func (u *VideoCommentUpsert) UpdateUserID() *VideoCommentUpsert {
 // AddUserID adds v to the "user_id" field.
 func (u *VideoCommentUpsert) AddUserID(v uint32) *VideoCommentUpsert {
 	u.Add(videocomment.FieldUserID, v)
-	return u
-}
-
-// ClearUserID clears the value of the "user_id" field.
-func (u *VideoCommentUpsert) ClearUserID() *VideoCommentUpsert {
-	u.SetNull(videocomment.FieldUserID)
 	return u
 }
 
@@ -445,14 +614,8 @@ func (u *VideoCommentUpsert) AddParentID(v uint32) *VideoCommentUpsert {
 	return u
 }
 
-// ClearParentID clears the value of the "parent_id" field.
-func (u *VideoCommentUpsert) ClearParentID() *VideoCommentUpsert {
-	u.SetNull(videocomment.FieldParentID)
-	return u
-}
-
 // SetLikeCount sets the "like_count" field.
-func (u *VideoCommentUpsert) SetLikeCount(v int64) *VideoCommentUpsert {
+func (u *VideoCommentUpsert) SetLikeCount(v uint64) *VideoCommentUpsert {
 	u.Set(videocomment.FieldLikeCount, v)
 	return u
 }
@@ -464,19 +627,13 @@ func (u *VideoCommentUpsert) UpdateLikeCount() *VideoCommentUpsert {
 }
 
 // AddLikeCount adds v to the "like_count" field.
-func (u *VideoCommentUpsert) AddLikeCount(v int64) *VideoCommentUpsert {
+func (u *VideoCommentUpsert) AddLikeCount(v uint64) *VideoCommentUpsert {
 	u.Add(videocomment.FieldLikeCount, v)
 	return u
 }
 
-// ClearLikeCount clears the value of the "like_count" field.
-func (u *VideoCommentUpsert) ClearLikeCount() *VideoCommentUpsert {
-	u.SetNull(videocomment.FieldLikeCount)
-	return u
-}
-
 // SetReplyCount sets the "reply_count" field.
-func (u *VideoCommentUpsert) SetReplyCount(v int64) *VideoCommentUpsert {
+func (u *VideoCommentUpsert) SetReplyCount(v uint64) *VideoCommentUpsert {
 	u.Set(videocomment.FieldReplyCount, v)
 	return u
 }
@@ -488,14 +645,8 @@ func (u *VideoCommentUpsert) UpdateReplyCount() *VideoCommentUpsert {
 }
 
 // AddReplyCount adds v to the "reply_count" field.
-func (u *VideoCommentUpsert) AddReplyCount(v int64) *VideoCommentUpsert {
+func (u *VideoCommentUpsert) AddReplyCount(v uint64) *VideoCommentUpsert {
 	u.Add(videocomment.FieldReplyCount, v)
-	return u
-}
-
-// ClearReplyCount clears the value of the "reply_count" field.
-func (u *VideoCommentUpsert) ClearReplyCount() *VideoCommentUpsert {
-	u.SetNull(videocomment.FieldReplyCount)
 	return u
 }
 
@@ -518,6 +669,9 @@ func (u *VideoCommentUpsertOne) UpdateNewValues() *VideoCommentUpsertOne {
 		}
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(videocomment.FieldCreatedAt)
+		}
+		if _, exists := u.create.mutation.TenantID(); exists {
+			s.SetIgnore(videocomment.FieldTenantID)
 		}
 	}))
 	return u
@@ -592,6 +746,90 @@ func (u *VideoCommentUpsertOne) ClearDeletedAt() *VideoCommentUpsertOne {
 	})
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (u *VideoCommentUpsertOne) SetCreatedBy(v uint32) *VideoCommentUpsertOne {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.SetCreatedBy(v)
+	})
+}
+
+// AddCreatedBy adds v to the "created_by" field.
+func (u *VideoCommentUpsertOne) AddCreatedBy(v uint32) *VideoCommentUpsertOne {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.AddCreatedBy(v)
+	})
+}
+
+// UpdateCreatedBy sets the "created_by" field to the value that was provided on create.
+func (u *VideoCommentUpsertOne) UpdateCreatedBy() *VideoCommentUpsertOne {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.UpdateCreatedBy()
+	})
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (u *VideoCommentUpsertOne) ClearCreatedBy() *VideoCommentUpsertOne {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.ClearCreatedBy()
+	})
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (u *VideoCommentUpsertOne) SetUpdatedBy(v uint32) *VideoCommentUpsertOne {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.SetUpdatedBy(v)
+	})
+}
+
+// AddUpdatedBy adds v to the "updated_by" field.
+func (u *VideoCommentUpsertOne) AddUpdatedBy(v uint32) *VideoCommentUpsertOne {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.AddUpdatedBy(v)
+	})
+}
+
+// UpdateUpdatedBy sets the "updated_by" field to the value that was provided on create.
+func (u *VideoCommentUpsertOne) UpdateUpdatedBy() *VideoCommentUpsertOne {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.UpdateUpdatedBy()
+	})
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (u *VideoCommentUpsertOne) ClearUpdatedBy() *VideoCommentUpsertOne {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.ClearUpdatedBy()
+	})
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (u *VideoCommentUpsertOne) SetDeletedBy(v uint32) *VideoCommentUpsertOne {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.SetDeletedBy(v)
+	})
+}
+
+// AddDeletedBy adds v to the "deleted_by" field.
+func (u *VideoCommentUpsertOne) AddDeletedBy(v uint32) *VideoCommentUpsertOne {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.AddDeletedBy(v)
+	})
+}
+
+// UpdateDeletedBy sets the "deleted_by" field to the value that was provided on create.
+func (u *VideoCommentUpsertOne) UpdateDeletedBy() *VideoCommentUpsertOne {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.UpdateDeletedBy()
+	})
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (u *VideoCommentUpsertOne) ClearDeletedBy() *VideoCommentUpsertOne {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.ClearDeletedBy()
+	})
+}
+
 // SetVideoID sets the "video_id" field.
 func (u *VideoCommentUpsertOne) SetVideoID(v uint32) *VideoCommentUpsertOne {
 	return u.Update(func(s *VideoCommentUpsert) {
@@ -613,13 +851,6 @@ func (u *VideoCommentUpsertOne) UpdateVideoID() *VideoCommentUpsertOne {
 	})
 }
 
-// ClearVideoID clears the value of the "video_id" field.
-func (u *VideoCommentUpsertOne) ClearVideoID() *VideoCommentUpsertOne {
-	return u.Update(func(s *VideoCommentUpsert) {
-		s.ClearVideoID()
-	})
-}
-
 // SetUserID sets the "user_id" field.
 func (u *VideoCommentUpsertOne) SetUserID(v uint32) *VideoCommentUpsertOne {
 	return u.Update(func(s *VideoCommentUpsert) {
@@ -638,13 +869,6 @@ func (u *VideoCommentUpsertOne) AddUserID(v uint32) *VideoCommentUpsertOne {
 func (u *VideoCommentUpsertOne) UpdateUserID() *VideoCommentUpsertOne {
 	return u.Update(func(s *VideoCommentUpsert) {
 		s.UpdateUserID()
-	})
-}
-
-// ClearUserID clears the value of the "user_id" field.
-func (u *VideoCommentUpsertOne) ClearUserID() *VideoCommentUpsertOne {
-	return u.Update(func(s *VideoCommentUpsert) {
-		s.ClearUserID()
 	})
 }
 
@@ -683,22 +907,15 @@ func (u *VideoCommentUpsertOne) UpdateParentID() *VideoCommentUpsertOne {
 	})
 }
 
-// ClearParentID clears the value of the "parent_id" field.
-func (u *VideoCommentUpsertOne) ClearParentID() *VideoCommentUpsertOne {
-	return u.Update(func(s *VideoCommentUpsert) {
-		s.ClearParentID()
-	})
-}
-
 // SetLikeCount sets the "like_count" field.
-func (u *VideoCommentUpsertOne) SetLikeCount(v int64) *VideoCommentUpsertOne {
+func (u *VideoCommentUpsertOne) SetLikeCount(v uint64) *VideoCommentUpsertOne {
 	return u.Update(func(s *VideoCommentUpsert) {
 		s.SetLikeCount(v)
 	})
 }
 
 // AddLikeCount adds v to the "like_count" field.
-func (u *VideoCommentUpsertOne) AddLikeCount(v int64) *VideoCommentUpsertOne {
+func (u *VideoCommentUpsertOne) AddLikeCount(v uint64) *VideoCommentUpsertOne {
 	return u.Update(func(s *VideoCommentUpsert) {
 		s.AddLikeCount(v)
 	})
@@ -711,22 +928,15 @@ func (u *VideoCommentUpsertOne) UpdateLikeCount() *VideoCommentUpsertOne {
 	})
 }
 
-// ClearLikeCount clears the value of the "like_count" field.
-func (u *VideoCommentUpsertOne) ClearLikeCount() *VideoCommentUpsertOne {
-	return u.Update(func(s *VideoCommentUpsert) {
-		s.ClearLikeCount()
-	})
-}
-
 // SetReplyCount sets the "reply_count" field.
-func (u *VideoCommentUpsertOne) SetReplyCount(v int64) *VideoCommentUpsertOne {
+func (u *VideoCommentUpsertOne) SetReplyCount(v uint64) *VideoCommentUpsertOne {
 	return u.Update(func(s *VideoCommentUpsert) {
 		s.SetReplyCount(v)
 	})
 }
 
 // AddReplyCount adds v to the "reply_count" field.
-func (u *VideoCommentUpsertOne) AddReplyCount(v int64) *VideoCommentUpsertOne {
+func (u *VideoCommentUpsertOne) AddReplyCount(v uint64) *VideoCommentUpsertOne {
 	return u.Update(func(s *VideoCommentUpsert) {
 		s.AddReplyCount(v)
 	})
@@ -736,13 +946,6 @@ func (u *VideoCommentUpsertOne) AddReplyCount(v int64) *VideoCommentUpsertOne {
 func (u *VideoCommentUpsertOne) UpdateReplyCount() *VideoCommentUpsertOne {
 	return u.Update(func(s *VideoCommentUpsert) {
 		s.UpdateReplyCount()
-	})
-}
-
-// ClearReplyCount clears the value of the "reply_count" field.
-func (u *VideoCommentUpsertOne) ClearReplyCount() *VideoCommentUpsertOne {
-	return u.Update(func(s *VideoCommentUpsert) {
-		s.ClearReplyCount()
 	})
 }
 
@@ -931,6 +1134,9 @@ func (u *VideoCommentUpsertBulk) UpdateNewValues() *VideoCommentUpsertBulk {
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(videocomment.FieldCreatedAt)
 			}
+			if _, exists := b.mutation.TenantID(); exists {
+				s.SetIgnore(videocomment.FieldTenantID)
+			}
 		}
 	}))
 	return u
@@ -1005,6 +1211,90 @@ func (u *VideoCommentUpsertBulk) ClearDeletedAt() *VideoCommentUpsertBulk {
 	})
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (u *VideoCommentUpsertBulk) SetCreatedBy(v uint32) *VideoCommentUpsertBulk {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.SetCreatedBy(v)
+	})
+}
+
+// AddCreatedBy adds v to the "created_by" field.
+func (u *VideoCommentUpsertBulk) AddCreatedBy(v uint32) *VideoCommentUpsertBulk {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.AddCreatedBy(v)
+	})
+}
+
+// UpdateCreatedBy sets the "created_by" field to the value that was provided on create.
+func (u *VideoCommentUpsertBulk) UpdateCreatedBy() *VideoCommentUpsertBulk {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.UpdateCreatedBy()
+	})
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (u *VideoCommentUpsertBulk) ClearCreatedBy() *VideoCommentUpsertBulk {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.ClearCreatedBy()
+	})
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (u *VideoCommentUpsertBulk) SetUpdatedBy(v uint32) *VideoCommentUpsertBulk {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.SetUpdatedBy(v)
+	})
+}
+
+// AddUpdatedBy adds v to the "updated_by" field.
+func (u *VideoCommentUpsertBulk) AddUpdatedBy(v uint32) *VideoCommentUpsertBulk {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.AddUpdatedBy(v)
+	})
+}
+
+// UpdateUpdatedBy sets the "updated_by" field to the value that was provided on create.
+func (u *VideoCommentUpsertBulk) UpdateUpdatedBy() *VideoCommentUpsertBulk {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.UpdateUpdatedBy()
+	})
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (u *VideoCommentUpsertBulk) ClearUpdatedBy() *VideoCommentUpsertBulk {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.ClearUpdatedBy()
+	})
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (u *VideoCommentUpsertBulk) SetDeletedBy(v uint32) *VideoCommentUpsertBulk {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.SetDeletedBy(v)
+	})
+}
+
+// AddDeletedBy adds v to the "deleted_by" field.
+func (u *VideoCommentUpsertBulk) AddDeletedBy(v uint32) *VideoCommentUpsertBulk {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.AddDeletedBy(v)
+	})
+}
+
+// UpdateDeletedBy sets the "deleted_by" field to the value that was provided on create.
+func (u *VideoCommentUpsertBulk) UpdateDeletedBy() *VideoCommentUpsertBulk {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.UpdateDeletedBy()
+	})
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (u *VideoCommentUpsertBulk) ClearDeletedBy() *VideoCommentUpsertBulk {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.ClearDeletedBy()
+	})
+}
+
 // SetVideoID sets the "video_id" field.
 func (u *VideoCommentUpsertBulk) SetVideoID(v uint32) *VideoCommentUpsertBulk {
 	return u.Update(func(s *VideoCommentUpsert) {
@@ -1026,13 +1316,6 @@ func (u *VideoCommentUpsertBulk) UpdateVideoID() *VideoCommentUpsertBulk {
 	})
 }
 
-// ClearVideoID clears the value of the "video_id" field.
-func (u *VideoCommentUpsertBulk) ClearVideoID() *VideoCommentUpsertBulk {
-	return u.Update(func(s *VideoCommentUpsert) {
-		s.ClearVideoID()
-	})
-}
-
 // SetUserID sets the "user_id" field.
 func (u *VideoCommentUpsertBulk) SetUserID(v uint32) *VideoCommentUpsertBulk {
 	return u.Update(func(s *VideoCommentUpsert) {
@@ -1051,13 +1334,6 @@ func (u *VideoCommentUpsertBulk) AddUserID(v uint32) *VideoCommentUpsertBulk {
 func (u *VideoCommentUpsertBulk) UpdateUserID() *VideoCommentUpsertBulk {
 	return u.Update(func(s *VideoCommentUpsert) {
 		s.UpdateUserID()
-	})
-}
-
-// ClearUserID clears the value of the "user_id" field.
-func (u *VideoCommentUpsertBulk) ClearUserID() *VideoCommentUpsertBulk {
-	return u.Update(func(s *VideoCommentUpsert) {
-		s.ClearUserID()
 	})
 }
 
@@ -1096,22 +1372,15 @@ func (u *VideoCommentUpsertBulk) UpdateParentID() *VideoCommentUpsertBulk {
 	})
 }
 
-// ClearParentID clears the value of the "parent_id" field.
-func (u *VideoCommentUpsertBulk) ClearParentID() *VideoCommentUpsertBulk {
-	return u.Update(func(s *VideoCommentUpsert) {
-		s.ClearParentID()
-	})
-}
-
 // SetLikeCount sets the "like_count" field.
-func (u *VideoCommentUpsertBulk) SetLikeCount(v int64) *VideoCommentUpsertBulk {
+func (u *VideoCommentUpsertBulk) SetLikeCount(v uint64) *VideoCommentUpsertBulk {
 	return u.Update(func(s *VideoCommentUpsert) {
 		s.SetLikeCount(v)
 	})
 }
 
 // AddLikeCount adds v to the "like_count" field.
-func (u *VideoCommentUpsertBulk) AddLikeCount(v int64) *VideoCommentUpsertBulk {
+func (u *VideoCommentUpsertBulk) AddLikeCount(v uint64) *VideoCommentUpsertBulk {
 	return u.Update(func(s *VideoCommentUpsert) {
 		s.AddLikeCount(v)
 	})
@@ -1124,22 +1393,15 @@ func (u *VideoCommentUpsertBulk) UpdateLikeCount() *VideoCommentUpsertBulk {
 	})
 }
 
-// ClearLikeCount clears the value of the "like_count" field.
-func (u *VideoCommentUpsertBulk) ClearLikeCount() *VideoCommentUpsertBulk {
-	return u.Update(func(s *VideoCommentUpsert) {
-		s.ClearLikeCount()
-	})
-}
-
 // SetReplyCount sets the "reply_count" field.
-func (u *VideoCommentUpsertBulk) SetReplyCount(v int64) *VideoCommentUpsertBulk {
+func (u *VideoCommentUpsertBulk) SetReplyCount(v uint64) *VideoCommentUpsertBulk {
 	return u.Update(func(s *VideoCommentUpsert) {
 		s.SetReplyCount(v)
 	})
 }
 
 // AddReplyCount adds v to the "reply_count" field.
-func (u *VideoCommentUpsertBulk) AddReplyCount(v int64) *VideoCommentUpsertBulk {
+func (u *VideoCommentUpsertBulk) AddReplyCount(v uint64) *VideoCommentUpsertBulk {
 	return u.Update(func(s *VideoCommentUpsert) {
 		s.AddReplyCount(v)
 	})
@@ -1149,13 +1411,6 @@ func (u *VideoCommentUpsertBulk) AddReplyCount(v int64) *VideoCommentUpsertBulk 
 func (u *VideoCommentUpsertBulk) UpdateReplyCount() *VideoCommentUpsertBulk {
 	return u.Update(func(s *VideoCommentUpsert) {
 		s.UpdateReplyCount()
-	})
-}
-
-// ClearReplyCount clears the value of the "reply_count" field.
-func (u *VideoCommentUpsertBulk) ClearReplyCount() *VideoCommentUpsertBulk {
-	return u.Update(func(s *VideoCommentUpsert) {
-		s.ClearReplyCount()
 	})
 }
 

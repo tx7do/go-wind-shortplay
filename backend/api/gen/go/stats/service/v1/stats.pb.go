@@ -8,7 +8,8 @@ package statspb
 
 import (
 	_ "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
-	v1 "go-wind-shortplay/api/gen/go/video/service/v1"
+	v1 "go-wind-shortplay/api/gen/go/identity/service/v1"
+	v11 "go-wind-shortplay/api/gen/go/video/service/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -75,7 +76,7 @@ func (x ListTopVideosRequest_Metric) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ListTopVideosRequest_Metric.Descriptor instead.
 func (ListTopVideosRequest_Metric) EnumDescriptor() ([]byte, []int) {
-	return file_stats_service_v1_stats_proto_rawDescGZIP(), []int{4, 0}
+	return file_stats_service_v1_stats_proto_rawDescGZIP(), []int{7, 0}
 }
 
 type GetCreatorOverviewRequest struct {
@@ -327,6 +328,164 @@ func (x *Overview) GetTodayPublished() uint64 {
 	return 0
 }
 
+// 近 N 日趋势 - 请求
+type ListTrendsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Days          *uint32                `protobuf:"varint,1,opt,name=days,proto3,oneof" json:"days,omitempty"` // 天数（1-30，缺省 7）
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTrendsRequest) Reset() {
+	*x = ListTrendsRequest{}
+	mi := &file_stats_service_v1_stats_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTrendsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTrendsRequest) ProtoMessage() {}
+
+func (x *ListTrendsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_stats_service_v1_stats_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTrendsRequest.ProtoReflect.Descriptor instead.
+func (*ListTrendsRequest) Descriptor() ([]byte, []int) {
+	return file_stats_service_v1_stats_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ListTrendsRequest) GetDays() uint32 {
+	if x != nil && x.Days != nil {
+		return *x.Days
+	}
+	return 0
+}
+
+// 单日趋势（published 按视频 published_at 落日；plays/likes 按 uba_events 当日 VIDEO_PLAY/VIDEO_LIKE 计数）
+type TrendItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Date          *string                `protobuf:"bytes,1,opt,name=date,proto3,oneof" json:"date,omitempty"`            // 日期（"2026-10-18"）
+	Published     *uint64                `protobuf:"varint,2,opt,name=published,proto3,oneof" json:"published,omitempty"` // 当日发布数
+	Plays         *uint64                `protobuf:"varint,3,opt,name=plays,proto3,oneof" json:"plays,omitempty"`         // 当日播放数
+	Likes         *uint64                `protobuf:"varint,4,opt,name=likes,proto3,oneof" json:"likes,omitempty"`         // 当日点赞数
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TrendItem) Reset() {
+	*x = TrendItem{}
+	mi := &file_stats_service_v1_stats_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TrendItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TrendItem) ProtoMessage() {}
+
+func (x *TrendItem) ProtoReflect() protoreflect.Message {
+	mi := &file_stats_service_v1_stats_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TrendItem.ProtoReflect.Descriptor instead.
+func (*TrendItem) Descriptor() ([]byte, []int) {
+	return file_stats_service_v1_stats_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *TrendItem) GetDate() string {
+	if x != nil && x.Date != nil {
+		return *x.Date
+	}
+	return ""
+}
+
+func (x *TrendItem) GetPublished() uint64 {
+	if x != nil && x.Published != nil {
+		return *x.Published
+	}
+	return 0
+}
+
+func (x *TrendItem) GetPlays() uint64 {
+	if x != nil && x.Plays != nil {
+		return *x.Plays
+	}
+	return 0
+}
+
+func (x *TrendItem) GetLikes() uint64 {
+	if x != nil && x.Likes != nil {
+		return *x.Likes
+	}
+	return 0
+}
+
+type ListTrendsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*TrendItem           `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"` // 趋势列表（按日期升序）
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTrendsResponse) Reset() {
+	*x = ListTrendsResponse{}
+	mi := &file_stats_service_v1_stats_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTrendsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTrendsResponse) ProtoMessage() {}
+
+func (x *ListTrendsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_stats_service_v1_stats_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTrendsResponse.ProtoReflect.Descriptor instead.
+func (*ListTrendsResponse) Descriptor() ([]byte, []int) {
+	return file_stats_service_v1_stats_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ListTrendsResponse) GetItems() []*TrendItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
 type ListTopVideosRequest struct {
 	state         protoimpl.MessageState      `protogen:"open.v1"`
 	Metric        ListTopVideosRequest_Metric `protobuf:"varint,1,opt,name=metric,proto3,enum=stats.service.v1.ListTopVideosRequest_Metric" json:"metric,omitempty"` // 排行指标
@@ -337,7 +496,7 @@ type ListTopVideosRequest struct {
 
 func (x *ListTopVideosRequest) Reset() {
 	*x = ListTopVideosRequest{}
-	mi := &file_stats_service_v1_stats_proto_msgTypes[4]
+	mi := &file_stats_service_v1_stats_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -349,7 +508,7 @@ func (x *ListTopVideosRequest) String() string {
 func (*ListTopVideosRequest) ProtoMessage() {}
 
 func (x *ListTopVideosRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_stats_service_v1_stats_proto_msgTypes[4]
+	mi := &file_stats_service_v1_stats_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -362,7 +521,7 @@ func (x *ListTopVideosRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTopVideosRequest.ProtoReflect.Descriptor instead.
 func (*ListTopVideosRequest) Descriptor() ([]byte, []int) {
-	return file_stats_service_v1_stats_proto_rawDescGZIP(), []int{4}
+	return file_stats_service_v1_stats_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ListTopVideosRequest) GetMetric() ListTopVideosRequest_Metric {
@@ -383,7 +542,7 @@ var File_stats_service_v1_stats_proto protoreflect.FileDescriptor
 
 const file_stats_service_v1_stats_proto_rawDesc = "" +
 	"\n" +
-	"\x1cstats/service/v1/stats.proto\x12\x10stats.service.v1\x1a\x1epagination/v1/pagination.proto\x1a\x1cvideo/service/v1/video.proto\"\x1b\n" +
+	"\x1cstats/service/v1/stats.proto\x12\x10stats.service.v1\x1a$identity/service/v1/user_brief.proto\x1a\x1epagination/v1/pagination.proto\x1a\x1cvideo/service/v1/video.proto\"\x1b\n" +
 	"\x19GetCreatorOverviewRequest\"\xf0\x02\n" +
 	"\x0fCreatorOverview\x12$\n" +
 	"\vvideo_count\x18\x01 \x01(\x04H\x00R\n" +
@@ -419,7 +578,22 @@ const file_stats_service_v1_stats_proto_rawDesc = "" +
 	"\f_total_likesB\x11\n" +
 	"\x0f_total_commentsB\x0e\n" +
 	"\f_total_usersB\x12\n" +
-	"\x10_today_published\"\xee\x01\n" +
+	"\x10_today_published\"5\n" +
+	"\x11ListTrendsRequest\x12\x17\n" +
+	"\x04days\x18\x01 \x01(\rH\x00R\x04days\x88\x01\x01B\a\n" +
+	"\x05_days\"\xa8\x01\n" +
+	"\tTrendItem\x12\x17\n" +
+	"\x04date\x18\x01 \x01(\tH\x00R\x04date\x88\x01\x01\x12!\n" +
+	"\tpublished\x18\x02 \x01(\x04H\x01R\tpublished\x88\x01\x01\x12\x19\n" +
+	"\x05plays\x18\x03 \x01(\x04H\x02R\x05plays\x88\x01\x01\x12\x19\n" +
+	"\x05likes\x18\x04 \x01(\x04H\x03R\x05likes\x88\x01\x01B\a\n" +
+	"\x05_dateB\f\n" +
+	"\n" +
+	"_publishedB\b\n" +
+	"\x06_playsB\b\n" +
+	"\x06_likes\"G\n" +
+	"\x12ListTrendsResponse\x121\n" +
+	"\x05items\x18\x01 \x03(\v2\x1b.stats.service.v1.TrendItemR\x05items\"\xee\x01\n" +
 	"\x14ListTopVideosRequest\x12E\n" +
 	"\x06metric\x18\x01 \x01(\x0e2-.stats.service.v1.ListTopVideosRequest.MetricR\x06metric\x12\x19\n" +
 	"\x05limit\x18\x02 \x01(\rH\x00R\x05limit\x88\x01\x01\"j\n" +
@@ -429,11 +603,14 @@ const file_stats_service_v1_stats_proto_rawDesc = "" +
 	"\vMETRIC_LIKE\x10\x02\x12\x12\n" +
 	"\x0eMETRIC_COLLECT\x10\x03\x12\x12\n" +
 	"\x0eMETRIC_COMMENT\x10\x04B\b\n" +
-	"\x06_limit2\xad\x02\n" +
+	"\x06_limit2\xe4\x03\n" +
 	"\x10DashboardService\x12Q\n" +
-	"\vGetOverview\x12$.stats.service.v1.GetOverviewRequest\x1a\x1a.stats.service.v1.Overview\"\x00\x12^\n" +
+	"\vGetOverview\x12$.stats.service.v1.GetOverviewRequest\x1a\x1a.stats.service.v1.Overview\"\x00\x12Y\n" +
+	"\n" +
+	"ListTrends\x12#.stats.service.v1.ListTrendsRequest\x1a$.stats.service.v1.ListTrendsResponse\"\x00\x12^\n" +
 	"\rListTopVideos\x12&.stats.service.v1.ListTopVideosRequest\x1a#.video.service.v1.ListVideoResponse\"\x00\x12f\n" +
-	"\x12GetCreatorOverview\x12+.stats.service.v1.GetCreatorOverviewRequest\x1a!.stats.service.v1.CreatorOverview\"\x00B\xbb\x01\n" +
+	"\x12GetCreatorOverview\x12+.stats.service.v1.GetCreatorOverviewRequest\x1a!.stats.service.v1.CreatorOverview\"\x00\x12Z\n" +
+	"\fGetUserStats\x12(.identity.service.v1.GetUserStatsRequest\x1a\x1e.identity.service.v1.UserStats\"\x00B\xbb\x01\n" +
 	"\x14com.stats.service.v1B\n" +
 	"StatsProtoP\x01Z5go-wind-shortplay/api/gen/go/stats/service/v1;statspb\xa2\x02\x03SSX\xaa\x02\x10Stats.Service.V1\xca\x02\x10Stats\\Service\\V1\xe2\x02\x1cStats\\Service\\V1\\GPBMetadata\xea\x02\x12Stats::Service::V1b\x06proto3"
 
@@ -450,29 +627,39 @@ func file_stats_service_v1_stats_proto_rawDescGZIP() []byte {
 }
 
 var file_stats_service_v1_stats_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_stats_service_v1_stats_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_stats_service_v1_stats_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_stats_service_v1_stats_proto_goTypes = []any{
 	(ListTopVideosRequest_Metric)(0),  // 0: stats.service.v1.ListTopVideosRequest.Metric
 	(*GetCreatorOverviewRequest)(nil), // 1: stats.service.v1.GetCreatorOverviewRequest
 	(*CreatorOverview)(nil),           // 2: stats.service.v1.CreatorOverview
 	(*GetOverviewRequest)(nil),        // 3: stats.service.v1.GetOverviewRequest
 	(*Overview)(nil),                  // 4: stats.service.v1.Overview
-	(*ListTopVideosRequest)(nil),      // 5: stats.service.v1.ListTopVideosRequest
-	(*v1.ListVideoResponse)(nil),      // 6: video.service.v1.ListVideoResponse
+	(*ListTrendsRequest)(nil),         // 5: stats.service.v1.ListTrendsRequest
+	(*TrendItem)(nil),                 // 6: stats.service.v1.TrendItem
+	(*ListTrendsResponse)(nil),        // 7: stats.service.v1.ListTrendsResponse
+	(*ListTopVideosRequest)(nil),      // 8: stats.service.v1.ListTopVideosRequest
+	(*v1.GetUserStatsRequest)(nil),    // 9: identity.service.v1.GetUserStatsRequest
+	(*v11.ListVideoResponse)(nil),     // 10: video.service.v1.ListVideoResponse
+	(*v1.UserStats)(nil),              // 11: identity.service.v1.UserStats
 }
 var file_stats_service_v1_stats_proto_depIdxs = []int32{
-	0, // 0: stats.service.v1.ListTopVideosRequest.metric:type_name -> stats.service.v1.ListTopVideosRequest.Metric
-	3, // 1: stats.service.v1.DashboardService.GetOverview:input_type -> stats.service.v1.GetOverviewRequest
-	5, // 2: stats.service.v1.DashboardService.ListTopVideos:input_type -> stats.service.v1.ListTopVideosRequest
-	1, // 3: stats.service.v1.DashboardService.GetCreatorOverview:input_type -> stats.service.v1.GetCreatorOverviewRequest
-	4, // 4: stats.service.v1.DashboardService.GetOverview:output_type -> stats.service.v1.Overview
-	6, // 5: stats.service.v1.DashboardService.ListTopVideos:output_type -> video.service.v1.ListVideoResponse
-	2, // 6: stats.service.v1.DashboardService.GetCreatorOverview:output_type -> stats.service.v1.CreatorOverview
-	4, // [4:7] is the sub-list for method output_type
-	1, // [1:4] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	6,  // 0: stats.service.v1.ListTrendsResponse.items:type_name -> stats.service.v1.TrendItem
+	0,  // 1: stats.service.v1.ListTopVideosRequest.metric:type_name -> stats.service.v1.ListTopVideosRequest.Metric
+	3,  // 2: stats.service.v1.DashboardService.GetOverview:input_type -> stats.service.v1.GetOverviewRequest
+	5,  // 3: stats.service.v1.DashboardService.ListTrends:input_type -> stats.service.v1.ListTrendsRequest
+	8,  // 4: stats.service.v1.DashboardService.ListTopVideos:input_type -> stats.service.v1.ListTopVideosRequest
+	1,  // 5: stats.service.v1.DashboardService.GetCreatorOverview:input_type -> stats.service.v1.GetCreatorOverviewRequest
+	9,  // 6: stats.service.v1.DashboardService.GetUserStats:input_type -> identity.service.v1.GetUserStatsRequest
+	4,  // 7: stats.service.v1.DashboardService.GetOverview:output_type -> stats.service.v1.Overview
+	7,  // 8: stats.service.v1.DashboardService.ListTrends:output_type -> stats.service.v1.ListTrendsResponse
+	10, // 9: stats.service.v1.DashboardService.ListTopVideos:output_type -> video.service.v1.ListVideoResponse
+	2,  // 10: stats.service.v1.DashboardService.GetCreatorOverview:output_type -> stats.service.v1.CreatorOverview
+	11, // 11: stats.service.v1.DashboardService.GetUserStats:output_type -> identity.service.v1.UserStats
+	7,  // [7:12] is the sub-list for method output_type
+	2,  // [2:7] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_stats_service_v1_stats_proto_init() }
@@ -483,13 +670,15 @@ func file_stats_service_v1_stats_proto_init() {
 	file_stats_service_v1_stats_proto_msgTypes[1].OneofWrappers = []any{}
 	file_stats_service_v1_stats_proto_msgTypes[3].OneofWrappers = []any{}
 	file_stats_service_v1_stats_proto_msgTypes[4].OneofWrappers = []any{}
+	file_stats_service_v1_stats_proto_msgTypes[5].OneofWrappers = []any{}
+	file_stats_service_v1_stats_proto_msgTypes[7].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_stats_service_v1_stats_proto_rawDesc), len(file_stats_service_v1_stats_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   5,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

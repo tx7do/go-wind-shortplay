@@ -3,6 +3,9 @@
 package uploadtask
 
 import (
+	"fmt"
+
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -17,6 +20,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// FieldTenantID holds the string denoting the tenant_id field in the database.
+	FieldTenantID = "tenant_id"
 	// FieldTaskID holds the string denoting the task_id field in the database.
 	FieldTaskID = "task_id"
 	// FieldFileName holds the string denoting the file_name field in the database.
@@ -38,7 +43,7 @@ const (
 	// FieldAuthorID holds the string denoting the author_id field in the database.
 	FieldAuthorID = "author_id"
 	// Table holds the table name of the uploadtask in the database.
-	Table = "upload_tasks"
+	Table = "sp_upload_tasks"
 )
 
 // Columns holds all SQL columns for uploadtask fields.
@@ -47,6 +52,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
+	FieldTenantID,
 	FieldTaskID,
 	FieldFileName,
 	FieldFileSize,
@@ -69,24 +75,61 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+// Note that the variables below are initialized by the runtime
+// package on the initialization of the application. Therefore,
+// it should be imported in the main as follows:
+//
+//	import _ "go-wind-shortplay/app/core/service/internal/data/ent/runtime"
 var (
+	Hooks  [1]ent.Hook
+	Policy ent.Policy
+	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
+	DefaultTenantID uint32
 	// TaskIDValidator is a validator for the "task_id" field. It is called by the builders before save.
 	TaskIDValidator func(string) error
 	// FileNameValidator is a validator for the "file_name" field. It is called by the builders before save.
 	FileNameValidator func(string) error
 	// DefaultFileSize holds the default value on creation for the "file_size" field.
-	DefaultFileSize int64
+	DefaultFileSize uint64
 	// DefaultChunkSize holds the default value on creation for the "chunk_size" field.
 	DefaultChunkSize uint32
 	// DefaultTotalChunks holds the default value on creation for the "total_chunks" field.
 	DefaultTotalChunks uint32
-	// DefaultStatus holds the default value on creation for the "status" field.
-	DefaultStatus uint8
 	// DefaultVideoID holds the default value on creation for the "video_id" field.
 	DefaultVideoID uint32
+	// DefaultAuthorID holds the default value on creation for the "author_id" field.
+	DefaultAuthorID uint32
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
+
+// Status defines the type for the "status" enum field.
+type Status string
+
+// StatusUploading is the default value of the Status enum.
+const DefaultStatus = StatusUploading
+
+// Status values.
+const (
+	StatusUploading Status = "UPLOADING"
+	StatusMerging   Status = "MERGING"
+	StatusCompleted Status = "COMPLETED"
+	StatusFailed    Status = "FAILED"
+)
+
+func (s Status) String() string {
+	return string(s)
+}
+
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
+func StatusValidator(s Status) error {
+	switch s {
+	case StatusUploading, StatusMerging, StatusCompleted, StatusFailed:
+		return nil
+	default:
+		return fmt.Errorf("uploadtask: invalid enum value for status field: %q", s)
+	}
+}
 
 // OrderOption defines the ordering options for the UploadTask queries.
 type OrderOption func(*sql.Selector)
@@ -109,6 +152,11 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByDeletedAt orders the results by the deleted_at field.
 func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByTenantID orders the results by the tenant_id field.
+func ByTenantID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTenantID, opts...).ToFunc()
 }
 
 // ByTaskID orders the results by the task_id field.

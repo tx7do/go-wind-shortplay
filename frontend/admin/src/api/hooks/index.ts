@@ -18,6 +18,7 @@ import type {
   Comment,
   CreateUserRequest,
   DashboardOverview,
+  DashboardTrendsResponse,
   HandleReportRequest,
   ListResponse,
   Report,
@@ -27,7 +28,7 @@ import type {
   UpdateUserRequest,
   Video,
 } from '@/api/types';
-import { queryClient } from '@/core';
+import { queryClient, type PaginationQuery } from '@/core';
 
 /** 列表查询参数（Admin BFF 统一 ?page=&pageSize=&query=&filter=） */
 export interface ListParams {
@@ -37,6 +38,8 @@ export interface ListParams {
   query?: string;
   /** 状态过滤（数字字符串，如 "1"~"5"） */
   filter?: string;
+  /** 作者过滤（GET /videos?authorId=，用户管理「查看作品」用） */
+  authorId?: number;
 }
 
 /** 剔除 undefined/null/空串，避免 axios 序列化出脏参数 */
@@ -72,6 +75,22 @@ export function useListTopVideos(
     queryKey: ['topVideos', metric, limit],
     queryFn: () =>
       adminHttp.get<ListResponse<Video>>('dashboard/top-videos', { metric, limit }),
+    ...options,
+  });
+}
+
+/**
+ * 近 N 日趋势（1-30，看板默认 7）。
+ * 后端增量端点（契约 docs/API.md「Admin 端增补」）：失败/为空时由调用方渲染空态，
+ * 不阻断看板其余区块。
+ */
+export function useGetDashboardTrends(
+  days = 7,
+  options?: UseQueryOptions<DashboardTrendsResponse, Error>,
+) {
+  return useQuery<DashboardTrendsResponse, Error>({
+    queryKey: ['dashboardTrends', days],
+    queryFn: () => adminHttp.get<DashboardTrendsResponse>('dashboard/trends', { days }),
     ...options,
   });
 }
@@ -166,13 +185,22 @@ export function useHandleReport(
 }
 
 // ==============================
-// 用户管理
+// 用户管理（/admin/v1/users：短剧 App 用户域，proto 形状 AppUser）
 // ==============================
 
-export async function fetchListUsers(params: ListParams) {
+/**
+ * 用户列表 —— fetcher 契约与基座一致（PaginationQuery → ?page&pageSize&query）：
+ * formValues 由 PaginationQuery 序列化为 go-crud JSON 过滤
+ * （username/nickname 等字符串值自动转 __contains 模糊匹配）。
+ */
+export async function fetchListUsers(params: PaginationQuery) {
   return queryClient.fetchQuery({
     queryKey: ['listUsers', params],
-    queryFn: () => adminHttp.get<ListResponse<AppUser>>('users', cleanParams(params)),
+    queryFn: () =>
+      adminHttp.get<ListResponse<AppUser>>(
+        'users',
+        params.toRawParams() as Record<string, unknown>,
+      ),
     retry: 0,
   });
 }

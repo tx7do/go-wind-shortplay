@@ -27,25 +27,30 @@ var File_admin_service_v1_i_stats_proto protoreflect.FileDescriptor
 
 const file_admin_service_v1_i_stats_proto_rawDesc = "" +
 	"\n" +
-	"\x1eadmin/service/v1/i_stats.proto\x12\x10admin.service.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1cstats/service/v1/stats.proto\x1a\x1cvideo/service/v1/video.proto2\x90\x02\n" +
+	"\x1eadmin/service/v1/i_stats.proto\x12\x10admin.service.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1cstats/service/v1/stats.proto\x1a\x1cvideo/service/v1/video.proto2\x89\x03\n" +
 	"\x10DashboardService\x12u\n" +
 	"\vGetOverview\x12$.stats.service.v1.GetOverviewRequest\x1a\x1a.stats.service.v1.Overview\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/admin/v1/dashboard/overview\x12\x84\x01\n" +
-	"\rListTopVideos\x12&.stats.service.v1.ListTopVideosRequest\x1a#.video.service.v1.ListVideoResponse\"&\x82\xd3\xe4\x93\x02 \x12\x1e/admin/v1/dashboard/top-videosB\xbc\x01\n" +
+	"\rListTopVideos\x12&.stats.service.v1.ListTopVideosRequest\x1a#.video.service.v1.ListVideoResponse\"&\x82\xd3\xe4\x93\x02 \x12\x1e/admin/v1/dashboard/top-videos\x12w\n" +
+	"\x06Trends\x12#.stats.service.v1.ListTrendsRequest\x1a$.stats.service.v1.ListTrendsResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/admin/v1/dashboard/trendsB\xbc\x01\n" +
 	"\x14com.admin.service.v1B\vIStatsProtoP\x01Z5go-wind-shortplay/api/gen/go/admin/service/v1;adminpb\xa2\x02\x03ASX\xaa\x02\x10Admin.Service.V1\xca\x02\x10Admin\\Service\\V1\xe2\x02\x1cAdmin\\Service\\V1\\GPBMetadata\xea\x02\x12Admin::Service::V1b\x06proto3"
 
 var file_admin_service_v1_i_stats_proto_goTypes = []any{
 	(*v1.GetOverviewRequest)(nil),   // 0: stats.service.v1.GetOverviewRequest
 	(*v1.ListTopVideosRequest)(nil), // 1: stats.service.v1.ListTopVideosRequest
-	(*v1.Overview)(nil),             // 2: stats.service.v1.Overview
-	(*v11.ListVideoResponse)(nil),   // 3: video.service.v1.ListVideoResponse
+	(*v1.ListTrendsRequest)(nil),    // 2: stats.service.v1.ListTrendsRequest
+	(*v1.Overview)(nil),             // 3: stats.service.v1.Overview
+	(*v11.ListVideoResponse)(nil),   // 4: video.service.v1.ListVideoResponse
+	(*v1.ListTrendsResponse)(nil),   // 5: stats.service.v1.ListTrendsResponse
 }
 var file_admin_service_v1_i_stats_proto_depIdxs = []int32{
 	0, // 0: admin.service.v1.DashboardService.GetOverview:input_type -> stats.service.v1.GetOverviewRequest
 	1, // 1: admin.service.v1.DashboardService.ListTopVideos:input_type -> stats.service.v1.ListTopVideosRequest
-	2, // 2: admin.service.v1.DashboardService.GetOverview:output_type -> stats.service.v1.Overview
-	3, // 3: admin.service.v1.DashboardService.ListTopVideos:output_type -> video.service.v1.ListVideoResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	2, // 2: admin.service.v1.DashboardService.Trends:input_type -> stats.service.v1.ListTrendsRequest
+	3, // 3: admin.service.v1.DashboardService.GetOverview:output_type -> stats.service.v1.Overview
+	4, // 4: admin.service.v1.DashboardService.ListTopVideos:output_type -> video.service.v1.ListVideoResponse
+	5, // 5: admin.service.v1.DashboardService.Trends:output_type -> stats.service.v1.ListTrendsResponse
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name

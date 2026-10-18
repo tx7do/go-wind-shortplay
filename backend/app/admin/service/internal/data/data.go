@@ -1,71 +1,440 @@
 package data
 
 import (
-	"os"
+	"time"
 
-	kratosGrpc "github.com/go-kratos/kratos/v2/transport/grpc"
-	"google.golang.org/grpc"
+	"github.com/redis/go-redis/v9"
+
+	authzEngine "github.com/tx7do/kratos-authz/engine"
+	"github.com/tx7do/kratos-authz/engine/noop"
+
+	"github.com/go-kratos/kratos/v2/registry"
+
 	"github.com/tx7do/kratos-bootstrap/bootstrap"
+	redisClient "github.com/tx7do/kratos-bootstrap/cache/redis"
+	bRegistry "github.com/tx7do/kratos-bootstrap/registry"
+	"github.com/tx7do/kratos-bootstrap/rpc"
 
-	feedV1 "go-wind-shortplay/api/gen/go/feed/service/v1"
-	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
+	"github.com/tx7do/go-utils/captcha"
+
+	auditV1 "go-wind-shortplay/api/gen/go/audit/service/v1"
+	authenticationV1 "go-wind-shortplay/api/gen/go/authentication/service/v1"
+	commentV1 "go-wind-shortplay/api/gen/go/comment/service/v1"
 	interactionV1 "go-wind-shortplay/api/gen/go/interaction/service/v1"
 	reportV1 "go-wind-shortplay/api/gen/go/report/service/v1"
 	statsV1 "go-wind-shortplay/api/gen/go/stats/service/v1"
 	sysconfV1 "go-wind-shortplay/api/gen/go/sysconf/service/v1"
 	videoV1 "go-wind-shortplay/api/gen/go/video/service/v1"
-	"go-wind-shortplay/pkg/middleware/auth"
+	dictV1 "go-wind-shortplay/api/gen/go/dict/service/v1"
+	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
+	internalMessageV1 "go-wind-shortplay/api/gen/go/internal_message/service/v1"
+	mediaV1 "go-wind-shortplay/api/gen/go/media/service/v1"
+	notifyV1 "go-wind-shortplay/api/gen/go/notify/service/v1"
+	permissionV1 "go-wind-shortplay/api/gen/go/permission/service/v1"
+	storageV1 "go-wind-shortplay/api/gen/go/storage/service/v1"
+	taskV1 "go-wind-shortplay/api/gen/go/task/service/v1"
+
+	"go-wind-shortplay/pkg/oss"
+	"go-wind-shortplay/pkg/serviceid"
 )
 
-// CoreServiceAddr core 服务直连地址（dev 免注册中心；生产可切 etcd 发现）
-func CoreServiceAddr() string {
-	if addr := os.Getenv("CORE_SERVICE_ADDR"); addr != "" {
-		return addr
-	}
-	return "127.0.0.1:7900"
+func NewClientType() authenticationV1.ClientType {
+	return authenticationV1.ClientType_admin
 }
 
-// NewCoreConn 创建到 core 的 gRPC 连接（附带身份与调用面透传中间件）
-func NewCoreConn(ctx *bootstrap.Context) (grpc.ClientConnInterface, func(), error) {
-	conn, err := kratosGrpc.DialInsecure(
-		ctx.Context(),
-		kratosGrpc.WithEndpoint(CoreServiceAddr()),
-		kratosGrpc.WithMiddleware(auth.NewClientMiddlewareFor("admin")),
+// NewRedisClient 创建Redis客户端
+func NewRedisClient(ctx *bootstrap.Context) (*redis.Client, func(), error) {
+	cfg := ctx.GetConfig()
+	if cfg == nil {
+		return nil, func() {}, nil
+	}
+
+	l := ctx.NewLoggerHelper("redis/data/admin-service")
+
+	cli := redisClient.NewClient(cfg.Data, l)
+
+	return cli, func() {
+		if err := cli.Close(); err != nil {
+			l.Error(err)
+		}
+	}, nil
+}
+
+func NewCaptcha(rdb *redis.Client) *captcha.Captcha {
+	captchaInstance := captcha.NewCaptcha(rdb,
+		captcha.WithDriverType(captcha.DriverString),
+		captcha.WithExpire(10*time.Minute),
+		captcha.WithKeyPrefix(serviceid.ProjectName+":captcha"),
+		captcha.WithStringCount(6),
+		captcha.WithStringSource("ABCDEFGHJKLMNPQRSTUVWXYZ23456789"),
 	)
-	if err != nil {
-		return nil, func() {}, err
+	return captchaInstance
+}
+
+// NewDiscovery 创建服务发现客户端
+func NewDiscovery(ctx *bootstrap.Context) registry.Discovery {
+	cfg := ctx.GetConfig()
+	if cfg == nil {
+		return nil
 	}
-	return conn, func() { _ = conn.Close() }, nil
+
+	discovery, err := bRegistry.NewDiscovery(cfg.Registry)
+	if err != nil {
+		return nil
+	}
+
+	NewDtmDriver(discovery)
+
+	return discovery
 }
 
-func NewUserServiceClient(conn grpc.ClientConnInterface) identityV1.UserServiceClient {
-	return identityV1.NewUserServiceClient(conn)
+func NewMinIoClient(ctx *bootstrap.Context) *oss.MinIOClient {
+	return oss.NewMinIoClient(ctx.GetConfig(), ctx.GetLogger())
 }
 
-func NewAuthenticationServiceClient(conn grpc.ClientConnInterface) identityV1.AuthenticationServiceClient {
-	return identityV1.NewAuthenticationServiceClient(conn)
+// NewAuthorizer 创建权鉴器
+func NewAuthorizer() authzEngine.Engine {
+	return noop.State{}
 }
 
-func NewVideoServiceClient(conn grpc.ClientConnInterface) videoV1.VideoServiceClient {
-	return videoV1.NewVideoServiceClient(conn)
+func NewAuthenticationServiceClient(ctx *bootstrap.Context, r registry.Discovery) authenticationV1.AuthenticationServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return authenticationV1.NewAuthenticationServiceClient(cli)
 }
 
-func NewFeedServiceClient(conn grpc.ClientConnInterface) feedV1.FeedServiceClient {
-	return feedV1.NewFeedServiceClient(conn)
+func NewUserCredentialServiceClient(ctx *bootstrap.Context, r registry.Discovery) authenticationV1.UserCredentialServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return authenticationV1.NewUserCredentialServiceClient(cli)
 }
 
-func NewCommentServiceClient(conn grpc.ClientConnInterface) interactionV1.CommentServiceClient {
-	return interactionV1.NewCommentServiceClient(conn)
+func NewLoginPolicyServiceClient(ctx *bootstrap.Context, r registry.Discovery) authenticationV1.LoginPolicyServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return authenticationV1.NewLoginPolicyServiceClient(cli)
 }
 
-func NewReportServiceClient(conn grpc.ClientConnInterface) reportV1.ReportServiceClient {
-	return reportV1.NewReportServiceClient(conn)
+func NewUserServiceClient(ctx *bootstrap.Context, r registry.Discovery) identityV1.UserServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return identityV1.NewUserServiceClient(cli)
 }
 
-func NewDashboardServiceClient(conn grpc.ClientConnInterface) statsV1.DashboardServiceClient {
-	return statsV1.NewDashboardServiceClient(conn)
+func NewTenantServiceClient(ctx *bootstrap.Context, r registry.Discovery) identityV1.TenantServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return identityV1.NewTenantServiceClient(cli)
 }
 
-func NewSysConfServiceClient(conn grpc.ClientConnInterface) sysconfV1.SysConfServiceClient {
-	return sysconfV1.NewSysConfServiceClient(conn)
+func NewRoleServiceClient(ctx *bootstrap.Context, r registry.Discovery) permissionV1.RoleServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return permissionV1.NewRoleServiceClient(cli)
+}
+
+func NewOrgUnitServiceClient(ctx *bootstrap.Context, r registry.Discovery) identityV1.OrgUnitServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return identityV1.NewOrgUnitServiceClient(cli)
+}
+
+func NewPositionServiceClient(ctx *bootstrap.Context, r registry.Discovery) identityV1.PositionServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return identityV1.NewPositionServiceClient(cli)
+}
+
+func NewInternalMessageCategoryServiceClient(ctx *bootstrap.Context, r registry.Discovery) internalMessageV1.InternalMessageCategoryServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return internalMessageV1.NewInternalMessageCategoryServiceClient(cli)
+}
+
+func NewInternalMessageServiceClient(ctx *bootstrap.Context, r registry.Discovery) internalMessageV1.InternalMessageServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return internalMessageV1.NewInternalMessageServiceClient(cli)
+}
+
+func NewInternalMessageRecipientServiceClient(ctx *bootstrap.Context, r registry.Discovery) internalMessageV1.InternalMessageRecipientServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return internalMessageV1.NewInternalMessageRecipientServiceClient(cli)
+}
+
+func NewFileServiceClient(ctx *bootstrap.Context, r registry.Discovery) storageV1.FileServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return storageV1.NewFileServiceClient(cli)
+}
+
+func NewPermissionGroupServiceClient(ctx *bootstrap.Context, r registry.Discovery) permissionV1.PermissionGroupServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return permissionV1.NewPermissionGroupServiceClient(cli)
+}
+
+func NewPermissionServiceClient(ctx *bootstrap.Context, r registry.Discovery) permissionV1.PermissionServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return permissionV1.NewPermissionServiceClient(cli)
+}
+
+func NewApiServiceClient(ctx *bootstrap.Context, r registry.Discovery) permissionV1.ApiServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return permissionV1.NewApiServiceClient(cli)
+}
+
+func NewMenuServiceClient(ctx *bootstrap.Context, r registry.Discovery) permissionV1.MenuServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return permissionV1.NewMenuServiceClient(cli)
+}
+
+func NewPermissionAuditLogServiceClient(ctx *bootstrap.Context, r registry.Discovery) auditV1.PermissionAuditLogServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return auditV1.NewPermissionAuditLogServiceClient(cli)
+}
+
+func NewPolicyEvaluationLogServiceClient(ctx *bootstrap.Context, r registry.Discovery) permissionV1.PolicyEvaluationLogServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return permissionV1.NewPolicyEvaluationLogServiceClient(cli)
+}
+
+func NewApiAuditLogServiceClient(ctx *bootstrap.Context, r registry.Discovery) auditV1.ApiAuditLogServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return auditV1.NewApiAuditLogServiceClient(cli)
+}
+
+func NewDataAccessAuditLogServiceClient(ctx *bootstrap.Context, r registry.Discovery) auditV1.DataAccessAuditLogServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return auditV1.NewDataAccessAuditLogServiceClient(cli)
+}
+
+func NewLoginAuditLogServiceClient(ctx *bootstrap.Context, r registry.Discovery) auditV1.LoginAuditLogServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return auditV1.NewLoginAuditLogServiceClient(cli)
+}
+
+func NewOperationAuditLogServiceClient(ctx *bootstrap.Context, r registry.Discovery) auditV1.OperationAuditLogServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return auditV1.NewOperationAuditLogServiceClient(cli)
+}
+
+func NewDictEntryServiceClient(ctx *bootstrap.Context, r registry.Discovery) dictV1.DictEntryServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return dictV1.NewDictEntryServiceClient(cli)
+}
+
+func NewDictTypeServiceClient(ctx *bootstrap.Context, r registry.Discovery) dictV1.DictTypeServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return dictV1.NewDictTypeServiceClient(cli)
+}
+
+func NewLanguageServiceClient(ctx *bootstrap.Context, r registry.Discovery) dictV1.LanguageServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return dictV1.NewLanguageServiceClient(cli)
+}
+
+func NewTaskServiceClient(ctx *bootstrap.Context, r registry.Discovery) taskV1.TaskServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return taskV1.NewTaskServiceClient(cli)
+}
+
+func NewSpVideoServiceClient(ctx *bootstrap.Context, r registry.Discovery) videoV1.VideoServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return videoV1.NewVideoServiceClient(cli)
+}
+
+func NewSpReportServiceClient(ctx *bootstrap.Context, r registry.Discovery) reportV1.ReportServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return reportV1.NewReportServiceClient(cli)
+}
+
+func NewSpDashboardServiceClient(ctx *bootstrap.Context, r registry.Discovery) statsV1.DashboardServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return statsV1.NewDashboardServiceClient(cli)
+}
+
+func NewSpSysConfServiceClient(ctx *bootstrap.Context, r registry.Discovery) sysconfV1.SysConfServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return sysconfV1.NewSysConfServiceClient(cli)
+}
+
+func NewSpCommentServiceClient(ctx *bootstrap.Context, r registry.Discovery) interactionV1.CommentServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return interactionV1.NewCommentServiceClient(cli)
+}
+
+func NewCommentServiceClient(ctx *bootstrap.Context, r registry.Discovery) commentV1.CommentServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return commentV1.NewCommentServiceClient(cli)
+}
+
+func NewMediaAssetServiceClient(ctx *bootstrap.Context, r registry.Discovery) mediaV1.MediaAssetServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return mediaV1.NewMediaAssetServiceClient(cli)
+}
+
+func NewNotificationServiceClient(ctx *bootstrap.Context, r registry.Discovery) notifyV1.NotificationServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return notifyV1.NewNotificationServiceClient(cli)
+}
+
+func NewNotificationChannelServiceClient(ctx *bootstrap.Context, r registry.Discovery) notifyV1.NotificationChannelServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return notifyV1.NewNotificationChannelServiceClient(cli)
+}
+
+func NewNotificationRuleServiceClient(ctx *bootstrap.Context, r registry.Discovery) notifyV1.NotificationRuleServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return notifyV1.NewNotificationRuleServiceClient(cli)
+}
+
+func NewNotificationTemplateServiceClient(ctx *bootstrap.Context, r registry.Discovery) notifyV1.NotificationTemplateServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return notifyV1.NewNotificationTemplateServiceClient(cli)
+}
+
+func NewNotificationPreferenceServiceClient(ctx *bootstrap.Context, r registry.Discovery) notifyV1.NotificationPreferenceServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return notifyV1.NewNotificationPreferenceServiceClient(cli)
 }

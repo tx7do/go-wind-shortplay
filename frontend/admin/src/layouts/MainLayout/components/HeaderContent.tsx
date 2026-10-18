@@ -22,6 +22,8 @@ import { useTranslation } from 'react-i18next';
 
 import { getIconFromName } from '@/layouts/MainLayout/utils/iconResolver';
 
+import NotificationBell from './NotificationBell';
+
 import { useI18n } from '@/core/i18n';
 import { usePreferencesStore } from '@/core/preferences/store';
 import type { SupportedLanguagesType } from '@/core/preferences/types/layout';
@@ -166,7 +168,9 @@ export const HeaderContent = ({
   widgetConfig,
 }: HeaderContentProps) => {
   const { t } = useI18n('common');
-  const { t: tRoutes, i18n } = useTranslation(); // 用于路由翻译
+  // 用于路由翻译：基座菜单键（menu.xxx.yyy 点分形态）在 routes 命名空间，
+  // 必须显式指定，否则落到 common 命名空间整排 miss 显示裸键
+  const { t: tRoutes, i18n } = useTranslation('routes');
   const navigate = useNavigate();
   const matches = useMatches();
 
@@ -272,6 +276,14 @@ export const HeaderContent = ({
 
   // 用户菜单
   const userMenuItems: MenuProps['items'] = [
+    {
+      key: 'profile',
+      icon: <UserOutlined />,
+      label: t('header.profile'),
+      onClick: () => {
+        navigate('/profile');
+      },
+    },
     {
       key: 'settings',
       icon: <SettingOutlined />,
@@ -772,6 +784,9 @@ export const HeaderContent = ({
             />
           </Tooltip>
         )}
+
+        {/* 通知铃（未读数 30s 轮询 + 弹出层/抽屉列表） */}
+        {widgetConfig.notification && <NotificationBell btnStyle={btnStyle} />}
 
         {/* 用户头像 + 下拉菜单 */}
         <Dropdown menu={{ items: userMenuItems }} trigger={['click']} placement="bottomRight">

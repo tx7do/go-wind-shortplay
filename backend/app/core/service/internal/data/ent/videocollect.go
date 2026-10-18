@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 收藏表
+// 收藏台账表
 type VideoCollect struct {
 	config `json:"-"`
 	// ID of the ent.
@@ -24,10 +24,12 @@ type VideoCollect struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
-	// 收藏人ID
-	UserID *uint32 `json:"user_id,omitempty"`
+	// 租户ID
+	TenantID *uint32 `json:"tenant_id,omitempty"`
+	// 收藏人用户ID
+	UserID uint32 `json:"user_id,omitempty"`
 	// 视频ID
-	VideoID      *uint32 `json:"video_id,omitempty"`
+	VideoID      uint32 `json:"video_id,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -36,7 +38,7 @@ func (*VideoCollect) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case videocollect.FieldID, videocollect.FieldUserID, videocollect.FieldVideoID:
+		case videocollect.FieldID, videocollect.FieldTenantID, videocollect.FieldUserID, videocollect.FieldVideoID:
 			values[i] = new(sql.NullInt64)
 		case videocollect.FieldCreatedAt, videocollect.FieldUpdatedAt, videocollect.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -82,19 +84,24 @@ func (_m *VideoCollect) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
+		case videocollect.FieldTenantID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
+			} else if value.Valid {
+				_m.TenantID = new(uint32)
+				*_m.TenantID = uint32(value.Int64)
+			}
 		case videocollect.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.UserID = new(uint32)
-				*_m.UserID = uint32(value.Int64)
+				_m.UserID = uint32(value.Int64)
 			}
 		case videocollect.FieldVideoID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field video_id", values[i])
 			} else if value.Valid {
-				_m.VideoID = new(uint32)
-				*_m.VideoID = uint32(value.Int64)
+				_m.VideoID = uint32(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -147,15 +154,16 @@ func (_m *VideoCollect) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	if v := _m.UserID; v != nil {
-		builder.WriteString("user_id=")
+	if v := _m.TenantID; v != nil {
+		builder.WriteString("tenant_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := _m.VideoID; v != nil {
-		builder.WriteString("video_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("user_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(", ")
+	builder.WriteString("video_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.VideoID))
 	builder.WriteByte(')')
 	return builder.String()
 }

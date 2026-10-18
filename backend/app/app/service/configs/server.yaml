@@ -1,8 +1,8 @@
 server:
   rest:
-    addr: "0.0.0.0:7700"
+    addr: "${APP_REST_ADDR:0.0.0.0:7700}"
     timeout: 10s
-    enable_swagger: true
+    enable_swagger: false
     cors:
       headers:
         - "X-Requested-With"
@@ -17,4 +17,29 @@ server:
         - "HEAD"
         - "OPTIONS"
       origins:
-        - "*"
+        - "http://localhost:15001"
+        - "http://localhost:15011"
+        - "http://localhost:15021"
+        - "http://localhost:10086"
+    middleware:
+      auth:
+        method: "HS256"
+        key: "${jwt_signing_key:dev_only_change_me_in_prod}"
+
+  sse:
+    addr: "${APP_SSE_ADDR::7701}"
+    codec: "json"
+    path: "/events"
+    auto_stream: true
+    auto_reply: false
+
+  grpc:
+    addr: "0.0.0.0:0"
+    timeout: 10s
+    middleware:
+      enable_logging: true
+      enable_recovery: true
+      enable_tracing: true
+      enable_validate: true
+      enable_circuit_breaker: true
+      enable_metadata: true

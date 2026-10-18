@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"go-wind-shortplay/app/core/service/internal/data/ent/predicate"
 	"go-wind-shortplay/app/core/service/internal/data/ent/videotagrel"
@@ -329,6 +330,12 @@ func (_q *VideoTagRelQuery) prepareQuery(ctx context.Context) error {
 			return err
 		}
 		_q.sql = prev
+	}
+	if videotagrel.Policy == nil {
+		return errors.New("ent: uninitialized videotagrel.Policy (forgotten import ent/runtime?)")
+	}
+	if err := videotagrel.Policy.EvalQuery(ctx, _q); err != nil {
+		return err
 	}
 	return nil
 }

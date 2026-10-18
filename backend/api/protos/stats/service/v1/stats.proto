@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package stats.service.v1;
 
+import "identity/service/v1/user_brief.proto";
 import "pagination/v1/pagination.proto";
 import "video/service/v1/video.proto";
 
@@ -10,11 +11,17 @@ service DashboardService {
   // 运营总览（视频量 / 播放量 / 互动量 / 用户量 / 今日发布）
   rpc GetOverview (GetOverviewRequest) returns (Overview) {}
 
+  // 近 N 日趋势（发布 / 播放 / 点赞按日落桶，管理端看板折线图）
+  rpc ListTrends (ListTrendsRequest) returns (ListTrendsResponse) {}
+
   // 视频 TOP 排行（按播放 / 点赞 / 收藏 / 评论）
   rpc ListTopVideos (ListTopVideosRequest) returns (video.service.v1.ListVideoResponse) {}
 
   // 创作者中心总览（viewer 本人作品聚合：播放 / 点赞 / 收藏 / 评论）
   rpc GetCreatorOverview (GetCreatorOverviewRequest) returns (CreatorOverview) {}
+
+  // 用户统计（作品 / 粉丝 / 关注 / 获赞；用户主页用）
+  rpc GetUserStats (identity.service.v1.GetUserStatsRequest) returns (identity.service.v1.UserStats) {}
 }
 
 message GetCreatorOverviewRequest {
@@ -43,6 +50,23 @@ message Overview {
   optional uint64 total_comments = 5 [json_name = "totalComments"];     // 总评论数
   optional uint64 total_users = 6 [json_name = "totalUsers"];           // 用户总数
   optional uint64 today_published = 7 [json_name = "todayPublished"];   // 今日发布数
+}
+
+// 近 N 日趋势 - 请求
+message ListTrendsRequest {
+  optional uint32 days = 1 [json_name = "days"]; // 天数（1-30，缺省 7）
+}
+
+// 单日趋势（published 按视频 published_at 落日；plays/likes 按 uba_events 当日 VIDEO_PLAY/VIDEO_LIKE 计数）
+message TrendItem {
+  optional string date = 1 [json_name = "date"];       // 日期（"2026-10-18"）
+  optional uint64 published = 2 [json_name = "published"]; // 当日发布数
+  optional uint64 plays = 3 [json_name = "plays"];     // 当日播放数
+  optional uint64 likes = 4 [json_name = "likes"];     // 当日点赞数
+}
+
+message ListTrendsResponse {
+  repeated TrendItem items = 1 [json_name = "items"]; // 趋势列表（按日期升序）
 }
 
 message ListTopVideosRequest {

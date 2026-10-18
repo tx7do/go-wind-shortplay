@@ -64,6 +64,48 @@ func (_c *SysConfigCreate) SetNillableDeletedAt(v *time.Time) *SysConfigCreate {
 	return _c
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_c *SysConfigCreate) SetCreatedBy(v uint32) *SysConfigCreate {
+	_c.mutation.SetCreatedBy(v)
+	return _c
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_c *SysConfigCreate) SetNillableCreatedBy(v *uint32) *SysConfigCreate {
+	if v != nil {
+		_c.SetCreatedBy(*v)
+	}
+	return _c
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_c *SysConfigCreate) SetUpdatedBy(v uint32) *SysConfigCreate {
+	_c.mutation.SetUpdatedBy(v)
+	return _c
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_c *SysConfigCreate) SetNillableUpdatedBy(v *uint32) *SysConfigCreate {
+	if v != nil {
+		_c.SetUpdatedBy(*v)
+	}
+	return _c
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (_c *SysConfigCreate) SetDeletedBy(v uint32) *SysConfigCreate {
+	_c.mutation.SetDeletedBy(v)
+	return _c
+}
+
+// SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
+func (_c *SysConfigCreate) SetNillableDeletedBy(v *uint32) *SysConfigCreate {
+	if v != nil {
+		_c.SetDeletedBy(*v)
+	}
+	return _c
+}
+
 // SetMaxUploadSizeMB sets the "max_upload_size_mb" field.
 func (_c *SysConfigCreate) SetMaxUploadSizeMB(v uint32) *SysConfigCreate {
 	_c.mutation.SetMaxUploadSizeMB(v)
@@ -187,6 +229,18 @@ func (_c *SysConfigCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *SysConfigCreate) check() error {
+	if _, ok := _c.mutation.MaxUploadSizeMB(); !ok {
+		return &ValidationError{Name: "max_upload_size_mb", err: errors.New(`ent: missing required field "SysConfig.max_upload_size_mb"`)}
+	}
+	if _, ok := _c.mutation.MaxDurationSeconds(); !ok {
+		return &ValidationError{Name: "max_duration_seconds", err: errors.New(`ent: missing required field "SysConfig.max_duration_seconds"`)}
+	}
+	if _, ok := _c.mutation.ManualReviewEnabled(); !ok {
+		return &ValidationError{Name: "manual_review_enabled", err: errors.New(`ent: missing required field "SysConfig.manual_review_enabled"`)}
+	}
+	if _, ok := _c.mutation.RegisterEnabled(); !ok {
+		return &ValidationError{Name: "register_enabled", err: errors.New(`ent: missing required field "SysConfig.register_enabled"`)}
+	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := sysconfig.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "SysConfig.id": %w`, err)}
@@ -237,21 +291,33 @@ func (_c *SysConfigCreate) createSpec() (*SysConfig, *sqlgraph.CreateSpec) {
 		_spec.SetField(sysconfig.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
+	if value, ok := _c.mutation.CreatedBy(); ok {
+		_spec.SetField(sysconfig.FieldCreatedBy, field.TypeUint32, value)
+		_node.CreatedBy = &value
+	}
+	if value, ok := _c.mutation.UpdatedBy(); ok {
+		_spec.SetField(sysconfig.FieldUpdatedBy, field.TypeUint32, value)
+		_node.UpdatedBy = &value
+	}
+	if value, ok := _c.mutation.DeletedBy(); ok {
+		_spec.SetField(sysconfig.FieldDeletedBy, field.TypeUint32, value)
+		_node.DeletedBy = &value
+	}
 	if value, ok := _c.mutation.MaxUploadSizeMB(); ok {
 		_spec.SetField(sysconfig.FieldMaxUploadSizeMB, field.TypeUint32, value)
-		_node.MaxUploadSizeMB = &value
+		_node.MaxUploadSizeMB = value
 	}
 	if value, ok := _c.mutation.MaxDurationSeconds(); ok {
 		_spec.SetField(sysconfig.FieldMaxDurationSeconds, field.TypeUint32, value)
-		_node.MaxDurationSeconds = &value
+		_node.MaxDurationSeconds = value
 	}
 	if value, ok := _c.mutation.ManualReviewEnabled(); ok {
 		_spec.SetField(sysconfig.FieldManualReviewEnabled, field.TypeBool, value)
-		_node.ManualReviewEnabled = &value
+		_node.ManualReviewEnabled = value
 	}
 	if value, ok := _c.mutation.RegisterEnabled(); ok {
 		_spec.SetField(sysconfig.FieldRegisterEnabled, field.TypeBool, value)
-		_node.RegisterEnabled = &value
+		_node.RegisterEnabled = value
 	}
 	if value, ok := _c.mutation.AllowedVideoTypes(); ok {
 		_spec.SetField(sysconfig.FieldAllowedVideoTypes, field.TypeJSON, value)
@@ -345,6 +411,78 @@ func (u *SysConfigUpsert) ClearDeletedAt() *SysConfigUpsert {
 	return u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (u *SysConfigUpsert) SetCreatedBy(v uint32) *SysConfigUpsert {
+	u.Set(sysconfig.FieldCreatedBy, v)
+	return u
+}
+
+// UpdateCreatedBy sets the "created_by" field to the value that was provided on create.
+func (u *SysConfigUpsert) UpdateCreatedBy() *SysConfigUpsert {
+	u.SetExcluded(sysconfig.FieldCreatedBy)
+	return u
+}
+
+// AddCreatedBy adds v to the "created_by" field.
+func (u *SysConfigUpsert) AddCreatedBy(v uint32) *SysConfigUpsert {
+	u.Add(sysconfig.FieldCreatedBy, v)
+	return u
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (u *SysConfigUpsert) ClearCreatedBy() *SysConfigUpsert {
+	u.SetNull(sysconfig.FieldCreatedBy)
+	return u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (u *SysConfigUpsert) SetUpdatedBy(v uint32) *SysConfigUpsert {
+	u.Set(sysconfig.FieldUpdatedBy, v)
+	return u
+}
+
+// UpdateUpdatedBy sets the "updated_by" field to the value that was provided on create.
+func (u *SysConfigUpsert) UpdateUpdatedBy() *SysConfigUpsert {
+	u.SetExcluded(sysconfig.FieldUpdatedBy)
+	return u
+}
+
+// AddUpdatedBy adds v to the "updated_by" field.
+func (u *SysConfigUpsert) AddUpdatedBy(v uint32) *SysConfigUpsert {
+	u.Add(sysconfig.FieldUpdatedBy, v)
+	return u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (u *SysConfigUpsert) ClearUpdatedBy() *SysConfigUpsert {
+	u.SetNull(sysconfig.FieldUpdatedBy)
+	return u
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (u *SysConfigUpsert) SetDeletedBy(v uint32) *SysConfigUpsert {
+	u.Set(sysconfig.FieldDeletedBy, v)
+	return u
+}
+
+// UpdateDeletedBy sets the "deleted_by" field to the value that was provided on create.
+func (u *SysConfigUpsert) UpdateDeletedBy() *SysConfigUpsert {
+	u.SetExcluded(sysconfig.FieldDeletedBy)
+	return u
+}
+
+// AddDeletedBy adds v to the "deleted_by" field.
+func (u *SysConfigUpsert) AddDeletedBy(v uint32) *SysConfigUpsert {
+	u.Add(sysconfig.FieldDeletedBy, v)
+	return u
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (u *SysConfigUpsert) ClearDeletedBy() *SysConfigUpsert {
+	u.SetNull(sysconfig.FieldDeletedBy)
+	return u
+}
+
 // SetMaxUploadSizeMB sets the "max_upload_size_mb" field.
 func (u *SysConfigUpsert) SetMaxUploadSizeMB(v uint32) *SysConfigUpsert {
 	u.Set(sysconfig.FieldMaxUploadSizeMB, v)
@@ -360,12 +498,6 @@ func (u *SysConfigUpsert) UpdateMaxUploadSizeMB() *SysConfigUpsert {
 // AddMaxUploadSizeMB adds v to the "max_upload_size_mb" field.
 func (u *SysConfigUpsert) AddMaxUploadSizeMB(v uint32) *SysConfigUpsert {
 	u.Add(sysconfig.FieldMaxUploadSizeMB, v)
-	return u
-}
-
-// ClearMaxUploadSizeMB clears the value of the "max_upload_size_mb" field.
-func (u *SysConfigUpsert) ClearMaxUploadSizeMB() *SysConfigUpsert {
-	u.SetNull(sysconfig.FieldMaxUploadSizeMB)
 	return u
 }
 
@@ -387,12 +519,6 @@ func (u *SysConfigUpsert) AddMaxDurationSeconds(v uint32) *SysConfigUpsert {
 	return u
 }
 
-// ClearMaxDurationSeconds clears the value of the "max_duration_seconds" field.
-func (u *SysConfigUpsert) ClearMaxDurationSeconds() *SysConfigUpsert {
-	u.SetNull(sysconfig.FieldMaxDurationSeconds)
-	return u
-}
-
 // SetManualReviewEnabled sets the "manual_review_enabled" field.
 func (u *SysConfigUpsert) SetManualReviewEnabled(v bool) *SysConfigUpsert {
 	u.Set(sysconfig.FieldManualReviewEnabled, v)
@@ -405,12 +531,6 @@ func (u *SysConfigUpsert) UpdateManualReviewEnabled() *SysConfigUpsert {
 	return u
 }
 
-// ClearManualReviewEnabled clears the value of the "manual_review_enabled" field.
-func (u *SysConfigUpsert) ClearManualReviewEnabled() *SysConfigUpsert {
-	u.SetNull(sysconfig.FieldManualReviewEnabled)
-	return u
-}
-
 // SetRegisterEnabled sets the "register_enabled" field.
 func (u *SysConfigUpsert) SetRegisterEnabled(v bool) *SysConfigUpsert {
 	u.Set(sysconfig.FieldRegisterEnabled, v)
@@ -420,12 +540,6 @@ func (u *SysConfigUpsert) SetRegisterEnabled(v bool) *SysConfigUpsert {
 // UpdateRegisterEnabled sets the "register_enabled" field to the value that was provided on create.
 func (u *SysConfigUpsert) UpdateRegisterEnabled() *SysConfigUpsert {
 	u.SetExcluded(sysconfig.FieldRegisterEnabled)
-	return u
-}
-
-// ClearRegisterEnabled clears the value of the "register_enabled" field.
-func (u *SysConfigUpsert) ClearRegisterEnabled() *SysConfigUpsert {
-	u.SetNull(sysconfig.FieldRegisterEnabled)
 	return u
 }
 
@@ -540,6 +654,90 @@ func (u *SysConfigUpsertOne) ClearDeletedAt() *SysConfigUpsertOne {
 	})
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (u *SysConfigUpsertOne) SetCreatedBy(v uint32) *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetCreatedBy(v)
+	})
+}
+
+// AddCreatedBy adds v to the "created_by" field.
+func (u *SysConfigUpsertOne) AddCreatedBy(v uint32) *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.AddCreatedBy(v)
+	})
+}
+
+// UpdateCreatedBy sets the "created_by" field to the value that was provided on create.
+func (u *SysConfigUpsertOne) UpdateCreatedBy() *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateCreatedBy()
+	})
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (u *SysConfigUpsertOne) ClearCreatedBy() *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.ClearCreatedBy()
+	})
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (u *SysConfigUpsertOne) SetUpdatedBy(v uint32) *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetUpdatedBy(v)
+	})
+}
+
+// AddUpdatedBy adds v to the "updated_by" field.
+func (u *SysConfigUpsertOne) AddUpdatedBy(v uint32) *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.AddUpdatedBy(v)
+	})
+}
+
+// UpdateUpdatedBy sets the "updated_by" field to the value that was provided on create.
+func (u *SysConfigUpsertOne) UpdateUpdatedBy() *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateUpdatedBy()
+	})
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (u *SysConfigUpsertOne) ClearUpdatedBy() *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.ClearUpdatedBy()
+	})
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (u *SysConfigUpsertOne) SetDeletedBy(v uint32) *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetDeletedBy(v)
+	})
+}
+
+// AddDeletedBy adds v to the "deleted_by" field.
+func (u *SysConfigUpsertOne) AddDeletedBy(v uint32) *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.AddDeletedBy(v)
+	})
+}
+
+// UpdateDeletedBy sets the "deleted_by" field to the value that was provided on create.
+func (u *SysConfigUpsertOne) UpdateDeletedBy() *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateDeletedBy()
+	})
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (u *SysConfigUpsertOne) ClearDeletedBy() *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.ClearDeletedBy()
+	})
+}
+
 // SetMaxUploadSizeMB sets the "max_upload_size_mb" field.
 func (u *SysConfigUpsertOne) SetMaxUploadSizeMB(v uint32) *SysConfigUpsertOne {
 	return u.Update(func(s *SysConfigUpsert) {
@@ -558,13 +756,6 @@ func (u *SysConfigUpsertOne) AddMaxUploadSizeMB(v uint32) *SysConfigUpsertOne {
 func (u *SysConfigUpsertOne) UpdateMaxUploadSizeMB() *SysConfigUpsertOne {
 	return u.Update(func(s *SysConfigUpsert) {
 		s.UpdateMaxUploadSizeMB()
-	})
-}
-
-// ClearMaxUploadSizeMB clears the value of the "max_upload_size_mb" field.
-func (u *SysConfigUpsertOne) ClearMaxUploadSizeMB() *SysConfigUpsertOne {
-	return u.Update(func(s *SysConfigUpsert) {
-		s.ClearMaxUploadSizeMB()
 	})
 }
 
@@ -589,13 +780,6 @@ func (u *SysConfigUpsertOne) UpdateMaxDurationSeconds() *SysConfigUpsertOne {
 	})
 }
 
-// ClearMaxDurationSeconds clears the value of the "max_duration_seconds" field.
-func (u *SysConfigUpsertOne) ClearMaxDurationSeconds() *SysConfigUpsertOne {
-	return u.Update(func(s *SysConfigUpsert) {
-		s.ClearMaxDurationSeconds()
-	})
-}
-
 // SetManualReviewEnabled sets the "manual_review_enabled" field.
 func (u *SysConfigUpsertOne) SetManualReviewEnabled(v bool) *SysConfigUpsertOne {
 	return u.Update(func(s *SysConfigUpsert) {
@@ -610,13 +794,6 @@ func (u *SysConfigUpsertOne) UpdateManualReviewEnabled() *SysConfigUpsertOne {
 	})
 }
 
-// ClearManualReviewEnabled clears the value of the "manual_review_enabled" field.
-func (u *SysConfigUpsertOne) ClearManualReviewEnabled() *SysConfigUpsertOne {
-	return u.Update(func(s *SysConfigUpsert) {
-		s.ClearManualReviewEnabled()
-	})
-}
-
 // SetRegisterEnabled sets the "register_enabled" field.
 func (u *SysConfigUpsertOne) SetRegisterEnabled(v bool) *SysConfigUpsertOne {
 	return u.Update(func(s *SysConfigUpsert) {
@@ -628,13 +805,6 @@ func (u *SysConfigUpsertOne) SetRegisterEnabled(v bool) *SysConfigUpsertOne {
 func (u *SysConfigUpsertOne) UpdateRegisterEnabled() *SysConfigUpsertOne {
 	return u.Update(func(s *SysConfigUpsert) {
 		s.UpdateRegisterEnabled()
-	})
-}
-
-// ClearRegisterEnabled clears the value of the "register_enabled" field.
-func (u *SysConfigUpsertOne) ClearRegisterEnabled() *SysConfigUpsertOne {
-	return u.Update(func(s *SysConfigUpsert) {
-		s.ClearRegisterEnabled()
 	})
 }
 
@@ -918,6 +1088,90 @@ func (u *SysConfigUpsertBulk) ClearDeletedAt() *SysConfigUpsertBulk {
 	})
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (u *SysConfigUpsertBulk) SetCreatedBy(v uint32) *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetCreatedBy(v)
+	})
+}
+
+// AddCreatedBy adds v to the "created_by" field.
+func (u *SysConfigUpsertBulk) AddCreatedBy(v uint32) *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.AddCreatedBy(v)
+	})
+}
+
+// UpdateCreatedBy sets the "created_by" field to the value that was provided on create.
+func (u *SysConfigUpsertBulk) UpdateCreatedBy() *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateCreatedBy()
+	})
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (u *SysConfigUpsertBulk) ClearCreatedBy() *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.ClearCreatedBy()
+	})
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (u *SysConfigUpsertBulk) SetUpdatedBy(v uint32) *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetUpdatedBy(v)
+	})
+}
+
+// AddUpdatedBy adds v to the "updated_by" field.
+func (u *SysConfigUpsertBulk) AddUpdatedBy(v uint32) *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.AddUpdatedBy(v)
+	})
+}
+
+// UpdateUpdatedBy sets the "updated_by" field to the value that was provided on create.
+func (u *SysConfigUpsertBulk) UpdateUpdatedBy() *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateUpdatedBy()
+	})
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (u *SysConfigUpsertBulk) ClearUpdatedBy() *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.ClearUpdatedBy()
+	})
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (u *SysConfigUpsertBulk) SetDeletedBy(v uint32) *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetDeletedBy(v)
+	})
+}
+
+// AddDeletedBy adds v to the "deleted_by" field.
+func (u *SysConfigUpsertBulk) AddDeletedBy(v uint32) *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.AddDeletedBy(v)
+	})
+}
+
+// UpdateDeletedBy sets the "deleted_by" field to the value that was provided on create.
+func (u *SysConfigUpsertBulk) UpdateDeletedBy() *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateDeletedBy()
+	})
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (u *SysConfigUpsertBulk) ClearDeletedBy() *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.ClearDeletedBy()
+	})
+}
+
 // SetMaxUploadSizeMB sets the "max_upload_size_mb" field.
 func (u *SysConfigUpsertBulk) SetMaxUploadSizeMB(v uint32) *SysConfigUpsertBulk {
 	return u.Update(func(s *SysConfigUpsert) {
@@ -936,13 +1190,6 @@ func (u *SysConfigUpsertBulk) AddMaxUploadSizeMB(v uint32) *SysConfigUpsertBulk 
 func (u *SysConfigUpsertBulk) UpdateMaxUploadSizeMB() *SysConfigUpsertBulk {
 	return u.Update(func(s *SysConfigUpsert) {
 		s.UpdateMaxUploadSizeMB()
-	})
-}
-
-// ClearMaxUploadSizeMB clears the value of the "max_upload_size_mb" field.
-func (u *SysConfigUpsertBulk) ClearMaxUploadSizeMB() *SysConfigUpsertBulk {
-	return u.Update(func(s *SysConfigUpsert) {
-		s.ClearMaxUploadSizeMB()
 	})
 }
 
@@ -967,13 +1214,6 @@ func (u *SysConfigUpsertBulk) UpdateMaxDurationSeconds() *SysConfigUpsertBulk {
 	})
 }
 
-// ClearMaxDurationSeconds clears the value of the "max_duration_seconds" field.
-func (u *SysConfigUpsertBulk) ClearMaxDurationSeconds() *SysConfigUpsertBulk {
-	return u.Update(func(s *SysConfigUpsert) {
-		s.ClearMaxDurationSeconds()
-	})
-}
-
 // SetManualReviewEnabled sets the "manual_review_enabled" field.
 func (u *SysConfigUpsertBulk) SetManualReviewEnabled(v bool) *SysConfigUpsertBulk {
 	return u.Update(func(s *SysConfigUpsert) {
@@ -988,13 +1228,6 @@ func (u *SysConfigUpsertBulk) UpdateManualReviewEnabled() *SysConfigUpsertBulk {
 	})
 }
 
-// ClearManualReviewEnabled clears the value of the "manual_review_enabled" field.
-func (u *SysConfigUpsertBulk) ClearManualReviewEnabled() *SysConfigUpsertBulk {
-	return u.Update(func(s *SysConfigUpsert) {
-		s.ClearManualReviewEnabled()
-	})
-}
-
 // SetRegisterEnabled sets the "register_enabled" field.
 func (u *SysConfigUpsertBulk) SetRegisterEnabled(v bool) *SysConfigUpsertBulk {
 	return u.Update(func(s *SysConfigUpsert) {
@@ -1006,13 +1239,6 @@ func (u *SysConfigUpsertBulk) SetRegisterEnabled(v bool) *SysConfigUpsertBulk {
 func (u *SysConfigUpsertBulk) UpdateRegisterEnabled() *SysConfigUpsertBulk {
 	return u.Update(func(s *SysConfigUpsert) {
 		s.UpdateRegisterEnabled()
-	})
-}
-
-// ClearRegisterEnabled clears the value of the "register_enabled" field.
-func (u *SysConfigUpsertBulk) ClearRegisterEnabled() *SysConfigUpsertBulk {
-	return u.Update(func(s *SysConfigUpsert) {
-		s.ClearRegisterEnabled()
 	})
 }
 

@@ -90,36 +90,17 @@ func (_u *VideoLikeUpdate) AddUserID(v int32) *VideoLikeUpdate {
 	return _u
 }
 
-// ClearUserID clears the value of the "user_id" field.
-func (_u *VideoLikeUpdate) ClearUserID() *VideoLikeUpdate {
-	_u.mutation.ClearUserID()
-	return _u
-}
-
 // SetTargetType sets the "target_type" field.
-func (_u *VideoLikeUpdate) SetTargetType(v uint8) *VideoLikeUpdate {
-	_u.mutation.ResetTargetType()
+func (_u *VideoLikeUpdate) SetTargetType(v videolike.TargetType) *VideoLikeUpdate {
 	_u.mutation.SetTargetType(v)
 	return _u
 }
 
 // SetNillableTargetType sets the "target_type" field if the given value is not nil.
-func (_u *VideoLikeUpdate) SetNillableTargetType(v *uint8) *VideoLikeUpdate {
+func (_u *VideoLikeUpdate) SetNillableTargetType(v *videolike.TargetType) *VideoLikeUpdate {
 	if v != nil {
 		_u.SetTargetType(*v)
 	}
-	return _u
-}
-
-// AddTargetType adds value to the "target_type" field.
-func (_u *VideoLikeUpdate) AddTargetType(v int8) *VideoLikeUpdate {
-	_u.mutation.AddTargetType(v)
-	return _u
-}
-
-// ClearTargetType clears the value of the "target_type" field.
-func (_u *VideoLikeUpdate) ClearTargetType() *VideoLikeUpdate {
-	_u.mutation.ClearTargetType()
 	return _u
 }
 
@@ -141,12 +122,6 @@ func (_u *VideoLikeUpdate) SetNillableTargetID(v *uint32) *VideoLikeUpdate {
 // AddTargetID adds value to the "target_id" field.
 func (_u *VideoLikeUpdate) AddTargetID(v int32) *VideoLikeUpdate {
 	_u.mutation.AddTargetID(v)
-	return _u
-}
-
-// ClearTargetID clears the value of the "target_id" field.
-func (_u *VideoLikeUpdate) ClearTargetID() *VideoLikeUpdate {
-	_u.mutation.ClearTargetID()
 	return _u
 }
 
@@ -182,6 +157,16 @@ func (_u *VideoLikeUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *VideoLikeUpdate) check() error {
+	if v, ok := _u.mutation.TargetType(); ok {
+		if err := videolike.TargetTypeValidator(v); err != nil {
+			return &ValidationError{Name: "target_type", err: fmt.Errorf(`ent: validator failed for field "VideoLike.target_type": %w`, err)}
+		}
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *VideoLikeUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *VideoLikeUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -189,6 +174,9 @@ func (_u *VideoLikeUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Vide
 }
 
 func (_u *VideoLikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(videolike.Table, videolike.Columns, sqlgraph.NewFieldSpec(videolike.FieldID, field.TypeUint32))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -212,32 +200,23 @@ func (_u *VideoLikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(videolike.FieldDeletedAt, field.TypeTime)
 	}
+	if _u.mutation.TenantIDCleared() {
+		_spec.ClearField(videolike.FieldTenantID, field.TypeUint32)
+	}
 	if value, ok := _u.mutation.UserID(); ok {
 		_spec.SetField(videolike.FieldUserID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
 		_spec.AddField(videolike.FieldUserID, field.TypeUint32, value)
 	}
-	if _u.mutation.UserIDCleared() {
-		_spec.ClearField(videolike.FieldUserID, field.TypeUint32)
-	}
 	if value, ok := _u.mutation.TargetType(); ok {
-		_spec.SetField(videolike.FieldTargetType, field.TypeUint8, value)
-	}
-	if value, ok := _u.mutation.AddedTargetType(); ok {
-		_spec.AddField(videolike.FieldTargetType, field.TypeUint8, value)
-	}
-	if _u.mutation.TargetTypeCleared() {
-		_spec.ClearField(videolike.FieldTargetType, field.TypeUint8)
+		_spec.SetField(videolike.FieldTargetType, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.TargetID(); ok {
 		_spec.SetField(videolike.FieldTargetID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedTargetID(); ok {
 		_spec.AddField(videolike.FieldTargetID, field.TypeUint32, value)
-	}
-	if _u.mutation.TargetIDCleared() {
-		_spec.ClearField(videolike.FieldTargetID, field.TypeUint32)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -322,36 +301,17 @@ func (_u *VideoLikeUpdateOne) AddUserID(v int32) *VideoLikeUpdateOne {
 	return _u
 }
 
-// ClearUserID clears the value of the "user_id" field.
-func (_u *VideoLikeUpdateOne) ClearUserID() *VideoLikeUpdateOne {
-	_u.mutation.ClearUserID()
-	return _u
-}
-
 // SetTargetType sets the "target_type" field.
-func (_u *VideoLikeUpdateOne) SetTargetType(v uint8) *VideoLikeUpdateOne {
-	_u.mutation.ResetTargetType()
+func (_u *VideoLikeUpdateOne) SetTargetType(v videolike.TargetType) *VideoLikeUpdateOne {
 	_u.mutation.SetTargetType(v)
 	return _u
 }
 
 // SetNillableTargetType sets the "target_type" field if the given value is not nil.
-func (_u *VideoLikeUpdateOne) SetNillableTargetType(v *uint8) *VideoLikeUpdateOne {
+func (_u *VideoLikeUpdateOne) SetNillableTargetType(v *videolike.TargetType) *VideoLikeUpdateOne {
 	if v != nil {
 		_u.SetTargetType(*v)
 	}
-	return _u
-}
-
-// AddTargetType adds value to the "target_type" field.
-func (_u *VideoLikeUpdateOne) AddTargetType(v int8) *VideoLikeUpdateOne {
-	_u.mutation.AddTargetType(v)
-	return _u
-}
-
-// ClearTargetType clears the value of the "target_type" field.
-func (_u *VideoLikeUpdateOne) ClearTargetType() *VideoLikeUpdateOne {
-	_u.mutation.ClearTargetType()
 	return _u
 }
 
@@ -373,12 +333,6 @@ func (_u *VideoLikeUpdateOne) SetNillableTargetID(v *uint32) *VideoLikeUpdateOne
 // AddTargetID adds value to the "target_id" field.
 func (_u *VideoLikeUpdateOne) AddTargetID(v int32) *VideoLikeUpdateOne {
 	_u.mutation.AddTargetID(v)
-	return _u
-}
-
-// ClearTargetID clears the value of the "target_id" field.
-func (_u *VideoLikeUpdateOne) ClearTargetID() *VideoLikeUpdateOne {
-	_u.mutation.ClearTargetID()
 	return _u
 }
 
@@ -427,6 +381,16 @@ func (_u *VideoLikeUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *VideoLikeUpdateOne) check() error {
+	if v, ok := _u.mutation.TargetType(); ok {
+		if err := videolike.TargetTypeValidator(v); err != nil {
+			return &ValidationError{Name: "target_type", err: fmt.Errorf(`ent: validator failed for field "VideoLike.target_type": %w`, err)}
+		}
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *VideoLikeUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *VideoLikeUpdateOne {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -434,6 +398,9 @@ func (_u *VideoLikeUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *V
 }
 
 func (_u *VideoLikeUpdateOne) sqlSave(ctx context.Context) (_node *VideoLike, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(videolike.Table, videolike.Columns, sqlgraph.NewFieldSpec(videolike.FieldID, field.TypeUint32))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -474,32 +441,23 @@ func (_u *VideoLikeUpdateOne) sqlSave(ctx context.Context) (_node *VideoLike, er
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(videolike.FieldDeletedAt, field.TypeTime)
 	}
+	if _u.mutation.TenantIDCleared() {
+		_spec.ClearField(videolike.FieldTenantID, field.TypeUint32)
+	}
 	if value, ok := _u.mutation.UserID(); ok {
 		_spec.SetField(videolike.FieldUserID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
 		_spec.AddField(videolike.FieldUserID, field.TypeUint32, value)
 	}
-	if _u.mutation.UserIDCleared() {
-		_spec.ClearField(videolike.FieldUserID, field.TypeUint32)
-	}
 	if value, ok := _u.mutation.TargetType(); ok {
-		_spec.SetField(videolike.FieldTargetType, field.TypeUint8, value)
-	}
-	if value, ok := _u.mutation.AddedTargetType(); ok {
-		_spec.AddField(videolike.FieldTargetType, field.TypeUint8, value)
-	}
-	if _u.mutation.TargetTypeCleared() {
-		_spec.ClearField(videolike.FieldTargetType, field.TypeUint8)
+		_spec.SetField(videolike.FieldTargetType, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.TargetID(); ok {
 		_spec.SetField(videolike.FieldTargetID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedTargetID(); ok {
 		_spec.AddField(videolike.FieldTargetID, field.TypeUint32, value)
-	}
-	if _u.mutation.TargetIDCleared() {
-		_spec.ClearField(videolike.FieldTargetID, field.TypeUint32)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &VideoLike{config: _u.config}

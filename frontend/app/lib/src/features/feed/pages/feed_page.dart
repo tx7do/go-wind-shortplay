@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -152,25 +153,28 @@ class _FeedPageState extends State<FeedPage>
           if (state.items.isEmpty) {
             return _buildEmpty(context, state, loc);
           }
-          return PageView.builder(
-            controller: _pageController,
-            scrollDirection: Axis.vertical,
-            itemCount: state.items.length,
-            onPageChanged: _onPageChanged,
-            itemBuilder: (context, index) {
-              final item = state.items[index];
-              return _FeedPageItem(
-                key: ValueKey('feed-video-${item.video.id}'),
-                feedItem: item,
-                isActive: index == _currentDrawnPage(),
-                author: _authors[item.video.authorId],
-                onNeedDetail: () => _fetchVideoDetail(item.video.id),
-                onVideoUpdated: (video) => context
-                    .read<FeedBloc>()
-                    .add(FeedVideoReplaced(video.id, video)),
-                onCommentTap: () => _openComments(item.video),
-              );
-            },
+          return ScrollConfiguration(
+            behavior: const _MouseDragScrollBehavior(),
+            child: PageView.builder(
+              controller: _pageController,
+              scrollDirection: Axis.vertical,
+              itemCount: state.items.length,
+              onPageChanged: _onPageChanged,
+              itemBuilder: (context, index) {
+                final item = state.items[index];
+                return _FeedPageItem(
+                  key: ValueKey('feed-video-${item.video.id}'),
+                  feedItem: item,
+                  isActive: index == _currentDrawnPage(),
+                  author: _authors[item.video.authorId],
+                  onNeedDetail: () => _fetchVideoDetail(item.video.id),
+                  onVideoUpdated: (video) => context
+                      .read<FeedBloc>()
+                      .add(FeedVideoReplaced(video.id, video)),
+                  onCommentTap: () => _openComments(item.video),
+                );
+              },
+            ),
           );
         },
       ),
@@ -293,4 +297,16 @@ class _FeedPageItem extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Web 桌面端默认 ScrollBehavior 的 dragDevices 不含鼠标，按住拖拽不会滚动；
+/// 放开鼠标后，上下滑 PageView 才能像移动端触屏一样拖拽切换视频。
+class _MouseDragScrollBehavior extends MaterialScrollBehavior {
+  const _MouseDragScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        ...super.dragDevices,
+        PointerDeviceKind.mouse,
+      };
 }

@@ -16,7 +16,7 @@ ROOT_DIR	:= $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 SRCS_MK		:= $(foreach dir, app, $(wildcard $(dir)/*/*/Makefile))
 
 .PHONY: help register gen ent build api openapi init all vendor dep test cover vet lint docker \
-		install-dev install-prod docker-up docker-down docker-libs compose-up compose-down
+		install-dev install-prod docker-up docker-down docker-libs pm2-deploy
 
 # show environment variables
 env:
@@ -72,6 +72,10 @@ vet:
 lint:
 	golangci-lint run
 
+# register a new CRUD module into the hand-written wiring (usage: make register ENTITY=product [SVC=core] [PKG=contentV1])
+register:
+	go run ./tools/register -entity $(ENTITY) -svc $(SVC) -pkg $(PKG)
+
 # generate ent code
 ent:
 	$(foreach dir, $(dir $(realpath $(SRCS_MK))),\
@@ -96,7 +100,11 @@ openapi:
 # generate protobuf api Typescript code
 ts:
 	@cd api && \
-	buf generate --template buf.admin.typescript.gen.yaml
+	buf generate --template buf.admin.openapi.gen.yaml && \
+	buf generate --template buf.admin.typescript.gen.yaml && \
+	buf generate --template buf.react.app.typescript.gen.yaml && \
+	buf generate --template buf.taro.app.typescript.gen.yaml && \
+	buf generate --template buf.vue.app.typescript.gen.yaml
 
 # build all service applications
 build: api openapi
@@ -110,6 +118,20 @@ build_only:
 	$(foreach dir, $(dir $(realpath $(SRCS_MK))),\
       cd $(dir);\
       make build_only;\
+    )
+
+# export configuration to etcd
+export:
+	@cfgexp \
+		--type=etcd \
+		--addr=localhost:2379 \
+		--proj=$(PROJECT_NAME)
+
+# generate & build all service applications
+all:
+	$(foreach dir, $(dir $(realpath $(SRCS_MK))),\
+      cd $(dir);\
+      make app;\
     )
 
 # use docker compose to run backend services and all its dependency services like redis, mysql, etc.
@@ -126,7 +148,7 @@ compose-down:
 
 # use docker compose to run only dependency services like redis, mysql, etc. without backend services.
 compose-up-libs:
-	@docker compose -f docker-compose.libs.yaml up -d
+	@echo "shortplay 依赖中间件复用宿主机既有容器（Citus PG/Redis/MinIO/etcd），不提供 libs 编排"
 
 # build docker image
 docker:
@@ -134,6 +156,53 @@ docker:
       cd $(dir);\
       make docker;\
     )
+
+# ============================================================================
+# Script Commands - 脚本命令
+# ============================================================================
+
+# install development environment (Unix/Linux/macOS)
+install-dev:
+	echo "Installing development environment..."
+	@bash scripts/env/install_unix_dev.sh
+
+# install production environment (Unix/Linux/macOS)
+install-prod:
+	echo "Installing production environment..."
+	@bash scripts/env/install_unix_prod.sh
+
+# install golang only
+install-golang:
+	echo "Installing Golang..."
+	@bash scripts/env/install_golang.sh
+
+# start all services with docker compose (application + dependencies)
+docker-up:
+	echo "Starting all services (application + dependencies)..."
+ifdef IS_WINDOWS
+	@powershell -ExecutionPolicy Bypass -File scripts/docker/full_deploy.ps1
+else
+	@bash scripts/docker/full_deploy.sh
+endif
+
+# start only dependency services with docker compose (without application)
+docker-libs:
+	echo "Starting dependency services only..."
+ifdef IS_WINDOWS
+	@powershell -ExecutionPolicy Bypass -File scripts/docker/libs_only.ps1
+else
+	@bash scripts/docker/libs_only.sh
+endif
+
+# stop all docker compose services
+docker-down:
+	echo "Stopping all services..."
+	@docker compose down
+
+# deploy services with PM2
+pm2-deploy:
+	echo "Deploying services with PM2..."
+	@bash scripts/deploy/pm2_service.sh
 
 # show help
 help:

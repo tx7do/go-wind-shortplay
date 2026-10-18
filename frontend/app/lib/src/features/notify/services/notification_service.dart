@@ -1,28 +1,34 @@
 import 'package:get_it/get_it.dart' show GetIt;
 
 import 'package:shortplay_app/src/core/services/base_service.dart';
-import 'package:shortplay_app/src/core/services/pagination_query.dart';
 import 'package:shortplay_app/src/core/transport/http/index.dart';
 import 'package:shortplay_app/src/core/utilities/convert.dart';
 import 'package:shortplay_app/src/features/notify/models/notification.dart';
 
-/// 通知服务：列表 / 已读 / 未读数
+/// 站内信通知服务（基座 internal_message 域收件箱的 app BFF 新端点）
+///
+/// 端点（均需登录）：
+/// - `POST /notifications/list`        {page, pageSize, unreadOnly} → {items, total}
+/// - `GET  /notifications/unread-count`                            → {count}
+/// - `POST /notifications/read`        {recipientIds: [id]}        → {}
+/// - `POST /notifications/read-all`    {}                          → {}
 class NotificationService extends BaseService {
   NotificationService() : super(tag: 'NotificationService');
 
   Dio get _dio => GetIt.instance<Dio>();
 
-  /// 通知列表（需登录）
-  /// `GET /notifications?unreadOnly=&pageNum=` → {items, total, unreadCount}
-  Future<({List<NotificationItem> items, int total, int unreadCount})> list({
-    required PaginationQuery query,
+  /// 通知列表（当前用户收件箱）
+  Future<({List<NotificationItem> items, int total})> list({
+    int page = 1,
+    int pageSize = 10,
     bool unreadOnly = false,
   }) async {
     try {
-      final res = await _dio.get<Map<String, dynamic>>(
-        '/notifications',
-        queryParameters: {
-          ...query.toQueryMap(),
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/notifications/list',
+        data: {
+          'page': page,
+          'pageSize': pageSize,
           'unreadOnly': unreadOnly,
         },
       );
@@ -34,19 +40,18 @@ class NotificationService extends BaseService {
       return (
         items: items,
         total: jsonInt(data['total'], fallback: items.length),
-        unreadCount: jsonInt(data['unreadCount']),
       );
     } on DioException catch (e) {
       throw ApiStatusException(handleDioError(e));
     }
   }
 
-  /// 标记已读
+  /// 标记已读（收件记录 ID 列表）
   Future<void> markRead(List<int> ids) async {
     try {
-      await _dio.put<Object?>(
+      await _dio.post<Object?>(
         '/notifications/read',
-        data: {'ids': ids},
+        data: {'recipientIds': ids},
       );
     } on DioException catch (e) {
       throw ApiStatusException(handleDioError(e));
@@ -56,22 +61,19 @@ class NotificationService extends BaseService {
   /// 全部已读
   Future<void> markAllRead() async {
     try {
-      await _dio.put<Object?>('/notifications/read-all', data: const {});
+      await _dio.post<Object?>('/notifications/read-all', data: const {});
     } on DioException catch (e) {
       throw ApiStatusException(handleDioError(e));
     }
   }
 
   /// 未读数
-  ///
-  /// 注意：实测后端该端点返回 `{"count":"0"}`（int64 字符串），
-  /// 与 API.md 文档写的 `unreadCount` 键名不一致，两种键名都兼容。
   Future<int> unreadCount() async {
     try {
       final res =
           await _dio.get<Map<String, dynamic>>('/notifications/unread-count');
       final data = res.data ?? const {};
-      return jsonInt(data['count'] ?? data['unreadCount']);
+      return jsonInt(data['count']);
     } on DioException catch (e) {
       throw ApiStatusException(handleDioError(e));
     }

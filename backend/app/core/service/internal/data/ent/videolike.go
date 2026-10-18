@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 点赞流水表
+// 点赞台账表
 type VideoLike struct {
 	config `json:"-"`
 	// ID of the ent.
@@ -24,12 +24,14 @@ type VideoLike struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
-	// 点赞人ID
-	UserID *uint32 `json:"user_id,omitempty"`
-	// 目标类型：1 视频 2 评论
-	TargetType *uint8 `json:"target_type,omitempty"`
+	// 租户ID
+	TenantID *uint32 `json:"tenant_id,omitempty"`
+	// 点赞人用户ID
+	UserID uint32 `json:"user_id,omitempty"`
+	// 目标类型
+	TargetType videolike.TargetType `json:"target_type,omitempty"`
 	// 目标ID
-	TargetID     *uint32 `json:"target_id,omitempty"`
+	TargetID     uint32 `json:"target_id,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -38,8 +40,10 @@ func (*VideoLike) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case videolike.FieldID, videolike.FieldUserID, videolike.FieldTargetType, videolike.FieldTargetID:
+		case videolike.FieldID, videolike.FieldTenantID, videolike.FieldUserID, videolike.FieldTargetID:
 			values[i] = new(sql.NullInt64)
+		case videolike.FieldTargetType:
+			values[i] = new(sql.NullString)
 		case videolike.FieldCreatedAt, videolike.FieldUpdatedAt, videolike.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
@@ -84,26 +88,30 @@ func (_m *VideoLike) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
+		case videolike.FieldTenantID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
+			} else if value.Valid {
+				_m.TenantID = new(uint32)
+				*_m.TenantID = uint32(value.Int64)
+			}
 		case videolike.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.UserID = new(uint32)
-				*_m.UserID = uint32(value.Int64)
+				_m.UserID = uint32(value.Int64)
 			}
 		case videolike.FieldTargetType:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field target_type", values[i])
 			} else if value.Valid {
-				_m.TargetType = new(uint8)
-				*_m.TargetType = uint8(value.Int64)
+				_m.TargetType = videolike.TargetType(value.String)
 			}
 		case videolike.FieldTargetID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field target_id", values[i])
 			} else if value.Valid {
-				_m.TargetID = new(uint32)
-				*_m.TargetID = uint32(value.Int64)
+				_m.TargetID = uint32(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -156,20 +164,19 @@ func (_m *VideoLike) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	if v := _m.UserID; v != nil {
-		builder.WriteString("user_id=")
+	if v := _m.TenantID; v != nil {
+		builder.WriteString("tenant_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := _m.TargetType; v != nil {
-		builder.WriteString("target_type=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("user_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteString(", ")
-	if v := _m.TargetID; v != nil {
-		builder.WriteString("target_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("target_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TargetType))
+	builder.WriteString(", ")
+	builder.WriteString("target_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TargetID))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 视频标签关联表
+// 短视频-标签关联表
 type VideoTagRel struct {
 	config `json:"-"`
 	// ID of the ent.
@@ -24,10 +24,12 @@ type VideoTagRel struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// 租户ID
+	TenantID *uint32 `json:"tenant_id,omitempty"`
 	// 视频ID
-	VideoID *uint32 `json:"video_id,omitempty"`
+	VideoID uint32 `json:"video_id,omitempty"`
 	// 标签ID
-	TagID        *uint32 `json:"tag_id,omitempty"`
+	TagID        uint32 `json:"tag_id,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -36,7 +38,7 @@ func (*VideoTagRel) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case videotagrel.FieldID, videotagrel.FieldVideoID, videotagrel.FieldTagID:
+		case videotagrel.FieldID, videotagrel.FieldTenantID, videotagrel.FieldVideoID, videotagrel.FieldTagID:
 			values[i] = new(sql.NullInt64)
 		case videotagrel.FieldCreatedAt, videotagrel.FieldUpdatedAt, videotagrel.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -82,19 +84,24 @@ func (_m *VideoTagRel) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
+		case videotagrel.FieldTenantID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
+			} else if value.Valid {
+				_m.TenantID = new(uint32)
+				*_m.TenantID = uint32(value.Int64)
+			}
 		case videotagrel.FieldVideoID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field video_id", values[i])
 			} else if value.Valid {
-				_m.VideoID = new(uint32)
-				*_m.VideoID = uint32(value.Int64)
+				_m.VideoID = uint32(value.Int64)
 			}
 		case videotagrel.FieldTagID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field tag_id", values[i])
 			} else if value.Valid {
-				_m.TagID = new(uint32)
-				*_m.TagID = uint32(value.Int64)
+				_m.TagID = uint32(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -147,15 +154,16 @@ func (_m *VideoTagRel) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	if v := _m.VideoID; v != nil {
-		builder.WriteString("video_id=")
+	if v := _m.TenantID; v != nil {
+		builder.WriteString("tenant_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := _m.TagID; v != nil {
-		builder.WriteString("tag_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("video_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.VideoID))
+	builder.WriteString(", ")
+	builder.WriteString("tag_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TagID))
 	builder.WriteByte(')')
 	return builder.String()
 }

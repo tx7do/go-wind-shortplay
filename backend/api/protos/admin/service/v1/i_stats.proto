@@ -21,4 +21,11 @@ service DashboardService {
       get: "/admin/v1/dashboard/top-videos"
     };
   }
+
+  // 近 N 日趋势（看板折线图）
+  rpc Trends (stats.service.v1.ListTrendsRequest) returns (stats.service.v1.ListTrendsResponse) {
+    option (google.api.http) = {
+      get: "/admin/v1/dashboard/trends"
+    };
+  }
 }

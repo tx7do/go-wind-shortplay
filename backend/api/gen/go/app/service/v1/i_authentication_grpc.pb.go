@@ -4,11 +4,11 @@
 // - protoc             (unknown)
 // source: app/service/v1/i_authentication.proto
 
-package apppb
+package servicev1
 
 import (
 	context "context"
-	v1 "go-wind-shortplay/api/gen/go/identity/service/v1"
+	v1 "go-wind-shortplay/api/gen/go/authentication/service/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -21,26 +21,38 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthenticationService_Login_FullMethodName        = "/app.service.v1.AuthenticationService/Login"
-	AuthenticationService_Register_FullMethodName     = "/app.service.v1.AuthenticationService/Register"
-	AuthenticationService_RefreshToken_FullMethodName = "/app.service.v1.AuthenticationService/RefreshToken"
-	AuthenticationService_Logout_FullMethodName       = "/app.service.v1.AuthenticationService/Logout"
+	AuthenticationService_Login_FullMethodName               = "/app.service.v1.AuthenticationService/Login"
+	AuthenticationService_Logout_FullMethodName              = "/app.service.v1.AuthenticationService/Logout"
+	AuthenticationService_RefreshToken_FullMethodName        = "/app.service.v1.AuthenticationService/RefreshToken"
+	AuthenticationService_GetOidcAuthorizeUrl_FullMethodName = "/app.service.v1.AuthenticationService/GetOidcAuthorizeUrl"
+	AuthenticationService_AuthLogin_FullMethodName           = "/app.service.v1.AuthenticationService/AuthLogin"
+	AuthenticationService_AuthRegister_FullMethodName        = "/app.service.v1.AuthenticationService/AuthRegister"
+	AuthenticationService_AuthRefresh_FullMethodName         = "/app.service.v1.AuthenticationService/AuthRefresh"
+	AuthenticationService_AuthLogout_FullMethodName          = "/app.service.v1.AuthenticationService/AuthLogout"
 )
 
 // AuthenticationServiceClient is the client API for AuthenticationService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// App 认证服务（注册 / 登录 / 登出 / 我的资料）
+// 用户前台登录认证服务
 type AuthenticationServiceClient interface {
-	// 账号密码登录
+	// 登录
 	Login(ctx context.Context, in *v1.LoginRequest, opts ...grpc.CallOption) (*v1.LoginResponse, error)
-	// 注册（是否开放由系统配置决定）
-	Register(ctx context.Context, in *v1.RegisterRequest, opts ...grpc.CallOption) (*v1.LoginResponse, error)
-	// 刷新令牌
-	RefreshToken(ctx context.Context, in *v1.RefreshTokenRequest, opts ...grpc.CallOption) (*v1.LoginResponse, error)
 	// 登出
-	Logout(ctx context.Context, in *v1.LogoutRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Logout(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// 刷新认证令牌
+	RefreshToken(ctx context.Context, in *v1.LoginRequest, opts ...grpc.CallOption) (*v1.LoginResponse, error)
+	// 获取 OIDC 授权跳转地址（core 生成 state 暂存 Redis，防 CSRF；免鉴权）
+	GetOidcAuthorizeUrl(ctx context.Context, in *v1.GetOidcAuthorizeUrlRequest, opts ...grpc.CallOption) (*v1.GetOidcAuthorizeUrlResponse, error)
+	// 账号密码登录（旧契约：/auth/login，返回 authenticator + user 包装）
+	AuthLogin(ctx context.Context, in *v1.LoginRequest, opts ...grpc.CallOption) (*AuthLoginResponse, error)
+	// 注册（开放注册开关由系统配置决定；成功即登录，返回 authenticator + user 包装）
+	AuthRegister(ctx context.Context, in *AuthRegisterRequest, opts ...grpc.CallOption) (*AuthLoginResponse, error)
+	// 刷新令牌（旧契约：仅凭 refreshToken，无 bearer）
+	AuthRefresh(ctx context.Context, in *AuthRefreshRequest, opts ...grpc.CallOption) (*AuthLoginResponse, error)
+	// 登出（需登录）
+	AuthLogout(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type authenticationServiceClient struct {
@@ -61,17 +73,17 @@ func (c *authenticationServiceClient) Login(ctx context.Context, in *v1.LoginReq
 	return out, nil
 }
 
-func (c *authenticationServiceClient) Register(ctx context.Context, in *v1.RegisterRequest, opts ...grpc.CallOption) (*v1.LoginResponse, error) {
+func (c *authenticationServiceClient) Logout(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.LoginResponse)
-	err := c.cc.Invoke(ctx, AuthenticationService_Register_FullMethodName, in, out, cOpts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, AuthenticationService_Logout_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *authenticationServiceClient) RefreshToken(ctx context.Context, in *v1.RefreshTokenRequest, opts ...grpc.CallOption) (*v1.LoginResponse, error) {
+func (c *authenticationServiceClient) RefreshToken(ctx context.Context, in *v1.LoginRequest, opts ...grpc.CallOption) (*v1.LoginResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.LoginResponse)
 	err := c.cc.Invoke(ctx, AuthenticationService_RefreshToken_FullMethodName, in, out, cOpts...)
@@ -81,10 +93,50 @@ func (c *authenticationServiceClient) RefreshToken(ctx context.Context, in *v1.R
 	return out, nil
 }
 
-func (c *authenticationServiceClient) Logout(ctx context.Context, in *v1.LogoutRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *authenticationServiceClient) GetOidcAuthorizeUrl(ctx context.Context, in *v1.GetOidcAuthorizeUrlRequest, opts ...grpc.CallOption) (*v1.GetOidcAuthorizeUrlResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.GetOidcAuthorizeUrlResponse)
+	err := c.cc.Invoke(ctx, AuthenticationService_GetOidcAuthorizeUrl_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authenticationServiceClient) AuthLogin(ctx context.Context, in *v1.LoginRequest, opts ...grpc.CallOption) (*AuthLoginResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AuthLoginResponse)
+	err := c.cc.Invoke(ctx, AuthenticationService_AuthLogin_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authenticationServiceClient) AuthRegister(ctx context.Context, in *AuthRegisterRequest, opts ...grpc.CallOption) (*AuthLoginResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AuthLoginResponse)
+	err := c.cc.Invoke(ctx, AuthenticationService_AuthRegister_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authenticationServiceClient) AuthRefresh(ctx context.Context, in *AuthRefreshRequest, opts ...grpc.CallOption) (*AuthLoginResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AuthLoginResponse)
+	err := c.cc.Invoke(ctx, AuthenticationService_AuthRefresh_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authenticationServiceClient) AuthLogout(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, AuthenticationService_Logout_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, AuthenticationService_AuthLogout_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -95,16 +147,24 @@ func (c *authenticationServiceClient) Logout(ctx context.Context, in *v1.LogoutR
 // All implementations must embed UnimplementedAuthenticationServiceServer
 // for forward compatibility.
 //
-// App 认证服务（注册 / 登录 / 登出 / 我的资料）
+// 用户前台登录认证服务
 type AuthenticationServiceServer interface {
-	// 账号密码登录
+	// 登录
 	Login(context.Context, *v1.LoginRequest) (*v1.LoginResponse, error)
-	// 注册（是否开放由系统配置决定）
-	Register(context.Context, *v1.RegisterRequest) (*v1.LoginResponse, error)
-	// 刷新令牌
-	RefreshToken(context.Context, *v1.RefreshTokenRequest) (*v1.LoginResponse, error)
 	// 登出
-	Logout(context.Context, *v1.LogoutRequest) (*emptypb.Empty, error)
+	Logout(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	// 刷新认证令牌
+	RefreshToken(context.Context, *v1.LoginRequest) (*v1.LoginResponse, error)
+	// 获取 OIDC 授权跳转地址（core 生成 state 暂存 Redis，防 CSRF；免鉴权）
+	GetOidcAuthorizeUrl(context.Context, *v1.GetOidcAuthorizeUrlRequest) (*v1.GetOidcAuthorizeUrlResponse, error)
+	// 账号密码登录（旧契约：/auth/login，返回 authenticator + user 包装）
+	AuthLogin(context.Context, *v1.LoginRequest) (*AuthLoginResponse, error)
+	// 注册（开放注册开关由系统配置决定；成功即登录，返回 authenticator + user 包装）
+	AuthRegister(context.Context, *AuthRegisterRequest) (*AuthLoginResponse, error)
+	// 刷新令牌（旧契约：仅凭 refreshToken，无 bearer）
+	AuthRefresh(context.Context, *AuthRefreshRequest) (*AuthLoginResponse, error)
+	// 登出（需登录）
+	AuthLogout(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	mustEmbedUnimplementedAuthenticationServiceServer()
 }
 
@@ -118,14 +178,26 @@ type UnimplementedAuthenticationServiceServer struct{}
 func (UnimplementedAuthenticationServiceServer) Login(context.Context, *v1.LoginRequest) (*v1.LoginResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Login not implemented")
 }
-func (UnimplementedAuthenticationServiceServer) Register(context.Context, *v1.RegisterRequest) (*v1.LoginResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Register not implemented")
+func (UnimplementedAuthenticationServiceServer) Logout(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method Logout not implemented")
 }
-func (UnimplementedAuthenticationServiceServer) RefreshToken(context.Context, *v1.RefreshTokenRequest) (*v1.LoginResponse, error) {
+func (UnimplementedAuthenticationServiceServer) RefreshToken(context.Context, *v1.LoginRequest) (*v1.LoginResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RefreshToken not implemented")
 }
-func (UnimplementedAuthenticationServiceServer) Logout(context.Context, *v1.LogoutRequest) (*emptypb.Empty, error) {
-	return nil, status.Error(codes.Unimplemented, "method Logout not implemented")
+func (UnimplementedAuthenticationServiceServer) GetOidcAuthorizeUrl(context.Context, *v1.GetOidcAuthorizeUrlRequest) (*v1.GetOidcAuthorizeUrlResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetOidcAuthorizeUrl not implemented")
+}
+func (UnimplementedAuthenticationServiceServer) AuthLogin(context.Context, *v1.LoginRequest) (*AuthLoginResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AuthLogin not implemented")
+}
+func (UnimplementedAuthenticationServiceServer) AuthRegister(context.Context, *AuthRegisterRequest) (*AuthLoginResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AuthRegister not implemented")
+}
+func (UnimplementedAuthenticationServiceServer) AuthRefresh(context.Context, *AuthRefreshRequest) (*AuthLoginResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AuthRefresh not implemented")
+}
+func (UnimplementedAuthenticationServiceServer) AuthLogout(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method AuthLogout not implemented")
 }
 func (UnimplementedAuthenticationServiceServer) mustEmbedUnimplementedAuthenticationServiceServer() {}
 func (UnimplementedAuthenticationServiceServer) testEmbeddedByValue()                               {}
@@ -166,44 +238,8 @@ func _AuthenticationService_Login_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthenticationService_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.RegisterRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthenticationServiceServer).Register(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AuthenticationService_Register_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthenticationServiceServer).Register(ctx, req.(*v1.RegisterRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AuthenticationService_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.RefreshTokenRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthenticationServiceServer).RefreshToken(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AuthenticationService_RefreshToken_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthenticationServiceServer).RefreshToken(ctx, req.(*v1.RefreshTokenRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _AuthenticationService_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.LogoutRequest)
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -215,7 +251,115 @@ func _AuthenticationService_Logout_Handler(srv interface{}, ctx context.Context,
 		FullMethod: AuthenticationService_Logout_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthenticationServiceServer).Logout(ctx, req.(*v1.LogoutRequest))
+		return srv.(AuthenticationServiceServer).Logout(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthenticationService_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.LoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthenticationServiceServer).RefreshToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthenticationService_RefreshToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthenticationServiceServer).RefreshToken(ctx, req.(*v1.LoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthenticationService_GetOidcAuthorizeUrl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.GetOidcAuthorizeUrlRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthenticationServiceServer).GetOidcAuthorizeUrl(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthenticationService_GetOidcAuthorizeUrl_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthenticationServiceServer).GetOidcAuthorizeUrl(ctx, req.(*v1.GetOidcAuthorizeUrlRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthenticationService_AuthLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.LoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthenticationServiceServer).AuthLogin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthenticationService_AuthLogin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthenticationServiceServer).AuthLogin(ctx, req.(*v1.LoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthenticationService_AuthRegister_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AuthRegisterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthenticationServiceServer).AuthRegister(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthenticationService_AuthRegister_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthenticationServiceServer).AuthRegister(ctx, req.(*AuthRegisterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthenticationService_AuthRefresh_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AuthRefreshRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthenticationServiceServer).AuthRefresh(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthenticationService_AuthRefresh_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthenticationServiceServer).AuthRefresh(ctx, req.(*AuthRefreshRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthenticationService_AuthLogout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthenticationServiceServer).AuthLogout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthenticationService_AuthLogout_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthenticationServiceServer).AuthLogout(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -232,16 +376,32 @@ var AuthenticationService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AuthenticationService_Login_Handler,
 		},
 		{
-			MethodName: "Register",
-			Handler:    _AuthenticationService_Register_Handler,
+			MethodName: "Logout",
+			Handler:    _AuthenticationService_Logout_Handler,
 		},
 		{
 			MethodName: "RefreshToken",
 			Handler:    _AuthenticationService_RefreshToken_Handler,
 		},
 		{
-			MethodName: "Logout",
-			Handler:    _AuthenticationService_Logout_Handler,
+			MethodName: "GetOidcAuthorizeUrl",
+			Handler:    _AuthenticationService_GetOidcAuthorizeUrl_Handler,
+		},
+		{
+			MethodName: "AuthLogin",
+			Handler:    _AuthenticationService_AuthLogin_Handler,
+		},
+		{
+			MethodName: "AuthRegister",
+			Handler:    _AuthenticationService_AuthRegister_Handler,
+		},
+		{
+			MethodName: "AuthRefresh",
+			Handler:    _AuthenticationService_AuthRefresh_Handler,
+		},
+		{
+			MethodName: "AuthLogout",
+			Handler:    _AuthenticationService_AuthLogout_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

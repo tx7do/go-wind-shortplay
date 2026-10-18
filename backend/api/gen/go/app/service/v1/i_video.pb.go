@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: app/service/v1/i_video.proto
 
-package apppb
+package servicev1
 
 import (
 	v11 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
@@ -110,8 +110,8 @@ const file_app_service_v1_i_video_proto_rawDesc = "" +
 	"\vUpdateVideo\x12$.video.service.v1.UpdateVideoRequest\x1a\x17.video.service.v1.Video\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\x1a\x13/app/v1/videos/{id}\x12h\n" +
 	"\vDeleteVideo\x12$.video.service.v1.DeleteVideoRequest\x1a\x16.google.protobuf.Empty\"\x1b\x82\xd3\xe4\x93\x02\x15*\x13/app/v1/videos/{id}\x12]\n" +
 	"\aListTag\x12\x19.pagination.PagingRequest\x1a!.video.service.v1.ListTagResponse\"\x14\x82\xd3\xe4\x93\x02\x0e\x12\f/app/v1/tags\x12\x86\x01\n" +
-	"\x12GetCreatorOverview\x12+.stats.service.v1.GetCreatorOverviewRequest\x1a!.stats.service.v1.CreatorOverview\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/app/v1/creator/overviewB\xae\x01\n" +
-	"\x12com.app.service.v1B\vIVideoProtoP\x01Z1go-wind-shortplay/api/gen/go/app/service/v1;apppb\xa2\x02\x03ASX\xaa\x02\x0eApp.Service.V1\xca\x02\x0eApp\\Service\\V1\xe2\x02\x1aApp\\Service\\V1\\GPBMetadata\xea\x02\x10App::Service::V1b\x06proto3"
+	"\x12GetCreatorOverview\x12+.stats.service.v1.GetCreatorOverviewRequest\x1a!.stats.service.v1.CreatorOverview\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/app/v1/creator/overviewB\xb2\x01\n" +
+	"\x12com.app.service.v1B\vIVideoProtoP\x01Z5go-wind-shortplay/api/gen/go/app/service/v1;servicev1\xa2\x02\x03ASX\xaa\x02\x0eApp.Service.V1\xca\x02\x0eApp\\Service\\V1\xe2\x02\x1aApp\\Service\\V1\\GPBMetadata\xea\x02\x10App::Service::V1b\x06proto3"
 
 var (
 	file_app_service_v1_i_video_proto_rawDescOnce sync.Once

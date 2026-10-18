@@ -8,6 +8,14 @@ import { getDefaultErrorMsg } from './utils';
 const REFRESH_QUEUE_TIMEOUT_MS = 30_000;
 
 /**
+ * 业务性 401 白名单：后端对部分业务接口也用 401 表达「校验失败」
+ * （如 PUT /profile/password 旧密码错误 → WRONG_PASSWORD，见 docs/API.md）。
+ * 这类错误带结构化错误体（{code,reason,message}），必须原样抛回调用方做友好提示，
+ * 绝不能触发 forceLogout 把用户踢回登录页。
+ */
+const BUSINESS_401_REASONS = new Set(['WRONG_PASSWORD']);
+
+/**
  * 认证响应拦截器：处理 401 错误，支持自动刷新 token 和重新认证
  * @param client 请求客户端实例
  * @param doReAuthenticate 重新认证函数，返回 Promise<void>
@@ -35,6 +43,14 @@ export const authenticateResponseInterceptor = ({
 
       /// 不是 401 → 直接抛错，交给错误拦截器处理
       if (response?.status !== 401) {
+        throw error;
+      }
+
+      // 业务性 401（带白名单 reason）≠ 会话失效：原样抛回调用方，
+      // 由页面按 reason 做友好提示（不标记 __handledByAuthInterceptor，
+      // 让错误消息拦截器把 reason 翻译后回调给 onError）
+      const bizReason = (response?.data as { reason?: string } | undefined)?.reason;
+      if (bizReason && BUSINESS_401_REASONS.has(bizReason)) {
         throw error;
       }
 

@@ -25,26 +25,28 @@ type UploadTask struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// 租户ID
+	TenantID *uint32 `json:"tenant_id,omitempty"`
 	// 任务号（UUID）
 	TaskID string `json:"task_id,omitempty"`
 	// 原始文件名
 	FileName string `json:"file_name,omitempty"`
 	// 文件大小（字节）
-	FileSize *int64 `json:"file_size,omitempty"`
+	FileSize uint64 `json:"file_size,omitempty"`
 	// 分片大小（字节）
-	ChunkSize *uint32 `json:"chunk_size,omitempty"`
+	ChunkSize uint32 `json:"chunk_size,omitempty"`
 	// 总分片数
-	TotalChunks *uint32 `json:"total_chunks,omitempty"`
+	TotalChunks uint32 `json:"total_chunks,omitempty"`
 	// 已上传分片序号
 	UploadedChunks []uint32 `json:"uploaded_chunks,omitempty"`
-	// 状态：1 上传中 2 合并中 3 完成 4 失败
-	Status *uint8 `json:"status,omitempty"`
+	// 任务状态
+	Status uploadtask.Status `json:"status,omitempty"`
 	// 合并后的 MinIO 对象键
 	FileKey *string `json:"file_key,omitempty"`
 	// 关联视频ID
-	VideoID *uint32 `json:"video_id,omitempty"`
-	// 上传人ID
-	AuthorID     *uint32 `json:"author_id,omitempty"`
+	VideoID uint32 `json:"video_id,omitempty"`
+	// 上传者用户ID
+	AuthorID     uint32 `json:"author_id,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -55,9 +57,9 @@ func (*UploadTask) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case uploadtask.FieldUploadedChunks:
 			values[i] = new([]byte)
-		case uploadtask.FieldID, uploadtask.FieldFileSize, uploadtask.FieldChunkSize, uploadtask.FieldTotalChunks, uploadtask.FieldStatus, uploadtask.FieldVideoID, uploadtask.FieldAuthorID:
+		case uploadtask.FieldID, uploadtask.FieldTenantID, uploadtask.FieldFileSize, uploadtask.FieldChunkSize, uploadtask.FieldTotalChunks, uploadtask.FieldVideoID, uploadtask.FieldAuthorID:
 			values[i] = new(sql.NullInt64)
-		case uploadtask.FieldTaskID, uploadtask.FieldFileName, uploadtask.FieldFileKey:
+		case uploadtask.FieldTaskID, uploadtask.FieldFileName, uploadtask.FieldStatus, uploadtask.FieldFileKey:
 			values[i] = new(sql.NullString)
 		case uploadtask.FieldCreatedAt, uploadtask.FieldUpdatedAt, uploadtask.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -103,6 +105,13 @@ func (_m *UploadTask) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
+		case uploadtask.FieldTenantID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
+			} else if value.Valid {
+				_m.TenantID = new(uint32)
+				*_m.TenantID = uint32(value.Int64)
+			}
 		case uploadtask.FieldTaskID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field task_id", values[i])
@@ -119,22 +128,19 @@ func (_m *UploadTask) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field file_size", values[i])
 			} else if value.Valid {
-				_m.FileSize = new(int64)
-				*_m.FileSize = value.Int64
+				_m.FileSize = uint64(value.Int64)
 			}
 		case uploadtask.FieldChunkSize:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field chunk_size", values[i])
 			} else if value.Valid {
-				_m.ChunkSize = new(uint32)
-				*_m.ChunkSize = uint32(value.Int64)
+				_m.ChunkSize = uint32(value.Int64)
 			}
 		case uploadtask.FieldTotalChunks:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field total_chunks", values[i])
 			} else if value.Valid {
-				_m.TotalChunks = new(uint32)
-				*_m.TotalChunks = uint32(value.Int64)
+				_m.TotalChunks = uint32(value.Int64)
 			}
 		case uploadtask.FieldUploadedChunks:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -145,11 +151,10 @@ func (_m *UploadTask) assignValues(columns []string, values []any) error {
 				}
 			}
 		case uploadtask.FieldStatus:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				_m.Status = new(uint8)
-				*_m.Status = uint8(value.Int64)
+				_m.Status = uploadtask.Status(value.String)
 			}
 		case uploadtask.FieldFileKey:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -162,15 +167,13 @@ func (_m *UploadTask) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field video_id", values[i])
 			} else if value.Valid {
-				_m.VideoID = new(uint32)
-				*_m.VideoID = uint32(value.Int64)
+				_m.VideoID = uint32(value.Int64)
 			}
 		case uploadtask.FieldAuthorID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field author_id", values[i])
 			} else if value.Valid {
-				_m.AuthorID = new(uint32)
-				*_m.AuthorID = uint32(value.Int64)
+				_m.AuthorID = uint32(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -223,49 +226,42 @@ func (_m *UploadTask) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
+	if v := _m.TenantID; v != nil {
+		builder.WriteString("tenant_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("task_id=")
 	builder.WriteString(_m.TaskID)
 	builder.WriteString(", ")
 	builder.WriteString("file_name=")
 	builder.WriteString(_m.FileName)
 	builder.WriteString(", ")
-	if v := _m.FileSize; v != nil {
-		builder.WriteString("file_size=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("file_size=")
+	builder.WriteString(fmt.Sprintf("%v", _m.FileSize))
 	builder.WriteString(", ")
-	if v := _m.ChunkSize; v != nil {
-		builder.WriteString("chunk_size=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("chunk_size=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ChunkSize))
 	builder.WriteString(", ")
-	if v := _m.TotalChunks; v != nil {
-		builder.WriteString("total_chunks=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("total_chunks=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TotalChunks))
 	builder.WriteString(", ")
 	builder.WriteString("uploaded_chunks=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UploadedChunks))
 	builder.WriteString(", ")
-	if v := _m.Status; v != nil {
-		builder.WriteString("status=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
 	builder.WriteString(", ")
 	if v := _m.FileKey; v != nil {
 		builder.WriteString("file_key=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
-	if v := _m.VideoID; v != nil {
-		builder.WriteString("video_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("video_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.VideoID))
 	builder.WriteString(", ")
-	if v := _m.AuthorID; v != nil {
-		builder.WriteString("author_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("author_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AuthorID))
 	builder.WriteByte(')')
 	return builder.String()
 }

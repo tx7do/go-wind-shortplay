@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: app/service/v1/i_user.proto
 
-package apppb
+package servicev1
 
 import (
 	v1 "go-wind-shortplay/api/gen/go/identity/service/v1"
@@ -12,6 +12,7 @@ import (
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -24,6 +25,195 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// 用户主页资料（旧版契约形状：avatarUrl/bio）
+type UserDetail struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            *uint32                `protobuf:"varint,1,opt,name=id,proto3,oneof" json:"id,omitempty"`                                // 用户ID
+	Username      *string                `protobuf:"bytes,2,opt,name=username,proto3,oneof" json:"username,omitempty"`                     // 登录名
+	Nickname      *string                `protobuf:"bytes,3,opt,name=nickname,proto3,oneof" json:"nickname,omitempty"`                     // 昵称
+	AvatarUrl     *string                `protobuf:"bytes,4,opt,name=avatar_url,json=avatarUrl,proto3,oneof" json:"avatar_url,omitempty"`  // 头像
+	Bio           *string                `protobuf:"bytes,5,opt,name=bio,proto3,oneof" json:"bio,omitempty"`                               // 简介
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,20,opt,name=created_at,json=createdAt,proto3,oneof" json:"created_at,omitempty"` // 注册时间
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UserDetail) Reset() {
+	*x = UserDetail{}
+	mi := &file_app_service_v1_i_user_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserDetail) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserDetail) ProtoMessage() {}
+
+func (x *UserDetail) ProtoReflect() protoreflect.Message {
+	mi := &file_app_service_v1_i_user_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserDetail.ProtoReflect.Descriptor instead.
+func (*UserDetail) Descriptor() ([]byte, []int) {
+	return file_app_service_v1_i_user_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *UserDetail) GetId() uint32 {
+	if x != nil && x.Id != nil {
+		return *x.Id
+	}
+	return 0
+}
+
+func (x *UserDetail) GetUsername() string {
+	if x != nil && x.Username != nil {
+		return *x.Username
+	}
+	return ""
+}
+
+func (x *UserDetail) GetNickname() string {
+	if x != nil && x.Nickname != nil {
+		return *x.Nickname
+	}
+	return ""
+}
+
+func (x *UserDetail) GetAvatarUrl() string {
+	if x != nil && x.AvatarUrl != nil {
+		return *x.AvatarUrl
+	}
+	return ""
+}
+
+func (x *UserDetail) GetBio() string {
+	if x != nil && x.Bio != nil {
+		return *x.Bio
+	}
+	return ""
+}
+
+func (x *UserDetail) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+type GetAppUserRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"` // 用户ID
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAppUserRequest) Reset() {
+	*x = GetAppUserRequest{}
+	mi := &file_app_service_v1_i_user_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAppUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAppUserRequest) ProtoMessage() {}
+
+func (x *GetAppUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_app_service_v1_i_user_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAppUserRequest.ProtoReflect.Descriptor instead.
+func (*GetAppUserRequest) Descriptor() ([]byte, []int) {
+	return file_app_service_v1_i_user_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *GetAppUserRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type UpdateProfileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Nickname      *string                `protobuf:"bytes,1,opt,name=nickname,proto3,oneof" json:"nickname,omitempty"`                    // 昵称
+	AvatarUrl     *string                `protobuf:"bytes,2,opt,name=avatar_url,json=avatarUrl,proto3,oneof" json:"avatar_url,omitempty"` // 头像
+	Bio           *string                `protobuf:"bytes,3,opt,name=bio,proto3,oneof" json:"bio,omitempty"`                              // 简介
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateProfileRequest) Reset() {
+	*x = UpdateProfileRequest{}
+	mi := &file_app_service_v1_i_user_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateProfileRequest) ProtoMessage() {}
+
+func (x *UpdateProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_app_service_v1_i_user_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateProfileRequest.ProtoReflect.Descriptor instead.
+func (*UpdateProfileRequest) Descriptor() ([]byte, []int) {
+	return file_app_service_v1_i_user_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *UpdateProfileRequest) GetNickname() string {
+	if x != nil && x.Nickname != nil {
+		return *x.Nickname
+	}
+	return ""
+}
+
+func (x *UpdateProfileRequest) GetAvatarUrl() string {
+	if x != nil && x.AvatarUrl != nil {
+		return *x.AvatarUrl
+	}
+	return ""
+}
+
+func (x *UpdateProfileRequest) GetBio() string {
+	if x != nil && x.Bio != nil {
+		return *x.Bio
+	}
+	return ""
+}
+
 type ListUserVideosRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        uint32                 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`             // 用户ID
@@ -35,7 +225,7 @@ type ListUserVideosRequest struct {
 
 func (x *ListUserVideosRequest) Reset() {
 	*x = ListUserVideosRequest{}
-	mi := &file_app_service_v1_i_user_proto_msgTypes[0]
+	mi := &file_app_service_v1_i_user_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -47,7 +237,7 @@ func (x *ListUserVideosRequest) String() string {
 func (*ListUserVideosRequest) ProtoMessage() {}
 
 func (x *ListUserVideosRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_app_service_v1_i_user_proto_msgTypes[0]
+	mi := &file_app_service_v1_i_user_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -60,7 +250,7 @@ func (x *ListUserVideosRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListUserVideosRequest.ProtoReflect.Descriptor instead.
 func (*ListUserVideosRequest) Descriptor() ([]byte, []int) {
-	return file_app_service_v1_i_user_proto_rawDescGZIP(), []int{0}
+	return file_app_service_v1_i_user_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ListUserVideosRequest) GetUserId() uint32 {
@@ -88,21 +278,47 @@ var File_app_service_v1_i_user_proto protoreflect.FileDescriptor
 
 const file_app_service_v1_i_user_proto_rawDesc = "" +
 	"\n" +
-	"\x1bapp/service/v1/i_user.proto\x12\x0eapp.service.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1eidentity/service/v1/user.proto\x1a\x1cvideo/service/v1/video.proto\"\x8d\x01\n" +
+	"\x1bapp/service/v1/i_user.proto\x12\x0eapp.service.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a$identity/service/v1/user_brief.proto\x1a\x1cvideo/service/v1/video.proto\"\xa5\x02\n" +
+	"\n" +
+	"UserDetail\x12\x13\n" +
+	"\x02id\x18\x01 \x01(\rH\x00R\x02id\x88\x01\x01\x12\x1f\n" +
+	"\busername\x18\x02 \x01(\tH\x01R\busername\x88\x01\x01\x12\x1f\n" +
+	"\bnickname\x18\x03 \x01(\tH\x02R\bnickname\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"avatar_url\x18\x04 \x01(\tH\x03R\tavatarUrl\x88\x01\x01\x12\x15\n" +
+	"\x03bio\x18\x05 \x01(\tH\x04R\x03bio\x88\x01\x01\x12>\n" +
+	"\n" +
+	"created_at\x18\x14 \x01(\v2\x1a.google.protobuf.TimestampH\x05R\tcreatedAt\x88\x01\x01B\x05\n" +
+	"\x03_idB\v\n" +
+	"\t_usernameB\v\n" +
+	"\t_nicknameB\r\n" +
+	"\v_avatar_urlB\x06\n" +
+	"\x04_bioB\r\n" +
+	"\v_created_at\"#\n" +
+	"\x11GetAppUserRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\"\x96\x01\n" +
+	"\x14UpdateProfileRequest\x12\x1f\n" +
+	"\bnickname\x18\x01 \x01(\tH\x00R\bnickname\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"avatar_url\x18\x02 \x01(\tH\x01R\tavatarUrl\x88\x01\x01\x12\x15\n" +
+	"\x03bio\x18\x03 \x01(\tH\x02R\x03bio\x88\x01\x01B\v\n" +
+	"\t_nicknameB\r\n" +
+	"\v_avatar_urlB\x06\n" +
+	"\x04_bio\"\x8d\x01\n" +
 	"\x15ListUserVideosRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\rR\x06userId\x12\x1e\n" +
 	"\bpage_num\x18\x02 \x01(\rH\x00R\apageNum\x88\x01\x01\x12 \n" +
 	"\tpage_size\x18\x03 \x01(\rH\x01R\bpageSize\x88\x01\x01B\v\n" +
 	"\t_page_numB\f\n" +
 	"\n" +
-	"_page_size2\xec\x03\n" +
-	"\vUserService\x12e\n" +
-	"\aGetUser\x12#.identity.service.v1.GetUserRequest\x1a\x19.identity.service.v1.User\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/app/v1/users/{id}\x12\x7f\n" +
-	"\fGetUserStats\x12(.identity.service.v1.GetUserStatsRequest\x1a\x1e.identity.service.v1.UserStats\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/app/v1/users/{user_id}/stats\x12n\n" +
-	"\rUpdateProfile\x12&.identity.service.v1.UpdateUserRequest\x1a\x19.identity.service.v1.User\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\x1a\x0f/app/v1/profile\x12\x84\x01\n" +
-	"\x0eListUserVideos\x12%.app.service.v1.ListUserVideosRequest\x1a#.video.service.v1.ListVideoResponse\"&\x82\xd3\xe4\x93\x02 \x12\x1e/app/v1/users/{user_id}/videosB\xad\x01\n" +
+	"_page_size2\xea\x03\n" +
+	"\vUserService\x12d\n" +
+	"\aGetUser\x12!.app.service.v1.GetAppUserRequest\x1a\x1a.app.service.v1.UserDetail\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/app/v1/users/{id}\x12\x7f\n" +
+	"\fGetUserStats\x12(.identity.service.v1.GetUserStatsRequest\x1a\x1e.identity.service.v1.UserStats\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/app/v1/users/{user_id}/stats\x12m\n" +
+	"\rUpdateProfile\x12$.app.service.v1.UpdateProfileRequest\x1a\x1a.app.service.v1.UserDetail\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\x1a\x0f/app/v1/profile\x12\x84\x01\n" +
+	"\x0eListUserVideos\x12%.app.service.v1.ListUserVideosRequest\x1a#.video.service.v1.ListVideoResponse\"&\x82\xd3\xe4\x93\x02 \x12\x1e/app/v1/users/{user_id}/videosB\xb1\x01\n" +
 	"\x12com.app.service.v1B\n" +
-	"IUserProtoP\x01Z1go-wind-shortplay/api/gen/go/app/service/v1;apppb\xa2\x02\x03ASX\xaa\x02\x0eApp.Service.V1\xca\x02\x0eApp\\Service\\V1\xe2\x02\x1aApp\\Service\\V1\\GPBMetadata\xea\x02\x10App::Service::V1b\x06proto3"
+	"IUserProtoP\x01Z5go-wind-shortplay/api/gen/go/app/service/v1;servicev1\xa2\x02\x03ASX\xaa\x02\x0eApp.Service.V1\xca\x02\x0eApp\\Service\\V1\xe2\x02\x1aApp\\Service\\V1\\GPBMetadata\xea\x02\x10App::Service::V1b\x06proto3"
 
 var (
 	file_app_service_v1_i_user_proto_rawDescOnce sync.Once
@@ -116,30 +332,32 @@ func file_app_service_v1_i_user_proto_rawDescGZIP() []byte {
 	return file_app_service_v1_i_user_proto_rawDescData
 }
 
-var file_app_service_v1_i_user_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_app_service_v1_i_user_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_app_service_v1_i_user_proto_goTypes = []any{
-	(*ListUserVideosRequest)(nil),  // 0: app.service.v1.ListUserVideosRequest
-	(*v1.GetUserRequest)(nil),      // 1: identity.service.v1.GetUserRequest
-	(*v1.GetUserStatsRequest)(nil), // 2: identity.service.v1.GetUserStatsRequest
-	(*v1.UpdateUserRequest)(nil),   // 3: identity.service.v1.UpdateUserRequest
-	(*v1.User)(nil),                // 4: identity.service.v1.User
-	(*v1.UserStats)(nil),           // 5: identity.service.v1.UserStats
-	(*v11.ListVideoResponse)(nil),  // 6: video.service.v1.ListVideoResponse
+	(*UserDetail)(nil),             // 0: app.service.v1.UserDetail
+	(*GetAppUserRequest)(nil),      // 1: app.service.v1.GetAppUserRequest
+	(*UpdateProfileRequest)(nil),   // 2: app.service.v1.UpdateProfileRequest
+	(*ListUserVideosRequest)(nil),  // 3: app.service.v1.ListUserVideosRequest
+	(*timestamppb.Timestamp)(nil),  // 4: google.protobuf.Timestamp
+	(*v1.GetUserStatsRequest)(nil), // 5: identity.service.v1.GetUserStatsRequest
+	(*v1.UserStats)(nil),           // 6: identity.service.v1.UserStats
+	(*v11.ListVideoResponse)(nil),  // 7: video.service.v1.ListVideoResponse
 }
 var file_app_service_v1_i_user_proto_depIdxs = []int32{
-	1, // 0: app.service.v1.UserService.GetUser:input_type -> identity.service.v1.GetUserRequest
-	2, // 1: app.service.v1.UserService.GetUserStats:input_type -> identity.service.v1.GetUserStatsRequest
-	3, // 2: app.service.v1.UserService.UpdateProfile:input_type -> identity.service.v1.UpdateUserRequest
-	0, // 3: app.service.v1.UserService.ListUserVideos:input_type -> app.service.v1.ListUserVideosRequest
-	4, // 4: app.service.v1.UserService.GetUser:output_type -> identity.service.v1.User
-	5, // 5: app.service.v1.UserService.GetUserStats:output_type -> identity.service.v1.UserStats
-	4, // 6: app.service.v1.UserService.UpdateProfile:output_type -> identity.service.v1.User
-	6, // 7: app.service.v1.UserService.ListUserVideos:output_type -> video.service.v1.ListVideoResponse
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	4, // 0: app.service.v1.UserDetail.created_at:type_name -> google.protobuf.Timestamp
+	1, // 1: app.service.v1.UserService.GetUser:input_type -> app.service.v1.GetAppUserRequest
+	5, // 2: app.service.v1.UserService.GetUserStats:input_type -> identity.service.v1.GetUserStatsRequest
+	2, // 3: app.service.v1.UserService.UpdateProfile:input_type -> app.service.v1.UpdateProfileRequest
+	3, // 4: app.service.v1.UserService.ListUserVideos:input_type -> app.service.v1.ListUserVideosRequest
+	0, // 5: app.service.v1.UserService.GetUser:output_type -> app.service.v1.UserDetail
+	6, // 6: app.service.v1.UserService.GetUserStats:output_type -> identity.service.v1.UserStats
+	0, // 7: app.service.v1.UserService.UpdateProfile:output_type -> app.service.v1.UserDetail
+	7, // 8: app.service.v1.UserService.ListUserVideos:output_type -> video.service.v1.ListVideoResponse
+	5, // [5:9] is the sub-list for method output_type
+	1, // [1:5] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_app_service_v1_i_user_proto_init() }
@@ -148,13 +366,15 @@ func file_app_service_v1_i_user_proto_init() {
 		return
 	}
 	file_app_service_v1_i_user_proto_msgTypes[0].OneofWrappers = []any{}
+	file_app_service_v1_i_user_proto_msgTypes[2].OneofWrappers = []any{}
+	file_app_service_v1_i_user_proto_msgTypes[3].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_app_service_v1_i_user_proto_rawDesc), len(file_app_service_v1_i_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

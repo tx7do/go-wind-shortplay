@@ -3,6 +3,9 @@
 package ubaevent
 
 import (
+	"fmt"
+
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -13,12 +16,18 @@ const (
 	FieldID = "id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
+	// FieldTenantID holds the string denoting the tenant_id field in the database.
+	FieldTenantID = "tenant_id"
+	// FieldUserID holds the string denoting the user_id field in the database.
+	FieldUserID = "user_id"
 	// FieldEventType holds the string denoting the event_type field in the database.
 	FieldEventType = "event_type"
 	// FieldVideoID holds the string denoting the video_id field in the database.
 	FieldVideoID = "video_id"
-	// FieldUserID holds the string denoting the user_id field in the database.
-	FieldUserID = "user_id"
 	// FieldTargetUserID holds the string denoting the target_user_id field in the database.
 	FieldTargetUserID = "target_user_id"
 	// FieldDurationMs holds the string denoting the duration_ms field in the database.
@@ -30,16 +39,19 @@ const (
 	// FieldOccurredAt holds the string denoting the occurred_at field in the database.
 	FieldOccurredAt = "occurred_at"
 	// Table holds the table name of the ubaevent in the database.
-	Table = "uba_events"
+	Table = "sp_uba_events"
 )
 
 // Columns holds all SQL columns for ubaevent fields.
 var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
+	FieldUpdatedAt,
+	FieldDeletedAt,
+	FieldTenantID,
+	FieldUserID,
 	FieldEventType,
 	FieldVideoID,
-	FieldUserID,
 	FieldTargetUserID,
 	FieldDurationMs,
 	FieldWatchPercent,
@@ -57,20 +69,61 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+// Note that the variables below are initialized by the runtime
+// package on the initialization of the application. Therefore,
+// it should be imported in the main as follows:
+//
+//	import _ "go-wind-shortplay/app/core/service/internal/data/ent/runtime"
 var (
-	// DefaultVideoID holds the default value on creation for the "video_id" field.
-	DefaultVideoID uint32
+	Hooks  [1]ent.Hook
+	Policy ent.Policy
+	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
+	DefaultTenantID uint32
 	// DefaultUserID holds the default value on creation for the "user_id" field.
 	DefaultUserID uint32
+	// DefaultVideoID holds the default value on creation for the "video_id" field.
+	DefaultVideoID uint32
 	// DefaultTargetUserID holds the default value on creation for the "target_user_id" field.
 	DefaultTargetUserID uint32
 	// DefaultDurationMs holds the default value on creation for the "duration_ms" field.
-	DefaultDurationMs int64
+	DefaultDurationMs uint64
 	// DefaultWatchPercent holds the default value on creation for the "watch_percent" field.
 	DefaultWatchPercent uint32
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
+
+// EventType defines the type for the "event_type" enum field.
+type EventType string
+
+// EventTypeVideoPlay is the default value of the EventType enum.
+const DefaultEventType = EventTypeVideoPlay
+
+// EventType values.
+const (
+	EventTypeVideoPlay      EventType = "VIDEO_PLAY"
+	EventTypeVideoHeartbeat EventType = "VIDEO_HEARTBEAT"
+	EventTypeVideoComplete  EventType = "VIDEO_COMPLETE"
+	EventTypeVideoSwipeAway EventType = "VIDEO_SWIPE_AWAY"
+	EventTypeVideoLike      EventType = "VIDEO_LIKE"
+	EventTypeVideoCollect   EventType = "VIDEO_COLLECT"
+	EventTypeCommentCreate  EventType = "COMMENT_CREATE"
+	EventTypeFollowAuthor   EventType = "FOLLOW_AUTHOR"
+)
+
+func (et EventType) String() string {
+	return string(et)
+}
+
+// EventTypeValidator is a validator for the "event_type" field enum values. It is called by the builders before save.
+func EventTypeValidator(et EventType) error {
+	switch et {
+	case EventTypeVideoPlay, EventTypeVideoHeartbeat, EventTypeVideoComplete, EventTypeVideoSwipeAway, EventTypeVideoLike, EventTypeVideoCollect, EventTypeCommentCreate, EventTypeFollowAuthor:
+		return nil
+	default:
+		return fmt.Errorf("ubaevent: invalid enum value for event_type field: %q", et)
+	}
+}
 
 // OrderOption defines the ordering options for the UbaEvent queries.
 type OrderOption func(*sql.Selector)
@@ -85,6 +138,26 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }
 
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByTenantID orders the results by the tenant_id field.
+func ByTenantID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTenantID, opts...).ToFunc()
+}
+
+// ByUserID orders the results by the user_id field.
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
 // ByEventType orders the results by the event_type field.
 func ByEventType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEventType, opts...).ToFunc()
@@ -93,11 +166,6 @@ func ByEventType(opts ...sql.OrderTermOption) OrderOption {
 // ByVideoID orders the results by the video_id field.
 func ByVideoID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVideoID, opts...).ToFunc()
-}
-
-// ByUserID orders the results by the user_id field.
-func ByUserID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
 // ByTargetUserID orders the results by the target_user_id field.

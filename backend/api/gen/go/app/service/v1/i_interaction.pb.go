@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: app/service/v1/i_interaction.proto
 
-package apppb
+package servicev1
 
 import (
 	v11 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
@@ -46,8 +46,8 @@ const file_app_service_v1_i_interaction_proto_rawDesc = "" +
 	"\rCreateComment\x12,.interaction.service.v1.CreateCommentRequest\x1a\x1f.interaction.service.v1.Comment\"-\x82\xd3\xe4\x93\x02':\x01*\"\"/app/v1/videos/{video_id}/comments\x12t\n" +
 	"\rDeleteComment\x12,.interaction.service.v1.DeleteCommentRequest\x1a\x16.google.protobuf.Empty\"\x1d\x82\xd3\xe4\x93\x02\x17*\x15/app/v1/comments/{id}\x12\x92\x01\n" +
 	"\vListComment\x12*.interaction.service.v1.ListCommentRequest\x1a+.interaction.service.v1.ListCommentResponse\"*\x82\xd3\xe4\x93\x02$\x12\"/app/v1/videos/{video_id}/comments\x12\x91\x01\n" +
-	"\tListReply\x12(.interaction.service.v1.ListReplyRequest\x1a+.interaction.service.v1.ListCommentResponse\"-\x82\xd3\xe4\x93\x02'\x12%/app/v1/comments/{comment_id}/repliesB\xb4\x01\n" +
-	"\x12com.app.service.v1B\x11IInteractionProtoP\x01Z1go-wind-shortplay/api/gen/go/app/service/v1;apppb\xa2\x02\x03ASX\xaa\x02\x0eApp.Service.V1\xca\x02\x0eApp\\Service\\V1\xe2\x02\x1aApp\\Service\\V1\\GPBMetadata\xea\x02\x10App::Service::V1b\x06proto3"
+	"\tListReply\x12(.interaction.service.v1.ListReplyRequest\x1a+.interaction.service.v1.ListCommentResponse\"-\x82\xd3\xe4\x93\x02'\x12%/app/v1/comments/{comment_id}/repliesB\xb8\x01\n" +
+	"\x12com.app.service.v1B\x11IInteractionProtoP\x01Z5go-wind-shortplay/api/gen/go/app/service/v1;servicev1\xa2\x02\x03ASX\xaa\x02\x0eApp.Service.V1\xca\x02\x0eApp\\Service\\V1\xe2\x02\x1aApp\\Service\\V1\\GPBMetadata\xea\x02\x10App::Service::V1b\x06proto3"
 
 var file_app_service_v1_i_interaction_proto_goTypes = []any{
 	(*v1.LikeRequest)(nil),                  // 0: interaction.service.v1.LikeRequest

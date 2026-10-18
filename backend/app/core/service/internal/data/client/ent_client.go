@@ -22,7 +22,7 @@ import (
 	_ "go-wind-shortplay/app/core/service/internal/data/ent/runtime"
 )
 
-// NewEntClient 创建 Ent ORM 数据库客户端（启动时按配置自动迁移建表）
+// NewEntClient 创建Ent ORM数据库客户端
 func NewEntClient(ctx *bootstrap.Context) (*entCrud.EntClient[*ent.Client], func(), error) {
 	l := ctx.NewLoggerHelper("ent/data/core-service")
 
@@ -67,13 +67,18 @@ func NewEntClient(ctx *bootstrap.Context) (*entCrud.EntClient[*ent.Client], func
 	}, nil
 }
 
-// 带 created_at/updated_at setter 的 mutation（所有使用 go-crud 时间 mixin 的实体均实现）。
+// 带 created_at/updated_at setter 的 mutation(所有使用 go-crud 时间 mixin 的实体均实现)。
 type createdAtSetter interface{ SetCreatedAt(time.Time) }
 type updatedAtSetter interface{ SetUpdatedAt(time.Time) }
 
-// ApplyTimeDefaultHooks 注册全局 mutation hook，为时间列兜底：
-// Create 时补 created_at/updated_at，Update 时补 updated_at。
-// 已显式设置的时间不被覆盖。
+// ApplyTimeDefaultHooks 注册全局 mutation hook,为时间列兜底:
+// Create 时补 created_at/updated_at,Update 时补 updated_at。
+//
+// 背景:项目所用 go-crud 的 TimeAt/CreatedAt mixin 只声明了
+// Optional().Nillable(),不带任何默认值,也不依赖数据库列 DEFAULT;
+// 而大量写入路径(user/post/comment/interaction ledger 等)未显式设置,
+// 导致这些表 created_at 为 NULL,无法支撑任何按时间维度的统计与审计。
+// 已显式设置的时间不被覆盖。enttest 测试客户端同样需要调用本函数。
 func ApplyTimeDefaultHooks(client *ent.Client) {
 	client.Use(func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
@@ -101,7 +106,7 @@ func ApplyTimeDefaultHooks(client *ent.Client) {
 	})
 }
 
-// setTimeIfMissing 当字段未被显式设置时以 now 填充（通过 setter 接口 duck typing）。
+// setTimeIfMissing 当字段未被显式设置时以 now 填充(通过 setter 接口 duck typing)。
 func setTimeIfMissing(m ent.Mutation, field string, set func(time.Time)) {
 	for _, f := range m.Fields() {
 		if f == field {

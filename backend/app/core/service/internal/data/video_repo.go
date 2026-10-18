@@ -2,24 +2,101 @@ package data
 
 import (
 	"context"
-	"strings"
+	"encoding/json"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/tx7do/kratos-bootstrap/bootstrap"
+	"github.com/tx7do/go-utils/timeutil"
+	"github.com/tx7do/go-utils/trans"
 
+	paginationV1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
 	entCrud "github.com/tx7do/go-crud/entgo"
 
-	videoV1 "go-wind-shortplay/api/gen/go/video/service/v1"
 	"go-wind-shortplay/app/core/service/internal/data/ent"
-	"go-wind-shortplay/app/core/service/internal/data/ent/uploadtask"
-	"go-wind-shortplay/app/core/service/internal/data/ent/videodraft"
+	"go-wind-shortplay/app/core/service/internal/data/ent/predicate"
+	"go-wind-shortplay/app/core/service/internal/data/ent/video"
 	"go-wind-shortplay/app/core/service/internal/data/ent/videotag"
 	"go-wind-shortplay/app/core/service/internal/data/ent/videotagrel"
-	"go-wind-shortplay/app/core/service/internal/data/ent/video"
+
+	videoV1 "go-wind-shortplay/api/gen/go/video/service/v1"
 )
 
-// VideoRepo 视频主表 / 草稿 / 标签 / 上传任务仓储
+// statusEntityOfVideo proto 枚举 → ent 枚举
+func statusEntityOfVideo(s videoV1.VideoStatus) video.Status {
+	switch s {
+	case videoV1.VideoStatus_VIDEO_STATUS_DRAFT:
+		return video.StatusDraft
+	case videoV1.VideoStatus_VIDEO_STATUS_REVIEWING:
+		return video.StatusReviewing
+	case videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED:
+		return video.StatusPublished
+	case videoV1.VideoStatus_VIDEO_STATUS_REJECTED:
+		return video.StatusRejected
+	case videoV1.VideoStatus_VIDEO_STATUS_OFFLINE:
+		return video.StatusOffline
+	default:
+		return video.StatusDraft
+	}
+}
+
+// statusDTOOfVideo ent 枚举 → proto 枚举
+func statusDTOOfVideo(s video.Status) videoV1.VideoStatus {
+	switch s {
+	case video.StatusDraft:
+		return videoV1.VideoStatus_VIDEO_STATUS_DRAFT
+	case video.StatusReviewing:
+		return videoV1.VideoStatus_VIDEO_STATUS_REVIEWING
+	case video.StatusPublished:
+		return videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED
+	case video.StatusRejected:
+		return videoV1.VideoStatus_VIDEO_STATUS_REJECTED
+	case video.StatusOffline:
+		return videoV1.VideoStatus_VIDEO_STATUS_OFFLINE
+	default:
+		return videoV1.VideoStatus_VIDEO_STATUS_UNSPECIFIED
+	}
+}
+
+// videoEntityToDTO ent.Video → proto Video
+func videoEntityToDTO(e *ent.Video, tags []string) *videoV1.Video {
+	if e == nil {
+		return nil
+	}
+	dto := &videoV1.Video{
+		Id:           trans.Ptr(e.ID),
+		Title:        trans.Ptr(e.Title),
+		Description:  e.Description,
+		CoverUrl:     e.CoverURL,
+		VideoUrl:     e.VideoURL,
+		Duration:     trans.Ptr(e.Duration),
+		Width:        trans.Ptr(e.Width),
+		Height:       trans.Ptr(e.Height),
+		Status:       statusDTOOfVideo(e.Status).Enum(),
+		AuthorId:     trans.Ptr(e.AuthorID),
+		LikeCount:    trans.Ptr(e.LikeCount),
+		CollectCount: trans.Ptr(e.CollectCount),
+		CommentCount: trans.Ptr(e.CommentCount),
+		ViewCount:    trans.Ptr(e.ViewCount),
+		RejectReason: e.RejectReason,
+		PublishedAt:  timeutil.TimeToTimestamppb(e.PublishedAt),
+		CreatedAt:    timeutil.TimeToTimestamppb(e.CreatedAt),
+		UpdatedAt:    timeutil.TimeToTimestamppb(e.UpdatedAt),
+	}
+	if tags != nil {
+		dto.Tags = tags
+	}
+	return dto
+}
+
+// spVideoListFilter admin 列表过滤条件（BFF 翻译 query JSON 后的结构）
+type spVideoListFilter struct {
+	Title    *string `json:"title___icontains"`
+	Status   *string `json:"status"`
+	AuthorID *uint32 `json:"author_id"`
+}
+
 type VideoRepo struct {
 	entClient *entCrud.EntClient[*ent.Client]
 	log       *log.Helper
@@ -32,153 +109,430 @@ func NewVideoRepo(ctx *bootstrap.Context, entClient *entCrud.EntClient[*ent.Clie
 	}
 }
 
-func (r *VideoRepo) Client() *ent.Client {
-	return r.entClient.Client()
+// pageArgsOf 解析分页参数（缺省 1/10，上限 50）
+func pageArgsOf(req *paginationV1.PagingRequest) (offset, limit int) {
+	page := int(req.GetPage())
+	if page < 1 {
+		page = 1
+	}
+	size := int(req.GetPageSize())
+	if size <= 0 {
+		size = 10
+	}
+	if size > 50 {
+		size = 50
+	}
+	return (page - 1) * size, size
 }
 
-// ── 视频 ──
-
-func (r *VideoRepo) GetByID(ctx context.Context, id uint32) (*ent.Video, error) {
-	return r.Client().Video.Query().Where(video.ID(id)).Only(ctx)
+func (r *VideoRepo) toDTO(ctx context.Context, e *ent.Video) (*videoV1.Video, error) {
+	tags, err := r.TagsOfVideo(ctx, e.ID)
+	if err != nil {
+		tags = nil
+	}
+	return videoEntityToDTO(e, tags), nil
 }
 
-// List 视频列表；status/authorID 为 nil 表示不过滤；keyword 非空时标题模糊匹配
-func (r *VideoRepo) List(ctx context.Context, offset, limit int, status *uint8, authorID *uint32, keyword, orderBy string) ([]*ent.Video, int, error) {
-	q := r.Client().Video.Query()
-	if status != nil {
-		q = q.Where(video.Status(*status))
+func (r *VideoRepo) Get(ctx context.Context, id uint32) (*videoV1.Video, error) {
+	e, err := r.entClient.Client().Video.Query().Where(video.IDEQ(id)).Only(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, videoV1.ErrorVideoNotFound("video not found")
+		}
+		r.log.Errorf("get video failed: %s", err.Error())
+		return nil, videoV1.ErrorInternalServerError("get video failed")
 	}
-	if authorID != nil {
-		q = q.Where(video.AuthorID(*authorID))
+	return r.toDTO(ctx, e)
+}
+
+// GetEntityRaw 内部取实体（计数 ledger 等场景）
+func (r *VideoRepo) GetEntityRaw(ctx context.Context, id uint32) (*ent.Video, error) {
+	return r.entClient.Client().Video.Query().Where(video.IDEQ(id)).Only(ctx)
+}
+
+// adminListFilter 解析 BFF 翻译后的过滤 JSON
+func (r *VideoRepo) adminListFilter(req *paginationV1.PagingRequest) (predicates []predicate.Video) {
+	if req.GetQuery() == "" {
+		return nil
 	}
-	if keyword != "" {
-		q = q.Where(video.TitleContains(keyword))
+	var f spVideoListFilter
+	if err := json.Unmarshal([]byte(req.GetQuery()), &f); err != nil {
+		return nil
 	}
+	if f.Title != nil && *f.Title != "" {
+		predicates = append(predicates, video.TitleContainsFold(*f.Title))
+	}
+	if f.Status != nil && *f.Status != "" {
+		predicates = append(predicates, video.StatusEQ(video.Status(*f.Status)))
+	}
+	if f.AuthorID != nil && *f.AuthorID > 0 {
+		predicates = append(predicates, video.AuthorIDEQ(*f.AuthorID))
+	}
+	return predicates
+}
+
+// List 管理端列表（分页 + 过滤）
+func (r *VideoRepo) List(ctx context.Context, req *paginationV1.PagingRequest) (*videoV1.ListVideoResponse, error) {
+	offs, limit := pageArgsOf(req)
+	q := r.entClient.Client().Video.Query().Offset(offs).Limit(limit).Order(ent.Desc(video.FieldID))
+	if ps := r.adminListFilter(req); len(ps) > 0 {
+		q.Where(ps...)
+	}
+	items, err := q.All(ctx)
+	if err != nil {
+		r.log.Errorf("list video failed: %s", err.Error())
+		return nil, videoV1.ErrorInternalServerError("list video failed")
+	}
+
+	cq := r.entClient.Client().Video.Query()
+	if ps := r.adminListFilter(req); len(ps) > 0 {
+		cq.Where(ps...)
+	}
+	total, err := cq.Count(ctx)
+	if err != nil {
+		r.log.Errorf("count video failed: %s", err.Error())
+		return nil, videoV1.ErrorInternalServerError("count video failed")
+	}
+
+	resp := &videoV1.ListVideoResponse{Total: trans.Ptr(int64(total))}
+	for _, e := range items {
+		tags, _ := r.TagsOfVideo(ctx, e.ID)
+		resp.Items = append(resp.Items, videoEntityToDTO(e, tags))
+	}
+	return resp, nil
+}
+
+// ListPublishedByAuthors 关注召回：指定作者的已发布视频（按发布时间倒序）
+func (r *VideoRepo) ListPublishedByAuthors(ctx context.Context, authorIDs []uint32, limit int) ([]*ent.Video, error) {
+	if len(authorIDs) == 0 {
+		return nil, nil
+	}
+	return r.entClient.Client().Video.Query().
+		Where(video.StatusEQ(video.StatusPublished), video.AuthorIDIn(authorIDs...)).
+		Order(ent.Desc(video.FieldPublishedAt)).
+		Limit(limit).
+		All(ctx)
+}
+
+// ListHot 热门召回：互动加权（view 优先 + like 加成），近发布优先
+func (r *VideoRepo) ListHot(ctx context.Context, limit int) ([]*ent.Video, error) {
+	return r.entClient.Client().Video.Query().
+		Where(video.StatusEQ(video.StatusPublished)).
+		Modify(func(s *sql.Selector) {
+			s.OrderBy(sql.Desc(
+				"view_count * 1 + like_count * 3 + collect_count * 5"),
+				sql.Desc(video.FieldPublishedAt),
+			)
+		}).
+		Limit(limit).
+		All(ctx)
+}
+
+// ListLatest 最新兜底召回
+func (r *VideoRepo) ListLatest(ctx context.Context, limit int) ([]*ent.Video, error) {
+	return r.entClient.Client().Video.Query().
+		Where(video.StatusEQ(video.StatusPublished)).
+		Order(ent.Desc(video.FieldPublishedAt), ent.Desc(video.FieldID)).
+		Limit(limit).
+		All(ctx)
+}
+
+// SearchByKeyword 搜索：标题模糊 + 标签精确命中的视频 ID 集合
+func (r *VideoRepo) SearchByKeyword(ctx context.Context, keyword string, limit int) ([]*ent.Video, error) {
+	if keyword == "" {
+		return nil, nil
+	}
+	// 标题模糊
+	byTitle, err := r.entClient.Client().Video.Query().
+		Where(video.StatusEQ(video.StatusPublished), video.TitleContainsFold(keyword)).
+		Order(ent.Desc(video.FieldPublishedAt)).
+		Limit(limit).
+		All(ctx)
+	if err != nil {
+		r.log.Errorf("search video by title failed: %s", err.Error())
+		return nil, videoV1.ErrorInternalServerError("search video failed")
+	}
+
+	// 标签精确
+	byTag, err := r.ListByTag(ctx, keyword, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	merged := make(map[uint32]*ent.Video, len(byTitle)+len(byTag))
+	for _, v := range byTitle {
+		merged[v.ID] = v
+	}
+	for _, v := range byTag {
+		if _, dup := merged[v.ID]; !dup {
+			merged[v.ID] = v
+		}
+	}
+	out := make([]*ent.Video, 0, len(merged))
+	for _, v := range merged {
+		out = append(out, v)
+	}
+	return out, nil
+}
+
+// ListByTag 标签聚合
+func (r *VideoRepo) ListByTag(ctx context.Context, tagName string, limit int) ([]*ent.Video, error) {
+	tag, err := r.entClient.Client().VideoTag.Query().Where(videotag.NameEQ(tagName)).Only(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, nil
+		}
+		r.log.Errorf("get tag failed: %s", err.Error())
+		return nil, videoV1.ErrorInternalServerError("get tag failed")
+	}
+	rels, err := r.entClient.Client().VideoTagRel.Query().
+		Where(videotagrel.TagIDEQ(tag.ID)).
+		Order(ent.Desc(videotagrel.FieldID)).
+		Limit(limit).
+		All(ctx)
+	if err != nil {
+		r.log.Errorf("list tag rels failed: %s", err.Error())
+		return nil, videoV1.ErrorInternalServerError("list tag rels failed")
+	}
+	if len(rels) == 0 {
+		return nil, nil
+	}
+	ids := make([]uint32, 0, len(rels))
+	for _, rel := range rels {
+		ids = append(ids, rel.VideoID)
+	}
+	return r.entClient.Client().Video.Query().
+		Where(video.IDIn(ids...), video.StatusEQ(video.StatusPublished)).
+		All(ctx)
+}
+
+// ListByAuthor 用户主页作品列表。isSelf=本人（含草稿/审核中/驳回/下架），否则仅已发布。
+func (r *VideoRepo) ListByAuthor(ctx context.Context, authorID uint32, isSelf bool, page, pageSize uint32) (*videoV1.ListVideoResponse, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+	if pageSize > 50 {
+		pageSize = 50
+	}
+	ps := []predicate.Video{video.AuthorIDEQ(authorID)}
+	if !isSelf {
+		ps = append(ps, video.StatusEQ(video.StatusPublished))
+	}
+	q := r.entClient.Client().Video.Query().Where(ps...)
 	total, err := q.Count(ctx)
 	if err != nil {
-		return nil, 0, err
+		r.log.Errorf("count author videos failed: %s", err.Error())
+		return nil, videoV1.ErrorInternalServerError("count author videos failed")
 	}
-	switch orderBy {
-	case "like_count":
-		q = q.Order(ent.Desc(video.FieldLikeCount))
-	case "view_count":
-		q = q.Order(ent.Desc(video.FieldViewCount))
-	case "collect_count":
-		q = q.Order(ent.Desc(video.FieldCollectCount))
-	case "comment_count":
-		q = q.Order(ent.Desc(video.FieldCommentCount))
-	default:
-		q = q.Order(ent.Desc(video.FieldID))
-	}
-	items, err := q.Offset(offset).Limit(limit).All(ctx)
+	items, err := q.Order(ent.Desc(video.FieldCreatedAt)).Offset(int(page-1) * int(pageSize)).Limit(int(pageSize)).All(ctx)
 	if err != nil {
-		return nil, 0, err
+		r.log.Errorf("list author videos failed: %s", err.Error())
+		return nil, videoV1.ErrorInternalServerError("list author videos failed")
 	}
-	return items, total, nil
+	resp := &videoV1.ListVideoResponse{Total: trans.Ptr(int64(total))}
+	for _, e := range items {
+		tags, _ := r.TagsOfVideo(ctx, e.ID)
+		resp.Items = append(resp.Items, videoEntityToDTO(e, tags))
+	}
+	return resp, nil
 }
 
-// CreateVideo 创建视频记录
-func (r *VideoRepo) CreateVideo(ctx context.Context, b *VideoBuilder) (*ent.Video, error) {
-	c := r.Client().Video.Create().
-		SetTitle(b.Title).
-		SetVideoURL(b.VideoURL).
-		SetNillableDescription(b.Description).
-		SetNillableCoverURL(b.CoverURL).
-		SetNillableDuration(b.Duration).
-		SetNillableWidth(b.Width).
-		SetNillableHeight(b.Height).
-		SetStatus(b.Status).
-		SetAuthorID(b.AuthorID).
-		SetNillablePublishedAt(b.PublishedAt)
-	return c.Save(ctx)
+// ListCollectedByUser 我的收藏（按收藏时间倒序）
+func (r *VideoRepo) ListCollectedByUser(ctx context.Context, videoIDs []uint32) ([]*ent.Video, error) {
+	if len(videoIDs) == 0 {
+		return nil, nil
+	}
+	return r.entClient.Client().Video.Query().Where(video.IDIn(videoIDs...)).All(ctx)
 }
 
-// VideoBuilder 视频写入参数（service 层组装，repo 不理解业务规则）
-type VideoBuilder struct {
-	Title       string
-	Description *string
-	CoverURL    *string
-	VideoURL    string
-	Duration    *uint32
-	Width       *uint32
-	Height      *uint32
-	Status      uint8
-	AuthorID    uint32
-	PublishedAt *time.Time
+// ListTopByMetric TOP 排行
+func (r *VideoRepo) ListTopByMetric(ctx context.Context, metric TopMetric, limit int) ([]*ent.Video, error) {
+	field := video.FieldViewCount
+	switch metric {
+	case TopMetricLike:
+		field = video.FieldLikeCount
+	case TopMetricCollect:
+		field = video.FieldCollectCount
+	case TopMetricComment:
+		field = video.FieldCommentCount
+	}
+	return r.entClient.Client().Video.Query().
+		Where(video.StatusEQ(video.StatusPublished)).
+		Order(ent.Desc(field)).
+		Limit(limit).
+		All(ctx)
 }
 
-func (r *VideoRepo) UpdateVideo(ctx context.Context, id uint32, title, description, coverURL *string) (*ent.Video, error) {
-	return r.Client().Video.UpdateOneID(id).
-		SetNillableTitle(title).
-		SetNillableDescription(description).
-		SetNillableCoverURL(coverURL).
-		Save(ctx)
+// Create 创建视频
+func (r *VideoRepo) Create(ctx context.Context, dto *videoV1.Video, tags []string) (*videoV1.Video, error) {
+	if dto == nil {
+		return nil, videoV1.ErrorBadRequest("invalid parameter")
+	}
+	builder := r.entClient.Client().Video.Create().
+		SetTitle(dto.GetTitle()).
+		SetDescription(dto.GetDescription()).
+		SetCoverURL(dto.GetCoverUrl()).
+		SetVideoURL(dto.GetVideoUrl()).
+		SetDuration(dto.GetDuration()).
+		SetWidth(dto.GetWidth()).
+		SetHeight(dto.GetHeight()).
+		SetStatus(statusEntityOfVideo(dto.GetStatus())).
+		SetAuthorID(dto.GetAuthorId()).
+		SetRejectReason(dto.GetRejectReason()).
+		SetNillablePublishedAt(timeutil.TimestamppbToTime(dto.PublishedAt)).
+		SetCreatedAt(time.Now())
+
+	if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
+		builder.SetTenantID(tid)
+	}
+
+	e, err := builder.Save(ctx)
+	if err != nil {
+		r.log.Errorf("create video failed: %s", err.Error())
+		return nil, videoV1.ErrorInternalServerError("create video failed")
+	}
+	if len(tags) > 0 {
+		if err = r.SetTags(ctx, e.ID, tags); err != nil {
+			return nil, err
+		}
+	}
+	return r.toDTO(ctx, e)
 }
 
+// Update 更新视频（部分字段）
+func (r *VideoRepo) Update(ctx context.Context, id uint32, dto *videoV1.Video, tags []string) (*videoV1.Video, error) {
+	builder := r.entClient.Client().Video.UpdateOneID(id)
+	if dto.Title != nil {
+		builder.SetTitle(dto.GetTitle())
+	}
+	if dto.Description != nil {
+		builder.SetDescription(*dto.Description)
+	}
+	if dto.CoverUrl != nil {
+		builder.SetCoverURL(*dto.CoverUrl)
+	}
+	if dto.VideoUrl != nil {
+		builder.SetVideoURL(*dto.VideoUrl)
+	}
+	if dto.Duration != nil {
+		builder.SetDuration(dto.GetDuration())
+	}
+	if dto.Width != nil {
+		builder.SetWidth(dto.GetWidth())
+	}
+	if dto.Height != nil {
+		builder.SetHeight(dto.GetHeight())
+	}
+	if dto.Status != nil {
+		builder.SetStatus(statusEntityOfVideo(*dto.Status))
+	}
+	if dto.RejectReason != nil {
+		builder.SetRejectReason(*dto.RejectReason)
+	}
+	if dto.PublishedAt != nil {
+		builder.SetNillablePublishedAt(timeutil.TimestamppbToTime(dto.PublishedAt))
+	}
+	builder.SetUpdatedAt(time.Now())
+
+	e, err := builder.Save(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, videoV1.ErrorVideoNotFound("video not found")
+		}
+		r.log.Errorf("update video failed: %s", err.Error())
+		return nil, videoV1.ErrorInternalServerError("update video failed")
+	}
+	if tags != nil {
+		if err = r.SetTags(ctx, id, tags); err != nil {
+			return nil, err
+		}
+	}
+	return r.toDTO(ctx, e)
+}
+
+// Delete 删除视频（连带标签关联）
 func (r *VideoRepo) Delete(ctx context.Context, id uint32) error {
-	return r.Client().Video.DeleteOneID(id).Exec(ctx)
-}
-
-func (r *VideoRepo) ChangeStatus(ctx context.Context, id uint32, status uint8, rejectReason *string) (*ent.Video, error) {
-	u := r.Client().Video.UpdateOneID(id).SetStatus(status)
-	if rejectReason != nil {
-		u.SetRejectReason(*rejectReason)
+	if _, err := r.entClient.Client().VideoTagRel.Delete().Where(videotagrel.VideoIDEQ(id)).Exec(ctx); err != nil {
+		r.log.Errorf("delete video tag rels failed: %s", err.Error())
 	}
-	if status == uint8(videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED) {
-		u.SetPublishedAt(time.Now())
+	if err := r.entClient.Client().Video.DeleteOneID(id).Exec(ctx); err != nil {
+		if ent.IsNotFound(err) {
+			return videoV1.ErrorVideoNotFound("video not found")
+		}
+		r.log.Errorf("delete video failed: %s", err.Error())
+		return videoV1.ErrorInternalServerError("delete video failed")
 	}
-	return u.Save(ctx)
+	return nil
 }
 
-// ReplaceTags 重设视频标签关联（先删后建），并维护标签引用计数
-func (r *VideoRepo) ReplaceTags(ctx context.Context, videoID uint32, tagNames []string) error {
-	return r.withTx(ctx, func(tx *ent.Tx) error {
-		olds, err := tx.VideoTagRel.Query().Where(videotagrel.VideoID(videoID)).All(ctx)
-		if err != nil {
-			return err
+// ── 计数 ledger：只允许在互动台账事务内经本组方法增减（全仓铁律 5）──
+
+// AddCountDelta 在事务 tx 内对视频计数列做有符号增减（PG BIGINT 列，负增量到 0 截断由调用方保证）。
+func (r *VideoRepo) AddCountDelta(ctx context.Context, tx *ent.Tx, videoID uint32, like, collect, comment int64) error {
+	builder := tx.Video.UpdateOneID(videoID)
+	apply := func(delta int64, add func(int64) *ent.VideoUpdateOne) {
+		if delta != 0 {
+			add(delta)
 		}
-		for _, old := range olds {
-			if err := tx.VideoTagRel.DeleteOneID(old.ID).Exec(ctx); err != nil {
-				return err
-			}
-			if old.TagID != nil {
-				if err := decrTagCount(ctx, tx, *old.TagID); err != nil {
-					return err
-				}
-			}
-		}
-		for _, name := range tagNames {
-			name = strings.TrimSpace(name)
-			if name == "" {
-				continue
-			}
-			tagID, err := ensureTag(ctx, tx, name)
-			if err != nil {
-				return err
-			}
-			exist, err := tx.VideoTagRel.Query().
-				Where(videotagrel.VideoID(videoID), videotagrel.TagID(tagID)).
-				Exist(ctx)
-			if err != nil {
-				return err
-			}
-			if exist {
-				continue
-			}
-			if _, err := tx.VideoTagRel.Create().SetVideoID(videoID).SetTagID(tagID).Save(ctx); err != nil {
-				return err
-			}
-			if err := incrTagCount(ctx, tx, tagID); err != nil {
-				return err
-			}
-		}
-		return nil
-	})
+	}
+	apply(like, builder.AddLikeCount)
+	apply(collect, builder.AddCollectCount)
+	apply(comment, builder.AddCommentCount)
+	if err := builder.Exec(ctx); err != nil {
+		r.log.Errorf("add count delta failed: %s", err.Error())
+		return videoV1.ErrorInternalServerError("add count delta failed")
+	}
+	return nil
 }
 
-// TagsOfVideo 查询视频的标签名列表
+// AddViewCount 播放量 +1（详情页调用，容忍丢失）
+func (r *VideoRepo) AddViewCount(ctx context.Context, videoID uint32) error {
+	_, err := r.entClient.Client().Video.Update().Where(video.IDEQ(videoID)).AddViewCount(1).Save(ctx)
+	return err
+}
+
+// CountTodayPublished 今日发布数
+func (r *VideoRepo) CountTodayPublished(ctx context.Context) (int, error) {
+	now := time.Now()
+	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	return r.entClient.Client().Video.Query().
+		Where(video.StatusEQ(video.StatusPublished), video.PublishedAtGTE(start)).
+		Count(ctx)
+}
+
+// CountByStatus 按状态计数
+func (r *VideoRepo) CountByStatus(ctx context.Context, status video.Status) (int, error) {
+	return r.entClient.Client().Video.Query().Where(video.StatusEQ(status)).Count(ctx)
+}
+
+// SumFieldOverview 运营总览聚合（总量 + 播放/点赞/评论总和）
+func (r *VideoRepo) SumFieldOverview(ctx context.Context) (total int, published int, views uint64, likes uint64, comments uint64, err error) {
+	var sel []*ent.Video
+	sel, err = r.entClient.Client().Video.Query().All(ctx)
+	if err != nil {
+		r.log.Errorf("sum overview failed: %s", err.Error())
+		return
+	}
+	total = len(sel)
+	for _, v := range sel {
+		if v.Status == video.StatusPublished {
+			published++
+		}
+		views += v.ViewCount
+		likes += v.LikeCount
+		comments += v.CommentCount
+	}
+	return
+}
+
+// ── 标签 ──
+
+// TagsOfVideo 视频标签名列表
 func (r *VideoRepo) TagsOfVideo(ctx context.Context, videoID uint32) ([]string, error) {
-	rels, err := r.Client().VideoTagRel.Query().Where(videotagrel.VideoID(videoID)).All(ctx)
+	rels, err := r.entClient.Client().VideoTagRel.Query().Where(videotagrel.VideoIDEQ(videoID)).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -187,11 +541,9 @@ func (r *VideoRepo) TagsOfVideo(ctx context.Context, videoID uint32) ([]string, 
 	}
 	tagIDs := make([]uint32, 0, len(rels))
 	for _, rel := range rels {
-		if rel.TagID != nil {
-			tagIDs = append(tagIDs, *rel.TagID)
-		}
+		tagIDs = append(tagIDs, rel.TagID)
 	}
-	tags, err := r.Client().VideoTag.Query().Where(videotag.IDIn(tagIDs...)).All(ctx)
+	tags, err := r.entClient.Client().VideoTag.Query().Where(videotag.IDIn(tagIDs...)).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -202,273 +554,127 @@ func (r *VideoRepo) TagsOfVideo(ctx context.Context, videoID uint32) ([]string, 
 	return names, nil
 }
 
-func (r *VideoRepo) ListTags(ctx context.Context, offset, limit int) ([]*ent.VideoTag, int, error) {
-	q := r.Client().VideoTag.Query()
-	total, err := q.Count(ctx)
+// SetTags 覆盖式设置视频标签（标签不存在则创建；引用计数同步）
+func (r *VideoRepo) SetTags(ctx context.Context, videoID uint32, tags []string) error {
+	oldRels, err := r.entClient.Client().VideoTagRel.Query().Where(videotagrel.VideoIDEQ(videoID)).All(ctx)
 	if err != nil {
-		return nil, 0, err
+		r.log.Errorf("query old tag rels failed: %s", err.Error())
+		return videoV1.ErrorInternalServerError("query old tag rels failed")
 	}
-	items, err := q.Order(ent.Desc(videotag.FieldVideoCount)).Offset(offset).Limit(limit).All(ctx)
-	if err != nil {
-		return nil, 0, err
+	oldTagIDs := make(map[uint32]struct{}, len(oldRels))
+	for _, rel := range oldRels {
+		oldTagIDs[rel.TagID] = struct{}{}
 	}
-	return items, total, nil
-}
 
-func ensureTag(ctx context.Context, tx *ent.Tx, name string) (uint32, error) {
-	t, err := tx.VideoTag.Query().Where(videotag.Name(name)).Only(ctx)
-	if err == nil {
-		return t.ID, nil
-	}
-	if ent.IsNotFound(err) {
-		created, cErr := tx.VideoTag.Create().SetName(name).Save(ctx)
-		if cErr != nil {
-			// 并发创建撞唯一键：再查一次
-			if again, aErr := tx.VideoTag.Query().Where(videotag.Name(name)).Only(ctx); aErr == nil {
-				return again.ID, nil
-			}
-			return 0, cErr
+	newTagIDs := make([]uint32, 0, len(tags))
+	for _, name := range tags {
+		if name == "" {
+			continue
 		}
-		return created.ID, nil
-	}
-	return 0, err
-}
-
-func incrTagCount(ctx context.Context, tx *ent.Tx, tagID uint32) error {
-	_, err := tx.VideoTag.UpdateOneID(tagID).AddVideoCount(1).Save(ctx)
-	return err
-}
-
-func decrTagCount(ctx context.Context, tx *ent.Tx, tagID uint32) error {
-	_, err := tx.VideoTag.UpdateOneID(tagID).AddVideoCount(-1).Save(ctx)
-	return err
-}
-
-// withTx 事务包装
-func (r *VideoRepo) withTx(ctx context.Context, fn func(tx *ent.Tx) error) (err error) {
-	tx, err := r.Client().Tx(ctx)
-	if err != nil {
-		return err
-	}
-	defer func() {
+		tag, err := r.ensureTag(ctx, name)
 		if err != nil {
-			_ = tx.Rollback()
-			return
+			return err
 		}
-		err = tx.Commit()
-	}()
-	return fn(tx)
-}
-
-// ── 草稿 ──
-
-func (r *VideoRepo) SaveDraft(ctx context.Context, id *uint32, authorID uint32, b *DraftBuilder) (*ent.VideoDraft, error) {
-	if id != nil && *id > 0 {
-		return r.Client().VideoDraft.UpdateOneID(*id).
-			SetNillableTitle(b.Title).
-			SetNillableDescription(b.Description).
-			SetNillableCoverURL(b.CoverURL).
-			SetNillableVideoURL(b.VideoURL).
-			SetNillableDuration(b.Duration).
-			SetNillableWidth(b.Width).
-			SetNillableHeight(b.Height).
-			SetNillableUploadTaskID(b.UploadTaskID).
-			Save(ctx)
+		newTagIDs = append(newTagIDs, tag.ID)
 	}
-	return r.Client().VideoDraft.Create().
-		SetNillableTitle(b.Title).
-		SetNillableDescription(b.Description).
-		SetNillableCoverURL(b.CoverURL).
-		SetNillableVideoURL(b.VideoURL).
-		SetNillableDuration(b.Duration).
-		SetNillableWidth(b.Width).
-		SetNillableHeight(b.Height).
-		SetNillableUploadTaskID(b.UploadTaskID).
-		SetAuthorID(authorID).
-		Save(ctx)
-}
 
-// DraftBuilder 草稿写入参数
-type DraftBuilder struct {
-	Title        *string
-	Description  *string
-	CoverURL     *string
-	VideoURL     *string
-	Duration     *uint32
-	Width        *uint32
-	Height       *uint32
-	UploadTaskID *string
-}
-
-func (r *VideoRepo) GetDraft(ctx context.Context, id uint32) (*ent.VideoDraft, error) {
-	return r.Client().VideoDraft.Query().Where(videodraft.ID(id)).Only(ctx)
-}
-
-func (r *VideoRepo) ListDrafts(ctx context.Context, authorID uint32, offset, limit int) ([]*ent.VideoDraft, int, error) {
-	q := r.Client().VideoDraft.Query().Where(videodraft.AuthorID(authorID))
-	total, err := q.Count(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	items, err := q.Order(ent.Desc(videodraft.FieldUpdatedAt)).Offset(offset).Limit(limit).All(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	return items, total, nil
-}
-
-func (r *VideoRepo) DeleteDraft(ctx context.Context, id uint32) error {
-	return r.Client().VideoDraft.DeleteOneID(id).Exec(ctx)
-}
-
-// ── 上传任务 ──
-
-func (r *VideoRepo) CreateUploadTask(ctx context.Context, taskID, fileName string, fileSize int64, chunkSize, totalChunks uint32, authorID uint32) (*ent.UploadTask, error) {
-	return r.Client().UploadTask.Create().
-		SetTaskID(taskID).
-		SetFileName(fileName).
-		SetFileSize(fileSize).
-		SetChunkSize(chunkSize).
-		SetTotalChunks(totalChunks).
-		SetUploadedChunks([]uint32{}).
-		SetStatus(uint8(videoV1.UploadTaskStatus_UPLOAD_TASK_STATUS_UPLOADING)).
-		SetAuthorID(authorID).
-		Save(ctx)
-}
-
-func (r *VideoRepo) GetUploadTask(ctx context.Context, taskID string) (*ent.UploadTask, error) {
-	return r.Client().UploadTask.Query().Where(uploadtask.TaskID(taskID)).Only(ctx)
-}
-
-// AppendUploadChunk 记录已上传分片（幂等：重复分片忽略）
-func (r *VideoRepo) AppendUploadChunk(ctx context.Context, taskID string, chunkIndex uint32) (*ent.UploadTask, error) {
-	t, err := r.GetUploadTask(ctx, taskID)
-	if err != nil {
-		return nil, err
-	}
-	for _, idx := range t.UploadedChunks {
-		if idx == chunkIndex {
-			return t, nil
+	// 删除移除的关联并扣计数
+	for _, rel := range oldRels {
+		if _, keep := containsUint32(newTagIDs, rel.TagID); keep {
+			continue
+		}
+		if _, err = r.entClient.Client().VideoTagRel.Delete().Where(videotagrel.IDEQ(rel.ID)).Exec(ctx); err != nil {
+			r.log.Errorf("delete tag rel failed: %s", err.Error())
+			return videoV1.ErrorInternalServerError("delete tag rel failed")
+		}
+		if err = r.bumpTagCount(ctx, rel.TagID, -1); err != nil {
+			return err
 		}
 	}
-	chunks := append(t.UploadedChunks, chunkIndex)
-	return r.Client().UploadTask.UpdateOneID(t.ID).
-		SetUploadedChunks(chunks).
-		Save(ctx)
-}
-
-func (r *VideoRepo) UpdateUploadTaskStatus(ctx context.Context, taskID string, status uint8, fileKey *string, videoID *uint32) (*ent.UploadTask, error) {
-	t, err := r.GetUploadTask(ctx, taskID)
-	if err != nil {
-		return nil, err
-	}
-	u := r.Client().UploadTask.UpdateOneID(t.ID).SetStatus(status)
-	if fileKey != nil {
-		u.SetFileKey(*fileKey)
-	}
-	if videoID != nil {
-		u.SetVideoID(*videoID)
-	}
-	return u.Save(ctx)
-}
-
-// SumLikeCountByAuthor 作者全部视频获赞求和
-func (r *VideoRepo) SumLikeCountByAuthor(ctx context.Context, authorID uint32) (int64, error) {
-	return sumColumn(ctx, r.Client().Video.Query().Where(video.AuthorID(authorID)), video.FieldLikeCount)
-}
-
-// ── Feed 召回查询 ──
-
-// ListPublishedByAuthors 指定作者的已发布视频（关注召回），按发布时间倒序
-func (r *VideoRepo) ListPublishedByAuthors(ctx context.Context, authorIDs []uint32, limit int) ([]*ent.Video, error) {
-	if len(authorIDs) == 0 {
-		return nil, nil
-	}
-	return r.Client().Video.Query().
-		Where(video.Status(uint8(videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED)), video.AuthorIDIn(authorIDs...)).
-		Order(ent.Desc(video.FieldPublishedAt)).
-		Limit(limit).
-		All(ctx)
-}
-
-// ListHot 热门召回：点赞加权排序（简单规则，无模型）
-func (r *VideoRepo) ListHot(ctx context.Context, limit int) ([]*ent.Video, error) {
-	return r.Client().Video.Query().
-		Where(video.Status(uint8(videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED))).
-		Order(ent.Desc(video.FieldLikeCount)).
-		Order(ent.Desc(video.FieldViewCount)).
-		Limit(limit).
-		All(ctx)
-}
-
-// ListLatest 最新发布兜底召回
-func (r *VideoRepo) ListLatest(ctx context.Context, limit int) ([]*ent.Video, error) {
-	return r.Client().Video.Query().
-		Where(video.Status(uint8(videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED))).
-		Order(ent.Desc(video.FieldPublishedAt)).
-		Limit(limit).
-		All(ctx)
-}
-
-// ListPublishedByIDs 按 ID 集合取已发布视频（收藏列表 / 标签聚合 / 评论目标组装）
-func (r *VideoRepo) ListPublishedByIDs(ctx context.Context, ids []uint32) ([]*ent.Video, error) {
-	if len(ids) == 0 {
-		return nil, nil
-	}
-	return r.Client().Video.Query().
-		Where(video.IDIn(ids...)).
-		Order(ent.Desc(video.FieldID)).
-		All(ctx)
-}
-
-// ListByAuthorAndStatuses 用户主页作品列表（本人含草稿/审核中，他人仅已发布）
-func (r *VideoRepo) ListByAuthorAndStatuses(ctx context.Context, authorID uint32, statuses []uint8, offset, limit int) ([]*ent.Video, int, error) {
-	q := r.Client().Video.Query().Where(video.AuthorID(authorID))
-	if len(statuses) > 0 {
-		q = q.Where(video.StatusIn(statuses...))
-	}
-	total, err := q.Count(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	items, err := q.Order(ent.Desc(video.FieldID)).Offset(offset).Limit(limit).All(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
-	return items, total, nil
-}
-
-// SearchByTitle 标题模糊搜索（已发布）
-func (r *VideoRepo) SearchByTitle(ctx context.Context, keyword string, limit int) ([]*ent.Video, error) {
-	return r.Client().Video.Query().
-		Where(video.Status(uint8(videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED)), video.TitleContains(keyword)).
-		Order(ent.Desc(video.FieldID)).
-		Limit(limit).
-		All(ctx)
-}
-
-// TagByName 按标签名取标签
-func (r *VideoRepo) TagByName(ctx context.Context, name string) (*ent.VideoTag, error) {
-	return r.Client().VideoTag.Query().Where(videotag.Name(name)).Only(ctx)
-}
-
-// VideoIDsByTag 标签下的视频ID集合
-func (r *VideoRepo) VideoIDsByTag(ctx context.Context, tagID uint32, limit int) ([]uint32, error) {
-	rels, err := r.Client().VideoTagRel.Query().Where(videotagrel.TagID(tagID)).Limit(limit).All(ctx)
-	if err != nil {
-		return nil, err
-	}
-	ids := make([]uint32, 0, len(rels))
-	for _, rel := range rels {
-		if rel.VideoID != nil {
-			ids = append(ids, *rel.VideoID)
+	// 新增关联并加计数
+	for _, tagID := range newTagIDs {
+		if _, exists := oldTagIDs[tagID]; exists {
+			continue
+		}
+		if _, err = r.entClient.Client().VideoTagRel.Create().SetVideoID(videoID).SetTagID(tagID).Save(ctx); err != nil {
+			r.log.Errorf("create tag rel failed: %s", err.Error())
+			return videoV1.ErrorInternalServerError("create tag rel failed")
+		}
+		if err = r.bumpTagCount(ctx, tagID, 1); err != nil {
+			return err
 		}
 	}
-	return ids, nil
+	return nil
 }
 
-// IncViewCount 播放量自增（完播口径）
-func (r *VideoRepo) IncViewCount(ctx context.Context, videoID uint32) error {
-	_, err := r.Client().Video.UpdateOneID(videoID).AddViewCount(1).Save(ctx)
+func containsUint32(list []uint32, v uint32) (uint32, bool) {
+	for _, item := range list {
+		if item == v {
+			return item, true
+		}
+	}
+	return 0, false
+}
+
+func (r *VideoRepo) ensureTag(ctx context.Context, name string) (*ent.VideoTag, error) {
+	tag, err := r.entClient.Client().VideoTag.Query().Where(videotag.NameEQ(name)).Only(ctx)
+	if err == nil {
+		return tag, nil
+	}
+	if !ent.IsNotFound(err) {
+		r.log.Errorf("query tag failed: %s", err.Error())
+		return nil, videoV1.ErrorInternalServerError("query tag failed")
+	}
+	tag, err = r.entClient.Client().VideoTag.Create().SetName(name).Save(ctx)
+	if err != nil {
+		// 并发创建冲突则回读
+		tag, err = r.entClient.Client().VideoTag.Query().Where(videotag.NameEQ(name)).Only(ctx)
+		if err != nil {
+			r.log.Errorf("create tag failed: %s", err.Error())
+			return nil, videoV1.ErrorInternalServerError("create tag failed")
+		}
+	}
+	return tag, nil
+}
+
+func (r *VideoRepo) bumpTagCount(ctx context.Context, tagID uint32, delta int) error {
+	_, err := r.entClient.Client().VideoTag.UpdateOneID(tagID).AddVideoCount(int64(delta)).Save(ctx)
 	return err
 }
+
+// ListTags 标签列表（按引用数倒序）
+func (r *VideoRepo) ListTags(ctx context.Context, req *paginationV1.PagingRequest) (*videoV1.ListTagResponse, error) {
+	offs, limit := pageArgsOf(req)
+	q := r.entClient.Client().VideoTag.Query().Offset(offs).Limit(limit).Order(ent.Desc(videotag.FieldVideoCount))
+	items, err := q.All(ctx)
+	if err != nil {
+		r.log.Errorf("list tags failed: %s", err.Error())
+		return nil, videoV1.ErrorInternalServerError("list tags failed")
+	}
+	total, err := r.entClient.Client().VideoTag.Query().Count(ctx)
+	if err != nil {
+		r.log.Errorf("count tags failed: %s", err.Error())
+		return nil, videoV1.ErrorInternalServerError("count tags failed")
+	}
+	resp := &videoV1.ListTagResponse{Total: trans.Ptr(int64(total))}
+	for _, t := range items {
+		resp.Items = append(resp.Items, &videoV1.Tag{
+			Id:         trans.Ptr(t.ID),
+			Name:       trans.Ptr(t.Name),
+			VideoCount: trans.Ptr(t.VideoCount),
+		})
+	}
+	return resp, nil
+}
+
+// ── stats 排行指标内部约定 ──
+
+// TopMetric TOP 排行指标（stats 域用）
+type TopMetric int
+
+const (
+	TopMetricView TopMetric = iota
+	TopMetricLike
+	TopMetricCollect
+	TopMetricComment
+)

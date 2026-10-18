@@ -3,6 +3,7 @@
 package videotagrel
 
 import (
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -17,12 +18,14 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// FieldTenantID holds the string denoting the tenant_id field in the database.
+	FieldTenantID = "tenant_id"
 	// FieldVideoID holds the string denoting the video_id field in the database.
 	FieldVideoID = "video_id"
 	// FieldTagID holds the string denoting the tag_id field in the database.
 	FieldTagID = "tag_id"
 	// Table holds the table name of the videotagrel in the database.
-	Table = "video_tag_rels"
+	Table = "sp_video_tag_rels"
 )
 
 // Columns holds all SQL columns for videotagrel fields.
@@ -31,6 +34,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
+	FieldTenantID,
 	FieldVideoID,
 	FieldTagID,
 }
@@ -45,7 +49,20 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+// Note that the variables below are initialized by the runtime
+// package on the initialization of the application. Therefore,
+// it should be imported in the main as follows:
+//
+//	import _ "go-wind-shortplay/app/core/service/internal/data/ent/runtime"
 var (
+	Hooks  [1]ent.Hook
+	Policy ent.Policy
+	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
+	DefaultTenantID uint32
+	// DefaultVideoID holds the default value on creation for the "video_id" field.
+	DefaultVideoID uint32
+	// DefaultTagID holds the default value on creation for the "tag_id" field.
+	DefaultTagID uint32
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
@@ -71,6 +88,11 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByDeletedAt orders the results by the deleted_at field.
 func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByTenantID orders the results by the tenant_id field.
+func ByTenantID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTenantID, opts...).ToFunc()
 }
 
 // ByVideoID orders the results by the video_id field.

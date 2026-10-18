@@ -34,5 +34,14 @@
   "nicknameRequired": "请输入昵称",
   "passwordRequired": "请输入初始密码",
   "editOwnTip": "管理员账号",
-  "action": "操作"
+  "department": "所属部门",
+  "departmentPlaceholder": "请选择部门",
+  "roles": "角色",
+  "rolesPlaceholder": "请选择角色（可多选）",
+  "assignRolesFailed": "角色分配失败",
+  "action": "操作",
+  "works": "作品",
+  "worksTitle": "用户作品",
+  "uploadAvatar": "上传头像",
+  "avatarUploadTip": "支持 jpg / png / webp / gif，不超过 2MB"
 }

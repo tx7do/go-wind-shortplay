@@ -540,7 +540,7 @@ var File_report_service_v1_report_proto protoreflect.FileDescriptor
 
 const file_report_service_v1_report_proto_rawDesc = "" +
 	"\n" +
-	"\x1ereport/service/v1/report.proto\x12\x11report.service.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1eidentity/service/v1/user.proto\x1a\x1epagination/v1/pagination.proto\"\xd0\x05\n" +
+	"\x1ereport/service/v1/report.proto\x12\x11report.service.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a$identity/service/v1/user_brief.proto\x1a\x1epagination/v1/pagination.proto\"\xd0\x05\n" +
 	"\x06Report\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\rH\x00R\x02id\x88\x01\x01\x12$\n" +
 	"\vreporter_id\x18\x02 \x01(\rH\x01R\n" +

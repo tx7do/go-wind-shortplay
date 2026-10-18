@@ -1,14 +1,16 @@
 server:
   rest:
-    addr: "0.0.0.0:7600"
+    addr: "${ADMIN_REST_ADDR:0.0.0.0:7600}"
     timeout: 10s
-    enable_swagger: true
+    enable_swagger: false
     cors:
       headers:
         - "X-Requested-With"
         - "X-Request-ID"
         - "Content-Type"
         - "Authorization"
+        - "X-Captcha-Id"
+        - "X-Captcha-Value"
       methods:
         - "GET"
         - "POST"
@@ -19,3 +21,26 @@ server:
       origins:
         - "http://localhost:16800"
         - "http://127.0.0.1:16800"
+    middleware:
+      auth:
+        method: "HS256"
+        key: "${jwt_signing_key:dev_only_change_me_in_prod}"
+
+  sse:
+    addr: "${ADMIN_SSE_ADDR::7601}"
+    codec: "json"
+    path: "/events"
+    auto_stream: true
+    auto_reply: false
+
+
+  grpc:
+    addr: "0.0.0.0:0"
+    timeout: 10s
+    middleware:
+      enable_logging: true
+      enable_recovery: true
+      enable_tracing: true
+      enable_validate: true
+      enable_circuit_breaker: true
+      enable_metadata: true

@@ -6,10 +6,11 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+
 	"github.com/tx7do/go-crud/entgo/mixin"
 )
 
-// VideoTagRel 视频标签关联表
+// VideoTagRel holds the schema definition for the VideoTagRel entity.
 type VideoTagRel struct {
 	ent.Schema
 }
@@ -17,38 +18,44 @@ type VideoTagRel struct {
 func (VideoTagRel) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entsql.Annotation{
-			Table:     "video_tag_rels",
+			Table:     "sp_video_tag_rels",
 			Charset:   "utf8mb4",
 			Collation: "utf8mb4_bin",
 		},
 		entsql.WithComments(true),
-		schema.Comment("视频标签关联表"),
+		schema.Comment("短视频-标签关联表"),
 	}
 }
 
+// Fields of the VideoTagRel.
 func (VideoTagRel) Fields() []ent.Field {
 	return []ent.Field{
 		field.Uint32("video_id").
 			Comment("视频ID").
-			Optional().
-			Nillable(),
+			Default(0),
+
 		field.Uint32("tag_id").
 			Comment("标签ID").
-			Optional().
-			Nillable(),
+			Default(0),
 	}
 }
 
+// Mixin of the VideoTagRel.
 func (VideoTagRel) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixin.AutoIncrementId{},
 		mixin.TimeAt{},
+		mixin.TenantID[uint32]{},
 	}
 }
 
 func (VideoTagRel) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("video_id", "tag_id").Unique(),
-		index.Fields("tag_id"),
+		index.Fields("video_id").
+			StorageKey("idx_sp_video_tag_rel_video"),
+
+		index.Fields("tag_id", "video_id").
+			Unique().
+			StorageKey("uix_sp_video_tag_rel_tag_video"),
 	}
 }

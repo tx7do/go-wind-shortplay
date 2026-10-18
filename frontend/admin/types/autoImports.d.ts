@@ -86,6 +86,7 @@ declare global {
   const TiptapEditor: typeof import('../src/components/common/Editor/src/TiptapEditor').default
   const Toolbar: typeof import('../src/components/common/Editor/src/TiptapEditor/index').Toolbar
   const UpdateBtn: typeof import('../src/components/Buttons/index').UpdateBtn
+  const UploadImage: typeof import('../src/components/common/UploadImage/index').default
   const VersionHistoryDrawer: typeof import('../src/components/version/VersionHistoryDrawer').default
   const VideoModal: typeof import('../src/components/common/Editor/src/TiptapEditor/modals').VideoModal
   const VirtualWrapper: typeof import('../src/components/Table/components/VirtualWrapper').default
@@ -118,6 +119,7 @@ declare global {
   const getTableHeight: typeof import('../src/components/Table/utils/helper').getTableHeight
   const handleRowHeight: typeof import('../src/components/Table/utils/helper').handleRowHeight
   const handleValuePropName: typeof import('../src/components/common/Form/utils/helper').handleValuePropName
+  const indexTsxTmp536: typeof import('../src/components/common/UploadImage/index.tsx.tmp.536.bfcb02d654df').default
   const initCompProps: typeof import('../src/components/common/Form/utils/helper').initCompProps
   const initMonacoWorkers: typeof import('../src/components/common/Editor/src/monaco-loader').initMonacoWorkers
   const isDarkMode: typeof import('../src/components/common/Editor/src/utils').isDarkMode
@@ -194,6 +196,6 @@ declare global {
 // for type re-export
 declare global {
   // @ts-ignore
-  export type { FC, ECOption, AuthLayoutProps, EditorProps, CodeEditorProps, JsonEditorProps, MarkdownEditorProps, PlainTextEditorProps, CollaborationOptions, TiptapEditorProps, CodeBlockModalProps, VideoModalProps, IframeModalProps, ImportModalProps, TableSkeletonProps, ThemeLoadingProps, TableExportServerExport, TableExportButtonProps, VersionHistoryDrawerProps, DiffLineType, DiffLine, TokenPayload, AuthState, UserState, TabItem } from './autoImports.d'
+  export type { UploadImageProps, FC, ECOption, AuthLayoutProps, EditorProps, CodeEditorProps, JsonEditorProps, MarkdownEditorProps, PlainTextEditorProps, CollaborationOptions, TiptapEditorProps, CodeBlockModalProps, VideoModalProps, IframeModalProps, ImportModalProps, TableSkeletonProps, ThemeLoadingProps, TableExportServerExport, TableExportButtonProps, VersionHistoryDrawerProps, DiffLineType, DiffLine, TokenPayload, AuthState, UserState, TabItem } from './autoImports.d'
   import('./autoImports.d')
 }

@@ -70,6 +70,87 @@ func (_u *SysConfigUpdate) ClearDeletedAt() *SysConfigUpdate {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *SysConfigUpdate) SetCreatedBy(v uint32) *SysConfigUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *SysConfigUpdate) SetNillableCreatedBy(v *uint32) *SysConfigUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *SysConfigUpdate) AddCreatedBy(v int32) *SysConfigUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *SysConfigUpdate) ClearCreatedBy() *SysConfigUpdate {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *SysConfigUpdate) SetUpdatedBy(v uint32) *SysConfigUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *SysConfigUpdate) SetNillableUpdatedBy(v *uint32) *SysConfigUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *SysConfigUpdate) AddUpdatedBy(v int32) *SysConfigUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *SysConfigUpdate) ClearUpdatedBy() *SysConfigUpdate {
+	_u.mutation.ClearUpdatedBy()
+	return _u
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (_u *SysConfigUpdate) SetDeletedBy(v uint32) *SysConfigUpdate {
+	_u.mutation.ResetDeletedBy()
+	_u.mutation.SetDeletedBy(v)
+	return _u
+}
+
+// SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
+func (_u *SysConfigUpdate) SetNillableDeletedBy(v *uint32) *SysConfigUpdate {
+	if v != nil {
+		_u.SetDeletedBy(*v)
+	}
+	return _u
+}
+
+// AddDeletedBy adds value to the "deleted_by" field.
+func (_u *SysConfigUpdate) AddDeletedBy(v int32) *SysConfigUpdate {
+	_u.mutation.AddDeletedBy(v)
+	return _u
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (_u *SysConfigUpdate) ClearDeletedBy() *SysConfigUpdate {
+	_u.mutation.ClearDeletedBy()
+	return _u
+}
+
 // SetMaxUploadSizeMB sets the "max_upload_size_mb" field.
 func (_u *SysConfigUpdate) SetMaxUploadSizeMB(v uint32) *SysConfigUpdate {
 	_u.mutation.ResetMaxUploadSizeMB()
@@ -88,12 +169,6 @@ func (_u *SysConfigUpdate) SetNillableMaxUploadSizeMB(v *uint32) *SysConfigUpdat
 // AddMaxUploadSizeMB adds value to the "max_upload_size_mb" field.
 func (_u *SysConfigUpdate) AddMaxUploadSizeMB(v int32) *SysConfigUpdate {
 	_u.mutation.AddMaxUploadSizeMB(v)
-	return _u
-}
-
-// ClearMaxUploadSizeMB clears the value of the "max_upload_size_mb" field.
-func (_u *SysConfigUpdate) ClearMaxUploadSizeMB() *SysConfigUpdate {
-	_u.mutation.ClearMaxUploadSizeMB()
 	return _u
 }
 
@@ -118,12 +193,6 @@ func (_u *SysConfigUpdate) AddMaxDurationSeconds(v int32) *SysConfigUpdate {
 	return _u
 }
 
-// ClearMaxDurationSeconds clears the value of the "max_duration_seconds" field.
-func (_u *SysConfigUpdate) ClearMaxDurationSeconds() *SysConfigUpdate {
-	_u.mutation.ClearMaxDurationSeconds()
-	return _u
-}
-
 // SetManualReviewEnabled sets the "manual_review_enabled" field.
 func (_u *SysConfigUpdate) SetManualReviewEnabled(v bool) *SysConfigUpdate {
 	_u.mutation.SetManualReviewEnabled(v)
@@ -138,12 +207,6 @@ func (_u *SysConfigUpdate) SetNillableManualReviewEnabled(v *bool) *SysConfigUpd
 	return _u
 }
 
-// ClearManualReviewEnabled clears the value of the "manual_review_enabled" field.
-func (_u *SysConfigUpdate) ClearManualReviewEnabled() *SysConfigUpdate {
-	_u.mutation.ClearManualReviewEnabled()
-	return _u
-}
-
 // SetRegisterEnabled sets the "register_enabled" field.
 func (_u *SysConfigUpdate) SetRegisterEnabled(v bool) *SysConfigUpdate {
 	_u.mutation.SetRegisterEnabled(v)
@@ -155,12 +218,6 @@ func (_u *SysConfigUpdate) SetNillableRegisterEnabled(v *bool) *SysConfigUpdate 
 	if v != nil {
 		_u.SetRegisterEnabled(*v)
 	}
-	return _u
-}
-
-// ClearRegisterEnabled clears the value of the "register_enabled" field.
-func (_u *SysConfigUpdate) ClearRegisterEnabled() *SysConfigUpdate {
-	_u.mutation.ClearRegisterEnabled()
 	return _u
 }
 
@@ -244,14 +301,38 @@ func (_u *SysConfigUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(sysconfig.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(sysconfig.FieldCreatedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(sysconfig.FieldCreatedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(sysconfig.FieldCreatedBy, field.TypeUint32)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(sysconfig.FieldUpdatedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(sysconfig.FieldUpdatedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(sysconfig.FieldUpdatedBy, field.TypeUint32)
+	}
+	if value, ok := _u.mutation.DeletedBy(); ok {
+		_spec.SetField(sysconfig.FieldDeletedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedDeletedBy(); ok {
+		_spec.AddField(sysconfig.FieldDeletedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.DeletedByCleared() {
+		_spec.ClearField(sysconfig.FieldDeletedBy, field.TypeUint32)
+	}
 	if value, ok := _u.mutation.MaxUploadSizeMB(); ok {
 		_spec.SetField(sysconfig.FieldMaxUploadSizeMB, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedMaxUploadSizeMB(); ok {
 		_spec.AddField(sysconfig.FieldMaxUploadSizeMB, field.TypeUint32, value)
-	}
-	if _u.mutation.MaxUploadSizeMBCleared() {
-		_spec.ClearField(sysconfig.FieldMaxUploadSizeMB, field.TypeUint32)
 	}
 	if value, ok := _u.mutation.MaxDurationSeconds(); ok {
 		_spec.SetField(sysconfig.FieldMaxDurationSeconds, field.TypeUint32, value)
@@ -259,20 +340,11 @@ func (_u *SysConfigUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedMaxDurationSeconds(); ok {
 		_spec.AddField(sysconfig.FieldMaxDurationSeconds, field.TypeUint32, value)
 	}
-	if _u.mutation.MaxDurationSecondsCleared() {
-		_spec.ClearField(sysconfig.FieldMaxDurationSeconds, field.TypeUint32)
-	}
 	if value, ok := _u.mutation.ManualReviewEnabled(); ok {
 		_spec.SetField(sysconfig.FieldManualReviewEnabled, field.TypeBool, value)
 	}
-	if _u.mutation.ManualReviewEnabledCleared() {
-		_spec.ClearField(sysconfig.FieldManualReviewEnabled, field.TypeBool)
-	}
 	if value, ok := _u.mutation.RegisterEnabled(); ok {
 		_spec.SetField(sysconfig.FieldRegisterEnabled, field.TypeBool, value)
-	}
-	if _u.mutation.RegisterEnabledCleared() {
-		_spec.ClearField(sysconfig.FieldRegisterEnabled, field.TypeBool)
 	}
 	if value, ok := _u.mutation.AllowedVideoTypes(); ok {
 		_spec.SetField(sysconfig.FieldAllowedVideoTypes, field.TypeJSON, value)
@@ -347,6 +419,87 @@ func (_u *SysConfigUpdateOne) ClearDeletedAt() *SysConfigUpdateOne {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *SysConfigUpdateOne) SetCreatedBy(v uint32) *SysConfigUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *SysConfigUpdateOne) SetNillableCreatedBy(v *uint32) *SysConfigUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *SysConfigUpdateOne) AddCreatedBy(v int32) *SysConfigUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *SysConfigUpdateOne) ClearCreatedBy() *SysConfigUpdateOne {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *SysConfigUpdateOne) SetUpdatedBy(v uint32) *SysConfigUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *SysConfigUpdateOne) SetNillableUpdatedBy(v *uint32) *SysConfigUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *SysConfigUpdateOne) AddUpdatedBy(v int32) *SysConfigUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *SysConfigUpdateOne) ClearUpdatedBy() *SysConfigUpdateOne {
+	_u.mutation.ClearUpdatedBy()
+	return _u
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (_u *SysConfigUpdateOne) SetDeletedBy(v uint32) *SysConfigUpdateOne {
+	_u.mutation.ResetDeletedBy()
+	_u.mutation.SetDeletedBy(v)
+	return _u
+}
+
+// SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
+func (_u *SysConfigUpdateOne) SetNillableDeletedBy(v *uint32) *SysConfigUpdateOne {
+	if v != nil {
+		_u.SetDeletedBy(*v)
+	}
+	return _u
+}
+
+// AddDeletedBy adds value to the "deleted_by" field.
+func (_u *SysConfigUpdateOne) AddDeletedBy(v int32) *SysConfigUpdateOne {
+	_u.mutation.AddDeletedBy(v)
+	return _u
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (_u *SysConfigUpdateOne) ClearDeletedBy() *SysConfigUpdateOne {
+	_u.mutation.ClearDeletedBy()
+	return _u
+}
+
 // SetMaxUploadSizeMB sets the "max_upload_size_mb" field.
 func (_u *SysConfigUpdateOne) SetMaxUploadSizeMB(v uint32) *SysConfigUpdateOne {
 	_u.mutation.ResetMaxUploadSizeMB()
@@ -365,12 +518,6 @@ func (_u *SysConfigUpdateOne) SetNillableMaxUploadSizeMB(v *uint32) *SysConfigUp
 // AddMaxUploadSizeMB adds value to the "max_upload_size_mb" field.
 func (_u *SysConfigUpdateOne) AddMaxUploadSizeMB(v int32) *SysConfigUpdateOne {
 	_u.mutation.AddMaxUploadSizeMB(v)
-	return _u
-}
-
-// ClearMaxUploadSizeMB clears the value of the "max_upload_size_mb" field.
-func (_u *SysConfigUpdateOne) ClearMaxUploadSizeMB() *SysConfigUpdateOne {
-	_u.mutation.ClearMaxUploadSizeMB()
 	return _u
 }
 
@@ -395,12 +542,6 @@ func (_u *SysConfigUpdateOne) AddMaxDurationSeconds(v int32) *SysConfigUpdateOne
 	return _u
 }
 
-// ClearMaxDurationSeconds clears the value of the "max_duration_seconds" field.
-func (_u *SysConfigUpdateOne) ClearMaxDurationSeconds() *SysConfigUpdateOne {
-	_u.mutation.ClearMaxDurationSeconds()
-	return _u
-}
-
 // SetManualReviewEnabled sets the "manual_review_enabled" field.
 func (_u *SysConfigUpdateOne) SetManualReviewEnabled(v bool) *SysConfigUpdateOne {
 	_u.mutation.SetManualReviewEnabled(v)
@@ -415,12 +556,6 @@ func (_u *SysConfigUpdateOne) SetNillableManualReviewEnabled(v *bool) *SysConfig
 	return _u
 }
 
-// ClearManualReviewEnabled clears the value of the "manual_review_enabled" field.
-func (_u *SysConfigUpdateOne) ClearManualReviewEnabled() *SysConfigUpdateOne {
-	_u.mutation.ClearManualReviewEnabled()
-	return _u
-}
-
 // SetRegisterEnabled sets the "register_enabled" field.
 func (_u *SysConfigUpdateOne) SetRegisterEnabled(v bool) *SysConfigUpdateOne {
 	_u.mutation.SetRegisterEnabled(v)
@@ -432,12 +567,6 @@ func (_u *SysConfigUpdateOne) SetNillableRegisterEnabled(v *bool) *SysConfigUpda
 	if v != nil {
 		_u.SetRegisterEnabled(*v)
 	}
-	return _u
-}
-
-// ClearRegisterEnabled clears the value of the "register_enabled" field.
-func (_u *SysConfigUpdateOne) ClearRegisterEnabled() *SysConfigUpdateOne {
-	_u.mutation.ClearRegisterEnabled()
 	return _u
 }
 
@@ -551,14 +680,38 @@ func (_u *SysConfigUpdateOne) sqlSave(ctx context.Context) (_node *SysConfig, er
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(sysconfig.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(sysconfig.FieldCreatedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(sysconfig.FieldCreatedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(sysconfig.FieldCreatedBy, field.TypeUint32)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(sysconfig.FieldUpdatedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(sysconfig.FieldUpdatedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(sysconfig.FieldUpdatedBy, field.TypeUint32)
+	}
+	if value, ok := _u.mutation.DeletedBy(); ok {
+		_spec.SetField(sysconfig.FieldDeletedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedDeletedBy(); ok {
+		_spec.AddField(sysconfig.FieldDeletedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.DeletedByCleared() {
+		_spec.ClearField(sysconfig.FieldDeletedBy, field.TypeUint32)
+	}
 	if value, ok := _u.mutation.MaxUploadSizeMB(); ok {
 		_spec.SetField(sysconfig.FieldMaxUploadSizeMB, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedMaxUploadSizeMB(); ok {
 		_spec.AddField(sysconfig.FieldMaxUploadSizeMB, field.TypeUint32, value)
-	}
-	if _u.mutation.MaxUploadSizeMBCleared() {
-		_spec.ClearField(sysconfig.FieldMaxUploadSizeMB, field.TypeUint32)
 	}
 	if value, ok := _u.mutation.MaxDurationSeconds(); ok {
 		_spec.SetField(sysconfig.FieldMaxDurationSeconds, field.TypeUint32, value)
@@ -566,20 +719,11 @@ func (_u *SysConfigUpdateOne) sqlSave(ctx context.Context) (_node *SysConfig, er
 	if value, ok := _u.mutation.AddedMaxDurationSeconds(); ok {
 		_spec.AddField(sysconfig.FieldMaxDurationSeconds, field.TypeUint32, value)
 	}
-	if _u.mutation.MaxDurationSecondsCleared() {
-		_spec.ClearField(sysconfig.FieldMaxDurationSeconds, field.TypeUint32)
-	}
 	if value, ok := _u.mutation.ManualReviewEnabled(); ok {
 		_spec.SetField(sysconfig.FieldManualReviewEnabled, field.TypeBool, value)
 	}
-	if _u.mutation.ManualReviewEnabledCleared() {
-		_spec.ClearField(sysconfig.FieldManualReviewEnabled, field.TypeBool)
-	}
 	if value, ok := _u.mutation.RegisterEnabled(); ok {
 		_spec.SetField(sysconfig.FieldRegisterEnabled, field.TypeBool, value)
-	}
-	if _u.mutation.RegisterEnabledCleared() {
-		_spec.ClearField(sysconfig.FieldRegisterEnabled, field.TypeBool)
 	}
 	if value, ok := _u.mutation.AllowedVideoTypes(); ok {
 		_spec.SetField(sysconfig.FieldAllowedVideoTypes, field.TypeJSON, value)

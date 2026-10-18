@@ -69,6 +69,11 @@ func DeletedAt(v time.Time) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldEQ(FieldDeletedAt, v))
 }
 
+// TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
+func TenantID(v uint32) predicate.VideoTagRel {
+	return predicate.VideoTagRel(sql.FieldEQ(FieldTenantID, v))
+}
+
 // VideoID applies equality check predicate on the "video_id" field. It's identical to VideoIDEQ.
 func VideoID(v uint32) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldEQ(FieldVideoID, v))
@@ -229,6 +234,56 @@ func DeletedAtNotNil() predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldNotNull(FieldDeletedAt))
 }
 
+// TenantIDEQ applies the EQ predicate on the "tenant_id" field.
+func TenantIDEQ(v uint32) predicate.VideoTagRel {
+	return predicate.VideoTagRel(sql.FieldEQ(FieldTenantID, v))
+}
+
+// TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
+func TenantIDNEQ(v uint32) predicate.VideoTagRel {
+	return predicate.VideoTagRel(sql.FieldNEQ(FieldTenantID, v))
+}
+
+// TenantIDIn applies the In predicate on the "tenant_id" field.
+func TenantIDIn(vs ...uint32) predicate.VideoTagRel {
+	return predicate.VideoTagRel(sql.FieldIn(FieldTenantID, vs...))
+}
+
+// TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
+func TenantIDNotIn(vs ...uint32) predicate.VideoTagRel {
+	return predicate.VideoTagRel(sql.FieldNotIn(FieldTenantID, vs...))
+}
+
+// TenantIDGT applies the GT predicate on the "tenant_id" field.
+func TenantIDGT(v uint32) predicate.VideoTagRel {
+	return predicate.VideoTagRel(sql.FieldGT(FieldTenantID, v))
+}
+
+// TenantIDGTE applies the GTE predicate on the "tenant_id" field.
+func TenantIDGTE(v uint32) predicate.VideoTagRel {
+	return predicate.VideoTagRel(sql.FieldGTE(FieldTenantID, v))
+}
+
+// TenantIDLT applies the LT predicate on the "tenant_id" field.
+func TenantIDLT(v uint32) predicate.VideoTagRel {
+	return predicate.VideoTagRel(sql.FieldLT(FieldTenantID, v))
+}
+
+// TenantIDLTE applies the LTE predicate on the "tenant_id" field.
+func TenantIDLTE(v uint32) predicate.VideoTagRel {
+	return predicate.VideoTagRel(sql.FieldLTE(FieldTenantID, v))
+}
+
+// TenantIDIsNil applies the IsNil predicate on the "tenant_id" field.
+func TenantIDIsNil() predicate.VideoTagRel {
+	return predicate.VideoTagRel(sql.FieldIsNull(FieldTenantID))
+}
+
+// TenantIDNotNil applies the NotNil predicate on the "tenant_id" field.
+func TenantIDNotNil() predicate.VideoTagRel {
+	return predicate.VideoTagRel(sql.FieldNotNull(FieldTenantID))
+}
+
 // VideoIDEQ applies the EQ predicate on the "video_id" field.
 func VideoIDEQ(v uint32) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldEQ(FieldVideoID, v))
@@ -269,16 +324,6 @@ func VideoIDLTE(v uint32) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldLTE(FieldVideoID, v))
 }
 
-// VideoIDIsNil applies the IsNil predicate on the "video_id" field.
-func VideoIDIsNil() predicate.VideoTagRel {
-	return predicate.VideoTagRel(sql.FieldIsNull(FieldVideoID))
-}
-
-// VideoIDNotNil applies the NotNil predicate on the "video_id" field.
-func VideoIDNotNil() predicate.VideoTagRel {
-	return predicate.VideoTagRel(sql.FieldNotNull(FieldVideoID))
-}
-
 // TagIDEQ applies the EQ predicate on the "tag_id" field.
 func TagIDEQ(v uint32) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldEQ(FieldTagID, v))
@@ -317,16 +362,6 @@ func TagIDLT(v uint32) predicate.VideoTagRel {
 // TagIDLTE applies the LTE predicate on the "tag_id" field.
 func TagIDLTE(v uint32) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldLTE(FieldTagID, v))
-}
-
-// TagIDIsNil applies the IsNil predicate on the "tag_id" field.
-func TagIDIsNil() predicate.VideoTagRel {
-	return predicate.VideoTagRel(sql.FieldIsNull(FieldTagID))
-}
-
-// TagIDNotNil applies the NotNil predicate on the "tag_id" field.
-func TagIDNotNil() predicate.VideoTagRel {
-	return predicate.VideoTagRel(sql.FieldNotNull(FieldTagID))
 }
 
 // And groups predicates with the AND operator between them.

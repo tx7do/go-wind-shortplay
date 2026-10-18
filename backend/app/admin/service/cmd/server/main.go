@@ -6,16 +6,16 @@ import (
 	"github.com/go-kratos/kratos/v2"
 	kratosTransport "github.com/go-kratos/kratos/v2/transport"
 
+
 	conf "github.com/tx7do/kratos-bootstrap/api/gen/go/conf/v1"
 	"github.com/tx7do/kratos-bootstrap/bootstrap"
-
 	_ "github.com/tx7do/kratos-bootstrap/registry/etcd"
 	_ "github.com/tx7do/kratos-bootstrap/tracer"
 
 	"go-wind-shortplay/pkg/serviceid"
 )
 
-var version = "0.1.0"
+var version = "1.0.0"
 
 // go build -ldflags "-X main.version=x.y.z"
 
@@ -35,7 +35,6 @@ func runApp() error {
 			Version: version,
 		},
 	)
-
 	return bootstrap.RunApp(ctx, initApp)
 }
 
@@ -44,4 +43,3 @@ func main() {
 		panic(err)
 	}
 }
-

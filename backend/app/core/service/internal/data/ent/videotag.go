@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 视频标签表
+// 短视频标签表
 type VideoTag struct {
 	config `json:"-"`
 	// ID of the ent.
@@ -24,10 +24,18 @@ type VideoTag struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// 创建者ID
+	CreatedBy *uint32 `json:"created_by,omitempty"`
+	// 更新者ID
+	UpdatedBy *uint32 `json:"updated_by,omitempty"`
+	// 删除者ID
+	DeletedBy *uint32 `json:"deleted_by,omitempty"`
+	// 租户ID
+	TenantID *uint32 `json:"tenant_id,omitempty"`
 	// 标签名
 	Name string `json:"name,omitempty"`
 	// 引用视频数
-	VideoCount   *int64 `json:"video_count,omitempty"`
+	VideoCount   uint64 `json:"video_count,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -36,7 +44,7 @@ func (*VideoTag) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case videotag.FieldID, videotag.FieldVideoCount:
+		case videotag.FieldID, videotag.FieldCreatedBy, videotag.FieldUpdatedBy, videotag.FieldDeletedBy, videotag.FieldTenantID, videotag.FieldVideoCount:
 			values[i] = new(sql.NullInt64)
 		case videotag.FieldName:
 			values[i] = new(sql.NullString)
@@ -84,6 +92,34 @@ func (_m *VideoTag) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
+		case videotag.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				_m.CreatedBy = new(uint32)
+				*_m.CreatedBy = uint32(value.Int64)
+			}
+		case videotag.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				_m.UpdatedBy = new(uint32)
+				*_m.UpdatedBy = uint32(value.Int64)
+			}
+		case videotag.FieldDeletedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_by", values[i])
+			} else if value.Valid {
+				_m.DeletedBy = new(uint32)
+				*_m.DeletedBy = uint32(value.Int64)
+			}
+		case videotag.FieldTenantID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
+			} else if value.Valid {
+				_m.TenantID = new(uint32)
+				*_m.TenantID = uint32(value.Int64)
+			}
 		case videotag.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -94,8 +130,7 @@ func (_m *VideoTag) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field video_count", values[i])
 			} else if value.Valid {
-				_m.VideoCount = new(int64)
-				*_m.VideoCount = value.Int64
+				_m.VideoCount = uint64(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -148,13 +183,31 @@ func (_m *VideoTag) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
+	if v := _m.CreatedBy; v != nil {
+		builder.WriteString("created_by=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.UpdatedBy; v != nil {
+		builder.WriteString("updated_by=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.DeletedBy; v != nil {
+		builder.WriteString("deleted_by=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.TenantID; v != nil {
+		builder.WriteString("tenant_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
-	if v := _m.VideoCount; v != nil {
-		builder.WriteString("video_count=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("video_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.VideoCount))
 	builder.WriteByte(')')
 	return builder.String()
 }

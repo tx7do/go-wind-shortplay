@@ -90,12 +90,6 @@ func (_u *VideoCollectUpdate) AddUserID(v int32) *VideoCollectUpdate {
 	return _u
 }
 
-// ClearUserID clears the value of the "user_id" field.
-func (_u *VideoCollectUpdate) ClearUserID() *VideoCollectUpdate {
-	_u.mutation.ClearUserID()
-	return _u
-}
-
 // SetVideoID sets the "video_id" field.
 func (_u *VideoCollectUpdate) SetVideoID(v uint32) *VideoCollectUpdate {
 	_u.mutation.ResetVideoID()
@@ -114,12 +108,6 @@ func (_u *VideoCollectUpdate) SetNillableVideoID(v *uint32) *VideoCollectUpdate 
 // AddVideoID adds value to the "video_id" field.
 func (_u *VideoCollectUpdate) AddVideoID(v int32) *VideoCollectUpdate {
 	_u.mutation.AddVideoID(v)
-	return _u
-}
-
-// ClearVideoID clears the value of the "video_id" field.
-func (_u *VideoCollectUpdate) ClearVideoID() *VideoCollectUpdate {
-	_u.mutation.ClearVideoID()
 	return _u
 }
 
@@ -185,23 +173,20 @@ func (_u *VideoCollectUpdate) sqlSave(ctx context.Context) (_node int, err error
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(videocollect.FieldDeletedAt, field.TypeTime)
 	}
+	if _u.mutation.TenantIDCleared() {
+		_spec.ClearField(videocollect.FieldTenantID, field.TypeUint32)
+	}
 	if value, ok := _u.mutation.UserID(); ok {
 		_spec.SetField(videocollect.FieldUserID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
 		_spec.AddField(videocollect.FieldUserID, field.TypeUint32, value)
 	}
-	if _u.mutation.UserIDCleared() {
-		_spec.ClearField(videocollect.FieldUserID, field.TypeUint32)
-	}
 	if value, ok := _u.mutation.VideoID(); ok {
 		_spec.SetField(videocollect.FieldVideoID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedVideoID(); ok {
 		_spec.AddField(videocollect.FieldVideoID, field.TypeUint32, value)
-	}
-	if _u.mutation.VideoIDCleared() {
-		_spec.ClearField(videocollect.FieldVideoID, field.TypeUint32)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -286,12 +271,6 @@ func (_u *VideoCollectUpdateOne) AddUserID(v int32) *VideoCollectUpdateOne {
 	return _u
 }
 
-// ClearUserID clears the value of the "user_id" field.
-func (_u *VideoCollectUpdateOne) ClearUserID() *VideoCollectUpdateOne {
-	_u.mutation.ClearUserID()
-	return _u
-}
-
 // SetVideoID sets the "video_id" field.
 func (_u *VideoCollectUpdateOne) SetVideoID(v uint32) *VideoCollectUpdateOne {
 	_u.mutation.ResetVideoID()
@@ -310,12 +289,6 @@ func (_u *VideoCollectUpdateOne) SetNillableVideoID(v *uint32) *VideoCollectUpda
 // AddVideoID adds value to the "video_id" field.
 func (_u *VideoCollectUpdateOne) AddVideoID(v int32) *VideoCollectUpdateOne {
 	_u.mutation.AddVideoID(v)
-	return _u
-}
-
-// ClearVideoID clears the value of the "video_id" field.
-func (_u *VideoCollectUpdateOne) ClearVideoID() *VideoCollectUpdateOne {
-	_u.mutation.ClearVideoID()
 	return _u
 }
 
@@ -411,23 +384,20 @@ func (_u *VideoCollectUpdateOne) sqlSave(ctx context.Context) (_node *VideoColle
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(videocollect.FieldDeletedAt, field.TypeTime)
 	}
+	if _u.mutation.TenantIDCleared() {
+		_spec.ClearField(videocollect.FieldTenantID, field.TypeUint32)
+	}
 	if value, ok := _u.mutation.UserID(); ok {
 		_spec.SetField(videocollect.FieldUserID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
 		_spec.AddField(videocollect.FieldUserID, field.TypeUint32, value)
 	}
-	if _u.mutation.UserIDCleared() {
-		_spec.ClearField(videocollect.FieldUserID, field.TypeUint32)
-	}
 	if value, ok := _u.mutation.VideoID(); ok {
 		_spec.SetField(videocollect.FieldVideoID, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.AddedVideoID(); ok {
 		_spec.AddField(videocollect.FieldVideoID, field.TypeUint32, value)
-	}
-	if _u.mutation.VideoIDCleared() {
-		_spec.ClearField(videocollect.FieldVideoID, field.TypeUint32)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &VideoCollect{config: _u.config}

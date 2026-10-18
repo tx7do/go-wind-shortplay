@@ -69,6 +69,87 @@ func (_u *VideoTagUpdate) ClearDeletedAt() *VideoTagUpdate {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *VideoTagUpdate) SetCreatedBy(v uint32) *VideoTagUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *VideoTagUpdate) SetNillableCreatedBy(v *uint32) *VideoTagUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *VideoTagUpdate) AddCreatedBy(v int32) *VideoTagUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *VideoTagUpdate) ClearCreatedBy() *VideoTagUpdate {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *VideoTagUpdate) SetUpdatedBy(v uint32) *VideoTagUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *VideoTagUpdate) SetNillableUpdatedBy(v *uint32) *VideoTagUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *VideoTagUpdate) AddUpdatedBy(v int32) *VideoTagUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *VideoTagUpdate) ClearUpdatedBy() *VideoTagUpdate {
+	_u.mutation.ClearUpdatedBy()
+	return _u
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (_u *VideoTagUpdate) SetDeletedBy(v uint32) *VideoTagUpdate {
+	_u.mutation.ResetDeletedBy()
+	_u.mutation.SetDeletedBy(v)
+	return _u
+}
+
+// SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
+func (_u *VideoTagUpdate) SetNillableDeletedBy(v *uint32) *VideoTagUpdate {
+	if v != nil {
+		_u.SetDeletedBy(*v)
+	}
+	return _u
+}
+
+// AddDeletedBy adds value to the "deleted_by" field.
+func (_u *VideoTagUpdate) AddDeletedBy(v int32) *VideoTagUpdate {
+	_u.mutation.AddDeletedBy(v)
+	return _u
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (_u *VideoTagUpdate) ClearDeletedBy() *VideoTagUpdate {
+	_u.mutation.ClearDeletedBy()
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *VideoTagUpdate) SetName(v string) *VideoTagUpdate {
 	_u.mutation.SetName(v)
@@ -84,14 +165,14 @@ func (_u *VideoTagUpdate) SetNillableName(v *string) *VideoTagUpdate {
 }
 
 // SetVideoCount sets the "video_count" field.
-func (_u *VideoTagUpdate) SetVideoCount(v int64) *VideoTagUpdate {
+func (_u *VideoTagUpdate) SetVideoCount(v uint64) *VideoTagUpdate {
 	_u.mutation.ResetVideoCount()
 	_u.mutation.SetVideoCount(v)
 	return _u
 }
 
 // SetNillableVideoCount sets the "video_count" field if the given value is not nil.
-func (_u *VideoTagUpdate) SetNillableVideoCount(v *int64) *VideoTagUpdate {
+func (_u *VideoTagUpdate) SetNillableVideoCount(v *uint64) *VideoTagUpdate {
 	if v != nil {
 		_u.SetVideoCount(*v)
 	}
@@ -101,12 +182,6 @@ func (_u *VideoTagUpdate) SetNillableVideoCount(v *int64) *VideoTagUpdate {
 // AddVideoCount adds value to the "video_count" field.
 func (_u *VideoTagUpdate) AddVideoCount(v int64) *VideoTagUpdate {
 	_u.mutation.AddVideoCount(v)
-	return _u
-}
-
-// ClearVideoCount clears the value of the "video_count" field.
-func (_u *VideoTagUpdate) ClearVideoCount() *VideoTagUpdate {
-	_u.mutation.ClearVideoCount()
 	return _u
 }
 
@@ -185,17 +260,44 @@ func (_u *VideoTagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(videotag.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(videotag.FieldCreatedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(videotag.FieldCreatedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(videotag.FieldCreatedBy, field.TypeUint32)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(videotag.FieldUpdatedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(videotag.FieldUpdatedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(videotag.FieldUpdatedBy, field.TypeUint32)
+	}
+	if value, ok := _u.mutation.DeletedBy(); ok {
+		_spec.SetField(videotag.FieldDeletedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedDeletedBy(); ok {
+		_spec.AddField(videotag.FieldDeletedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.DeletedByCleared() {
+		_spec.ClearField(videotag.FieldDeletedBy, field.TypeUint32)
+	}
+	if _u.mutation.TenantIDCleared() {
+		_spec.ClearField(videotag.FieldTenantID, field.TypeUint32)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(videotag.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.VideoCount(); ok {
-		_spec.SetField(videotag.FieldVideoCount, field.TypeInt64, value)
+		_spec.SetField(videotag.FieldVideoCount, field.TypeUint64, value)
 	}
 	if value, ok := _u.mutation.AddedVideoCount(); ok {
-		_spec.AddField(videotag.FieldVideoCount, field.TypeInt64, value)
-	}
-	if _u.mutation.VideoCountCleared() {
-		_spec.ClearField(videotag.FieldVideoCount, field.TypeInt64)
+		_spec.AddField(videotag.FieldVideoCount, field.TypeUint64, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -259,6 +361,87 @@ func (_u *VideoTagUpdateOne) ClearDeletedAt() *VideoTagUpdateOne {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *VideoTagUpdateOne) SetCreatedBy(v uint32) *VideoTagUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *VideoTagUpdateOne) SetNillableCreatedBy(v *uint32) *VideoTagUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *VideoTagUpdateOne) AddCreatedBy(v int32) *VideoTagUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *VideoTagUpdateOne) ClearCreatedBy() *VideoTagUpdateOne {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *VideoTagUpdateOne) SetUpdatedBy(v uint32) *VideoTagUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *VideoTagUpdateOne) SetNillableUpdatedBy(v *uint32) *VideoTagUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *VideoTagUpdateOne) AddUpdatedBy(v int32) *VideoTagUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *VideoTagUpdateOne) ClearUpdatedBy() *VideoTagUpdateOne {
+	_u.mutation.ClearUpdatedBy()
+	return _u
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (_u *VideoTagUpdateOne) SetDeletedBy(v uint32) *VideoTagUpdateOne {
+	_u.mutation.ResetDeletedBy()
+	_u.mutation.SetDeletedBy(v)
+	return _u
+}
+
+// SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
+func (_u *VideoTagUpdateOne) SetNillableDeletedBy(v *uint32) *VideoTagUpdateOne {
+	if v != nil {
+		_u.SetDeletedBy(*v)
+	}
+	return _u
+}
+
+// AddDeletedBy adds value to the "deleted_by" field.
+func (_u *VideoTagUpdateOne) AddDeletedBy(v int32) *VideoTagUpdateOne {
+	_u.mutation.AddDeletedBy(v)
+	return _u
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (_u *VideoTagUpdateOne) ClearDeletedBy() *VideoTagUpdateOne {
+	_u.mutation.ClearDeletedBy()
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *VideoTagUpdateOne) SetName(v string) *VideoTagUpdateOne {
 	_u.mutation.SetName(v)
@@ -274,14 +457,14 @@ func (_u *VideoTagUpdateOne) SetNillableName(v *string) *VideoTagUpdateOne {
 }
 
 // SetVideoCount sets the "video_count" field.
-func (_u *VideoTagUpdateOne) SetVideoCount(v int64) *VideoTagUpdateOne {
+func (_u *VideoTagUpdateOne) SetVideoCount(v uint64) *VideoTagUpdateOne {
 	_u.mutation.ResetVideoCount()
 	_u.mutation.SetVideoCount(v)
 	return _u
 }
 
 // SetNillableVideoCount sets the "video_count" field if the given value is not nil.
-func (_u *VideoTagUpdateOne) SetNillableVideoCount(v *int64) *VideoTagUpdateOne {
+func (_u *VideoTagUpdateOne) SetNillableVideoCount(v *uint64) *VideoTagUpdateOne {
 	if v != nil {
 		_u.SetVideoCount(*v)
 	}
@@ -291,12 +474,6 @@ func (_u *VideoTagUpdateOne) SetNillableVideoCount(v *int64) *VideoTagUpdateOne 
 // AddVideoCount adds value to the "video_count" field.
 func (_u *VideoTagUpdateOne) AddVideoCount(v int64) *VideoTagUpdateOne {
 	_u.mutation.AddVideoCount(v)
-	return _u
-}
-
-// ClearVideoCount clears the value of the "video_count" field.
-func (_u *VideoTagUpdateOne) ClearVideoCount() *VideoTagUpdateOne {
-	_u.mutation.ClearVideoCount()
 	return _u
 }
 
@@ -405,17 +582,44 @@ func (_u *VideoTagUpdateOne) sqlSave(ctx context.Context) (_node *VideoTag, err 
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(videotag.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(videotag.FieldCreatedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(videotag.FieldCreatedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(videotag.FieldCreatedBy, field.TypeUint32)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(videotag.FieldUpdatedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(videotag.FieldUpdatedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(videotag.FieldUpdatedBy, field.TypeUint32)
+	}
+	if value, ok := _u.mutation.DeletedBy(); ok {
+		_spec.SetField(videotag.FieldDeletedBy, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedDeletedBy(); ok {
+		_spec.AddField(videotag.FieldDeletedBy, field.TypeUint32, value)
+	}
+	if _u.mutation.DeletedByCleared() {
+		_spec.ClearField(videotag.FieldDeletedBy, field.TypeUint32)
+	}
+	if _u.mutation.TenantIDCleared() {
+		_spec.ClearField(videotag.FieldTenantID, field.TypeUint32)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(videotag.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.VideoCount(); ok {
-		_spec.SetField(videotag.FieldVideoCount, field.TypeInt64, value)
+		_spec.SetField(videotag.FieldVideoCount, field.TypeUint64, value)
 	}
 	if value, ok := _u.mutation.AddedVideoCount(); ok {
-		_spec.AddField(videotag.FieldVideoCount, field.TypeInt64, value)
-	}
-	if _u.mutation.VideoCountCleared() {
-		_spec.ClearField(videotag.FieldVideoCount, field.TypeInt64)
+		_spec.AddField(videotag.FieldVideoCount, field.TypeUint64, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &VideoTag{config: _u.config}

@@ -23,18 +23,22 @@ const _ = http.SupportPackageIsVersion1
 
 const OperationDashboardServiceGetOverview = "/admin.service.v1.DashboardService/GetOverview"
 const OperationDashboardServiceListTopVideos = "/admin.service.v1.DashboardService/ListTopVideos"
+const OperationDashboardServiceTrends = "/admin.service.v1.DashboardService/Trends"
 
 type DashboardServiceHTTPServer interface {
 	// GetOverview 运营总览
 	GetOverview(context.Context, *v1.GetOverviewRequest) (*v1.Overview, error)
 	// ListTopVideos 视频 TOP 排行
 	ListTopVideos(context.Context, *v1.ListTopVideosRequest) (*v11.ListVideoResponse, error)
+	// Trends 近 N 日趋势（看板折线图）
+	Trends(context.Context, *v1.ListTrendsRequest) (*v1.ListTrendsResponse, error)
 }
 
 func RegisterDashboardServiceHTTPServer(s *http.Server, srv DashboardServiceHTTPServer) {
 	r := s.Route("/")
 	r.GET("/admin/v1/dashboard/overview", _DashboardService_GetOverview0_HTTP_Handler(srv))
 	r.GET("/admin/v1/dashboard/top-videos", _DashboardService_ListTopVideos0_HTTP_Handler(srv))
+	r.GET("/admin/v1/dashboard/trends", _DashboardService_Trends0_HTTP_Handler(srv))
 }
 
 func _DashboardService_GetOverview0_HTTP_Handler(srv DashboardServiceHTTPServer) func(ctx http.Context) error {
@@ -75,11 +79,32 @@ func _DashboardService_ListTopVideos0_HTTP_Handler(srv DashboardServiceHTTPServe
 	}
 }
 
+func _DashboardService_Trends0_HTTP_Handler(srv DashboardServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ListTrendsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationDashboardServiceTrends)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.Trends(ctx, req.(*v1.ListTrendsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ListTrendsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type DashboardServiceHTTPClient interface {
 	// GetOverview 运营总览
 	GetOverview(ctx context.Context, req *v1.GetOverviewRequest, opts ...http.CallOption) (rsp *v1.Overview, err error)
 	// ListTopVideos 视频 TOP 排行
 	ListTopVideos(ctx context.Context, req *v1.ListTopVideosRequest, opts ...http.CallOption) (rsp *v11.ListVideoResponse, err error)
+	// Trends 近 N 日趋势（看板折线图）
+	Trends(ctx context.Context, req *v1.ListTrendsRequest, opts ...http.CallOption) (rsp *v1.ListTrendsResponse, err error)
 }
 
 type DashboardServiceHTTPClientImpl struct {
@@ -110,6 +135,20 @@ func (c *DashboardServiceHTTPClientImpl) ListTopVideos(ctx context.Context, in *
 	pattern := "/admin/v1/dashboard/top-videos"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationDashboardServiceListTopVideos))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Trends 近 N 日趋势（看板折线图）
+func (c *DashboardServiceHTTPClientImpl) Trends(ctx context.Context, in *v1.ListTrendsRequest, opts ...http.CallOption) (*v1.ListTrendsResponse, error) {
+	var out v1.ListTrendsResponse
+	pattern := "/admin/v1/dashboard/trends"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationDashboardServiceTrends))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

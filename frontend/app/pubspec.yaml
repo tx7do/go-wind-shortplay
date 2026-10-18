@@ -49,6 +49,9 @@ dependencies:
   dio_http2_adapter: ^2.5.2
   http: ^1.2.1
 
+  # 密码传输加密（AES-CBC/PKCS7 base64，与基座 flutter_app 同款）
+  encrypt: ^5.0.3
+
   # 存储
   shared_preferences: ^2.5.2
   sqlite3_flutter_libs: ^0.6.0+eol # 不引用的话，将会没有libsqlite3.so

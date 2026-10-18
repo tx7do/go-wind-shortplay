@@ -3,6 +3,9 @@
 package videoreport
 
 import (
+	"fmt"
+
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -17,6 +20,14 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// FieldCreatedBy holds the string denoting the created_by field in the database.
+	FieldCreatedBy = "created_by"
+	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
+	FieldUpdatedBy = "updated_by"
+	// FieldDeletedBy holds the string denoting the deleted_by field in the database.
+	FieldDeletedBy = "deleted_by"
+	// FieldTenantID holds the string denoting the tenant_id field in the database.
+	FieldTenantID = "tenant_id"
 	// FieldReporterID holds the string denoting the reporter_id field in the database.
 	FieldReporterID = "reporter_id"
 	// FieldTargetType holds the string denoting the target_type field in the database.
@@ -36,7 +47,7 @@ const (
 	// FieldHandledAt holds the string denoting the handled_at field in the database.
 	FieldHandledAt = "handled_at"
 	// Table holds the table name of the videoreport in the database.
-	Table = "video_reports"
+	Table = "sp_video_reports"
 )
 
 // Columns holds all SQL columns for videoreport fields.
@@ -45,6 +56,10 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
+	FieldCreatedBy,
+	FieldUpdatedBy,
+	FieldDeletedBy,
+	FieldTenantID,
 	FieldReporterID,
 	FieldTargetType,
 	FieldTargetID,
@@ -66,14 +81,81 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+// Note that the variables below are initialized by the runtime
+// package on the initialization of the application. Therefore,
+// it should be imported in the main as follows:
+//
+//	import _ "go-wind-shortplay/app/core/service/internal/data/ent/runtime"
 var (
+	Hooks  [1]ent.Hook
+	Policy ent.Policy
+	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
+	DefaultTenantID uint32
+	// DefaultReporterID holds the default value on creation for the "reporter_id" field.
+	DefaultReporterID uint32
+	// DefaultTargetID holds the default value on creation for the "target_id" field.
+	DefaultTargetID uint32
 	// ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
 	ReasonValidator func(string) error
-	// DefaultStatus holds the default value on creation for the "status" field.
-	DefaultStatus uint8
+	// DefaultHandledBy holds the default value on creation for the "handled_by" field.
+	DefaultHandledBy uint32
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
+
+// TargetType defines the type for the "target_type" enum field.
+type TargetType string
+
+// TargetTypeVideo is the default value of the TargetType enum.
+const DefaultTargetType = TargetTypeVideo
+
+// TargetType values.
+const (
+	TargetTypeVideo   TargetType = "VIDEO"
+	TargetTypeComment TargetType = "COMMENT"
+	TargetTypeUser    TargetType = "USER"
+)
+
+func (tt TargetType) String() string {
+	return string(tt)
+}
+
+// TargetTypeValidator is a validator for the "target_type" field enum values. It is called by the builders before save.
+func TargetTypeValidator(tt TargetType) error {
+	switch tt {
+	case TargetTypeVideo, TargetTypeComment, TargetTypeUser:
+		return nil
+	default:
+		return fmt.Errorf("videoreport: invalid enum value for target_type field: %q", tt)
+	}
+}
+
+// Status defines the type for the "status" enum field.
+type Status string
+
+// StatusPending is the default value of the Status enum.
+const DefaultStatus = StatusPending
+
+// Status values.
+const (
+	StatusPending   Status = "PENDING"
+	StatusResolved  Status = "RESOLVED"
+	StatusDismissed Status = "DISMISSED"
+)
+
+func (s Status) String() string {
+	return string(s)
+}
+
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
+func StatusValidator(s Status) error {
+	switch s {
+	case StatusPending, StatusResolved, StatusDismissed:
+		return nil
+	default:
+		return fmt.Errorf("videoreport: invalid enum value for status field: %q", s)
+	}
+}
 
 // OrderOption defines the ordering options for the VideoReport queries.
 type OrderOption func(*sql.Selector)
@@ -96,6 +178,26 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByDeletedAt orders the results by the deleted_at field.
 func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByCreatedBy orders the results by the created_by field.
+func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
+}
+
+// ByUpdatedBy orders the results by the updated_by field.
+func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedBy, opts...).ToFunc()
+}
+
+// ByDeletedBy orders the results by the deleted_by field.
+func ByDeletedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedBy, opts...).ToFunc()
+}
+
+// ByTenantID orders the results by the tenant_id field.
+func ByTenantID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTenantID, opts...).ToFunc()
 }
 
 // ByReporterID orders the results by the reporter_id field.

@@ -4,7 +4,7 @@ package interaction.service.v1;
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
-import "identity/service/v1/user.proto";
+import "identity/service/v1/user_brief.proto";
 import "pagination/v1/pagination.proto";
 import "video/service/v1/video.proto";
 

@@ -69,6 +69,26 @@ func DeletedAt(v time.Time) predicate.VideoDraft {
 	return predicate.VideoDraft(sql.FieldEQ(FieldDeletedAt, v))
 }
 
+// CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
+func CreatedBy(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// UpdatedBy applies equality check predicate on the "updated_by" field. It's identical to UpdatedByEQ.
+func UpdatedBy(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldEQ(FieldUpdatedBy, v))
+}
+
+// DeletedBy applies equality check predicate on the "deleted_by" field. It's identical to DeletedByEQ.
+func DeletedBy(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldEQ(FieldDeletedBy, v))
+}
+
+// TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
+func TenantID(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldEQ(FieldTenantID, v))
+}
+
 // Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
 func Title(v string) predicate.VideoDraft {
 	return predicate.VideoDraft(sql.FieldEQ(FieldTitle, v))
@@ -264,6 +284,206 @@ func DeletedAtNotNil() predicate.VideoDraft {
 	return predicate.VideoDraft(sql.FieldNotNull(FieldDeletedAt))
 }
 
+// CreatedByEQ applies the EQ predicate on the "created_by" field.
+func CreatedByEQ(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// CreatedByNEQ applies the NEQ predicate on the "created_by" field.
+func CreatedByNEQ(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNEQ(FieldCreatedBy, v))
+}
+
+// CreatedByIn applies the In predicate on the "created_by" field.
+func CreatedByIn(vs ...uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByNotIn applies the NotIn predicate on the "created_by" field.
+func CreatedByNotIn(vs ...uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNotIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByGT applies the GT predicate on the "created_by" field.
+func CreatedByGT(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldGT(FieldCreatedBy, v))
+}
+
+// CreatedByGTE applies the GTE predicate on the "created_by" field.
+func CreatedByGTE(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldGTE(FieldCreatedBy, v))
+}
+
+// CreatedByLT applies the LT predicate on the "created_by" field.
+func CreatedByLT(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldLT(FieldCreatedBy, v))
+}
+
+// CreatedByLTE applies the LTE predicate on the "created_by" field.
+func CreatedByLTE(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldLTE(FieldCreatedBy, v))
+}
+
+// CreatedByIsNil applies the IsNil predicate on the "created_by" field.
+func CreatedByIsNil() predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldIsNull(FieldCreatedBy))
+}
+
+// CreatedByNotNil applies the NotNil predicate on the "created_by" field.
+func CreatedByNotNil() predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNotNull(FieldCreatedBy))
+}
+
+// UpdatedByEQ applies the EQ predicate on the "updated_by" field.
+func UpdatedByEQ(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldEQ(FieldUpdatedBy, v))
+}
+
+// UpdatedByNEQ applies the NEQ predicate on the "updated_by" field.
+func UpdatedByNEQ(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNEQ(FieldUpdatedBy, v))
+}
+
+// UpdatedByIn applies the In predicate on the "updated_by" field.
+func UpdatedByIn(vs ...uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldIn(FieldUpdatedBy, vs...))
+}
+
+// UpdatedByNotIn applies the NotIn predicate on the "updated_by" field.
+func UpdatedByNotIn(vs ...uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNotIn(FieldUpdatedBy, vs...))
+}
+
+// UpdatedByGT applies the GT predicate on the "updated_by" field.
+func UpdatedByGT(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldGT(FieldUpdatedBy, v))
+}
+
+// UpdatedByGTE applies the GTE predicate on the "updated_by" field.
+func UpdatedByGTE(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldGTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByLT applies the LT predicate on the "updated_by" field.
+func UpdatedByLT(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldLT(FieldUpdatedBy, v))
+}
+
+// UpdatedByLTE applies the LTE predicate on the "updated_by" field.
+func UpdatedByLTE(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldLTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByIsNil applies the IsNil predicate on the "updated_by" field.
+func UpdatedByIsNil() predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldIsNull(FieldUpdatedBy))
+}
+
+// UpdatedByNotNil applies the NotNil predicate on the "updated_by" field.
+func UpdatedByNotNil() predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNotNull(FieldUpdatedBy))
+}
+
+// DeletedByEQ applies the EQ predicate on the "deleted_by" field.
+func DeletedByEQ(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldEQ(FieldDeletedBy, v))
+}
+
+// DeletedByNEQ applies the NEQ predicate on the "deleted_by" field.
+func DeletedByNEQ(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNEQ(FieldDeletedBy, v))
+}
+
+// DeletedByIn applies the In predicate on the "deleted_by" field.
+func DeletedByIn(vs ...uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldIn(FieldDeletedBy, vs...))
+}
+
+// DeletedByNotIn applies the NotIn predicate on the "deleted_by" field.
+func DeletedByNotIn(vs ...uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNotIn(FieldDeletedBy, vs...))
+}
+
+// DeletedByGT applies the GT predicate on the "deleted_by" field.
+func DeletedByGT(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldGT(FieldDeletedBy, v))
+}
+
+// DeletedByGTE applies the GTE predicate on the "deleted_by" field.
+func DeletedByGTE(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldGTE(FieldDeletedBy, v))
+}
+
+// DeletedByLT applies the LT predicate on the "deleted_by" field.
+func DeletedByLT(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldLT(FieldDeletedBy, v))
+}
+
+// DeletedByLTE applies the LTE predicate on the "deleted_by" field.
+func DeletedByLTE(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldLTE(FieldDeletedBy, v))
+}
+
+// DeletedByIsNil applies the IsNil predicate on the "deleted_by" field.
+func DeletedByIsNil() predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldIsNull(FieldDeletedBy))
+}
+
+// DeletedByNotNil applies the NotNil predicate on the "deleted_by" field.
+func DeletedByNotNil() predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNotNull(FieldDeletedBy))
+}
+
+// TenantIDEQ applies the EQ predicate on the "tenant_id" field.
+func TenantIDEQ(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldEQ(FieldTenantID, v))
+}
+
+// TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
+func TenantIDNEQ(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNEQ(FieldTenantID, v))
+}
+
+// TenantIDIn applies the In predicate on the "tenant_id" field.
+func TenantIDIn(vs ...uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldIn(FieldTenantID, vs...))
+}
+
+// TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
+func TenantIDNotIn(vs ...uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNotIn(FieldTenantID, vs...))
+}
+
+// TenantIDGT applies the GT predicate on the "tenant_id" field.
+func TenantIDGT(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldGT(FieldTenantID, v))
+}
+
+// TenantIDGTE applies the GTE predicate on the "tenant_id" field.
+func TenantIDGTE(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldGTE(FieldTenantID, v))
+}
+
+// TenantIDLT applies the LT predicate on the "tenant_id" field.
+func TenantIDLT(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldLT(FieldTenantID, v))
+}
+
+// TenantIDLTE applies the LTE predicate on the "tenant_id" field.
+func TenantIDLTE(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldLTE(FieldTenantID, v))
+}
+
+// TenantIDIsNil applies the IsNil predicate on the "tenant_id" field.
+func TenantIDIsNil() predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldIsNull(FieldTenantID))
+}
+
+// TenantIDNotNil applies the NotNil predicate on the "tenant_id" field.
+func TenantIDNotNil() predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNotNull(FieldTenantID))
+}
+
 // TitleEQ applies the EQ predicate on the "title" field.
 func TitleEQ(v string) predicate.VideoDraft {
 	return predicate.VideoDraft(sql.FieldEQ(FieldTitle, v))
@@ -412,6 +632,16 @@ func DescriptionEqualFold(v string) predicate.VideoDraft {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.VideoDraft {
 	return predicate.VideoDraft(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// TagsIsNil applies the IsNil predicate on the "tags" field.
+func TagsIsNil() predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldIsNull(FieldTags))
+}
+
+// TagsNotNil applies the NotNil predicate on the "tags" field.
+func TagsNotNil() predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNotNull(FieldTags))
 }
 
 // CoverURLEQ applies the EQ predicate on the "cover_url" field.
@@ -604,16 +834,6 @@ func DurationLTE(v uint32) predicate.VideoDraft {
 	return predicate.VideoDraft(sql.FieldLTE(FieldDuration, v))
 }
 
-// DurationIsNil applies the IsNil predicate on the "duration" field.
-func DurationIsNil() predicate.VideoDraft {
-	return predicate.VideoDraft(sql.FieldIsNull(FieldDuration))
-}
-
-// DurationNotNil applies the NotNil predicate on the "duration" field.
-func DurationNotNil() predicate.VideoDraft {
-	return predicate.VideoDraft(sql.FieldNotNull(FieldDuration))
-}
-
 // WidthEQ applies the EQ predicate on the "width" field.
 func WidthEQ(v uint32) predicate.VideoDraft {
 	return predicate.VideoDraft(sql.FieldEQ(FieldWidth, v))
@@ -654,16 +874,6 @@ func WidthLTE(v uint32) predicate.VideoDraft {
 	return predicate.VideoDraft(sql.FieldLTE(FieldWidth, v))
 }
 
-// WidthIsNil applies the IsNil predicate on the "width" field.
-func WidthIsNil() predicate.VideoDraft {
-	return predicate.VideoDraft(sql.FieldIsNull(FieldWidth))
-}
-
-// WidthNotNil applies the NotNil predicate on the "width" field.
-func WidthNotNil() predicate.VideoDraft {
-	return predicate.VideoDraft(sql.FieldNotNull(FieldWidth))
-}
-
 // HeightEQ applies the EQ predicate on the "height" field.
 func HeightEQ(v uint32) predicate.VideoDraft {
 	return predicate.VideoDraft(sql.FieldEQ(FieldHeight, v))
@@ -702,16 +912,6 @@ func HeightLT(v uint32) predicate.VideoDraft {
 // HeightLTE applies the LTE predicate on the "height" field.
 func HeightLTE(v uint32) predicate.VideoDraft {
 	return predicate.VideoDraft(sql.FieldLTE(FieldHeight, v))
-}
-
-// HeightIsNil applies the IsNil predicate on the "height" field.
-func HeightIsNil() predicate.VideoDraft {
-	return predicate.VideoDraft(sql.FieldIsNull(FieldHeight))
-}
-
-// HeightNotNil applies the NotNil predicate on the "height" field.
-func HeightNotNil() predicate.VideoDraft {
-	return predicate.VideoDraft(sql.FieldNotNull(FieldHeight))
 }
 
 // UploadTaskIDEQ applies the EQ predicate on the "upload_task_id" field.
@@ -827,16 +1027,6 @@ func AuthorIDLT(v uint32) predicate.VideoDraft {
 // AuthorIDLTE applies the LTE predicate on the "author_id" field.
 func AuthorIDLTE(v uint32) predicate.VideoDraft {
 	return predicate.VideoDraft(sql.FieldLTE(FieldAuthorID, v))
-}
-
-// AuthorIDIsNil applies the IsNil predicate on the "author_id" field.
-func AuthorIDIsNil() predicate.VideoDraft {
-	return predicate.VideoDraft(sql.FieldIsNull(FieldAuthorID))
-}
-
-// AuthorIDNotNil applies the NotNil predicate on the "author_id" field.
-func AuthorIDNotNil() predicate.VideoDraft {
-	return predicate.VideoDraft(sql.FieldNotNull(FieldAuthorID))
 }
 
 // And groups predicates with the AND operator between them.

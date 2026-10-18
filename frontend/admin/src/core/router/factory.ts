@@ -8,15 +8,20 @@ import type { AccessModeType } from '@/core/preferences';
 
 /**
  * 从路由列表中分离出：
- * - layoutRoutes: 包含 MainLayout/AuthGuard 的根路由（path='/'）
- * - staticRoutes: 不受 AuthGuard 保护的静态路由（auth/login/error 等）
+ * - layoutRoutes: 主布局容器路由（path='/'，后端模式下被 navigation 下发的
+ *   BasicLayout 取代）
+ * - staticRoutes: 不受 AuthGuard 保护的静态路由（auth/error 等）
+ *
+ * 注意：只有声明 meta.replaceByBackendLayout 的 '/' 容器才会被后端模式替换
+ * （静态业务容器）；errorRoutes 的 '/' 容器（BlankLayout + /404 通配符）必须
+ * 原样保留，否则后端模式会丢失 404 与错误页。
  */
 function separateRoutes(routes: AppRouteObject[]) {
-  const layoutRoutes: AppRouteObject[] = [];  // path='/' 的布局路由
+  const layoutRoutes: AppRouteObject[] = [];  // path='/' 的主布局容器路由
   const otherRoutes: AppRouteObject[] = [];    // 其他静态路由（auth/error等）
 
   for (const route of routes) {
-    if (route.path === '/' && route.children) {
+    if (route.path === '/' && route.children && route.meta?.['replaceByBackendLayout'] === true) {
       layoutRoutes.push(route);
     } else {
       otherRoutes.push(route);

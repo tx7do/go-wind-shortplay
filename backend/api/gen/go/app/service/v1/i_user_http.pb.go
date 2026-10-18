@@ -4,7 +4,7 @@
 // - protoc             (unknown)
 // source: app/service/v1/i_user.proto
 
-package apppb
+package servicev1
 
 import (
 	context "context"
@@ -27,14 +27,14 @@ const OperationUserServiceListUserVideos = "/app.service.v1.UserService/ListUser
 const OperationUserServiceUpdateProfile = "/app.service.v1.UserService/UpdateProfile"
 
 type UserServiceHTTPServer interface {
-	// GetUser 用户主页（本人 / 他人通用：资料 + 统计）
-	GetUser(context.Context, *v1.GetUserRequest) (*v1.User, error)
-	// GetUserStats 用户统计（粉丝 / 关注 / 作品 / 获赞）
+	// GetUser 用户主页（本人 / 他人通用：资料；游客可访问）
+	GetUser(context.Context, *GetAppUserRequest) (*UserDetail, error)
+	// GetUserStats 用户统计（粉丝 / 关注 / 作品 / 获赞；游客可访问）
 	GetUserStats(context.Context, *v1.GetUserStatsRequest) (*v1.UserStats, error)
 	// ListUserVideos 用户作品列表（主页「作品」Tab；本人可见全部状态，他人仅已发布）
 	ListUserVideos(context.Context, *ListUserVideosRequest) (*v11.ListVideoResponse, error)
-	// UpdateProfile 编辑我的资料
-	UpdateProfile(context.Context, *v1.UpdateUserRequest) (*v1.User, error)
+	// UpdateProfile 编辑我的资料（id 取令牌）
+	UpdateProfile(context.Context, *UpdateProfileRequest) (*UserDetail, error)
 }
 
 func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
@@ -47,7 +47,7 @@ func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
 
 func _UserService_GetUser0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v1.GetUserRequest
+		var in GetAppUserRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
@@ -56,13 +56,13 @@ func _UserService_GetUser0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http
 		}
 		http.SetOperation(ctx, OperationUserServiceGetUser)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetUser(ctx, req.(*v1.GetUserRequest))
+			return srv.GetUser(ctx, req.(*GetAppUserRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*v1.User)
+		reply := out.(*UserDetail)
 		return ctx.Result(200, reply)
 	}
 }
@@ -91,7 +91,7 @@ func _UserService_GetUserStats0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx
 
 func _UserService_UpdateProfile0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in v1.UpdateUserRequest
+		var in UpdateProfileRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
@@ -100,13 +100,13 @@ func _UserService_UpdateProfile0_HTTP_Handler(srv UserServiceHTTPServer) func(ct
 		}
 		http.SetOperation(ctx, OperationUserServiceUpdateProfile)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UpdateProfile(ctx, req.(*v1.UpdateUserRequest))
+			return srv.UpdateProfile(ctx, req.(*UpdateProfileRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*v1.User)
+		reply := out.(*UserDetail)
 		return ctx.Result(200, reply)
 	}
 }
@@ -134,14 +134,14 @@ func _UserService_ListUserVideos0_HTTP_Handler(srv UserServiceHTTPServer) func(c
 }
 
 type UserServiceHTTPClient interface {
-	// GetUser 用户主页（本人 / 他人通用：资料 + 统计）
-	GetUser(ctx context.Context, req *v1.GetUserRequest, opts ...http.CallOption) (rsp *v1.User, err error)
-	// GetUserStats 用户统计（粉丝 / 关注 / 作品 / 获赞）
+	// GetUser 用户主页（本人 / 他人通用：资料；游客可访问）
+	GetUser(ctx context.Context, req *GetAppUserRequest, opts ...http.CallOption) (rsp *UserDetail, err error)
+	// GetUserStats 用户统计（粉丝 / 关注 / 作品 / 获赞；游客可访问）
 	GetUserStats(ctx context.Context, req *v1.GetUserStatsRequest, opts ...http.CallOption) (rsp *v1.UserStats, err error)
 	// ListUserVideos 用户作品列表（主页「作品」Tab；本人可见全部状态，他人仅已发布）
 	ListUserVideos(ctx context.Context, req *ListUserVideosRequest, opts ...http.CallOption) (rsp *v11.ListVideoResponse, err error)
-	// UpdateProfile 编辑我的资料
-	UpdateProfile(ctx context.Context, req *v1.UpdateUserRequest, opts ...http.CallOption) (rsp *v1.User, err error)
+	// UpdateProfile 编辑我的资料（id 取令牌）
+	UpdateProfile(ctx context.Context, req *UpdateProfileRequest, opts ...http.CallOption) (rsp *UserDetail, err error)
 }
 
 type UserServiceHTTPClientImpl struct {
@@ -152,9 +152,9 @@ func NewUserServiceHTTPClient(client *http.Client) UserServiceHTTPClient {
 	return &UserServiceHTTPClientImpl{client}
 }
 
-// GetUser 用户主页（本人 / 他人通用：资料 + 统计）
-func (c *UserServiceHTTPClientImpl) GetUser(ctx context.Context, in *v1.GetUserRequest, opts ...http.CallOption) (*v1.User, error) {
-	var out v1.User
+// GetUser 用户主页（本人 / 他人通用：资料；游客可访问）
+func (c *UserServiceHTTPClientImpl) GetUser(ctx context.Context, in *GetAppUserRequest, opts ...http.CallOption) (*UserDetail, error) {
+	var out UserDetail
 	pattern := "/app/v1/users/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserServiceGetUser))
@@ -166,7 +166,7 @@ func (c *UserServiceHTTPClientImpl) GetUser(ctx context.Context, in *v1.GetUserR
 	return &out, nil
 }
 
-// GetUserStats 用户统计（粉丝 / 关注 / 作品 / 获赞）
+// GetUserStats 用户统计（粉丝 / 关注 / 作品 / 获赞；游客可访问）
 func (c *UserServiceHTTPClientImpl) GetUserStats(ctx context.Context, in *v1.GetUserStatsRequest, opts ...http.CallOption) (*v1.UserStats, error) {
 	var out v1.UserStats
 	pattern := "/app/v1/users/{user_id}/stats"
@@ -194,9 +194,9 @@ func (c *UserServiceHTTPClientImpl) ListUserVideos(ctx context.Context, in *List
 	return &out, nil
 }
 
-// UpdateProfile 编辑我的资料
-func (c *UserServiceHTTPClientImpl) UpdateProfile(ctx context.Context, in *v1.UpdateUserRequest, opts ...http.CallOption) (*v1.User, error) {
-	var out v1.User
+// UpdateProfile 编辑我的资料（id 取令牌）
+func (c *UserServiceHTTPClientImpl) UpdateProfile(ctx context.Context, in *UpdateProfileRequest, opts ...http.CallOption) (*UserDetail, error) {
+	var out UserDetail
 	pattern := "/app/v1/profile"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserServiceUpdateProfile))

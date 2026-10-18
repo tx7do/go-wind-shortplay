@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import type { ProColumns, ActionType } from '@ant-design/pro-components';
 import ListTable from '@/components/common/ListTable';
-import { Button, Popconfirm, Space, Tabs, Tag, App } from 'antd';
+import { Button, Image, Popconfirm, Space, Tabs, Tag, App } from 'antd';
 import {
   CheckOutlined,
   CloseOutlined,
@@ -141,12 +141,15 @@ const VideoList = () => {
       dataIndex: 'coverUrl',
       search: false,
       width: 100,
+      // 有封面：44px 高缩略图，点击 antd Image 预览大图；空仍显示 —
       render: (_, record) =>
         record.coverUrl ? (
-          <img
+          <Image
             src={record.coverUrl}
             alt={record.title}
-            style={{ width: 64, height: 40, objectFit: 'cover', borderRadius: 4 }}
+            width={78}
+            height={44}
+            style={{ objectFit: 'cover', borderRadius: 4 }}
           />
         ) : (
           '-'

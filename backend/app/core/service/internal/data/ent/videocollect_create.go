@@ -64,6 +64,20 @@ func (_c *VideoCollectCreate) SetNillableDeletedAt(v *time.Time) *VideoCollectCr
 	return _c
 }
 
+// SetTenantID sets the "tenant_id" field.
+func (_c *VideoCollectCreate) SetTenantID(v uint32) *VideoCollectCreate {
+	_c.mutation.SetTenantID(v)
+	return _c
+}
+
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_c *VideoCollectCreate) SetNillableTenantID(v *uint32) *VideoCollectCreate {
+	if v != nil {
+		_c.SetTenantID(*v)
+	}
+	return _c
+}
+
 // SetUserID sets the "user_id" field.
 func (_c *VideoCollectCreate) SetUserID(v uint32) *VideoCollectCreate {
 	_c.mutation.SetUserID(v)
@@ -105,6 +119,9 @@ func (_c *VideoCollectCreate) Mutation() *VideoCollectMutation {
 
 // Save creates the VideoCollect in the database.
 func (_c *VideoCollectCreate) Save(ctx context.Context) (*VideoCollect, error) {
+	if err := _c.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -130,8 +147,31 @@ func (_c *VideoCollectCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_c *VideoCollectCreate) defaults() error {
+	if _, ok := _c.mutation.TenantID(); !ok {
+		v := videocollect.DefaultTenantID
+		_c.mutation.SetTenantID(v)
+	}
+	if _, ok := _c.mutation.UserID(); !ok {
+		v := videocollect.DefaultUserID
+		_c.mutation.SetUserID(v)
+	}
+	if _, ok := _c.mutation.VideoID(); !ok {
+		v := videocollect.DefaultVideoID
+		_c.mutation.SetVideoID(v)
+	}
+	return nil
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_c *VideoCollectCreate) check() error {
+	if _, ok := _c.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "VideoCollect.user_id"`)}
+	}
+	if _, ok := _c.mutation.VideoID(); !ok {
+		return &ValidationError{Name: "video_id", err: errors.New(`ent: missing required field "VideoCollect.video_id"`)}
+	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := videocollect.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "VideoCollect.id": %w`, err)}
@@ -182,13 +222,17 @@ func (_c *VideoCollectCreate) createSpec() (*VideoCollect, *sqlgraph.CreateSpec)
 		_spec.SetField(videocollect.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
+	if value, ok := _c.mutation.TenantID(); ok {
+		_spec.SetField(videocollect.FieldTenantID, field.TypeUint32, value)
+		_node.TenantID = &value
+	}
 	if value, ok := _c.mutation.UserID(); ok {
 		_spec.SetField(videocollect.FieldUserID, field.TypeUint32, value)
-		_node.UserID = &value
+		_node.UserID = value
 	}
 	if value, ok := _c.mutation.VideoID(); ok {
 		_spec.SetField(videocollect.FieldVideoID, field.TypeUint32, value)
-		_node.VideoID = &value
+		_node.VideoID = value
 	}
 	return _node, _spec
 }
@@ -296,12 +340,6 @@ func (u *VideoCollectUpsert) AddUserID(v uint32) *VideoCollectUpsert {
 	return u
 }
 
-// ClearUserID clears the value of the "user_id" field.
-func (u *VideoCollectUpsert) ClearUserID() *VideoCollectUpsert {
-	u.SetNull(videocollect.FieldUserID)
-	return u
-}
-
 // SetVideoID sets the "video_id" field.
 func (u *VideoCollectUpsert) SetVideoID(v uint32) *VideoCollectUpsert {
 	u.Set(videocollect.FieldVideoID, v)
@@ -317,12 +355,6 @@ func (u *VideoCollectUpsert) UpdateVideoID() *VideoCollectUpsert {
 // AddVideoID adds v to the "video_id" field.
 func (u *VideoCollectUpsert) AddVideoID(v uint32) *VideoCollectUpsert {
 	u.Add(videocollect.FieldVideoID, v)
-	return u
-}
-
-// ClearVideoID clears the value of the "video_id" field.
-func (u *VideoCollectUpsert) ClearVideoID() *VideoCollectUpsert {
-	u.SetNull(videocollect.FieldVideoID)
 	return u
 }
 
@@ -345,6 +377,9 @@ func (u *VideoCollectUpsertOne) UpdateNewValues() *VideoCollectUpsertOne {
 		}
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(videocollect.FieldCreatedAt)
+		}
+		if _, exists := u.create.mutation.TenantID(); exists {
+			s.SetIgnore(videocollect.FieldTenantID)
 		}
 	}))
 	return u
@@ -440,13 +475,6 @@ func (u *VideoCollectUpsertOne) UpdateUserID() *VideoCollectUpsertOne {
 	})
 }
 
-// ClearUserID clears the value of the "user_id" field.
-func (u *VideoCollectUpsertOne) ClearUserID() *VideoCollectUpsertOne {
-	return u.Update(func(s *VideoCollectUpsert) {
-		s.ClearUserID()
-	})
-}
-
 // SetVideoID sets the "video_id" field.
 func (u *VideoCollectUpsertOne) SetVideoID(v uint32) *VideoCollectUpsertOne {
 	return u.Update(func(s *VideoCollectUpsert) {
@@ -465,13 +493,6 @@ func (u *VideoCollectUpsertOne) AddVideoID(v uint32) *VideoCollectUpsertOne {
 func (u *VideoCollectUpsertOne) UpdateVideoID() *VideoCollectUpsertOne {
 	return u.Update(func(s *VideoCollectUpsert) {
 		s.UpdateVideoID()
-	})
-}
-
-// ClearVideoID clears the value of the "video_id" field.
-func (u *VideoCollectUpsertOne) ClearVideoID() *VideoCollectUpsertOne {
-	return u.Update(func(s *VideoCollectUpsert) {
-		s.ClearVideoID()
 	})
 }
 
@@ -527,6 +548,7 @@ func (_c *VideoCollectCreateBulk) Save(ctx context.Context) ([]*VideoCollect, er
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*VideoCollectMutation)
 				if !ok {
@@ -659,6 +681,9 @@ func (u *VideoCollectUpsertBulk) UpdateNewValues() *VideoCollectUpsertBulk {
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(videocollect.FieldCreatedAt)
 			}
+			if _, exists := b.mutation.TenantID(); exists {
+				s.SetIgnore(videocollect.FieldTenantID)
+			}
 		}
 	}))
 	return u
@@ -754,13 +779,6 @@ func (u *VideoCollectUpsertBulk) UpdateUserID() *VideoCollectUpsertBulk {
 	})
 }
 
-// ClearUserID clears the value of the "user_id" field.
-func (u *VideoCollectUpsertBulk) ClearUserID() *VideoCollectUpsertBulk {
-	return u.Update(func(s *VideoCollectUpsert) {
-		s.ClearUserID()
-	})
-}
-
 // SetVideoID sets the "video_id" field.
 func (u *VideoCollectUpsertBulk) SetVideoID(v uint32) *VideoCollectUpsertBulk {
 	return u.Update(func(s *VideoCollectUpsert) {
@@ -779,13 +797,6 @@ func (u *VideoCollectUpsertBulk) AddVideoID(v uint32) *VideoCollectUpsertBulk {
 func (u *VideoCollectUpsertBulk) UpdateVideoID() *VideoCollectUpsertBulk {
 	return u.Update(func(s *VideoCollectUpsert) {
 		s.UpdateVideoID()
-	})
-}
-
-// ClearVideoID clears the value of the "video_id" field.
-func (u *VideoCollectUpsertBulk) ClearVideoID() *VideoCollectUpsertBulk {
-	return u.Update(func(s *VideoCollectUpsert) {
-		s.ClearVideoID()
 	})
 }
 

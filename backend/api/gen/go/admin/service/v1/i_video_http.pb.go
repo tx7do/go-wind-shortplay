@@ -40,13 +40,13 @@ type VideoServiceHTTPServer interface {
 
 func RegisterVideoServiceHTTPServer(s *http.Server, srv VideoServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/v1/videos", _VideoService_List3_HTTP_Handler(srv))
-	r.GET("/admin/v1/videos/{id}", _VideoService_Get3_HTTP_Handler(srv))
+	r.GET("/admin/v1/videos", _VideoService_List28_HTTP_Handler(srv))
+	r.GET("/admin/v1/videos/{id}", _VideoService_Get29_HTTP_Handler(srv))
 	r.PUT("/admin/v1/videos/{id}/status", _VideoService_ChangeStatus0_HTTP_Handler(srv))
-	r.DELETE("/admin/v1/videos/{id}", _VideoService_Delete2_HTTP_Handler(srv))
+	r.DELETE("/admin/v1/videos/{id}", _VideoService_Delete21_HTTP_Handler(srv))
 }
 
-func _VideoService_List3_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
+func _VideoService_List28_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v1.PagingRequest
 		if err := ctx.BindQuery(&in); err != nil {
@@ -65,7 +65,7 @@ func _VideoService_List3_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.
 	}
 }
 
-func _VideoService_Get3_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
+func _VideoService_Get29_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v11.GetVideoRequest
 		if err := ctx.BindQuery(&in); err != nil {
@@ -112,7 +112,7 @@ func _VideoService_ChangeStatus0_HTTP_Handler(srv VideoServiceHTTPServer) func(c
 	}
 }
 
-func _VideoService_Delete2_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
+func _VideoService_Delete21_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v11.DeleteVideoRequest
 		if err := ctx.BindQuery(&in); err != nil {

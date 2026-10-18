@@ -64,6 +64,20 @@ func (_c *VideoLikeCreate) SetNillableDeletedAt(v *time.Time) *VideoLikeCreate {
 	return _c
 }
 
+// SetTenantID sets the "tenant_id" field.
+func (_c *VideoLikeCreate) SetTenantID(v uint32) *VideoLikeCreate {
+	_c.mutation.SetTenantID(v)
+	return _c
+}
+
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_c *VideoLikeCreate) SetNillableTenantID(v *uint32) *VideoLikeCreate {
+	if v != nil {
+		_c.SetTenantID(*v)
+	}
+	return _c
+}
+
 // SetUserID sets the "user_id" field.
 func (_c *VideoLikeCreate) SetUserID(v uint32) *VideoLikeCreate {
 	_c.mutation.SetUserID(v)
@@ -79,13 +93,13 @@ func (_c *VideoLikeCreate) SetNillableUserID(v *uint32) *VideoLikeCreate {
 }
 
 // SetTargetType sets the "target_type" field.
-func (_c *VideoLikeCreate) SetTargetType(v uint8) *VideoLikeCreate {
+func (_c *VideoLikeCreate) SetTargetType(v videolike.TargetType) *VideoLikeCreate {
 	_c.mutation.SetTargetType(v)
 	return _c
 }
 
 // SetNillableTargetType sets the "target_type" field if the given value is not nil.
-func (_c *VideoLikeCreate) SetNillableTargetType(v *uint8) *VideoLikeCreate {
+func (_c *VideoLikeCreate) SetNillableTargetType(v *videolike.TargetType) *VideoLikeCreate {
 	if v != nil {
 		_c.SetTargetType(*v)
 	}
@@ -119,6 +133,9 @@ func (_c *VideoLikeCreate) Mutation() *VideoLikeMutation {
 
 // Save creates the VideoLike in the database.
 func (_c *VideoLikeCreate) Save(ctx context.Context) (*VideoLike, error) {
+	if err := _c.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -144,8 +161,43 @@ func (_c *VideoLikeCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_c *VideoLikeCreate) defaults() error {
+	if _, ok := _c.mutation.TenantID(); !ok {
+		v := videolike.DefaultTenantID
+		_c.mutation.SetTenantID(v)
+	}
+	if _, ok := _c.mutation.UserID(); !ok {
+		v := videolike.DefaultUserID
+		_c.mutation.SetUserID(v)
+	}
+	if _, ok := _c.mutation.TargetType(); !ok {
+		v := videolike.DefaultTargetType
+		_c.mutation.SetTargetType(v)
+	}
+	if _, ok := _c.mutation.TargetID(); !ok {
+		v := videolike.DefaultTargetID
+		_c.mutation.SetTargetID(v)
+	}
+	return nil
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_c *VideoLikeCreate) check() error {
+	if _, ok := _c.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "VideoLike.user_id"`)}
+	}
+	if _, ok := _c.mutation.TargetType(); !ok {
+		return &ValidationError{Name: "target_type", err: errors.New(`ent: missing required field "VideoLike.target_type"`)}
+	}
+	if v, ok := _c.mutation.TargetType(); ok {
+		if err := videolike.TargetTypeValidator(v); err != nil {
+			return &ValidationError{Name: "target_type", err: fmt.Errorf(`ent: validator failed for field "VideoLike.target_type": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.TargetID(); !ok {
+		return &ValidationError{Name: "target_id", err: errors.New(`ent: missing required field "VideoLike.target_id"`)}
+	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := videolike.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "VideoLike.id": %w`, err)}
@@ -196,17 +248,21 @@ func (_c *VideoLikeCreate) createSpec() (*VideoLike, *sqlgraph.CreateSpec) {
 		_spec.SetField(videolike.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
+	if value, ok := _c.mutation.TenantID(); ok {
+		_spec.SetField(videolike.FieldTenantID, field.TypeUint32, value)
+		_node.TenantID = &value
+	}
 	if value, ok := _c.mutation.UserID(); ok {
 		_spec.SetField(videolike.FieldUserID, field.TypeUint32, value)
-		_node.UserID = &value
+		_node.UserID = value
 	}
 	if value, ok := _c.mutation.TargetType(); ok {
-		_spec.SetField(videolike.FieldTargetType, field.TypeUint8, value)
-		_node.TargetType = &value
+		_spec.SetField(videolike.FieldTargetType, field.TypeEnum, value)
+		_node.TargetType = value
 	}
 	if value, ok := _c.mutation.TargetID(); ok {
 		_spec.SetField(videolike.FieldTargetID, field.TypeUint32, value)
-		_node.TargetID = &value
+		_node.TargetID = value
 	}
 	return _node, _spec
 }
@@ -314,14 +370,8 @@ func (u *VideoLikeUpsert) AddUserID(v uint32) *VideoLikeUpsert {
 	return u
 }
 
-// ClearUserID clears the value of the "user_id" field.
-func (u *VideoLikeUpsert) ClearUserID() *VideoLikeUpsert {
-	u.SetNull(videolike.FieldUserID)
-	return u
-}
-
 // SetTargetType sets the "target_type" field.
-func (u *VideoLikeUpsert) SetTargetType(v uint8) *VideoLikeUpsert {
+func (u *VideoLikeUpsert) SetTargetType(v videolike.TargetType) *VideoLikeUpsert {
 	u.Set(videolike.FieldTargetType, v)
 	return u
 }
@@ -329,18 +379,6 @@ func (u *VideoLikeUpsert) SetTargetType(v uint8) *VideoLikeUpsert {
 // UpdateTargetType sets the "target_type" field to the value that was provided on create.
 func (u *VideoLikeUpsert) UpdateTargetType() *VideoLikeUpsert {
 	u.SetExcluded(videolike.FieldTargetType)
-	return u
-}
-
-// AddTargetType adds v to the "target_type" field.
-func (u *VideoLikeUpsert) AddTargetType(v uint8) *VideoLikeUpsert {
-	u.Add(videolike.FieldTargetType, v)
-	return u
-}
-
-// ClearTargetType clears the value of the "target_type" field.
-func (u *VideoLikeUpsert) ClearTargetType() *VideoLikeUpsert {
-	u.SetNull(videolike.FieldTargetType)
 	return u
 }
 
@@ -359,12 +397,6 @@ func (u *VideoLikeUpsert) UpdateTargetID() *VideoLikeUpsert {
 // AddTargetID adds v to the "target_id" field.
 func (u *VideoLikeUpsert) AddTargetID(v uint32) *VideoLikeUpsert {
 	u.Add(videolike.FieldTargetID, v)
-	return u
-}
-
-// ClearTargetID clears the value of the "target_id" field.
-func (u *VideoLikeUpsert) ClearTargetID() *VideoLikeUpsert {
-	u.SetNull(videolike.FieldTargetID)
 	return u
 }
 
@@ -387,6 +419,9 @@ func (u *VideoLikeUpsertOne) UpdateNewValues() *VideoLikeUpsertOne {
 		}
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(videolike.FieldCreatedAt)
+		}
+		if _, exists := u.create.mutation.TenantID(); exists {
+			s.SetIgnore(videolike.FieldTenantID)
 		}
 	}))
 	return u
@@ -482,24 +517,10 @@ func (u *VideoLikeUpsertOne) UpdateUserID() *VideoLikeUpsertOne {
 	})
 }
 
-// ClearUserID clears the value of the "user_id" field.
-func (u *VideoLikeUpsertOne) ClearUserID() *VideoLikeUpsertOne {
-	return u.Update(func(s *VideoLikeUpsert) {
-		s.ClearUserID()
-	})
-}
-
 // SetTargetType sets the "target_type" field.
-func (u *VideoLikeUpsertOne) SetTargetType(v uint8) *VideoLikeUpsertOne {
+func (u *VideoLikeUpsertOne) SetTargetType(v videolike.TargetType) *VideoLikeUpsertOne {
 	return u.Update(func(s *VideoLikeUpsert) {
 		s.SetTargetType(v)
-	})
-}
-
-// AddTargetType adds v to the "target_type" field.
-func (u *VideoLikeUpsertOne) AddTargetType(v uint8) *VideoLikeUpsertOne {
-	return u.Update(func(s *VideoLikeUpsert) {
-		s.AddTargetType(v)
 	})
 }
 
@@ -507,13 +528,6 @@ func (u *VideoLikeUpsertOne) AddTargetType(v uint8) *VideoLikeUpsertOne {
 func (u *VideoLikeUpsertOne) UpdateTargetType() *VideoLikeUpsertOne {
 	return u.Update(func(s *VideoLikeUpsert) {
 		s.UpdateTargetType()
-	})
-}
-
-// ClearTargetType clears the value of the "target_type" field.
-func (u *VideoLikeUpsertOne) ClearTargetType() *VideoLikeUpsertOne {
-	return u.Update(func(s *VideoLikeUpsert) {
-		s.ClearTargetType()
 	})
 }
 
@@ -535,13 +549,6 @@ func (u *VideoLikeUpsertOne) AddTargetID(v uint32) *VideoLikeUpsertOne {
 func (u *VideoLikeUpsertOne) UpdateTargetID() *VideoLikeUpsertOne {
 	return u.Update(func(s *VideoLikeUpsert) {
 		s.UpdateTargetID()
-	})
-}
-
-// ClearTargetID clears the value of the "target_id" field.
-func (u *VideoLikeUpsertOne) ClearTargetID() *VideoLikeUpsertOne {
-	return u.Update(func(s *VideoLikeUpsert) {
-		s.ClearTargetID()
 	})
 }
 
@@ -597,6 +604,7 @@ func (_c *VideoLikeCreateBulk) Save(ctx context.Context) ([]*VideoLike, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*VideoLikeMutation)
 				if !ok {
@@ -729,6 +737,9 @@ func (u *VideoLikeUpsertBulk) UpdateNewValues() *VideoLikeUpsertBulk {
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(videolike.FieldCreatedAt)
 			}
+			if _, exists := b.mutation.TenantID(); exists {
+				s.SetIgnore(videolike.FieldTenantID)
+			}
 		}
 	}))
 	return u
@@ -824,24 +835,10 @@ func (u *VideoLikeUpsertBulk) UpdateUserID() *VideoLikeUpsertBulk {
 	})
 }
 
-// ClearUserID clears the value of the "user_id" field.
-func (u *VideoLikeUpsertBulk) ClearUserID() *VideoLikeUpsertBulk {
-	return u.Update(func(s *VideoLikeUpsert) {
-		s.ClearUserID()
-	})
-}
-
 // SetTargetType sets the "target_type" field.
-func (u *VideoLikeUpsertBulk) SetTargetType(v uint8) *VideoLikeUpsertBulk {
+func (u *VideoLikeUpsertBulk) SetTargetType(v videolike.TargetType) *VideoLikeUpsertBulk {
 	return u.Update(func(s *VideoLikeUpsert) {
 		s.SetTargetType(v)
-	})
-}
-
-// AddTargetType adds v to the "target_type" field.
-func (u *VideoLikeUpsertBulk) AddTargetType(v uint8) *VideoLikeUpsertBulk {
-	return u.Update(func(s *VideoLikeUpsert) {
-		s.AddTargetType(v)
 	})
 }
 
@@ -849,13 +846,6 @@ func (u *VideoLikeUpsertBulk) AddTargetType(v uint8) *VideoLikeUpsertBulk {
 func (u *VideoLikeUpsertBulk) UpdateTargetType() *VideoLikeUpsertBulk {
 	return u.Update(func(s *VideoLikeUpsert) {
 		s.UpdateTargetType()
-	})
-}
-
-// ClearTargetType clears the value of the "target_type" field.
-func (u *VideoLikeUpsertBulk) ClearTargetType() *VideoLikeUpsertBulk {
-	return u.Update(func(s *VideoLikeUpsert) {
-		s.ClearTargetType()
 	})
 }
 
@@ -877,13 +867,6 @@ func (u *VideoLikeUpsertBulk) AddTargetID(v uint32) *VideoLikeUpsertBulk {
 func (u *VideoLikeUpsertBulk) UpdateTargetID() *VideoLikeUpsertBulk {
 	return u.Update(func(s *VideoLikeUpsert) {
 		s.UpdateTargetID()
-	})
-}
-
-// ClearTargetID clears the value of the "target_id" field.
-func (u *VideoLikeUpsertBulk) ClearTargetID() *VideoLikeUpsertBulk {
-	return u.Update(func(s *VideoLikeUpsert) {
-		s.ClearTargetID()
 	})
 }
 

@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package identity.service.v1;
+
+// shortplay 业务域引用的用户轻量模型（Phase 2 增补，独立文件不改既有 user.proto）。
+// 字段形状与旧版契约一致（camelCase JSON：id/nickname/avatarUrl），供
+// feed / interaction / report / stats 等域的冗余展示字段复用。
+
+// 用户轻量摘要（评论作者 / 举报人 / Feed 作者等冗余展示）
+message UserBrief {
+  optional uint32 id = 1 [json_name = "id"];                // 用户ID
+  optional string nickname = 2 [json_name = "nickname"];    // 昵称
+  optional string avatar_url = 3 [json_name = "avatarUrl"]; // 头像
+}
+
+// 用户统计（用户主页 / 作者卡片）
+message UserStats {
+  optional uint32 user_id = 1 [json_name = "userId"];                  // 用户ID
+  optional uint64 video_count = 2 [json_name = "videoCount"];          // 作品数（已发布）
+  optional uint64 follower_count = 3 [json_name = "followerCount"];    // 粉丝数
+  optional uint64 following_count = 4 [json_name = "followingCount"];  // 关注数
+  optional uint64 like_received_count = 5 [json_name = "likeReceivedCount"]; // 获赞总数
+}
+
+// 用户统计 - 请求
+message GetUserStatsRequest {
+  uint32 user_id = 1 [json_name = "userId"]; // 用户ID
+}

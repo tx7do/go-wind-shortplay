@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: app/service/v1/i_uba.proto
 
-package apppb
+package servicev1
 
 import (
 	v1 "go-wind-shortplay/api/gen/go/uba/service/v1"
@@ -30,8 +30,8 @@ const file_app_service_v1_i_uba_proto_rawDesc = "" +
 	"\x1aapp/service/v1/i_uba.proto\x12\x0eapp.service.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x18uba/service/v1/uba.proto2x\n" +
 	"\n" +
 	"UbaService\x12j\n" +
-	"\fReportEvents\x12#.uba.service.v1.ReportEventsRequest\x1a\x16.google.protobuf.Empty\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/app/v1/uba/eventsB\xac\x01\n" +
-	"\x12com.app.service.v1B\tIUbaProtoP\x01Z1go-wind-shortplay/api/gen/go/app/service/v1;apppb\xa2\x02\x03ASX\xaa\x02\x0eApp.Service.V1\xca\x02\x0eApp\\Service\\V1\xe2\x02\x1aApp\\Service\\V1\\GPBMetadata\xea\x02\x10App::Service::V1b\x06proto3"
+	"\fReportEvents\x12#.uba.service.v1.ReportEventsRequest\x1a\x16.google.protobuf.Empty\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/app/v1/uba/eventsB\xb0\x01\n" +
+	"\x12com.app.service.v1B\tIUbaProtoP\x01Z5go-wind-shortplay/api/gen/go/app/service/v1;servicev1\xa2\x02\x03ASX\xaa\x02\x0eApp.Service.V1\xca\x02\x0eApp\\Service\\V1\xe2\x02\x1aApp\\Service\\V1\\GPBMetadata\xea\x02\x10App::Service::V1b\x06proto3"
 
 var file_app_service_v1_i_uba_proto_goTypes = []any{
 	(*v1.ReportEventsRequest)(nil), // 0: uba.service.v1.ReportEventsRequest

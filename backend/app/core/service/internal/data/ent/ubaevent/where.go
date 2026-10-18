@@ -59,19 +59,29 @@ func CreatedAt(v time.Time) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldEQ(FieldCreatedAt, v))
 }
 
-// EventType applies equality check predicate on the "event_type" field. It's identical to EventTypeEQ.
-func EventType(v uint8) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldEQ(FieldEventType, v))
+// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
-// VideoID applies equality check predicate on the "video_id" field. It's identical to VideoIDEQ.
-func VideoID(v uint32) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldEQ(FieldVideoID, v))
+// DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
+func DeletedAt(v time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldEQ(FieldDeletedAt, v))
+}
+
+// TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
+func TenantID(v uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldEQ(FieldTenantID, v))
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v uint32) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldEQ(FieldUserID, v))
+}
+
+// VideoID applies equality check predicate on the "video_id" field. It's identical to VideoIDEQ.
+func VideoID(v uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldEQ(FieldVideoID, v))
 }
 
 // TargetUserID applies equality check predicate on the "target_user_id" field. It's identical to TargetUserIDEQ.
@@ -80,7 +90,7 @@ func TargetUserID(v uint32) predicate.UbaEvent {
 }
 
 // DurationMs applies equality check predicate on the "duration_ms" field. It's identical to DurationMsEQ.
-func DurationMs(v int64) predicate.UbaEvent {
+func DurationMs(v uint64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldEQ(FieldDurationMs, v))
 }
 
@@ -149,104 +159,154 @@ func CreatedAtNotNil() predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldNotNull(FieldCreatedAt))
 }
 
-// EventTypeEQ applies the EQ predicate on the "event_type" field.
-func EventTypeEQ(v uint8) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldEQ(FieldEventType, v))
+// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
+func UpdatedAtEQ(v time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
-// EventTypeNEQ applies the NEQ predicate on the "event_type" field.
-func EventTypeNEQ(v uint8) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldNEQ(FieldEventType, v))
+// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
+func UpdatedAtNEQ(v time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldNEQ(FieldUpdatedAt, v))
 }
 
-// EventTypeIn applies the In predicate on the "event_type" field.
-func EventTypeIn(vs ...uint8) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldIn(FieldEventType, vs...))
+// UpdatedAtIn applies the In predicate on the "updated_at" field.
+func UpdatedAtIn(vs ...time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldIn(FieldUpdatedAt, vs...))
 }
 
-// EventTypeNotIn applies the NotIn predicate on the "event_type" field.
-func EventTypeNotIn(vs ...uint8) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldNotIn(FieldEventType, vs...))
+// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldNotIn(FieldUpdatedAt, vs...))
 }
 
-// EventTypeGT applies the GT predicate on the "event_type" field.
-func EventTypeGT(v uint8) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldGT(FieldEventType, v))
+// UpdatedAtGT applies the GT predicate on the "updated_at" field.
+func UpdatedAtGT(v time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldGT(FieldUpdatedAt, v))
 }
 
-// EventTypeGTE applies the GTE predicate on the "event_type" field.
-func EventTypeGTE(v uint8) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldGTE(FieldEventType, v))
+// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
+func UpdatedAtGTE(v time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldGTE(FieldUpdatedAt, v))
 }
 
-// EventTypeLT applies the LT predicate on the "event_type" field.
-func EventTypeLT(v uint8) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldLT(FieldEventType, v))
+// UpdatedAtLT applies the LT predicate on the "updated_at" field.
+func UpdatedAtLT(v time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldLT(FieldUpdatedAt, v))
 }
 
-// EventTypeLTE applies the LTE predicate on the "event_type" field.
-func EventTypeLTE(v uint8) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldLTE(FieldEventType, v))
+// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
+func UpdatedAtLTE(v time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
-// EventTypeIsNil applies the IsNil predicate on the "event_type" field.
-func EventTypeIsNil() predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldIsNull(FieldEventType))
+// UpdatedAtIsNil applies the IsNil predicate on the "updated_at" field.
+func UpdatedAtIsNil() predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldIsNull(FieldUpdatedAt))
 }
 
-// EventTypeNotNil applies the NotNil predicate on the "event_type" field.
-func EventTypeNotNil() predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldNotNull(FieldEventType))
+// UpdatedAtNotNil applies the NotNil predicate on the "updated_at" field.
+func UpdatedAtNotNil() predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldNotNull(FieldUpdatedAt))
 }
 
-// VideoIDEQ applies the EQ predicate on the "video_id" field.
-func VideoIDEQ(v uint32) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldEQ(FieldVideoID, v))
+// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
+func DeletedAtEQ(v time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldEQ(FieldDeletedAt, v))
 }
 
-// VideoIDNEQ applies the NEQ predicate on the "video_id" field.
-func VideoIDNEQ(v uint32) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldNEQ(FieldVideoID, v))
+// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
+func DeletedAtNEQ(v time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldNEQ(FieldDeletedAt, v))
 }
 
-// VideoIDIn applies the In predicate on the "video_id" field.
-func VideoIDIn(vs ...uint32) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldIn(FieldVideoID, vs...))
+// DeletedAtIn applies the In predicate on the "deleted_at" field.
+func DeletedAtIn(vs ...time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldIn(FieldDeletedAt, vs...))
 }
 
-// VideoIDNotIn applies the NotIn predicate on the "video_id" field.
-func VideoIDNotIn(vs ...uint32) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldNotIn(FieldVideoID, vs...))
+// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
+func DeletedAtNotIn(vs ...time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldNotIn(FieldDeletedAt, vs...))
 }
 
-// VideoIDGT applies the GT predicate on the "video_id" field.
-func VideoIDGT(v uint32) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldGT(FieldVideoID, v))
+// DeletedAtGT applies the GT predicate on the "deleted_at" field.
+func DeletedAtGT(v time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldGT(FieldDeletedAt, v))
 }
 
-// VideoIDGTE applies the GTE predicate on the "video_id" field.
-func VideoIDGTE(v uint32) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldGTE(FieldVideoID, v))
+// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
+func DeletedAtGTE(v time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldGTE(FieldDeletedAt, v))
 }
 
-// VideoIDLT applies the LT predicate on the "video_id" field.
-func VideoIDLT(v uint32) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldLT(FieldVideoID, v))
+// DeletedAtLT applies the LT predicate on the "deleted_at" field.
+func DeletedAtLT(v time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldLT(FieldDeletedAt, v))
 }
 
-// VideoIDLTE applies the LTE predicate on the "video_id" field.
-func VideoIDLTE(v uint32) predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldLTE(FieldVideoID, v))
+// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
+func DeletedAtLTE(v time.Time) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldLTE(FieldDeletedAt, v))
 }
 
-// VideoIDIsNil applies the IsNil predicate on the "video_id" field.
-func VideoIDIsNil() predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldIsNull(FieldVideoID))
+// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
+func DeletedAtIsNil() predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldIsNull(FieldDeletedAt))
 }
 
-// VideoIDNotNil applies the NotNil predicate on the "video_id" field.
-func VideoIDNotNil() predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldNotNull(FieldVideoID))
+// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
+func DeletedAtNotNil() predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldNotNull(FieldDeletedAt))
+}
+
+// TenantIDEQ applies the EQ predicate on the "tenant_id" field.
+func TenantIDEQ(v uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldEQ(FieldTenantID, v))
+}
+
+// TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
+func TenantIDNEQ(v uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldNEQ(FieldTenantID, v))
+}
+
+// TenantIDIn applies the In predicate on the "tenant_id" field.
+func TenantIDIn(vs ...uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldIn(FieldTenantID, vs...))
+}
+
+// TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
+func TenantIDNotIn(vs ...uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldNotIn(FieldTenantID, vs...))
+}
+
+// TenantIDGT applies the GT predicate on the "tenant_id" field.
+func TenantIDGT(v uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldGT(FieldTenantID, v))
+}
+
+// TenantIDGTE applies the GTE predicate on the "tenant_id" field.
+func TenantIDGTE(v uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldGTE(FieldTenantID, v))
+}
+
+// TenantIDLT applies the LT predicate on the "tenant_id" field.
+func TenantIDLT(v uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldLT(FieldTenantID, v))
+}
+
+// TenantIDLTE applies the LTE predicate on the "tenant_id" field.
+func TenantIDLTE(v uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldLTE(FieldTenantID, v))
+}
+
+// TenantIDIsNil applies the IsNil predicate on the "tenant_id" field.
+func TenantIDIsNil() predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldIsNull(FieldTenantID))
+}
+
+// TenantIDNotNil applies the NotNil predicate on the "tenant_id" field.
+func TenantIDNotNil() predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldNotNull(FieldTenantID))
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
@@ -289,14 +349,64 @@ func UserIDLTE(v uint32) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldLTE(FieldUserID, v))
 }
 
-// UserIDIsNil applies the IsNil predicate on the "user_id" field.
-func UserIDIsNil() predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldIsNull(FieldUserID))
+// EventTypeEQ applies the EQ predicate on the "event_type" field.
+func EventTypeEQ(v EventType) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldEQ(FieldEventType, v))
 }
 
-// UserIDNotNil applies the NotNil predicate on the "user_id" field.
-func UserIDNotNil() predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldNotNull(FieldUserID))
+// EventTypeNEQ applies the NEQ predicate on the "event_type" field.
+func EventTypeNEQ(v EventType) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldNEQ(FieldEventType, v))
+}
+
+// EventTypeIn applies the In predicate on the "event_type" field.
+func EventTypeIn(vs ...EventType) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldIn(FieldEventType, vs...))
+}
+
+// EventTypeNotIn applies the NotIn predicate on the "event_type" field.
+func EventTypeNotIn(vs ...EventType) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldNotIn(FieldEventType, vs...))
+}
+
+// VideoIDEQ applies the EQ predicate on the "video_id" field.
+func VideoIDEQ(v uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldEQ(FieldVideoID, v))
+}
+
+// VideoIDNEQ applies the NEQ predicate on the "video_id" field.
+func VideoIDNEQ(v uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldNEQ(FieldVideoID, v))
+}
+
+// VideoIDIn applies the In predicate on the "video_id" field.
+func VideoIDIn(vs ...uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldIn(FieldVideoID, vs...))
+}
+
+// VideoIDNotIn applies the NotIn predicate on the "video_id" field.
+func VideoIDNotIn(vs ...uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldNotIn(FieldVideoID, vs...))
+}
+
+// VideoIDGT applies the GT predicate on the "video_id" field.
+func VideoIDGT(v uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldGT(FieldVideoID, v))
+}
+
+// VideoIDGTE applies the GTE predicate on the "video_id" field.
+func VideoIDGTE(v uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldGTE(FieldVideoID, v))
+}
+
+// VideoIDLT applies the LT predicate on the "video_id" field.
+func VideoIDLT(v uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldLT(FieldVideoID, v))
+}
+
+// VideoIDLTE applies the LTE predicate on the "video_id" field.
+func VideoIDLTE(v uint32) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldLTE(FieldVideoID, v))
 }
 
 // TargetUserIDEQ applies the EQ predicate on the "target_user_id" field.
@@ -339,64 +449,44 @@ func TargetUserIDLTE(v uint32) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldLTE(FieldTargetUserID, v))
 }
 
-// TargetUserIDIsNil applies the IsNil predicate on the "target_user_id" field.
-func TargetUserIDIsNil() predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldIsNull(FieldTargetUserID))
-}
-
-// TargetUserIDNotNil applies the NotNil predicate on the "target_user_id" field.
-func TargetUserIDNotNil() predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldNotNull(FieldTargetUserID))
-}
-
 // DurationMsEQ applies the EQ predicate on the "duration_ms" field.
-func DurationMsEQ(v int64) predicate.UbaEvent {
+func DurationMsEQ(v uint64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldEQ(FieldDurationMs, v))
 }
 
 // DurationMsNEQ applies the NEQ predicate on the "duration_ms" field.
-func DurationMsNEQ(v int64) predicate.UbaEvent {
+func DurationMsNEQ(v uint64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldNEQ(FieldDurationMs, v))
 }
 
 // DurationMsIn applies the In predicate on the "duration_ms" field.
-func DurationMsIn(vs ...int64) predicate.UbaEvent {
+func DurationMsIn(vs ...uint64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldIn(FieldDurationMs, vs...))
 }
 
 // DurationMsNotIn applies the NotIn predicate on the "duration_ms" field.
-func DurationMsNotIn(vs ...int64) predicate.UbaEvent {
+func DurationMsNotIn(vs ...uint64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldNotIn(FieldDurationMs, vs...))
 }
 
 // DurationMsGT applies the GT predicate on the "duration_ms" field.
-func DurationMsGT(v int64) predicate.UbaEvent {
+func DurationMsGT(v uint64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldGT(FieldDurationMs, v))
 }
 
 // DurationMsGTE applies the GTE predicate on the "duration_ms" field.
-func DurationMsGTE(v int64) predicate.UbaEvent {
+func DurationMsGTE(v uint64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldGTE(FieldDurationMs, v))
 }
 
 // DurationMsLT applies the LT predicate on the "duration_ms" field.
-func DurationMsLT(v int64) predicate.UbaEvent {
+func DurationMsLT(v uint64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldLT(FieldDurationMs, v))
 }
 
 // DurationMsLTE applies the LTE predicate on the "duration_ms" field.
-func DurationMsLTE(v int64) predicate.UbaEvent {
+func DurationMsLTE(v uint64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldLTE(FieldDurationMs, v))
-}
-
-// DurationMsIsNil applies the IsNil predicate on the "duration_ms" field.
-func DurationMsIsNil() predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldIsNull(FieldDurationMs))
-}
-
-// DurationMsNotNil applies the NotNil predicate on the "duration_ms" field.
-func DurationMsNotNil() predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldNotNull(FieldDurationMs))
 }
 
 // WatchPercentEQ applies the EQ predicate on the "watch_percent" field.
@@ -437,16 +527,6 @@ func WatchPercentLT(v uint32) predicate.UbaEvent {
 // WatchPercentLTE applies the LTE predicate on the "watch_percent" field.
 func WatchPercentLTE(v uint32) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldLTE(FieldWatchPercent, v))
-}
-
-// WatchPercentIsNil applies the IsNil predicate on the "watch_percent" field.
-func WatchPercentIsNil() predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldIsNull(FieldWatchPercent))
-}
-
-// WatchPercentNotNil applies the NotNil predicate on the "watch_percent" field.
-func WatchPercentNotNil() predicate.UbaEvent {
-	return predicate.UbaEvent(sql.FieldNotNull(FieldWatchPercent))
 }
 
 // ExtraEQ applies the EQ predicate on the "extra" field.

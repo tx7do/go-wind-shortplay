@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// 视频主表
+// 短视频表
 type Video struct {
 	config `json:"-"`
 	// ID of the ent.
@@ -24,34 +24,42 @@ type Video struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// 创建者ID
+	CreatedBy *uint32 `json:"created_by,omitempty"`
+	// 更新者ID
+	UpdatedBy *uint32 `json:"updated_by,omitempty"`
+	// 删除者ID
+	DeletedBy *uint32 `json:"deleted_by,omitempty"`
+	// 租户ID
+	TenantID *uint32 `json:"tenant_id,omitempty"`
 	// 标题
 	Title string `json:"title,omitempty"`
 	// 简介
 	Description *string `json:"description,omitempty"`
-	// 封面图地址
+	// 封面图
 	CoverURL *string `json:"cover_url,omitempty"`
-	// 视频播放地址（MinIO 对象键或完整 URL）
-	VideoURL string `json:"video_url,omitempty"`
+	// 视频播放地址
+	VideoURL *string `json:"video_url,omitempty"`
 	// 时长（秒）
-	Duration *uint32 `json:"duration,omitempty"`
+	Duration uint32 `json:"duration,omitempty"`
 	// 分辨率宽
-	Width *uint32 `json:"width,omitempty"`
+	Width uint32 `json:"width,omitempty"`
 	// 分辨率高
-	Height *uint32 `json:"height,omitempty"`
-	// 状态：1 草稿 2 审核中 3 已发布 4 驳回 5 下架
-	Status *uint8 `json:"status,omitempty"`
-	// 作者ID
-	AuthorID *uint32 `json:"author_id,omitempty"`
+	Height uint32 `json:"height,omitempty"`
+	// 状态：DRAFT草稿 REVIEWING审核中 PUBLISHED已发布 REJECTED驳回 OFFLINE下架
+	Status video.Status `json:"status,omitempty"`
+	// 作者用户ID
+	AuthorID uint32 `json:"author_id,omitempty"`
 	// 驳回原因
 	RejectReason *string `json:"reject_reason,omitempty"`
-	// 点赞数
-	LikeCount *int64 `json:"like_count,omitempty"`
-	// 收藏数
-	CollectCount *int64 `json:"collect_count,omitempty"`
-	// 评论数
-	CommentCount *int64 `json:"comment_count,omitempty"`
-	// 播放量
-	ViewCount *int64 `json:"view_count,omitempty"`
+	// 点赞数（ledger 事务内增减，禁止直接 Set 覆盖）
+	LikeCount uint64 `json:"like_count,omitempty"`
+	// 收藏数（ledger 事务内增减）
+	CollectCount uint64 `json:"collect_count,omitempty"`
+	// 评论数（ledger 事务内增减）
+	CommentCount uint64 `json:"comment_count,omitempty"`
+	// 播放量（ledger 事务内增减）
+	ViewCount uint64 `json:"view_count,omitempty"`
 	// 发布时间
 	PublishedAt  *time.Time `json:"published_at,omitempty"`
 	selectValues sql.SelectValues
@@ -62,9 +70,9 @@ func (*Video) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case video.FieldID, video.FieldDuration, video.FieldWidth, video.FieldHeight, video.FieldStatus, video.FieldAuthorID, video.FieldLikeCount, video.FieldCollectCount, video.FieldCommentCount, video.FieldViewCount:
+		case video.FieldID, video.FieldCreatedBy, video.FieldUpdatedBy, video.FieldDeletedBy, video.FieldTenantID, video.FieldDuration, video.FieldWidth, video.FieldHeight, video.FieldAuthorID, video.FieldLikeCount, video.FieldCollectCount, video.FieldCommentCount, video.FieldViewCount:
 			values[i] = new(sql.NullInt64)
-		case video.FieldTitle, video.FieldDescription, video.FieldCoverURL, video.FieldVideoURL, video.FieldRejectReason:
+		case video.FieldTitle, video.FieldDescription, video.FieldCoverURL, video.FieldVideoURL, video.FieldStatus, video.FieldRejectReason:
 			values[i] = new(sql.NullString)
 		case video.FieldCreatedAt, video.FieldUpdatedAt, video.FieldDeletedAt, video.FieldPublishedAt:
 			values[i] = new(sql.NullTime)
@@ -110,6 +118,34 @@ func (_m *Video) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
+		case video.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				_m.CreatedBy = new(uint32)
+				*_m.CreatedBy = uint32(value.Int64)
+			}
+		case video.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				_m.UpdatedBy = new(uint32)
+				*_m.UpdatedBy = uint32(value.Int64)
+			}
+		case video.FieldDeletedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_by", values[i])
+			} else if value.Valid {
+				_m.DeletedBy = new(uint32)
+				*_m.DeletedBy = uint32(value.Int64)
+			}
+		case video.FieldTenantID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
+			} else if value.Valid {
+				_m.TenantID = new(uint32)
+				*_m.TenantID = uint32(value.Int64)
+			}
 		case video.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
@@ -134,42 +170,38 @@ func (_m *Video) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field video_url", values[i])
 			} else if value.Valid {
-				_m.VideoURL = value.String
+				_m.VideoURL = new(string)
+				*_m.VideoURL = value.String
 			}
 		case video.FieldDuration:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field duration", values[i])
 			} else if value.Valid {
-				_m.Duration = new(uint32)
-				*_m.Duration = uint32(value.Int64)
+				_m.Duration = uint32(value.Int64)
 			}
 		case video.FieldWidth:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field width", values[i])
 			} else if value.Valid {
-				_m.Width = new(uint32)
-				*_m.Width = uint32(value.Int64)
+				_m.Width = uint32(value.Int64)
 			}
 		case video.FieldHeight:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field height", values[i])
 			} else if value.Valid {
-				_m.Height = new(uint32)
-				*_m.Height = uint32(value.Int64)
+				_m.Height = uint32(value.Int64)
 			}
 		case video.FieldStatus:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				_m.Status = new(uint8)
-				*_m.Status = uint8(value.Int64)
+				_m.Status = video.Status(value.String)
 			}
 		case video.FieldAuthorID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field author_id", values[i])
 			} else if value.Valid {
-				_m.AuthorID = new(uint32)
-				*_m.AuthorID = uint32(value.Int64)
+				_m.AuthorID = uint32(value.Int64)
 			}
 		case video.FieldRejectReason:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -182,29 +214,25 @@ func (_m *Video) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field like_count", values[i])
 			} else if value.Valid {
-				_m.LikeCount = new(int64)
-				*_m.LikeCount = value.Int64
+				_m.LikeCount = uint64(value.Int64)
 			}
 		case video.FieldCollectCount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field collect_count", values[i])
 			} else if value.Valid {
-				_m.CollectCount = new(int64)
-				*_m.CollectCount = value.Int64
+				_m.CollectCount = uint64(value.Int64)
 			}
 		case video.FieldCommentCount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field comment_count", values[i])
 			} else if value.Valid {
-				_m.CommentCount = new(int64)
-				*_m.CommentCount = value.Int64
+				_m.CommentCount = uint64(value.Int64)
 			}
 		case video.FieldViewCount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field view_count", values[i])
 			} else if value.Valid {
-				_m.ViewCount = new(int64)
-				*_m.ViewCount = value.Int64
+				_m.ViewCount = uint64(value.Int64)
 			}
 		case video.FieldPublishedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -264,6 +292,26 @@ func (_m *Video) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
+	if v := _m.CreatedBy; v != nil {
+		builder.WriteString("created_by=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.UpdatedBy; v != nil {
+		builder.WriteString("updated_by=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.DeletedBy; v != nil {
+		builder.WriteString("deleted_by=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.TenantID; v != nil {
+		builder.WriteString("tenant_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("title=")
 	builder.WriteString(_m.Title)
 	builder.WriteString(", ")
@@ -277,58 +325,42 @@ func (_m *Video) String() string {
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
-	builder.WriteString("video_url=")
-	builder.WriteString(_m.VideoURL)
-	builder.WriteString(", ")
-	if v := _m.Duration; v != nil {
-		builder.WriteString("duration=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
+	if v := _m.VideoURL; v != nil {
+		builder.WriteString("video_url=")
+		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
-	if v := _m.Width; v != nil {
-		builder.WriteString("width=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("duration=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Duration))
 	builder.WriteString(", ")
-	if v := _m.Height; v != nil {
-		builder.WriteString("height=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("width=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Width))
 	builder.WriteString(", ")
-	if v := _m.Status; v != nil {
-		builder.WriteString("status=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("height=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Height))
 	builder.WriteString(", ")
-	if v := _m.AuthorID; v != nil {
-		builder.WriteString("author_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString(", ")
+	builder.WriteString("author_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AuthorID))
 	builder.WriteString(", ")
 	if v := _m.RejectReason; v != nil {
 		builder.WriteString("reject_reason=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
-	if v := _m.LikeCount; v != nil {
-		builder.WriteString("like_count=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("like_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.LikeCount))
 	builder.WriteString(", ")
-	if v := _m.CollectCount; v != nil {
-		builder.WriteString("collect_count=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("collect_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CollectCount))
 	builder.WriteString(", ")
-	if v := _m.CommentCount; v != nil {
-		builder.WriteString("comment_count=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("comment_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CommentCount))
 	builder.WriteString(", ")
-	if v := _m.ViewCount; v != nil {
-		builder.WriteString("view_count=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("view_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ViewCount))
 	builder.WriteString(", ")
 	if v := _m.PublishedAt; v != nil {
 		builder.WriteString("published_at=")

@@ -538,7 +538,7 @@ var File_feed_service_v1_feed_proto protoreflect.FileDescriptor
 
 const file_feed_service_v1_feed_proto_rawDesc = "" +
 	"\n" +
-	"\x1afeed/service/v1/feed.proto\x12\x0ffeed.service.v1\x1a\x1eidentity/service/v1/user.proto\x1a\x1epagination/v1/pagination.proto\x1a\x1cvideo/service/v1/video.proto\"\x8c\x01\n" +
+	"\x1afeed/service/v1/feed.proto\x12\x0ffeed.service.v1\x1a$identity/service/v1/user_brief.proto\x1a\x1epagination/v1/pagination.proto\x1a\x1cvideo/service/v1/video.proto\"\x8c\x01\n" +
 	"\x0eGetFeedRequest\x12\x15\n" +
 	"\x03tag\x18\x01 \x01(\tH\x00R\x03tag\x88\x01\x01\x12\x1e\n" +
 	"\bpage_num\x18\x02 \x01(\rH\x01R\apageNum\x88\x01\x01\x12 \n" +

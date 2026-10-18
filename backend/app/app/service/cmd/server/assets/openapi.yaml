@@ -3,20 +3,28 @@
 
 openapi: 3.0.3
 info:
-    title: ""
-    version: 0.0.1
+    title: GoWind Content Hub App API
+    description: GoWind Content Hub App API
+    contact:
+        name: tx7do
+        url: https://github.com/tx7do/go-wind-shortplay
+        email: yanglinbo@gmail.com
+    license:
+        name: MIT License
+        url: https://github.com/tx7do/go-wind-shortplay/blob/master/LICENSE
+    version: "1.0"
 paths:
     /app/v1/auth/login:
         post:
             tags:
                 - AuthenticationService
-            description: 账号密码登录
-            operationId: AuthenticationService_Login
+            description: 账号密码登录（旧契约：/auth/login，返回 authenticator + user 包装）
+            operationId: AuthenticationService_AuthLogin
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/identity.service.v1.LoginRequest'
+                            $ref: '#/components/schemas/authentication.service.v1.LoginRequest'
                 required: true
             responses:
                 "200":
@@ -24,18 +32,18 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/identity.service.v1.LoginResponse'
+                                $ref: '#/components/schemas/app.service.v1.AuthLoginResponse'
+            security:
+                - {}
     /app/v1/auth/logout:
         post:
             tags:
                 - AuthenticationService
-            description: 登出
-            operationId: AuthenticationService_Logout
+            description: 登出（需登录）
+            operationId: AuthenticationService_AuthLogout
             requestBody:
                 content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/identity.service.v1.LogoutRequest'
+                    application/json: {}
                 required: true
             responses:
                 "200":
@@ -45,13 +53,13 @@ paths:
         post:
             tags:
                 - AuthenticationService
-            description: 刷新令牌
-            operationId: AuthenticationService_RefreshToken
+            description: 刷新令牌（旧契约：仅凭 refreshToken，无 bearer）
+            operationId: AuthenticationService_AuthRefresh
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/identity.service.v1.RefreshTokenRequest'
+                            $ref: '#/components/schemas/app.service.v1.AuthRefreshRequest'
                 required: true
             responses:
                 "200":
@@ -59,18 +67,20 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/identity.service.v1.LoginResponse'
+                                $ref: '#/components/schemas/app.service.v1.AuthLoginResponse'
+            security:
+                - {}
     /app/v1/auth/register:
         post:
             tags:
                 - AuthenticationService
-            description: 注册（是否开放由系统配置决定）
-            operationId: AuthenticationService_Register
+            description: 注册（开放注册开关由系统配置决定；成功即登录，返回 authenticator + user 包装）
+            operationId: AuthenticationService_AuthRegister
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/identity.service.v1.RegisterRequest'
+                            $ref: '#/components/schemas/app.service.v1.AuthRegisterRequest'
                 required: true
             responses:
                 "200":
@@ -78,7 +88,9 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/identity.service.v1.LoginResponse'
+                                $ref: '#/components/schemas/app.service.v1.AuthLoginResponse'
+            security:
+                - {}
     /app/v1/collects:
         get:
             tags:
@@ -403,6 +415,104 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/feed.service.v1.GetFeedResponse'
+    /app/v1/file/download:
+        get:
+            tags:
+                - FileTransferService
+            description: 下载文件
+            operationId: FileTransferService_DownloadFile
+            parameters:
+                - name: fileId
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: storageObject.bucketName
+                  in: query
+                  schema:
+                    type: string
+                - name: storageObject.fileDirectory
+                  in: query
+                  schema:
+                    type: string
+                - name: storageObject.objectName
+                  in: query
+                  schema:
+                    type: string
+                - name: downloadUrl
+                  in: query
+                  schema:
+                    type: string
+                - name: rangeStart
+                  in: query
+                  description: 可选的分段下载范围（闭区间 start，开区间 end；为 0/0 表示全量）
+                  schema:
+                    type: string
+                - name: rangeEnd
+                  in: query
+                  schema:
+                    type: string
+                - name: preferPresignedUrl
+                  in: query
+                  schema:
+                    type: boolean
+                - name: presignExpireSeconds
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: disposition
+                  in: query
+                  schema:
+                    type: string
+                - name: acceptMime
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/storage.service.v1.DownloadFileResponse'
+    /app/v1/file/upload:
+        put:
+            tags:
+                - FileTransferService
+            description: 上传文件 PUT 方式
+            operationId: FileTransferService_PutUploadFile
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/storage.service.v1.UploadFileRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/storage.service.v1.UploadFileResponse'
+        post:
+            tags:
+                - FileTransferService
+            description: 上传文件 POST 方式
+            operationId: FileTransferService_PostUploadFile
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/storage.service.v1.UploadFileRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/storage.service.v1.UploadFileResponse'
     /app/v1/followers:
         get:
             tags:
@@ -627,79 +737,59 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/interaction.service.v1.LikeResponse'
-    /app/v1/notifications:
-        get:
+    /app/v1/login:
+        post:
             tags:
-                - NotifyService
-            description: 通知列表（点赞 / 评论 / 粉丝 / 系统）
-            operationId: NotifyService_ListNotification
-            parameters:
-                - name: unreadOnly
-                  in: query
-                  schema:
-                    type: boolean
-                - name: pageNum
-                  in: query
-                  schema:
-                    type: integer
-                    format: uint32
-                - name: pageSize
-                  in: query
-                  schema:
-                    type: integer
-                    format: uint32
+                - AuthenticationService
+            description: 登录
+            operationId: AuthenticationService_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/authentication.service.v1.LoginRequest'
+                required: true
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/notify.service.v1.ListNotificationResponse'
-    /app/v1/notifications/read:
-        put:
+                                $ref: '#/components/schemas/authentication.service.v1.LoginResponse'
+            security:
+                - {}
+    /app/v1/logout:
+        post:
             tags:
-                - NotifyService
-            description: 标记已读
-            operationId: NotifyService_MarkRead
+                - AuthenticationService
+            description: 登出
+            operationId: AuthenticationService_Logout
             requestBody:
                 content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/notify.service.v1.MarkReadRequest'
+                    application/json: {}
                 required: true
             responses:
                 "200":
                     description: OK
                     content: {}
-    /app/v1/notifications/read-all:
-        put:
-            tags:
-                - NotifyService
-            description: 全部标记已读
-            operationId: NotifyService_MarkAllRead
-            responses:
-                "200":
-                    description: OK
-                    content: {}
-    /app/v1/notifications/unread-count:
+    /app/v1/me:
         get:
             tags:
-                - NotifyService
-            description: 未读数（Tab 角标）
-            operationId: NotifyService_GetUnreadCount
+                - UserProfileService
+            description: 获取用户资料
+            operationId: UserProfileService_GetUser
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/notify.service.v1.GetUnreadCountResponse'
-    /app/v1/profile:
+                                $ref: '#/components/schemas/identity.service.v1.User'
         put:
             tags:
-                - UserService
-            description: 编辑我的资料
-            operationId: UserService_UpdateProfile
+                - UserProfileService
+            description: 更新用户资料
+            operationId: UserProfileService_UpdateUser
             requestBody:
                 content:
                     application/json:
@@ -709,10 +799,203 @@ paths:
             responses:
                 "200":
                     description: OK
+                    content: {}
+    /app/v1/me/contact:
+        post:
+            tags:
+                - UserProfileService
+            description: 绑定手机号码/邮箱
+            operationId: UserProfileService_BindContact
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/identity.service.v1.BindContactRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /app/v1/me/contact/verify:
+        post:
+            tags:
+                - UserProfileService
+            description: 验证手机号码/邮箱
+            operationId: UserProfileService_VerifyContact
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/identity.service.v1.VerifyContactRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /app/v1/me/password:
+        post:
+            tags:
+                - UserProfileService
+            description: 修改用户密码
+            operationId: UserProfileService_ChangePassword
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/identity.service.v1.ChangePasswordRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /app/v1/media-assets/{id}:
+        get:
+            tags:
+                - MediaAssetService
+            description: 按 ID 取媒体资产（公开字段：url/filename/mimeType 等；租户隔离由 core 保证）
+            operationId: MediaAssetService_Get
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: viewMask
+                  in: query
+                  schema:
+                    type: string
+                    format: field-mask
+            responses:
+                "200":
+                    description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/identity.service.v1.User'
+                                $ref: '#/components/schemas/media.service.v1.MediaAsset'
+            security:
+                - {}
+    /app/v1/notifications/list:
+        post:
+            tags:
+                - NotificationService
+            description: 消息通知列表（当前用户收件箱，通知类）
+            operationId: NotificationService_ListNotifications
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/app.service.v1.ListNotificationsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/internal_message.service.v1.ListUserInboxResponse'
+    /app/v1/notifications/read:
+        post:
+            tags:
+                - NotificationService
+            description: 将指定收件记录标记为已读
+            operationId: NotificationService_MarkNotificationsRead
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/app.service.v1.MarkNotificationsReadRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /app/v1/notifications/read-all:
+        post:
+            tags:
+                - NotificationService
+            description: 全部标记为已读
+            operationId: NotificationService_MarkAllNotificationsRead
+            requestBody:
+                content:
+                    application/json: {}
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /app/v1/notifications/unread-count:
+        get:
+            tags:
+                - NotificationService
+            description: 未读消息数
+            operationId: NotificationService_GetUnreadCount
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/app.service.v1.GetUnreadCountResponse'
+    /app/v1/oidc/authorize-url:
+        post:
+            tags:
+                - AuthenticationService
+            description: 获取 OIDC 授权跳转地址（core 生成 state 暂存 Redis，防 CSRF；免鉴权）
+            operationId: AuthenticationService_GetOidcAuthorizeUrl
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/authentication.service.v1.GetOidcAuthorizeUrlRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/authentication.service.v1.GetOidcAuthorizeUrlResponse'
+            security:
+                - {}
+    /app/v1/profile:
+        put:
+            tags:
+                - UserService
+            description: 编辑我的资料（id 取令牌）
+            operationId: UserService_UpdateProfile
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/app.service.v1.UpdateProfileRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/app.service.v1.UserDetail'
+    /app/v1/refresh-token:
+        post:
+            tags:
+                - AuthenticationService
+            description: 刷新认证令牌
+            operationId: AuthenticationService_RefreshToken
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/authentication.service.v1.LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/authentication.service.v1.LoginResponse'
     /app/v1/reports:
         post:
             tags:
@@ -979,7 +1262,7 @@ paths:
         get:
             tags:
                 - UserService
-            description: 用户主页（本人 / 他人通用：资料 + 统计）
+            description: 用户主页（本人 / 他人通用：资料；游客可访问）
             operationId: UserService_GetUser
             parameters:
                 - name: id
@@ -994,7 +1277,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/identity.service.v1.User'
+                                $ref: '#/components/schemas/app.service.v1.UserDetail'
     /app/v1/users/{userId}/follow:
         post:
             tags:
@@ -1044,7 +1327,7 @@ paths:
         get:
             tags:
                 - UserService
-            description: 用户统计（粉丝 / 关注 / 作品 / 获赞）
+            description: 用户统计（粉丝 / 关注 / 作品 / 获赞；游客可访问）
             operationId: UserService_GetUserStats
             parameters:
                 - name: userId
@@ -1254,6 +1537,249 @@ paths:
                                 $ref: '#/components/schemas/interaction.service.v1.Comment'
 components:
     schemas:
+        KratosStatus:
+            type: object
+            properties:
+                code:
+                    type: number
+                    description: 错误码
+                    format: int32
+                message:
+                    type: string
+                    description: 错误消息
+                reason:
+                    type: string
+                    description: 错误原因
+                metadata:
+                    type: object
+                    description: 元数据
+            description: Kratos错误返回
+        app.service.v1.AuthLoginResponse:
+            type: object
+            properties:
+                authenticator:
+                    $ref: '#/components/schemas/app.service.v1.Authenticator'
+                user:
+                    $ref: '#/components/schemas/app.service.v1.AuthUserProfile'
+            description: 登录/注册/刷新统一响应（旧契约包装）
+        app.service.v1.AuthRefreshRequest:
+            type: object
+            properties:
+                refreshToken:
+                    type: string
+            description: 刷新令牌 - 请求
+        app.service.v1.AuthRegisterRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+                nickname:
+                    type: string
+            description: 注册 - 请求
+        app.service.v1.AuthUserProfile:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                username:
+                    type: string
+                nickname:
+                    type: string
+                avatarUrl:
+                    type: string
+            description: 用户摘要（旧契约形状）
+        app.service.v1.Authenticator:
+            type: object
+            properties:
+                tokenType:
+                    type: string
+                accessToken:
+                    type: string
+                refreshToken:
+                    type: string
+                expiresIn:
+                    type: integer
+                    format: int32
+            description: 认证令牌对（旧契约形状）
+        app.service.v1.GetUnreadCountResponse:
+            type: object
+            properties:
+                count:
+                    type: string
+                    description: 未读收件记录总数
+            description: 未读消息数 - 回应
+        app.service.v1.ListNotificationsRequest:
+            type: object
+            properties:
+                page:
+                    type: integer
+                    description: 页码（从 1 开始，缺省 1）
+                    format: uint32
+                pageSize:
+                    type: integer
+                    description: 每页条数（缺省 10）
+                    format: uint32
+                unreadOnly:
+                    type: boolean
+                    description: 仅看未读（服务端按收件状态 != READ 过滤）
+            description: 消息通知列表 - 请求
+        app.service.v1.MarkNotificationsReadRequest:
+            type: object
+            properties:
+                recipientIds:
+                    type: array
+                    items:
+                        type: integer
+                        format: uint32
+                    description: 收件记录 ID 列表（必填，来自列表响应的 id）
+            description: 标记已读 - 请求
+        app.service.v1.UpdateProfileRequest:
+            type: object
+            properties:
+                nickname:
+                    type: string
+                avatarUrl:
+                    type: string
+                bio:
+                    type: string
+        app.service.v1.UserDetail:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                username:
+                    type: string
+                nickname:
+                    type: string
+                avatarUrl:
+                    type: string
+                bio:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+            description: 用户主页资料（旧版契约形状：avatarUrl/bio）
+        authentication.service.v1.GetOidcAuthorizeUrlRequest:
+            type: object
+            properties:
+                redirect_uri:
+                    type: string
+                    description: 授权完成后的回调地址（须与 IdP 注册的 redirect_uri 一致）
+            description: OIDC 授权跳转地址 - 请求
+        authentication.service.v1.GetOidcAuthorizeUrlResponse:
+            type: object
+            properties:
+                authorizeUrl:
+                    type: string
+                    description: IdP 授权端点完整地址（含 client_id/redirect_uri/state/scope），浏览器直接跳转
+            description: OIDC 授权跳转地址 - 响应
+        authentication.service.v1.LoginRequest:
+            required:
+                - grant_type
+            type: object
+            properties:
+                grant_type:
+                    enum:
+                        - password
+                        - client_credentials
+                        - authorization_code
+                        - refresh_token
+                        - implicit
+                    type: string
+                    default: password
+                    description: 授权类型，此处的值固定为"password"，必选项。
+                    format: enum
+                client_id:
+                    type: string
+                    description: 客户端ID
+                client_secret:
+                    type: string
+                    description: 客户端密钥
+                scope:
+                    type: string
+                    description: 以空格分隔的用户授予范围列表。如果未提供，scope则授权任何范围，默认为空列表。
+                redirect_uri:
+                    type: string
+                    description: 跳转链接
+                user_id:
+                    type: integer
+                    description: 用户ID
+                    format: uint32
+                username:
+                    type: string
+                    description: 用户名
+                email:
+                    type: string
+                    description: 电子邮件地址
+                mobile:
+                    type: string
+                    description: 手机号
+                password:
+                    type: string
+                    description: 用户的密码
+                refresh_token:
+                    type: string
+                    description: 更新令牌，用来获取下一次的访问令牌，可选项。如果访问令牌将过期，则返回刷新令牌很有用，应用程序可以使用该刷新令牌来获取另一个访问令牌。但是，通过隐式授予颁发的令牌不能颁发刷新令牌。
+                code:
+                    type: string
+                    description: 授权请求中收到的一次性验证/认证码。(当使用授权码模式时)
+                oidc_state:
+                    type: string
+                    description: OIDC 授权码模式的 state（防 CSRF；须与授权跳转时生成并暂存的 state 一致）
+                oidcIssuer:
+                    type: string
+                    description: OIDC Issuer 标识（多 IdP 时区分来源；单 IdP 可留空）
+                client_type:
+                    enum:
+                        - admin
+                        - app
+                    type: string
+                    description: 客户端类型
+                    format: enum
+                device_id:
+                    type: string
+                    description: 设备唯一标识（可选），用于设备绑定、推送、风控等
+                jti:
+                    type: string
+                    description: 建议客户端生成并提供 jti（JWT ID）作为唯一标识，服务端可据此防止重放攻击
+                tenant_code:
+                    type: string
+                    description: 租户编号，留空表示平台登录（平台超级管理员）；非空时按该编号解析对应租户
+            description: 用户登录 - 请求
+        authentication.service.v1.LoginResponse:
+            type: object
+            properties:
+                token_type:
+                    enum:
+                        - bearer
+                        - mac
+                    type: string
+                    default: Bearer
+                    description: 令牌的类型，该值大小写不敏感，必选项，可以是bearer类型或mac类型，通常只是字符串“Bearer”。
+                    format: enum
+                access_token:
+                    type: string
+                    description: 访问令牌，必选项。授权服务器颁发的访问令牌字符串。
+                expires_in:
+                    type: string
+                    description: 访问令牌过期时间（秒）
+                refresh_token:
+                    type: string
+                    description: 更新令牌，用来获取下一次的访问令牌，可选项。如果访问令牌将过期，则返回刷新令牌很有用，应用程序可以使用该刷新令牌来获取另一个访问令牌。但是，通过隐式授予颁发的令牌不能颁发刷新令牌。
+                scope:
+                    type: string
+                    description: 以空格分隔的用户授予范围列表。如果未提供，scope则授权任何范围，默认为空列表。
+                refresh_expires_in:
+                    type: string
+                    description: 刷新令牌过期时间（秒）
+                id_token:
+                    type: string
+                    description: ID 令牌，OpenID Connect 扩展中定义的 JWT 格式令牌
+            description: 用户登录 - 回应
         feed.service.v1.FeedItem:
             type: object
             properties:
@@ -1297,92 +1823,261 @@ components:
                 following:
                     type: boolean
             description: 观看者视角状态（登录时返回，游客全 false）
-        identity.service.v1.Authenticator:
+        identity.service.v1.BindContactRequest:
             type: object
             properties:
-                accessToken:
-                    type: string
-                refreshToken:
-                    type: string
-                expiresIn:
-                    type: string
-                tokenType:
-                    type: string
-        identity.service.v1.LoginRequest:
+                phone:
+                    $ref: '#/components/schemas/identity.service.v1.BindPhoneRequest'
+                email:
+                    $ref: '#/components/schemas/identity.service.v1.BindEmailRequest'
+        identity.service.v1.BindEmailRequest:
             type: object
             properties:
-                username:
+                email:
                     type: string
-                password:
+                    description: 邮箱地址
+                verificationCode:
                     type: string
-        identity.service.v1.LoginResponse:
+                    description: 邮箱验证码（可选）
+        identity.service.v1.BindPhoneRequest:
             type: object
             properties:
-                authenticator:
-                    $ref: '#/components/schemas/identity.service.v1.Authenticator'
-                user:
-                    $ref: '#/components/schemas/identity.service.v1.User'
-        identity.service.v1.LogoutRequest:
+                phone:
+                    type: string
+                    description: 手机号码
+                code:
+                    type: string
+                    description: 验证码
+        identity.service.v1.ChangePasswordRequest:
             type: object
             properties:
-                userId:
-                    type: integer
-                    format: uint32
-        identity.service.v1.RefreshTokenRequest:
+                oldPassword:
+                    type: string
+                    description: 旧密码
+                newPassword:
+                    type: string
+                    description: 新密码
+            description: 修改用户密码（需要验证旧密码） - 请求
+        identity.service.v1.EmailVerification:
+            required:
+                - code
             type: object
             properties:
-                refreshToken:
+                email:
                     type: string
-        identity.service.v1.RegisterRequest:
+                    description: 邮箱地址
+                code:
+                    type: string
+                    description: 邮箱验证码
+            description: 邮箱验证
+        identity.service.v1.PhoneVerification:
+            required:
+                - code
             type: object
             properties:
-                username:
+                phone:
                     type: string
-                password:
+                    description: 手机号码，带国家码
+                code:
                     type: string
-                nickname:
-                    type: string
+                    description: 短信验证码
+            description: 手机验证
         identity.service.v1.UpdateUserRequest:
+            required:
+                - data
             type: object
             properties:
                 id:
                     type: integer
                     format: uint32
-                nickname:
-                    type: string
-                avatarUrl:
-                    type: string
-                bio:
-                    type: string
+                data:
+                    $ref: '#/components/schemas/identity.service.v1.User'
                 password:
+                    readOnly: true
                     type: string
+                    description: 用户登录密码
+                updateMask:
+                    example: id,realname,username
+                    type: string
+                    description: 要更新的字段列表
+                    format: field-mask
+                allowMissing:
+                    type: boolean
+                    description: 如果设置为true的时候，资源不存在则会新增(插入)，并且在这种情况下`updateMask`字段将会被忽略。
+            description: 更新用户 - 请求
         identity.service.v1.User:
             type: object
             properties:
                 id:
                     type: integer
+                    description: 用户ID
                     format: uint32
+                tenantId:
+                    type: integer
+                    description: 租户ID
+                    format: uint32
+                tenantName:
+                    type: string
+                    description: 租户名称
+                orgUnitId:
+                    type: integer
+                    description: 组织ID
+                    format: uint32
+                orgUnitIds:
+                    type: array
+                    items:
+                        type: integer
+                        format: uint32
+                    description: 归属组织ID列表
+                orgUnitName:
+                    type: string
+                    description: 组织名称
+                orgUnitNames:
+                    type: array
+                    items:
+                        type: string
+                    description: 组织名称列表
+                positionId:
+                    type: integer
+                    description: 职位ID
+                    format: uint32
+                positionIds:
+                    type: array
+                    items:
+                        type: integer
+                        format: uint32
+                    description: 职位列表
+                positionName:
+                    type: string
+                    description: 职位名称
+                positionNames:
+                    type: array
+                    items:
+                        type: string
+                    description: 职位名称列表
+                roleId:
+                    type: integer
+                    description: 角色ID
+                    format: uint32
+                roleIds:
+                    type: array
+                    items:
+                        type: integer
+                        format: uint32
+                    description: 角色ID列表
+                roles:
+                    type: array
+                    items:
+                        type: string
+                    description: 角色码列表
+                roleNames:
+                    type: array
+                    items:
+                        type: string
+                    description: 角色名称列表
                 username:
                     type: string
+                    description: 用户名
                 nickname:
                     type: string
-                avatarUrl:
+                    description: 昵称
+                realname:
                     type: string
-                bio:
+                    description: 真实姓名
+                avatar:
                     type: string
+                    description: 头像
+                email:
+                    type: string
+                    description: 邮箱
+                mobile:
+                    type: string
+                    description: 手机号
+                telephone:
+                    type: string
+                    description: 座机号
+                gender:
+                    enum:
+                        - SECRET
+                        - MALE
+                        - FEMALE
+                    type: string
+                    description: 性别
+                    format: enum
+                address:
+                    type: string
+                    description: 住址
+                region:
+                    type: string
+                    description: 国家地区
+                description:
+                    type: string
+                    description: 个人描述
+                remark:
+                    type: string
+                    description: 备注
+                lastLoginAt:
+                    type: string
+                    description: 最后登录时间
+                    format: date-time
+                lastLoginIp:
+                    type: string
+                    description: 最后登录IP
                 status:
                     enum:
-                        - USER_STATUS_UNSPECIFIED
-                        - USER_STATUS_DISABLED
-                        - USER_STATUS_NORMAL
+                        - DISABLED
+                        - NORMAL
+                        - PENDING
+                        - LOCKED
+                        - EXPIRED
+                        - CLOSED
                     type: string
+                    description: 状态
                     format: enum
+                lockedUntil:
+                    type: string
+                    description: 锁定截止时间
+                    format: date-time
+                followers:
+                    type: string
+                    description: 粉丝数
+                following:
+                    type: string
+                    description: 关注数
+                postCount:
+                    type: string
+                    description: 发帖数
+                commentCount:
+                    type: string
+                    description: 评论数
+                likeCount:
+                    type: string
+                    description: 获赞数
+                createdBy:
+                    type: integer
+                    description: 创建者用户ID
+                    format: uint32
+                updatedBy:
+                    type: integer
+                    description: 更新者用户ID
+                    format: uint32
+                deletedBy:
+                    type: integer
+                    description: 删除者用户ID
+                    format: uint32
                 createdAt:
                     type: string
+                    description: 创建时间
                     format: date-time
                 updatedAt:
                     type: string
+                    description: 更新时间
                     format: date-time
+                deletedAt:
+                    type: string
+                    description: 删除时间
+                    format: date-time
+            description: 用户
         identity.service.v1.UserBrief:
             type: object
             properties:
@@ -1393,6 +2088,7 @@ components:
                     type: string
                 avatarUrl:
                     type: string
+            description: 用户轻量摘要（评论作者 / 举报人 / Feed 作者等冗余展示）
         identity.service.v1.UserStats:
             type: object
             properties:
@@ -1407,7 +2103,17 @@ components:
                     type: string
                 likeReceivedCount:
                     type: string
-            description: 用户创作统计（计数由互动域异步维护，避免用户表与互动表强耦合）
+            description: 用户统计（用户主页 / 作者卡片）
+        identity.service.v1.VerifyContactRequest:
+            type: object
+            properties:
+                phone:
+                    $ref: '#/components/schemas/identity.service.v1.PhoneVerification'
+                email:
+                    $ref: '#/components/schemas/identity.service.v1.EmailVerification'
+                verificationId:
+                    type: string
+                    description: 服务端生成的验证码会话ID（可选）
         interaction.service.v1.CollectRequest:
             type: object
             properties:
@@ -1537,60 +2243,203 @@ components:
                         $ref: '#/components/schemas/interaction.service.v1.FollowItem'
                 total:
                     type: string
-        notify.service.v1.GetUnreadCountResponse:
+        internal_message.service.v1.InternalMessageRecipient:
             type: object
             properties:
-                count:
+                id:
+                    type: integer
+                    description: 记录ID
+                    format: uint32
+                messageId:
+                    type: integer
+                    description: 站内信内容ID
+                    format: uint32
+                recipientUserId:
+                    type: integer
+                    description: 接收者用户ID
+                    format: uint32
+                status:
+                    enum:
+                        - SENT
+                        - RECEIVED
+                        - READ
+                        - REVOKED
+                        - DELETED
                     type: string
-        notify.service.v1.ListNotificationResponse:
+                    description: 消息状态
+                    format: enum
+                receivedAt:
+                    type: string
+                    description: 消息到达用户收件箱的时间
+                    format: date-time
+                readAt:
+                    type: string
+                    description: 用户阅读消息的时间
+                    format: date-time
+                title:
+                    type: string
+                    description: 消息标题
+                content:
+                    type: string
+                    description: 消息内容
+                tenantId:
+                    type: integer
+                    description: 租户ID，0代表系统全局角色
+                    format: uint32
+                tenantName:
+                    type: string
+                    description: 租户名称
+                createdBy:
+                    type: integer
+                    description: 创建者用户ID
+                    format: uint32
+                updatedBy:
+                    type: integer
+                    description: 更新者用户ID
+                    format: uint32
+                deletedBy:
+                    type: integer
+                    description: 删除者用户ID
+                    format: uint32
+                createdAt:
+                    type: string
+                    description: 创建时间
+                    format: date-time
+                updatedAt:
+                    type: string
+                    description: 更新时间
+                    format: date-time
+                deletedAt:
+                    type: string
+                    description: 删除时间
+                    format: date-time
+            description: 站内信消息用户接收信息
+        internal_message.service.v1.ListUserInboxResponse:
             type: object
             properties:
                 items:
                     type: array
                     items:
-                        $ref: '#/components/schemas/notify.service.v1.Notification'
+                        $ref: '#/components/schemas/internal_message.service.v1.InternalMessageRecipient'
                 total:
                     type: string
-                unreadCount:
-                    type: string
-        notify.service.v1.MarkReadRequest:
-            type: object
-            properties:
-                ids:
-                    type: array
-                    items:
-                        type: integer
-                        format: uint32
-        notify.service.v1.Notification:
+        media.service.v1.MediaAsset:
             type: object
             properties:
                 id:
                     type: integer
+                    description: 媒体资源库ID
                     format: uint32
                 type:
                     enum:
-                        - NOTIFY_TYPE_UNSPECIFIED
-                        - NOTIFY_TYPE_LIKE
-                        - NOTIFY_TYPE_COMMENT
-                        - NOTIFY_TYPE_FOLLOW
-                        - NOTIFY_TYPE_SYSTEM
+                        - ASSET_TYPE_UNSPECIFIED
+                        - ASSET_TYPE_IMAGE
+                        - ASSET_TYPE_VIDEO
+                        - ASSET_TYPE_DOCUMENT
+                        - ASSET_TYPE_AUDIO
+                        - ASSET_TYPE_ARCHIVE
+                        - ASSET_TYPE_OTHER
                     type: string
+                    description: 媒体类型
                     format: enum
-                sender:
-                    $ref: '#/components/schemas/identity.service.v1.UserBrief'
-                videoId:
-                    type: integer
-                    format: uint32
-                commentId:
-                    type: integer
-                    format: uint32
-                content:
+                filename:
                     type: string
-                isRead:
+                    description: 原始文件名（含扩展名，如 'cover.jpg'）
+                mimeType:
+                    type: string
+                    description: MIME 类型（如 'image/jpeg'）
+                size:
+                    type: string
+                    description: 文件大小（字节）
+                storagePath:
+                    type: string
+                    description: 存储路径（对象存储内部路径，如 'assets/2024/06/cover.jpg'）
+                url:
+                    type: string
+                    description: CDN 访问 URL（带签名/过期时间的临时 URL 或永久 URL）
+                width:
+                    type: integer
+                    description: 宽度（像素，图片/视频有效）
+                    format: uint32
+                height:
+                    type: integer
+                    description: 高度（像素，图片/视频有效）
+                    format: uint32
+                duration:
+                    type: integer
+                    description: 时长（秒，视频/音频有效）
+                    format: uint32
+                altText:
+                    type: string
+                    description: ALT 文本（SEO 优化，图片必需）
+                title:
+                    type: string
+                    description: 标题（后台管理/图库展示用）
+                caption:
+                    type: string
+                    description: 说明文字（前端展示用）
+                processingStatus:
+                    enum:
+                        - PROCESSING_STATUS_UNSPECIFIED
+                        - PROCESSING_STATUS_UPLOADING
+                        - PROCESSING_STATUS_PROCESSING
+                        - PROCESSING_STATUS_COMPLETED
+                        - PROCESSING_STATUS_FAILED
+                    type: string
+                    description: 媒体处理状态
+                    format: enum
+                processingError:
+                    type: string
+                    description: 处理失败时的错误信息
+                fileHash:
+                    type: string
+                    description: 文件哈希值（SHA256，用于去重和完整性校验）
+                referenceCount:
+                    type: integer
+                    description: 被引用次数（用于垃圾回收，0 表示未被任何内容引用）
+                    format: uint32
+                variantFileIds:
+                    type: object
+                    additionalProperties:
+                        type: integer
+                        format: uint32
+                    description: 变体文件URL（如不同尺寸的图片/不同质量的视频），key为变体名称（如 'thumbnail'、'medium'、'high'），value为对应的文件ID
+                isPrivate:
                     type: boolean
+                    description: 是否私密资源
+                fileId:
+                    type: integer
+                    description: 存储文件ID（如果使用了文件表存储文件元数据，则关联的文件ID）
+                    format: uint32
+                folderId:
+                    type: integer
+                    description: 所属文件夹ID（0 表示根目录）
+                    format: uint32
+                createdBy:
+                    type: integer
+                    description: 创建者用户ID
+                    format: uint32
+                updatedBy:
+                    type: integer
+                    description: 更新者用户ID
+                    format: uint32
+                deletedBy:
+                    type: integer
+                    description: 删除者用户ID
+                    format: uint32
                 createdAt:
                     type: string
+                    description: 创建时间
                     format: date-time
+                updatedAt:
+                    type: string
+                    description: 更新时间
+                    format: date-time
+                deletedAt:
+                    type: string
+                    description: 删除时间
+                    format: date-time
+            description: 媒体资源库
         report.service.v1.CreateReportRequest:
             type: object
             properties:
@@ -1670,6 +2519,102 @@ components:
                 followerCount:
                     type: string
             description: 创作者中心总览
+        storage.service.v1.DownloadFileResponse:
+            type: object
+            properties:
+                file:
+                    type: string
+                    description: 直接返回文件字节（小文件或同步场景）
+                    format: bytes
+                downloadUrl:
+                    type: string
+                    description: 预签名 URL（大文件或异步下载）
+                sourceFileName:
+                    type: string
+                    description: 原始文件名，客户端用于保存或显示
+                mime:
+                    type: string
+                    description: MIME 类型，默认 application/octet-stream
+                size:
+                    type: string
+                    description: 文件大小（字节），可用于进度或校验
+                checksum:
+                    type: string
+                    description: 可选，文件校验（如 MD5 或 SHA256）
+                storagePath:
+                    type: string
+                    description: 可选，后端存储位置或 key
+                updatedAt:
+                    type: string
+                    description: 可选，最后修改时间
+                    format: date-time
+            description: 文件下载响应
+        storage.service.v1.PresignOption:
+            type: object
+            properties:
+                method:
+                    type: string
+                    description: 预签名使用的 HTTP 方法，例如 PUT 或 POST
+                expireSeconds:
+                    type: integer
+                    description: 预签名有效期（秒）
+                    format: int32
+                contentType:
+                    type: string
+                    description: 预签名约束的 Content-Type（可选）
+            description: 预签名选项
+        storage.service.v1.StorageObject:
+            type: object
+            properties:
+                bucketName:
+                    type: string
+                    description: 目标文件桶名称
+                fileDirectory:
+                    example: tenant/1001/user/avatar/
+                    type: string
+                    description: 存储目录（如 'user/1001/avatar/'），服务端会在此目录下生成唯一文件名
+                objectName:
+                    example: user/1001/avatar.jpg
+                    type: string
+                    description: OSS 对象键（完整路径，如 'user/1001/avatar.jpg'）。若未提供，服务端将自动生成。
+            description: 对象存储对象
+        storage.service.v1.UploadFileRequest:
+            type: object
+            properties:
+                storageObject:
+                    $ref: '#/components/schemas/storage.service.v1.StorageObject'
+                file:
+                    type: string
+                    description: 直接上传的文件内容（内联字节）
+                    format: bytes
+                presign:
+                    $ref: '#/components/schemas/storage.service.v1.PresignOption'
+                sourceFileName:
+                    type: string
+                    description: 原文件文件名
+                mime:
+                    type: string
+                    description: 文件的MIME类型
+                size:
+                    type: string
+                    description: 文件大小（字节）
+                tenantId:
+                    type: integer
+                    description: 租户ID，0代表系统全局角色
+                    format: uint32
+                userId:
+                    type: integer
+                    description: 用户ID
+                    format: uint32
+        storage.service.v1.UploadFileResponse:
+            type: object
+            properties:
+                objectName:
+                    type: string
+                    description: OSS 对象键
+                presignedUrl:
+                    type: string
+                    description: 预签名上传链接
         uba.service.v1.ReportEventsRequest:
             type: object
             properties:
@@ -1977,22 +2922,50 @@ components:
                 updatedAt:
                     type: string
                     format: date-time
+    responses:
+        default:
+            description: default kratos response
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/KratosStatus'
+    securitySchemes:
+        OAuth2PasswordBearer:
+            type: oauth2
+            flows:
+                password:
+                    tokenUrl: /admin/v1/login
+                    refreshUrl: /admin/v1/refresh-token
+                    scopes: {}
+security:
+    - OAuth2PasswordBearer: []
 tags:
     - name: AuthenticationService
-      description: App 认证服务（注册 / 登录 / 登出 / 我的资料）
+      description: 用户前台登录认证服务
     - name: CommentService
       description: 评论服务（App 端底部弹窗）
     - name: FeedService
       description: Feed 流服务（App 首页沉浸式上下滑）
+    - name: FileTransferService
+      description: 文件传输服务
     - name: InteractionService
       description: 互动服务（App 端：点赞 / 收藏 / 关注 / 评论）
-    - name: NotifyService
-      description: 消息通知服务（App 端）
+    - name: MediaAssetService
+      description: 公开媒体资产服务（C 端渲染用最小面）
+    - name: NotificationService
+      description: |-
+        消息通知服务（基座 internal_message 域收件箱的 App 端薄转发面）
+
+         仅暴露 C 端必需的收件箱能力：列表 / 未读数 / 已读。
+         数据归属与越权防护由 core 收件箱仓储强制（recipient_user_id 恒取鉴权上下文调用者），
+         本面不新增数据访问，仅做参数整形与转发；全部接口需登录（不入游客白名单）。
     - name: ReportService
       description: 举报服务（App 端：举报视频 / 评论 / 用户）
     - name: UbaService
       description: UBA 埋点上报服务（App 端：观看时长 / 完播 / 划走等）
+    - name: UserProfileService
+      description: 用户个人资料服务
     - name: UserService
-      description: 用户主页服务（App 端）
+      description: 用户主页服务（App 端，shortplay 业务）
     - name: VideoService
       description: 视频创作服务（App 端：分片上传 / 发布 / 草稿 / 我的作品）

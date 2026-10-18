@@ -1,37 +1,15 @@
-# 全量部署：基础设施 + 三服务（core / admin / app）
+# 短剧应用服务编排：仅包含三个应用服务。
+#
+# 第三方依赖（Citus PostgreSQL、Redis、MinIO、etcd）复用宿主机既有容器，
+# 不在本文件内创建；ZLMediaKit 经 docker run 单独创建（shortplay-zlmediakit）。
+# 依赖连接经环境变量注入（缺省值见 app/*/service/configs/*.yaml 的 ${ENV:default}）：
+#   DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME、REDIS_ADDR/REDIS_PASSWORD、
+#   OSS_ENDPOINT/OSS_PUBLIC_ENDPOINT/OSS_ACCESS_KEY/OSS_SECRET_KEY。
+# 服务发现：三服务经 etcd 注册/发现（registry.yaml，缺省 localhost:2379），
+# 容器内需将 etcd endpoint 指向宿主机（部署时调整 registry.yaml 或挂载覆盖）。
+#
 # 用法：docker compose up -d --build
 services:
-  postgres:
-    image: docker.io/library/postgres:16-alpine
-    environment:
-      POSTGRES_USER: shortplay
-      POSTGRES_PASSWORD: shortplay
-      POSTGRES_DB: shortplay
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U shortplay"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  redis:
-    image: docker.io/library/redis:7-alpine
-    volumes:
-      - redis_data:/data
-
-  minio:
-    image: docker.io/minio/minio:latest
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    ports:
-      - "9100:9000"
-      - "9101:9001"
-    volumes:
-      - minio_data:/data
-
   core-service:
     build:
       context: .
@@ -40,16 +18,14 @@ services:
         SERVICE_NAME: core
     environment:
       JWT_SIGNING_KEY: "${JWT_SIGNING_KEY:-dev_only_change_me_in_prod}"
-      OSS_BUCKET: "${OSS_BUCKET:-shortplay}"
-      OSS_PUBLIC_ENDPOINT: "http://127.0.0.1:9100"
-      UPLOAD_TEMP_DIR: "/tmp/shortplay-uploads"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_started
-      minio:
-        condition: service_started
+      OSS_PUBLIC_ENDPOINT: "${OSS_PUBLIC_ENDPOINT:-http://localhost:9000}"
+      DB_HOST: "host.docker.internal"
+      DB_PORT: "5432"
+      DB_NAME: "shortplay"
+      REDIS_ADDR: "host.docker.internal:6379"
+      OSS_ENDPOINT: "host.docker.internal:9000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   admin-service:
     build:
@@ -59,11 +35,12 @@ services:
         SERVICE_NAME: admin
     environment:
       JWT_SIGNING_KEY: "${JWT_SIGNING_KEY:-dev_only_change_me_in_prod}"
-      CORE_SERVICE_ADDR: "core-service:7900"
     ports:
       - "7600:7600"
     depends_on:
       - core-service
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   app-service:
     build:
@@ -73,13 +50,9 @@ services:
         SERVICE_NAME: app
     environment:
       JWT_SIGNING_KEY: "${JWT_SIGNING_KEY:-dev_only_change_me_in_prod}"
-      CORE_SERVICE_ADDR: "core-service:7900"
     ports:
       - "7700:7700"
     depends_on:
       - core-service
-
-volumes:
-  postgres_data:
-  redis_data:
-  minio_data:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
