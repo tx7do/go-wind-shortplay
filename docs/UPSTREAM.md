@@ -1,6 +1,6 @@
 # 从基座同步上游改动（go-wind-cms → go-wind-shortplay）
 
-> 本仓库不是从零开发：后端是 [go-wind-cms](https://github.com/tx7do/go-wind-cms) `backend/` 的**源码移植裁剪版**，管理后台是 `go-wind-cms/frontend/admin`（Ant Design Pro / vben 底座）的裁剪适配版，Flutter App 遵循同一套生态约定。本文说明两边的目录映射、裁剪清单、以及再同步上游改动的方法。机器比对取证详见 [backend-vs-cms-diff.md](./backend-vs-cms-diff.md)（2026-10-18 快照）。
+> 本仓库不是从零开发：后端是 [go-wind-cms](https://github.com/tx7do/go-wind-cms) `backend/` 的**源码移植裁剪版**，管理后台是 `go-wind-cms/frontend/admin`（Ant Design Pro / vben 底座）的裁剪适配版，Flutter App 遵循同一套生态约定。本文说明两边的目录映射、裁剪清单、以及再同步上游改动的方法。机器比对取证 [backend-vs-cms-diff.md](./backend-vs-cms-diff.md) 是**基座重建前旧实现**的历史快照（结论已不描述现状，见其卷首说明）。
 
 ## 一、上游基座清单
 
@@ -32,8 +32,8 @@ identity / permission / authentication / audit / dict / media / storage / task /
 
 - proto：`api/protos/{video,feed,report,sysconf,uba}/service/v1`（+ `api/gen/go/` 同名）
 - core：`internal/data/{video,feed,comment_report,business_tenant,...}_repo.go`、`internal/service/{video,feed,report,...}_service.go`
-- BFF：`app/{admin,app}/service/internal/server/` 的业务路由挂载、`image_upload.go`、`rest_server.go` 白名单
-- `pkg/authctx/`（viewer 身份提取）、`pkg/crypto/`（凭据落库加密，A/B 类引入）
+- BFF：`app/{admin,app}/service/internal/server/` 的业务路由挂载、`image_upload.go`、`rest_server.go` 白名单；app 侧 `/auth/*` 认证兼容层（`authentication_service.go`）
+- `pkg/configenv/`（env 覆盖链路）、`pkg/crypto/`（凭据落库加密，A/B 类引入）
 - Flutter App：`frontend/app/`（基座无此端）
 
 ### 2.3 基座有而本项目**未采纳**（同步时跳过）
@@ -48,9 +48,14 @@ CMS 内容业务域：`ai/ content/ site/ social/ flow/ translator/ webhook/ gra
 | `app/core/service/configs/server.yaml` | asynq URI 单层插值 `${ASYNQ_REDIS_URI:...}`、:7900 |
 | `app/*/service/cmd/server/main.go` | `configenv.OverrideAESKeyFromEnv()` 启动钩子 |
 | `pkg/configenv/` | env 覆盖链路（kratos-bootstrap 只注册 file source，环境变量默认**不生效**，本项目经远程配置源工厂扩展点接通） |
-| `app.mk` | 追加装载仓库根 `backend/.env`（服务目录 .env 可覆盖） |
-| `app/admin/service/configs/server.yaml` | CORS 白名单 :16800 |
-| 种子数据（`pkg/constants/`、core 幂等补种） | 短剧角色/菜单/权限码（`biz:*`）、admin/admin |
+| `app.mk` | 顶部 include 并 export `backend/.env`（实测：`ENV_FILE` 恒指向 app.mk 所在目录的 `backend/.env`，与调用目录无关；`ROOT_ENV_FILE` 变量解析到仓库外的 `../..env` 且文件不存在——「服务目录 .env 可覆盖」的注释与实际行为不符，见已知问题清单） |
+| `.golangci.yml` | 本仓自建（基座无此文件）：v2 格式，`default: standard`，排除 `api/gen`、`internal/data/ent(etest)`、`*.pb.go`；`_test.go` 放宽 errcheck/ineffassign |
+| `app/admin/service/configs/server.yaml` | CORS 白名单 `localhost:16800` + `127.0.0.1:16800` |
+| `app/admin/service/internal/server/rest_server.go` | 追加 `GET /admin/v1/navigation`（shortplay 自定义 JSON 形状的动态菜单契约，admin 前端消费；基座原生 `/routes` 保留）与 `POST /admin/v1/uploads/image`（图片直传手工路由，app 侧同构） |
+| `app/app/service/internal/service/authentication_service.go` | `/auth/*` 认证兼容层（AuthLogin/AuthRegister/AuthRefresh/AuthLogout：免验证码、密码 AES 密文、注册租户服务端定为缺省、refresh 按值反查绑定键）+ 手工挂载 `POST /app/v1/register` |
+| `app/core/service/internal/service/report_service.go` | sp-biz 站内信尾标记约定：content 末尾独立一行 `sp-biz:{"videoId":<id>}`（`spBizMarkerPrefix`），客户端解析跳转后剔除 |
+| `app/core/service/internal/data/business_tenant.go` | 业务行租户归属兜底（基座无）：平台/系统上下文的业务行缺省归缺省业务租户 `shortplay`，避免 tenant_id=0 孤儿数据 |
+| 种子数据（`pkg/constants/`、core 幂等补种） | 短剧角色/菜单/权限码（`biz:*`）、admin/admin；默认角色权限绑定与默认租户普通用户角色**不受空表门控、启动期幂等补种**（自愈） |
 
 ## 三、再同步方法（基座有新改动时）
 

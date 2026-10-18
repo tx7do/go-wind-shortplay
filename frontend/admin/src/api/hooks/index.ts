@@ -26,6 +26,7 @@ import type {
   TopMetric,
   UpdateSysConfRequest,
   UpdateUserRequest,
+  UpdateVideoRequest,
   Video,
 } from '@/api/types';
 import { queryClient, type PaginationQuery } from '@/core';
@@ -122,6 +123,15 @@ export function useChangeVideoStatus(
   return useMutation<Video, Error, { id: number } & ChangeVideoStatusRequest>({
     mutationFn: ({ id, ...body }) =>
       adminHttp.put<Video>(`videos/${id}/status`, body),
+    ...options,
+  });
+}
+
+export function useUpdateVideo(
+  options?: UseMutationOptions<Video, Error, { id: number } & UpdateVideoRequest>,
+) {
+  return useMutation<Video, Error, { id: number } & UpdateVideoRequest>({
+    mutationFn: ({ id, ...body }) => adminHttp.put<Video>(`videos/${id}`, body),
     ...options,
   });
 }

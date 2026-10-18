@@ -192,20 +192,62 @@ const LEGACY_REDIRECT_BACKEND_ROUTES: BackendRoute[] = LEGACY_REDIRECT_PAIRS.map
 }));
 
 /**
+ * 解析菜单树中第一个「可落地」页面的完整路径（登录/根路径的落点）：
+ * - 跳过 index 重定向节点与 hideInMenu 节点（个人中心伪节点、旧路径兼容
+ *   重定向不作落点）；
+ * - 页面节点（有页面 component）即视为可落地，返回其绝对路径；
+ * - 目录节点（无页面组件）递归其首个可落地子级；
+ * - 子层级保持相对路径（toBackendRoutes 只补根层前导斜杠），按父路径拼接。
+ * 全树无可落地页面时返回 null，调用方不得注入空目标的 index 重定向。
+ */
+function resolveFirstMenuPath(nodes: BackendRoute[], parentPath: string = ''): string | null {
+  for (const node of nodes) {
+    if (node.index || node.meta?.hideInMenu) continue;
+    const rawPath = node.path ?? '';
+    if (!rawPath) continue;
+    const absPath = rawPath.startsWith('/') ? rawPath : `${parentPath}/${rawPath}`;
+    if (node.component && node.component !== 'BasicLayout') {
+      return absPath;
+    }
+    if (node.children?.length) {
+      const childPath = resolveFirstMenuPath(node.children, absPath);
+      if (childPath) return childPath;
+    }
+  }
+  return null;
+}
+
+/**
  * 统一合成 '/' 主布局根节点：
  * - navigation 下发的多棵目录子树（Dashboard/组织人事/权限/短剧管理等）全部
  *   挂到同一 BasicLayout 根下，侧栏（useMenuData 取 '/' 容器的 children）才能
  *   呈现完整层级树；目录的 BasicLayout 已在 toBackendRoutes 剥离，不会双层布局；
- * - 个人中心伪节点并入根 children（顶栏「个人中心」入口始终有路由）。
+ * - 个人中心伪节点并入根 children（顶栏「个人中心」入口始终有路由）；
+ * - 根注入 index 重定向（基座对齐）：cms 静态 '/' 容器自带
+ *   `{ index: true, element: <Navigate to="/dashboard" replace /> }`
+ *   （router/config/static.tsx），基座默认前端模式即靠它落地看板。本仓默认
+ *   后端模式、'/' 容器由本合成根取代，该兜底一度丢失——登录守卫把用户送到
+ *   '/' 时，裸根分支（布局壳无 index）在 React Router 打分上压过 404 通配符，
+ *   渲染出空白布局。这里按同路径目录的既有 redirect→index 机制补回：
+ *   目标取菜单树首个可落地页面（当前种子即 /dashboard），种子变化时自动跟随。
  */
 function ensureLayoutRoot(routes: BackendRoute[]): BackendRoute[] {
+  const children: BackendRoute[] = [...routes, PROFILE_BACKEND_ROUTE, ...LEGACY_REDIRECT_BACKEND_ROUTES];
+  const firstMenuPath = resolveFirstMenuPath(routes);
+  if (firstMenuPath && firstMenuPath !== '/') {
+    children.unshift({
+      name: 'root-redirect',
+      index: true,
+      redirect: firstMenuPath,
+    });
+  }
   return [
     {
       name: 'root',
       path: '/',
       component: 'BasicLayout',
       meta: { title: 'routes:home', hideInMenu: true, hideInTab: true },
-      children: [...routes, PROFILE_BACKEND_ROUTE, ...LEGACY_REDIRECT_BACKEND_ROUTES],
+      children,
     },
   ];
 }

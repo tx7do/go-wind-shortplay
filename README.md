@@ -14,17 +14,32 @@
 
 ---
 
+<div align="center">
+  <img src="docs/images/dashboard.png" alt="管理后台 · 数据看板" width="880">
+  <p><sub>管理后台 · 数据看板（React 19 + Ant Design，基于 GoWind Admin 底座）</sub></p>
+</div>
+
 风行短剧（GoWind ShortPlay）是一款开箱即用的企业级短视频社区基础版（开源 MVP），基于 GoWind 生态构建：上下滑沉浸式视频流、拍摄发布、互动社区与后台审核闭环，小流量企业内部场景可直接上线。
 
 **核心亮点：**
 
-- **API 优先** — Protobuf-first 契约驱动，RESTful / gRPC 双协议，OpenAPI 文档自动生成并内嵌 Swagger
+- **API 优先** — Protobuf-first 契约驱动，RESTful / gRPC 双协议，OpenAPI 文档自动生成（`make openapi`；服务端 Swagger UI 缺省关闭，configs 一键打开）
 - **三服务架构** — admin / app 瘦网关 BFF + core 唯一数据落点，与 [go-wind-cms](https://github.com/tx7do/go-wind-cms) 完全同构
 - **双端覆盖** — React 19 管理后台（GoWind Admin 底座裁剪适配）+ Flutter 跨平台 App，共用一个 core 服务
 - **开箱即用** — docker compose 一键起；core 启动即自动建表并播种管理员账号
 - **商业版留口** — 转码集群、AI 推荐、内容安全、SaaS 多租户、直播以独立服务外挂，契约边界已定（见 [docs/ROADMAP.md](./docs/ROADMAP.md)）
 
 > **开源版 / 商业版边界**：本仓库为开源基础版，不含多码率转码集群、AI 推荐、内容安全审核、SaaS 多租户与直播（归商业闭源增值包）。
+
+## 界面预览
+
+| | | |
+|---|---|---|
+| ![登录](docs/images/admin-login.png) | ![数据看板](docs/images/dashboard.png) | ![视频管理](docs/images/admin-videos.png) |
+| ![评论管理](docs/images/admin-comments.png) | ![举报管理](docs/images/admin-reports.png) | ![系统配置](docs/images/admin-sysconf.png) |
+| ![用户管理](docs/images/admin-users.png) | ![角色管理](docs/images/admin-roles.png) | ![菜单管理](docs/images/admin-menus.png) |
+
+> 更多：接口管理、部门管理见 `docs/images/`；Flutter App（iOS/Android/Windows 桌面）与 H5 分享页运行实测截图随版本更新。
 
 ## 技术栈
 
@@ -44,7 +59,7 @@
 | 鉴权 | HS256 JWT | core 签发、网关校验、metadata 透传 |
 | 服务发现 | etcd | 三服务 gRPC 注册/发现 |
 
-> 后端以 [go-wind-cms](https://github.com/tx7do/go-wind-cms) 的 `backend/` 基座源码移植裁剪而来（Phase 1：保留 identity/permission/authentication/audit/dict/media/storage/task/notify/internal_message 等全部基建域，CMS 内容类业务域已裁剪）；与基座差异仅模块名/端口/数据指向，shortplay 业务域（video/feed 等）按基座既有模式在 Phase 2 接入，详见 [backend/AGENTS.md](./backend/AGENTS.md)。从基座同步上游改动的方法见 [docs/UPSTREAM.md](./docs/UPSTREAM.md)。
+> 后端以 [go-wind-cms](https://github.com/tx7do/go-wind-cms) 的 `backend/` 基座源码移植裁剪而来：保留 identity / permission / authentication / audit / dict / media / storage / task / notify / internal_message 等全部基建域，CMS 内容类业务域已裁剪，shortplay 业务域（video / feed / report / sysconf / uba）已按基座既有模式接入。对基座的刻意偏离（端口、`pkg/configenv` 环境变量覆盖链路、`.golangci.yml`、sp-biz 站内信标记等）见 [docs/UPSTREAM.md](./docs/UPSTREAM.md)；开发规约详见 [backend/AGENTS.md](./backend/AGENTS.md)。
 
 ### 管理后台前端
 
@@ -75,18 +90,20 @@ Flutter App ──▶ app-service   (BFF :7700) ──────────�
 ```
 
 - **admin / app 是瘦网关 BFF**（参数校验 + 转发），所有业务与数据操作收敛在 core
-- 领域拆分体现在 proto 与 core 内部模块上（video / feed / interaction / report / uba / sysconf / notify / identity / stats），不体现在进程上
+- 领域拆分体现在 proto 与 core 内部模块上（业务域 video / feed / report / sysconf / uba + 基座基建域 identity / permission / authentication / comment / interaction / notify / stats 等），不体现在进程上
 - 服务拆分研判与商业版扩展路径见 [docs/ROADMAP.md](./docs/ROADMAP.md)
 
 ### 端口表
 
 | 端口 | 服务 | 说明 |
 |---|---|---|
-| :7600 | admin BFF（REST） | 管理后台 API；Swagger `/docs/` |
+| :7600 | admin BFF（REST） | 管理后台 API（Swagger `/docs/` 需在 configs 打开 `enable_swagger`，缺省关） |
 | :7601 | admin BFF（SSE） | 通知实时推送 `/events`（需 `?stream=<accessToken>` 与 Bearer 同令牌） |
-| :7700 | app BFF（REST） | Flutter App API；Swagger `/docs/` |
+| :7700 | app BFF（REST） | Flutter App API（Swagger 同上，缺省关） |
+| :7701 | app BFF（SSE） | app 侧 SSE 通道 `/events`（预留，业务当前未消费） |
 | :7900 | core（gRPC） | 唯一数据落点，etcd 注册 |
 | :16800 | admin 前端 dev server | Vite（`frontend/admin`）；后端 CORS 白名单缺省只放行 `localhost:16800` |
+| :9000 | MinIO S3 API | 对象存储公开读（媒体 URL 前缀，`OSS_PUBLIC_ENDPOINT`） |
 | :8280 | ZLMediaKit HTTP | 本地流媒体（直播/转码扩展预留，`docker run` 映射） |
 
 ## 核心功能
@@ -121,7 +138,7 @@ Flutter App ──▶ app-service   (BFF :7700) ──────────�
 | 评论管理 | 评论查询与删除 |
 | 举报工单 | 举报受理与处置，处置联动目标内容 |
 | 用户管理 | 用户查询与管理 |
-| 数据看板 | 核心指标概览 |
+| 数据看板 | 核心指标概览 + 视频 TOP10 排行 + 近 7 日趋势 |
 | 系统配置 | 上传限制 / 时长限制 / 人工审核开关 |
 
 ## 项目结构
@@ -157,7 +174,7 @@ go-wind-shortplay/
 
 ### 1. 准备依赖服务
 
-PostgreSQL / Redis / MinIO / Kafka 复用宿主机既有容器；ZLMediaKit 用 `docker run` 单独创建，并在 PostgreSQL 中建库 `shortplay`：
+PostgreSQL / Redis / MinIO / etcd 复用宿主机既有容器；ZLMediaKit 用 `docker run` 单独创建，并在 PostgreSQL 中建库 `shortplay`：
 
 ```bash
 docker run -d --name shortplay-zlmediakit --restart unless-stopped \
@@ -199,7 +216,7 @@ curl -X POST http://127.0.0.1:7700/app/v1/auth/register \
   -d '{"username":"demo","password":"SjM/2yeJT+/3xpCGydysrA==","nickname":"Demo"}'
 ```
 
-API 文档：服务启动后访问 `http://127.0.0.1:7600/docs/`、`http://127.0.0.1:7700/docs/`（Swagger）。
+API 文档：OpenAPI 资产经 `make openapi` 生成在 `app/{admin,app}/service/assets/openapi.yaml`；需要浏览 Swagger UI 时，把对应服务 configs 的 `server.rest.enable_swagger` 改为 `true` 再启动（缺省关闭，`/docs/` 404）。
 
 ### 4. 启动前端
 

@@ -14,17 +14,32 @@
 
 ---
 
+<div align="center">
+  <img src="docs/images/dashboard.png" alt="Admin Console · Dashboard" width="880">
+  <p><sub>Admin Console · Dashboard (React 19 + Ant Design, based on GoWind Admin)</sub></p>
+</div>
+
 GoWind ShortPlay is an out-of-the-box, enterprise-grade short-video community base edition (open-source MVP) built on the GoWind ecosystem: immersive vertical-swipe video feed, publishing, social interactions, and a back-office review loop — ready to deploy for small-traffic, in-enterprise scenarios.
 
 **Highlights:**
 
-- **API First** — Protobuf-first contract-driven development, RESTful / gRPC dual protocol, OpenAPI docs auto-generated with built-in Swagger
+- **API First** — Protobuf-first contract-driven development, RESTful / gRPC dual protocol, OpenAPI docs auto-generated (`make openapi`; the per-service Swagger UI is off by default and can be enabled in configs)
 - **Three-Service Architecture** — thin admin / app BFF gateways + one core service as the single data sink, isomorphic to [go-wind-cms](https://github.com/tx7do/go-wind-cms)
 - **Two Frontends** — React 19 admin panel (trimmed from the GoWind Admin base) + Flutter cross-platform app, sharing a single core service
 - **Out of the Box** — one-command `docker compose`; core auto-creates tables and seeds the admin account on first start
 - **Room for the Pro Edition** — transcoding cluster, AI recommendation, content moderation, SaaS multi-tenancy, and live streaming attach as external services; contract boundaries are already in place (see [docs/ROADMAP.md](./docs/ROADMAP.md))
 
 > **Open-source / Pro edition boundary**: this repository is the open-source base edition. It does not include a multi-bitrate transcoding cluster, AI recommendation, content moderation, SaaS multi-tenancy, or live streaming (reserved for the commercial closed-source add-on pack).
+
+## Screenshots
+
+| | | |
+|---|---|---|
+| ![Login](docs/images/admin-login.png) | ![Dashboard](docs/images/dashboard.png) | ![Videos](docs/images/admin-videos.png) |
+| ![Comments](docs/images/admin-comments.png) | ![Reports](docs/images/admin-reports.png) | ![System Config](docs/images/admin-sysconf.png) |
+| ![Users](docs/images/admin-users.png) | ![Roles](docs/images/admin-roles.png) | ![Menus](docs/images/admin-menus.png) |
+
+> More: API management, departments under `docs/images/`; Flutter App (iOS/Android/Windows) and H5 share page screenshots ship with each release.
 
 ## Tech Stack
 
@@ -72,18 +87,20 @@ Flutter App ──▶ app-service   (BFF :7700) ──────────�
 ```
 
 - **admin / app are thin BFF gateways** (parameter validation + forwarding); all business logic and data operations converge in core
-- Domain separation lives in protos and core's internal modules (video / feed / interaction / report / uba / sysconf / notify / identity / stats), not in processes
+- Domain separation lives in protos and core's internal modules (business domains video / feed / report / sysconf / uba + base infrastructure domains identity / permission / authentication / comment / interaction / notify / stats), not in processes
 - See [docs/ROADMAP.md](./docs/ROADMAP.md) for the service-splitting analysis and the Pro edition expansion path
 
 ### Ports
 
 | Port | Service | Notes |
 |---|---|---|
-| :7600 | admin BFF (REST) | Admin API; Swagger at `/docs/` |
+| :7600 | admin BFF (REST) | Admin API (Swagger at `/docs/` requires `enable_swagger` in configs, off by default) |
 | :7601 | admin BFF (SSE) | Real-time notifications at `/events` (requires `?stream=<accessToken>` matching the Bearer token) |
-| :7700 | app BFF (REST) | Flutter app API; Swagger at `/docs/` |
+| :7700 | app BFF (REST) | Flutter app API (Swagger same as above, off by default) |
+| :7701 | app BFF (SSE) | App-side SSE channel `/events` (reserved; not consumed by the app yet) |
 | :7900 | core (gRPC) | Single data sink, registered in etcd |
 | :16800 | admin frontend dev server | Vite (`frontend/admin`); backend CORS whitelist allows `localhost:16800` by default |
+| :9000 | MinIO S3 API | Object storage public reads (media URL prefix, `OSS_PUBLIC_ENDPOINT`) |
 | :8280 | ZLMediaKit HTTP | Local streaming media (reserved for live/transcoding extensions, mapped via `docker run`) |
 
 ## Core Features
@@ -118,7 +135,7 @@ Flutter App ──▶ app-service   (BFF :7700) ──────────�
 | Comment management | Comment query and deletion |
 | Report tickets | Report handling linked to target content |
 | User management | User query and administration |
-| Dashboard | Key metrics overview |
+| Dashboard | Key metrics overview + video TOP10 ranking + 7-day trends |
 | System settings | Upload limits / duration limits / manual-review switch |
 
 ## Project Structure
@@ -154,7 +171,7 @@ go-wind-shortplay/
 
 ### 1. Prepare Dependency Services
 
-PostgreSQL / Redis / MinIO / Kafka are reused from existing containers on the host; ZLMediaKit is created separately via `docker run`, and the `shortplay` database must be created in PostgreSQL:
+PostgreSQL / Redis / MinIO / etcd are reused from existing containers on the host; ZLMediaKit is created separately via `docker run`, and the `shortplay` database must be created in PostgreSQL:
 
 ```bash
 docker run -d --name shortplay-zlmediakit --restart unless-stopped \
@@ -196,7 +213,7 @@ curl -X POST http://127.0.0.1:7700/app/v1/auth/register \
   -d '{"username":"demo","password":"SjM/2yeJT+/3xpCGydysrA==","nickname":"Demo"}'
 ```
 
-API docs: once the services are up, visit `http://127.0.0.1:7600/docs/` and `http://127.0.0.1:7700/docs/` (Swagger).
+API docs: the OpenAPI assets are generated by `make openapi` into `app/{admin,app}/service/assets/openapi.yaml`. To browse the Swagger UI, set `server.rest.enable_swagger` to `true` in the corresponding service's configs and restart (off by default; `/docs/` returns 404).
 
 ### 4. Start the Frontends
 

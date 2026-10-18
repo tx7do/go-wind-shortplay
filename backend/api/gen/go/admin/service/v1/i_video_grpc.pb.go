@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	VideoService_List_FullMethodName         = "/admin.service.v1.VideoService/List"
 	VideoService_Get_FullMethodName          = "/admin.service.v1.VideoService/Get"
+	VideoService_Update_FullMethodName       = "/admin.service.v1.VideoService/Update"
 	VideoService_ChangeStatus_FullMethodName = "/admin.service.v1.VideoService/ChangeStatus"
 	VideoService_Delete_FullMethodName       = "/admin.service.v1.VideoService/Delete"
 )
@@ -32,12 +33,14 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// 视频管理服务（后台：列表 / 详情 / 审核 / 下架 / 删除）
+// 视频管理服务（后台：列表 / 详情 / 编辑 / 审核 / 下架 / 删除）
 type VideoServiceClient interface {
 	// 视频列表（按状态 / 作者过滤）
 	List(ctx context.Context, in *v1.PagingRequest, opts ...grpc.CallOption) (*v11.ListVideoResponse, error)
 	// 视频详情
 	Get(ctx context.Context, in *v11.GetVideoRequest, opts ...grpc.CallOption) (*v11.Video, error)
+	// 编辑视频（标题 / 简介 / 封面 / 标签，复用 video 域 UpdateVideoRequest）
+	Update(ctx context.Context, in *v11.UpdateVideoRequest, opts ...grpc.CallOption) (*v11.Video, error)
 	// 审核通过 / 驳回 / 强制下架
 	ChangeStatus(ctx context.Context, in *v11.ChangeVideoStatusRequest, opts ...grpc.CallOption) (*v11.Video, error)
 	// 删除视频
@@ -72,6 +75,16 @@ func (c *videoServiceClient) Get(ctx context.Context, in *v11.GetVideoRequest, o
 	return out, nil
 }
 
+func (c *videoServiceClient) Update(ctx context.Context, in *v11.UpdateVideoRequest, opts ...grpc.CallOption) (*v11.Video, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v11.Video)
+	err := c.cc.Invoke(ctx, VideoService_Update_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *videoServiceClient) ChangeStatus(ctx context.Context, in *v11.ChangeVideoStatusRequest, opts ...grpc.CallOption) (*v11.Video, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v11.Video)
@@ -96,12 +109,14 @@ func (c *videoServiceClient) Delete(ctx context.Context, in *v11.DeleteVideoRequ
 // All implementations must embed UnimplementedVideoServiceServer
 // for forward compatibility.
 //
-// 视频管理服务（后台：列表 / 详情 / 审核 / 下架 / 删除）
+// 视频管理服务（后台：列表 / 详情 / 编辑 / 审核 / 下架 / 删除）
 type VideoServiceServer interface {
 	// 视频列表（按状态 / 作者过滤）
 	List(context.Context, *v1.PagingRequest) (*v11.ListVideoResponse, error)
 	// 视频详情
 	Get(context.Context, *v11.GetVideoRequest) (*v11.Video, error)
+	// 编辑视频（标题 / 简介 / 封面 / 标签，复用 video 域 UpdateVideoRequest）
+	Update(context.Context, *v11.UpdateVideoRequest) (*v11.Video, error)
 	// 审核通过 / 驳回 / 强制下架
 	ChangeStatus(context.Context, *v11.ChangeVideoStatusRequest) (*v11.Video, error)
 	// 删除视频
@@ -121,6 +136,9 @@ func (UnimplementedVideoServiceServer) List(context.Context, *v1.PagingRequest) 
 }
 func (UnimplementedVideoServiceServer) Get(context.Context, *v11.GetVideoRequest) (*v11.Video, error) {
 	return nil, status.Error(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedVideoServiceServer) Update(context.Context, *v11.UpdateVideoRequest) (*v11.Video, error) {
+	return nil, status.Error(codes.Unimplemented, "method Update not implemented")
 }
 func (UnimplementedVideoServiceServer) ChangeStatus(context.Context, *v11.ChangeVideoStatusRequest) (*v11.Video, error) {
 	return nil, status.Error(codes.Unimplemented, "method ChangeStatus not implemented")
@@ -185,6 +203,24 @@ func _VideoService_Get_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VideoService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v11.UpdateVideoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoServiceServer).Update(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoService_Update_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoServiceServer).Update(ctx, req.(*v11.UpdateVideoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _VideoService_ChangeStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v11.ChangeVideoStatusRequest)
 	if err := dec(in); err != nil {
@@ -235,6 +271,10 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Get",
 			Handler:    _VideoService_Get_Handler,
+		},
+		{
+			MethodName: "Update",
+			Handler:    _VideoService_Update_Handler,
 		},
 		{
 			MethodName: "ChangeStatus",

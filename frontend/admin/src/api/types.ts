@@ -174,6 +174,14 @@ export interface ChangeVideoStatusRequest {
   reason?: string;
 }
 
+/** PUT /videos/{id} 编辑视频（标题 / 简介 / 封面 / 标签） */
+export interface UpdateVideoRequest {
+  title?: string;
+  description?: string;
+  coverUrl?: string;
+  tags?: string[];
+}
+
 // ========== 评论 ==========
 
 export interface UserBrief {

@@ -5542,6 +5542,31 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/video.service.v1.Video'
+        put:
+            tags:
+                - VideoService
+            description: 编辑视频（标题 / 简介 / 封面 / 标签，复用 video 域 UpdateVideoRequest）
+            operationId: VideoService_Update
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/video.service.v1.UpdateVideoRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.Video'
         delete:
             tags:
                 - VideoService
@@ -10163,6 +10188,22 @@ components:
                         $ref: '#/components/schemas/video.service.v1.Video'
                 total:
                     type: string
+        video.service.v1.UpdateVideoRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                title:
+                    type: string
+                description:
+                    type: string
+                coverUrl:
+                    type: string
+                tags:
+                    type: array
+                    items:
+                        type: string
         video.service.v1.Video:
             type: object
             properties:
@@ -10328,4 +10369,4 @@ tags:
     - name: UserService
       description: "用户管理服务（后台，shortplay 业务 App 用户）\r\n\r\n Phase 2：/admin/v1/users 路由由业务用户管理接管（基座 RBAC 用户 CRUD 面与\r\n 业务前端契约同路径冲突）。实现转发基座 identity UserService（字段映射\r\n avatar→avatarUrl、description→bio、User.Status→1正常/0禁用），RBAC 角色分配\r\n 面转发基座 permission RoleService。"
     - name: VideoService
-      description: 视频管理服务（后台：列表 / 详情 / 审核 / 下架 / 删除）
+      description: 视频管理服务（后台：列表 / 详情 / 编辑 / 审核 / 下架 / 删除）

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"strings"
@@ -67,7 +68,10 @@ func registerImageUploadHandler(srv *http.Server, mc *oss.MinIOClient) {
 		if mc == nil {
 			return ctx.JSON(500, map[string]string{"message": "storage unavailable"})
 		}
-		_, _, downloadURL, err := mc.UploadFile(ctx, "images", "", mimeType, strings.NewReader(string(data)), int64(len(data)))
+		// 统一媒体桶（OSS_BUCKET，缺省 shortplay，懒建+匿名只读），
+		// 对象键保留 images/ 前缀——与前端 MEDIA_BASE（<host>/<桶>）拼址对齐。
+		objectKey := oss.GenerateObjectName("images", allowedImageMime[mimeType], oss.GenerateFileNameTypeUUID)
+		_, downloadURL, err := mc.PutObject(ctx, objectKey, mimeType, bytes.NewReader(data), int64(len(data)))
 		if err != nil {
 			return ctx.JSON(500, map[string]string{"message": "upload image failed"})
 		}

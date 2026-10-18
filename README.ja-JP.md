@@ -14,17 +14,32 @@
 
 ---
 
+<div align="center">
+  <img src="docs/images/dashboard.png" alt="Admin Console · Dashboard" width="880">
+  <p><sub>Admin Console · Dashboard (React 19 + Ant Design, based on GoWind Admin)</sub></p>
+</div>
+
 風行短劇（GoWind ShortPlay）は、GoWind エコシステム上に構築された、すぐに使えるエンタープライズ級ショート動画コミュニティのベーシック版（オープンソース MVP）です。縦スワイプの没入型動画フィード、投稿、ソーシャルインタラクション、バックオフィス審査ループを備え、小規模トラフィックの企業内シナリオでそのまま本番稼働できます。
 
 **主な特長：**
 
-- **API ファースト** — Protobuf ファーストの契約駆動開発、RESTful / gRPC デュアルプロトコル、OpenAPI ドキュメント自動生成（Swagger 内蔵）
+- **API ファースト** — Protobuf ファーストの契約駆動開発、RESTful / gRPC デュアルプロトコル、OpenAPI ドキュメント自動生成（`make openapi`。各サービスの Swagger UI はデフォルト無効、configs で有効化可能）
 - **3 サービスアーキテクチャ** — admin / app の薄い BFF ゲートウェイ + 唯一のデータ投影先である core サービス。[go-wind-cms](https://github.com/tx7do/go-wind-cms) と完全に同型
 - **2 つのフロントエンド** — React 19 管理画面（GoWind Admin ベースから派生）+ Flutter クロスプラットフォームアプリが、単一の core サービスを共有
 - **すぐに使える** — `docker compose` 一発起動。core は初回起動時にテーブルを自動作成し、管理者アカウントをシード
 - **商用版への拡張性** — トランスコードクラスタ、AI レコメンド、コンテンツモデレーション、SaaS マルチテナント、ライブ配信は独立サービスとして外付け。契約境界は既に確定（[docs/ROADMAP.md](./docs/ROADMAP.md) 参照）
 
 > **オープンソース版 / 商用版の境界**：本リポジトリはオープンソースのベーシック版です。マルチビットレートトランスコードクラスタ、AI レコメンド、コンテンツモデレーション、SaaS マルチテナント、ライブ配信は含みません（商用クローズドソースのアドオンパックに属します）。
+
+## スクリーンショット
+
+| | | |
+|---|---|---|
+| ![ログイン](docs/images/admin-login.png) | ![ダッシュボード](docs/images/dashboard.png) | ![動画管理](docs/images/admin-videos.png) |
+| ![コメント管理](docs/images/admin-comments.png) | ![通報管理](docs/images/admin-reports.png) | ![システム設定](docs/images/admin-sysconf.png) |
+| ![ユーザー管理](docs/images/admin-users.png) | ![ロール管理](docs/images/admin-roles.png) | ![メニュー管理](docs/images/admin-menus.png) |
+
+> その他：API 管理・部署管理は `docs/images/` にあります。Flutter アプリ（iOS/Android/Windows）と H5 共有ページのスクリーンショットはリリースごとに更新されます。
 
 ## テクノロジースタック
 
@@ -72,18 +87,20 @@ Flutter App ──▶ app-service   (BFF :7700) ──────────�
 ```
 
 - **admin / app は薄い BFF ゲートウェイ**（パラメータ検証 + 転送）。業務ロジックとデータ操作はすべて core に集約
-- ドメイン分割は proto と core 内部モジュール（video / feed / interaction / report / uba / sysconf / notify / identity / stats）に反映され、プロセスには反映されない
+- ドメイン分割は proto と core 内部モジュール（業務ドメイン video / feed / report / sysconf / uba + 基盤インフラドメイン identity / permission / authentication / comment / interaction / notify / stats など）に反映され、プロセスには反映されない
 - サービス分割の検討と商用版拡張パスは [docs/ROADMAP.md](./docs/ROADMAP.md) 参照
 
 ### ポート一覧
 
 | ポート | サービス | 説明 |
 |---|---|---|
-| :7600 | admin BFF（REST） | 管理画面 API。Swagger は `/docs/` |
+| :7600 | admin BFF（REST） | 管理画面 API（Swagger `/docs/` は configs の `enable_swagger` で有効化、デフォルト無効） |
 | :7601 | admin BFF（SSE） | 通知のリアルタイム配信 `/events`（`?stream=<accessToken>` が Bearer トークンと一致する必要あり） |
-| :7700 | app BFF（REST） | Flutter アプリ API。Swagger は `/docs/` |
+| :7700 | app BFF（REST） | Flutter アプリ API（Swagger 同上、デフォルト無効） |
+| :7701 | app BFF（SSE） | アプリ側 SSE チャネル `/events`（予約。アプリは未使用） |
 | :7900 | core（gRPC） | 唯一のデータ投影先。etcd に登録 |
 | :16800 | 管理画面フロントエンド dev サーバー | Vite（`frontend/admin`）。バックエンド CORS 許可リストは既定で `localhost:16800` のみ |
+| :9000 | MinIO S3 API | オブジェクトストレージの公開読み取り（メディア URL プレフィックス、`OSS_PUBLIC_ENDPOINT`） |
 | :8280 | ZLMediaKit HTTP | ローカルストリーミングメディア（ライブ / トランスコード拡張の予約、`docker run` でマッピング） |
 
 ## コア機能
@@ -118,7 +135,7 @@ Flutter App ──▶ app-service   (BFF :7700) ──────────�
 | コメント管理 | コメント照会・削除 |
 | 通報チケット | 通報の受付・処分、処分は対象コンテンツに連動 |
 | ユーザー管理 | ユーザー照会・管理 |
-| ダッシュボード | 主要指標の概観 |
+| ダッシュボード | 主要指標の概観 + 動画 TOP10 ランキング + 直近 7 日間のトレンド |
 | システム設定 | アップロード制限 / 長さ制限 / 手動審査スイッチ |
 
 ## プロジェクト構造
@@ -154,7 +171,7 @@ go-wind-shortplay/
 
 ### 1. 依存サービスの準備
 
-PostgreSQL / Redis / MinIO / Kafka はホスト上の既存コンテナを再利用します。ZLMediaKit は `docker run` で別途作成し、PostgreSQL に `shortplay` データベースを作成してください：
+PostgreSQL / Redis / MinIO / etcd はホスト上の既存コンテナを再利用します。ZLMediaKit は `docker run` で別途作成し、PostgreSQL に `shortplay` データベースを作成してください：
 
 ```bash
 docker run -d --name shortplay-zlmediakit --restart unless-stopped \
@@ -196,7 +213,7 @@ curl -X POST http://127.0.0.1:7700/app/v1/auth/register \
   -d '{"username":"demo","password":"SjM/2yeJT+/3xpCGydysrA==","nickname":"Demo"}'
 ```
 
-API ドキュメント：サービス起動後、`http://127.0.0.1:7600/docs/` と `http://127.0.0.1:7700/docs/`（Swagger）にアクセスしてください。
+API ドキュメント：OpenAPI アセットは `make openapi` で `app/{admin,app}/service/assets/openapi.yaml` に生成されます。Swagger UI を閲覧するには、該当サービスの configs で `server.rest.enable_swagger` を `true` にして再起動してください（デフォルト無効、`/docs/` は 404）。
 
 ### 4. フロントエンドの起動
 

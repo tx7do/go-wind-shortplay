@@ -53,8 +53,6 @@ const (
 	// 缺省分片 4MB
 	defaultChunkSize uint32 = 4 * 1024 * 1024
 	// 单个上传任务的并发分片写入不做限制（顺序上传）
-
-	videoBucket = "videos"
 )
 
 // spUploadTempRootDef 分片暂存缺省根目录
@@ -457,7 +455,7 @@ func (s *VideoService) CompleteUpload(ctx context.Context, req *videoV1.Complete
 	} else if s.taskEnqueuer != nil {
 		if err = s.taskEnqueuer.NewTask(task.VideoCoverExtractTaskType, &task.VideoCoverExtractTaskData{
 			TaskID:  e.TaskID,
-			Bucket:  videoBucket,
+			Bucket:  oss.DefaultBucketName(),
 			Object:  objectKey,
 			VideoID: video.GetId(),
 		}); err != nil {
@@ -513,7 +511,9 @@ func (s *VideoService) mergeAndUpload(ctx context.Context, e *ent.UploadTask, ro
 
 	ext := spVideoExtOf(e.FileName)
 	objectKey = fmt.Sprintf("sp/%s%s", e.TaskID, ext)
-	if _, _, _, uerr := s.minio.UploadFile(ctx, videoBucket, objectKey, mimeOfVideoExt(ext), f, int64(e.FileSize)); uerr != nil {
+	// 统一媒体桶（OSS_BUCKET，缺省 shortplay，懒建+匿名只读）：
+	// DB video_url 存对象键，前端按 MEDIA_BASE（<host>/<桶>）+ 键拼播放地址。
+	if _, _, uerr := s.minio.PutObject(ctx, objectKey, mimeOfVideoExt(ext), f, int64(e.FileSize)); uerr != nil {
 		s.log.Errorf("upload merged object failed: %s", uerr.Error())
 		return "", "", videoV1.ErrorFileMergeFailed("upload merged object failed")
 	}
@@ -595,8 +595,8 @@ func (s *VideoService) AsyncCoverExtract(_ string, payload *task.VideoCoverExtra
 	st, _ := f.Stat()
 
 	coverKey := fmt.Sprintf("sp/covers/%s.jpg", payload.TaskID)
-	_, _, _, err = s.minio.UploadFile(ctx, videoBucket, coverKey, "image/jpeg", f, st.Size())
-	if err != nil {
+	// 封面与视频同桶（统一媒体桶），DB 存公网直取地址。
+	if _, _, err = s.minio.PutObject(ctx, coverKey, "image/jpeg", f, st.Size()); err != nil {
 		s.log.Errorf("upload cover failed: %s", err.Error())
 		return nil
 	}
@@ -625,13 +625,18 @@ func extractCoverFFmpeg(videoPath, coverPath string) bool {
 	return err == nil && st.Size() > 0
 }
 
-// publicURLOfSP 拼对象公网地址（与基座 JoinObjectUrl 口径一致：下载域名/桶/键）。
+// publicURLOfSP 拼对象公网地址（统一媒体桶 + 对象键）。
+// Host 取值顺序：OSS_DOWNLOAD_HOST → OSS_PUBLIC_ENDPOINT（与 configs/oss.yaml
+// 的 download_host 同源）→ 本地缺省。
 func publicURLOfSP(objectKey string) string {
 	host := os.Getenv("OSS_DOWNLOAD_HOST")
 	if host == "" {
+		host = os.Getenv("OSS_PUBLIC_ENDPOINT")
+	}
+	if host == "" {
 		host = "http://127.0.0.1:9000"
 	}
-	return strings.TrimRight(host, "/") + "/" + videoBucket + "/" + objectKey
+	return strings.TrimRight(host, "/") + "/" + oss.DefaultBucketName() + "/" + objectKey
 }
 
 // ── 草稿 ──

@@ -7,6 +7,7 @@ import {
   CloseOutlined,
   DeleteOutlined,
   DownCircleOutlined,
+  EditOutlined,
   EyeOutlined,
   PlayCircleOutlined,
 } from '@ant-design/icons';
@@ -25,6 +26,7 @@ import { VIDEO_STATUS } from '@/api/types';
 import type { Video } from '@/api/types';
 import { formatDuration, getVideoStatusConfig, VIDEO_STATUS_LIST } from './constants';
 import VideoDetailDrawer from './VideoDetailDrawer';
+import VideoEditDrawer from './VideoEditDrawer';
 import ReasonModal from './ReasonModal';
 
 type PendingAction = 'reject' | 'offline';
@@ -47,6 +49,10 @@ const VideoList = () => {
   // 详情抽屉
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailRow, setDetailRow] = useState<Video | null>(null);
+
+  // 编辑抽屉
+  const [editOpen, setEditOpen] = useState(false);
+  const [editRow, setEditRow] = useState<Video | null>(null);
 
   // 必填原因弹窗（驳回/下架）
   const [reasonAction, setReasonAction] = useState<PendingAction | null>(null);
@@ -90,6 +96,11 @@ const VideoList = () => {
   const openDetail = (row: Video) => {
     setDetailRow(row);
     setDetailOpen(true);
+  };
+
+  const openEdit = (row: Video) => {
+    setEditRow(row);
+    setEditOpen(true);
   };
 
   const handleApprove = (row: Video) => {
@@ -232,13 +243,16 @@ const VideoList = () => {
     {
       title: t('action'),
       valueType: 'option',
-      width: 200,
+      width: 260,
       fixed: 'right',
       render: (_, record) => {
         const status = record.status;
         const actions = [
           <a key="detail" onClick={() => openDetail(record)}>
             <EyeOutlined /> {t('detail')}
+          </a>,
+          <a key="edit" onClick={() => openEdit(record)}>
+            <EditOutlined /> {t('edit')}
           </a>,
         ];
         // 审核中 → 通过 / 驳回
@@ -451,6 +465,17 @@ const VideoList = () => {
             </>
           )
         }
+      />
+
+      {/* 编辑抽屉：标题/简介/封面/标签，成功后刷新列表与详情 */}
+      <VideoEditDrawer
+        open={editOpen}
+        data={editRow}
+        onClose={() => {
+          setEditOpen(false);
+          setEditRow(null);
+        }}
+        onSuccess={refresh}
       />
 
       {/* 驳回 / 下架：必填原因 */}

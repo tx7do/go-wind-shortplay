@@ -185,7 +185,7 @@ var DefaultPermissions = []*permissionV1.Permission{
 		Id:          trans.Ptr(uint32(7)),
 		GroupId:     trans.Ptr(uint32(1)),
 		Name:        trans.Ptr("视频管理"),
-		Description: trans.Ptr("短视频审核/下架/删除（/admin/v1/videos*）"),
+		Description: trans.Ptr("短视频审核/下架/删除/编辑（/admin/v1/videos*，含 UPDATE /admin/v1/videos/{id}）"),
 		Code:        trans.Ptr(BizVideoManagePermissionCode),
 		Status:      trans.Ptr(permissionV1.Permission_ON),
 		MenuIds:     []uint32{70},

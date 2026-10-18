@@ -1,15 +1,17 @@
 # REST API 契约（前端对接）
 
-两个网关均由 proto 定义生成，本文是人工可读摘要。字段为 camelCase JSON。完整定义以 `backend/api/protos/` 为准；Swagger：`:7600/docs/`、`:7700/docs/`。
+两个网关均由 proto 定义生成，本文是人工可读摘要。字段为 camelCase JSON。完整定义以 `backend/api/protos/` 为准；OpenAPI 资产经 `make openapi` 生成在各服务 `assets/openapi.yaml`。各服务 configs 的 `server.rest.enable_swagger` **缺省 false**（`:7600/docs/`、`:7700/docs/` 返回 404），需要 Swagger UI 时在对应 `configs/server.yaml` 打开。
 
 ## 约定
 
 - **Base URL**：App 端 `http://<host>:7700/app/v1`；Admin 端 `http://<host>:7600/admin/v1`
-- **鉴权**：`Authorization: Bearer <accessToken>`；游客仅白名单接口（Feed/详情/搜索/主页/评论列表）
+- **鉴权**：`Authorization: Bearer <accessToken>`；游客仅白名单接口（登录/注册/刷新、Feed/详情/搜索/标签聚合、主页资料/统计/作品、评论列表与楼中楼、互动状态查询、标签列表、UBA 上报、媒体读取）
 - **错误响应**（HTTP 状态码 + body）：`{"code":404,"reason":"VIDEO_NOT_FOUND","message":"video not found","metadata":{}}`；reason 枚举见各 `*_error.proto`
 - **分页参数**：`page`（从 1 起）+ `pageSize`（缺省 10，上限 50）；部分新接口用 `pageNum/pageSize`（以下逐条标注）；分页响应含 `total`
 - **令牌**：登录/注册返回 `authenticator{accessToken, refreshToken, expiresIn, tokenType:"Bearer"}` + `user`；刷新 `POST /app/v1/auth/refresh {refreshToken}`。access token（JWT HS256）claims：`sub`=用户名、`uid`=用户ID、`tid`=租户ID、`roc`=角色 code 数组、`jti`=令牌ID（登出/刷新即轮换绑定键，旧 access 立即失效）
-- **登录密码传输加密**：`password` 字段须为 `base64(AES-CBC(明文, key=iv=<AES_KEY>))`；dev 缺省 key 见 `backend/.env.example`，与前端 `VITE_AES_KEY` 同源，生产必须更换
+- **登录密码传输加密**：`password` 字段须为 `base64(AES-CBC(明文, key=iv=<AES_KEY>))`（PKCS7）；dev 缺省 key 见 `backend/.env.example`，与前端 `VITE_AES_KEY` 同源，生产必须更换
+- **令牌按端隔离**：admin / app 网关各以自己的 ClientType（admin/app）签发与校验令牌，一端签发的 accessToken 在另一端返回 401
+- **管理端登录**：`POST /admin/v1/login` 强制验证码——先 `GET /admin/v1/captcha`（6 位大写字母+数字，单次有效），答案经 `X-Captcha-Id` / `X-Captcha-Value` 请求头携带；响应为扁平下划线风格 `{token_type:"bearer", access_token, expires_in:"5400", refresh_expires_in:"43200"}`（**无 refresh_token 字段**，刷新凭 HttpOnly Cookie 走 `POST /refresh-token`）
 
 ## App 端（:7700 /app/v1）
 
@@ -17,24 +19,24 @@
 | 方法 | 路径 | 说明 |
 |---|---|---|
 | POST | `/auth/login` | `{grantType:"password", username, password(AES 密文)}` → **`{authenticator:{tokenType:"bearer", accessToken, refreshToken, expiresIn:900}, user:{id, username, nickname, avatarUrl}}`**（无需验证码；401 用户名密码错误） |
-| POST | `/auth/register` | `{username, password(AES 密文), nickname}` → 同上包装（成功即登录；409 USERNAME_TAKEN；开放注册开关由 `/sysconf.registerEnabled` 决定） |
+| POST | `/auth/register` | `{username, password(AES 密文), nickname}` → 同上包装（成功即登录；409 USERNAME_TAKEN；开放注册开关由 `/sysconf.registerEnabled` 决定；租户由服务端定为缺省业务租户。注意：用户名唯一约束是**租户内唯一**（`(tenant_id, username)` 索引），跨租户同名可注册——平台租户的 `admin` 挡不住 C 端再注册同名，见 backend/AGENTS.md） |
 | POST | `/auth/refresh` | `{refreshToken}`（无 bearer）→ 同上包装；旧 refreshToken 轮换失效 |
 | POST | `/auth/logout` | 需登录，吊销当前会话 |
 
-旧契约面（基座前形状，仍可用）：`POST /login`（同 auth/login）、`POST /refresh-token`、`POST /logout`；响应为扁平 `LoginResponse`（access_token/refresh_token 下划线风格）。**Flutter 走 `/auth/*`**。
+旧契约面（基座原生形状，实测 2026-10-18）：`POST /login`（同 auth/login，免验证码，响应键 `token_type/access_token/expires_in/refresh_token/refresh_expires_in`，int64 为字符串）、`POST /refresh-token`、`POST /logout`。**Flutter 走 `/auth/*`**。
 
 图片直传（需登录，app 端 token）：`POST /uploads/image`，body=图片原始字节（Content-Type: image/jpeg|png|webp|gif，≤2MB）→ `{"url":"http://<minio>/images/<hash>.png"}`（头像等通用能力，非分片上传）。
 
 ### Feed / 视频
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/feed?tag=&pageNum=&pageSize=` | 游客可访问；`items[]{video, reason:FOLLOW/HOT/LATEST}` + `hasMore`；登录态自动已看去重 |
+| GET | `/feed?tag=&pageNum=&pageSize=` | 游客可访问；`items[]{video, reason:"FEED_REASON_FOLLOW"/"FEED_REASON_HOT"/"FEED_REASON_LATEST"}` + `hasMore`；登录态自动已看去重 |
 | GET | `/videos/{videoId}` | 详情：`{video, author, authorStats, viewerState{liked,collected,following}}` |
 | GET | `/search/videos?keyword=&pageNum=` | 标题模糊 + 标签精确 |
 | GET | `/tags/{tag}/videos?pageNum=` | 标签聚合 |
 | GET | `/tags?page=&pageSize=` | 标签列表（发布选择/搜索联想） |
 
-`video` 对象：`{id,title,description,coverUrl,videoUrl,duration,width,height,status:1草稿/2审核中/3已发布/4驳回/5下架,authorId,tags[],likeCount,collectCount,commentCount,viewCount,rejectReason,publishedAt,createdAt}`
+`video` 对象：`{id,title,description,coverUrl,videoUrl,duration,width,height,status:"VIDEO_STATUS_DRAFT"草稿/"VIDEO_STATUS_REVIEWING"审核中/"VIDEO_STATUS_PUBLISHED"已发布/"VIDEO_STATUS_REJECTED"驳回/"VIDEO_STATUS_OFFLINE"下架,authorId,tags[],likeCount,collectCount,commentCount,viewCount,rejectReason,publishedAt,createdAt}`（status 为枚举字符串全名；计数 int64 为字符串；coverUrl 可能是服务端拼好的完整 URL，videoUrl 为对象键，客户端经 `MediaUrl.resolve()` 统一处理——完整 http(s) 地址原样返回）
 
 ### 创作发布（需登录）
 | 方法 | 路径 | 说明 |
@@ -52,10 +54,10 @@
 ### 互动（需登录，除批量状态查询）
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| POST | `/likes` | `{targetType:1视频/2评论,targetId}` → `{liked,likeCount}`（幂等） |
+| POST | `/likes` | `{targetType:"TARGET_TYPE_VIDEO"视频/"TARGET_TYPE_COMMENT"评论,targetId}` → `{liked,likeCount}`（幂等） |
 | DELETE | `/likes/{targetType}/{targetId}` | 取消点赞 |
 | POST·DELETE | `/videos/{videoId}/collect` | 收藏/取消 → `{collected,collectCount}` |
-| POST | `/interactions/status` | `{videoIds[]}` → `statuses{[id]:{liked,collected}}`（游客全 false） |
+| POST | `/interactions/status` | `{videoIds[]}` → `statuses{[id]:{liked,collected}}`（游客返回空 `statuses:{}`；登录态无互动记录的视频同样下发全 false 条目） |
 | GET | `/collects?page=` | 我的收藏 |
 | POST·DELETE | `/users/{userId}/follow` | 关注/取关 → `{following}`；409 CANNOT_FOLLOW_SELF |
 | GET | `/following?page=` / `/followers?page=` | `{items:[{user,followedAt}],total}` |
@@ -76,12 +78,12 @@
 | GET | `/users/{id}` / `/users/{id}/stats` | 主页资料 / `{videoCount,followerCount,followingCount,likeReceivedCount}`（游客可访问） |
 | PUT | `/profile` | `{nickname?,avatarUrl?,bio?}`（id 取令牌） |
 | GET | `/users/{id}/videos?pageNum=` | 作品列表；本人含审核中/驳回/下架，他人仅已发布 |
-| POST | `/notifications/list` | `{page?, pageSize?, unreadOnly?}` → 基座收件箱 `{items:[{id,messageId,status:UNREAD/READ,readAt,title,content,tenantId,createdAt,updatedAt}],total}`（基座 internal_message 承载；业务跳转标记以 `sp-biz:{videoId}` 尾缀附在 content，客户端解析后剔除） |
+| POST | `/notifications/list` | `{page?, pageSize?, unreadOnly?}` → 基座收件箱 `{items:[{id,messageId,status:UNREAD/READ,readAt,title,content,tenantId,createdAt,updatedAt}],total}`（基座 internal_message 承载；业务跳转标记以独立尾行 `sp-biz:{"videoId":<id>}` 附在 content 末尾，客户端解析后剔除） |
 | POST | `/notifications/read` | `{recipientIds[]}` 标记已读 |
 | POST | `/notifications/read-all` | 全部已读 |
 | GET | `/notifications/unread-count` | `{"count":"3"}`（int64 字符串） |
-| POST | `/reports` | `{targetType:1视频/2评论/3用户,targetId,reason,description?}`；409 DUPLICATE_REPORT |
-| POST | `/uba/events` | `{events:[{eventType:1播放/2心跳/3完播/4划走/5赞/6藏/7评/8关注,videoId,durationMs,watchPercent,extra?,occurredAt?}]}`（游客可上报，尽力而为） |
+| POST | `/reports` | `{targetType:"REPORT_TARGET_TYPE_VIDEO"视频/"REPORT_TARGET_TYPE_COMMENT"评论/"REPORT_TARGET_TYPE_USER"用户,targetId,reason,description?}`；409 DUPLICATE_REPORT |
+| POST | `/uba/events` | `{events:[{eventType:"EVENT_TYPE_VIDEO_PLAY"播放/"EVENT_TYPE_VIDEO_HEARTBEAT"心跳/"EVENT_TYPE_VIDEO_COMPLETE"完播/"EVENT_TYPE_VIDEO_SWIPE_AWAY"划走/"EVENT_TYPE_VIDEO_LIKE"赞/"EVENT_TYPE_VIDEO_COLLECT"藏/"EVENT_TYPE_COMMENT_CREATE"评/"EVENT_TYPE_FOLLOW_AUTHOR"关注,videoId,durationMs,watchPercent,extra?,occurredAt?}]}`（游客可上报，尽力而为） |
 
 ### 分享 H5
 `GET /s/{videoId}`（无 /app/v1 前缀）→ 内联 HTML 预览页（OG meta + video 标签）。
@@ -92,7 +94,8 @@
 |---|---|---|
 | POST | `/login` / `/logout` | 管理员登录 |
 | GET | `/videos?page=&pageSize=` / GET `/videos/{id}` | 视频列表（支持 `?query=` 关键字）/详情 |
-| PUT | `/videos/{id}/status` | `{status:2重审/3通过/4驳回/5下架, reason?}`（驳回/下架必填 reason） |
+| PUT | `/videos/{id}` | 编辑视频 `{title?,description?,coverUrl?,tags[]}`（管理端编辑） |
+| PUT | `/videos/{id}/status` | `{status, reason?}`：status 传枚举全名 `VIDEO_STATUS_REVIEWING`重审/`VIDEO_STATUS_PUBLISHED`通过/`VIDEO_STATUS_REJECTED`驳回/`VIDEO_STATUS_OFFLINE`下架（驳回/下架必填 reason） |
 | DELETE | `/videos/{id}` | 删除 |
 | GET | `/comments?page=` / DELETE `/comments/{id}` | 评论管理 |
 | GET | `/reports?page=&pageSize=&filter=1待处理/2已通过/3已驳回` / GET `/reports/{id}` | 举报工单 |
@@ -146,8 +149,9 @@
 ### 导航 routes / 聚合
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/routes` | **当前用户**可见前端路由树（按角色 authority 过滤，BUTTON 不下发）：`{items:[{path,name,component,children[],meta:{title,icon,order,authority[]}}]}`（前端动态注册路由源） |
-| GET | `/initial-context` | 登录后首屏聚合（当前版本空体，预留基座扩展点） |
+| GET | `/routes` | **当前用户**可见前端路由树（按角色 authority 过滤，BUTTON 不下发）：`{items:[{path,name,component,children[],meta:{title,icon,order,authority[]}}]}`（基座原生动态路由契约） |
+| GET | `/navigation` | **shortplay 自定义动态菜单契约**（本仓 admin 前端实际消费的数据源）：当前用户菜单树 `{items:[{id,name,path,icon,sort,type:CATALOG/MENU,visible,component?,children[]}]}`，手工路由 + handler 内显式验 Bearer |
+| GET | `/initial-context` | 登录后首屏聚合（基座预留扩展点；core 当前未实现，调用返回 502 Unimplemented，前端勿依赖） |
 | GET | `/me` | 当前用户全量：`{id,tenantId,orgUnitIds[],orgUnitNames[],positionIds[],positionNames[],roleIds[],roles:[角色code],roleNames[],username,nickname,realname,email,mobile,gender,address,region,status,createdAt,updatedAt}` |
 | PUT | `/me` · POST `/me/password` `{oldPassword,newPassword}` · POST `/me/contact` `/me/contact/verify` | 个人资料/改密/绑定联系方式 |
 | POST | `/refresh-token` | 会话续期：HttpOnly 刷新 Cookie + uid/jti 绑定键轮换（80% 生命周期内前端静默续期；无 token 凭 Cookie 恢复会话） |
@@ -171,7 +175,7 @@
 |---|---|---|
 | POST | `/uploads/image` | 图片上传：body=图片原始字节（Content-Type: image/jpeg|png|webp|gif，≤2MB）→ `{url}`（MinIO 公网地址；需登录+接口权限）。App 端同款：`POST :7700/app/v1/uploads/image`（app 端 token） |
 | GET | `/videos?authorId=` | 视频列表新增按作者过滤（用户管理"查看作品"用） |
-| GET | `/dashboard/trends?days=7`（1-30，缺省 7） | 近 N 日趋势：`{items:[{date:"2026-10-18",published:0,plays:0,likes:0}]}`（published 按视频 published_at 落日统计；plays/likes 按 uba_events 当日事件计数：VIDEO_PLAY/VIDEO_LIKE） |
+| GET | `/dashboard/trends?days=7`（1-30，缺省 7） | 近 N 日趋势：`{items:[{date:"2026-10-18",published:"3",plays:"2",likes:"1"}]}`（数值均为 int64 字符串；published 按视频 published_at 落日统计；plays/likes 按 uba_events 当日事件计数：EVENT_TYPE_VIDEO_PLAY/EVENT_TYPE_VIDEO_LIKE） |
 
 ---
 
@@ -181,9 +185,9 @@
 
 ### 兼容性保持
 - App/Admin 全部业务路由、消息形状、枚举名、错误 reason 与旧版一致；`/app/v1/uploads/{taskId}/chunks/{i}` 仍为 **raw octet-stream**（手工路由）。
-- 管理端新增/接管路由：`GET /admin/v1/routes`（动态菜单，形状见「Admin 端 RBAC」）、`GET /admin/v1/dashboard/trends`、`POST /admin/v1/uploads/image`、用户管理（基座 identity 域承载，形状 = 旧 AppUser 契约）、评论管理（interaction 域承载）。
+- 管理端新增/接管路由：动态菜单双契约并存——`GET /admin/v1/navigation`（shortplay 自定义形状，**admin 前端实际消费**）与 `GET /admin/v1/routes`（基座原生，形状见「Admin 端 RBAC」）、`GET /admin/v1/dashboard/trends`、`POST /admin/v1/uploads/image`、用户管理（基座 identity 域承载，形状 = 旧 AppUser 契约）、评论管理（comment/interaction 域承载）。
 
 ### 已知差异（前端注意）
 - **App 消息中心已接基座站内信**：`/app/v1/notifications/list|read|read-all|unread-count`（形状见「用户主页 / 通知 / 举报 / 埋点」节）；旧 notify 域的 `sender/videoId/commentId` 结构化字段不再下发，业务跳转改由 content 尾缀 `sp-biz:{videoId}` 标记承载。
-- 管理端角色/菜单/权限点页面走基座 RBAC 契约（形状与旧版「RBAC 扩展」节不同，见重写后的「Admin 端 RBAC」节；动态菜单端点为 `GET /admin/v1/routes`，旧 `/navigation` 已不存在）。
+- 管理端角色/菜单/权限点页面走基座 RBAC 契约（形状与旧版「RBAC 扩展」节不同，见重写后的「Admin 端 RBAC」节；admin 前端动态菜单数据源为 `GET /admin/v1/navigation`，基座原生 `/routes` 同时保留）。
 - `GET /admin/v1/users` 的 `query` 按昵称模糊、`filter` 按状态（1禁用/2正常）；视频列表 `query`=标题模糊、`filter`=状态（1草稿/2审核中/3已发布/4驳回/5下架）、支持 `authorId=`；举报列表 `filter`=工单状态（1待处理/2已通过/3已驳回）。

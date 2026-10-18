@@ -28,10 +28,11 @@ var File_admin_service_v1_i_video_proto protoreflect.FileDescriptor
 
 const file_admin_service_v1_i_video_proto_rawDesc = "" +
 	"\n" +
-	"\x1eadmin/service/v1/i_video.proto\x12\x10admin.service.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1epagination/v1/pagination.proto\x1a\x1cvideo/service/v1/video.proto2\xb7\x03\n" +
+	"\x1eadmin/service/v1/i_video.proto\x12\x10admin.service.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1epagination/v1/pagination.proto\x1a\x1cvideo/service/v1/video.proto2\xa2\x04\n" +
 	"\fVideoService\x12`\n" +
 	"\x04List\x12\x19.pagination.PagingRequest\x1a#.video.service.v1.ListVideoResponse\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/admin/v1/videos\x12`\n" +
-	"\x03Get\x12!.video.service.v1.GetVideoRequest\x1a\x17.video.service.v1.Video\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/admin/v1/videos/{id}\x12|\n" +
+	"\x03Get\x12!.video.service.v1.GetVideoRequest\x1a\x17.video.service.v1.Video\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/admin/v1/videos/{id}\x12i\n" +
+	"\x06Update\x12$.video.service.v1.UpdateVideoRequest\x1a\x17.video.service.v1.Video\" \x82\xd3\xe4\x93\x02\x1a:\x01*\x1a\x15/admin/v1/videos/{id}\x12|\n" +
 	"\fChangeStatus\x12*.video.service.v1.ChangeVideoStatusRequest\x1a\x17.video.service.v1.Video\"'\x82\xd3\xe4\x93\x02!:\x01*\x1a\x1c/admin/v1/videos/{id}/status\x12e\n" +
 	"\x06Delete\x12$.video.service.v1.DeleteVideoRequest\x1a\x16.google.protobuf.Empty\"\x1d\x82\xd3\xe4\x93\x02\x17*\x15/admin/v1/videos/{id}B\xbc\x01\n" +
 	"\x14com.admin.service.v1B\vIVideoProtoP\x01Z5go-wind-shortplay/api/gen/go/admin/service/v1;adminpb\xa2\x02\x03ASX\xaa\x02\x10Admin.Service.V1\xca\x02\x10Admin\\Service\\V1\xe2\x02\x1cAdmin\\Service\\V1\\GPBMetadata\xea\x02\x12Admin::Service::V1b\x06proto3"
@@ -39,23 +40,26 @@ const file_admin_service_v1_i_video_proto_rawDesc = "" +
 var file_admin_service_v1_i_video_proto_goTypes = []any{
 	(*v1.PagingRequest)(nil),             // 0: pagination.PagingRequest
 	(*v11.GetVideoRequest)(nil),          // 1: video.service.v1.GetVideoRequest
-	(*v11.ChangeVideoStatusRequest)(nil), // 2: video.service.v1.ChangeVideoStatusRequest
-	(*v11.DeleteVideoRequest)(nil),       // 3: video.service.v1.DeleteVideoRequest
-	(*v11.ListVideoResponse)(nil),        // 4: video.service.v1.ListVideoResponse
-	(*v11.Video)(nil),                    // 5: video.service.v1.Video
-	(*emptypb.Empty)(nil),                // 6: google.protobuf.Empty
+	(*v11.UpdateVideoRequest)(nil),       // 2: video.service.v1.UpdateVideoRequest
+	(*v11.ChangeVideoStatusRequest)(nil), // 3: video.service.v1.ChangeVideoStatusRequest
+	(*v11.DeleteVideoRequest)(nil),       // 4: video.service.v1.DeleteVideoRequest
+	(*v11.ListVideoResponse)(nil),        // 5: video.service.v1.ListVideoResponse
+	(*v11.Video)(nil),                    // 6: video.service.v1.Video
+	(*emptypb.Empty)(nil),                // 7: google.protobuf.Empty
 }
 var file_admin_service_v1_i_video_proto_depIdxs = []int32{
 	0, // 0: admin.service.v1.VideoService.List:input_type -> pagination.PagingRequest
 	1, // 1: admin.service.v1.VideoService.Get:input_type -> video.service.v1.GetVideoRequest
-	2, // 2: admin.service.v1.VideoService.ChangeStatus:input_type -> video.service.v1.ChangeVideoStatusRequest
-	3, // 3: admin.service.v1.VideoService.Delete:input_type -> video.service.v1.DeleteVideoRequest
-	4, // 4: admin.service.v1.VideoService.List:output_type -> video.service.v1.ListVideoResponse
-	5, // 5: admin.service.v1.VideoService.Get:output_type -> video.service.v1.Video
-	5, // 6: admin.service.v1.VideoService.ChangeStatus:output_type -> video.service.v1.Video
-	6, // 7: admin.service.v1.VideoService.Delete:output_type -> google.protobuf.Empty
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	2, // 2: admin.service.v1.VideoService.Update:input_type -> video.service.v1.UpdateVideoRequest
+	3, // 3: admin.service.v1.VideoService.ChangeStatus:input_type -> video.service.v1.ChangeVideoStatusRequest
+	4, // 4: admin.service.v1.VideoService.Delete:input_type -> video.service.v1.DeleteVideoRequest
+	5, // 5: admin.service.v1.VideoService.List:output_type -> video.service.v1.ListVideoResponse
+	6, // 6: admin.service.v1.VideoService.Get:output_type -> video.service.v1.Video
+	6, // 7: admin.service.v1.VideoService.Update:output_type -> video.service.v1.Video
+	6, // 8: admin.service.v1.VideoService.ChangeStatus:output_type -> video.service.v1.Video
+	7, // 9: admin.service.v1.VideoService.Delete:output_type -> google.protobuf.Empty
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name

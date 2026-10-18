@@ -7,7 +7,7 @@ import "google/protobuf/empty.proto";
 import "pagination/v1/pagination.proto";
 import "video/service/v1/video.proto";
 
-// 视频管理服务（后台：列表 / 详情 / 审核 / 下架 / 删除）
+// 视频管理服务（后台：列表 / 详情 / 编辑 / 审核 / 下架 / 删除）
 service VideoService {
   // 视频列表（按状态 / 作者过滤）
   rpc List (pagination.PagingRequest) returns (video.service.v1.ListVideoResponse) {
@@ -20,6 +20,14 @@ service VideoService {
   rpc Get (video.service.v1.GetVideoRequest) returns (video.service.v1.Video) {
     option (google.api.http) = {
       get: "/admin/v1/videos/{id}"
+    };
+  }
+
+  // 编辑视频（标题 / 简介 / 封面 / 标签，复用 video 域 UpdateVideoRequest）
+  rpc Update (video.service.v1.UpdateVideoRequest) returns (video.service.v1.Video) {
+    option (google.api.http) = {
+      put: "/admin/v1/videos/{id}"
+      body: "*"
     };
   }
 

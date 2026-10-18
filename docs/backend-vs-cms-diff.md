@@ -1,5 +1,9 @@
 # 后端机器比对取证报告：go-wind-shortplay vs go-wind-cms（基座）
 
+> **⚠️ 历史存档（2026-10-18）——本报告描述的是"基座重建之前"的旧实现。**
+> 报告取证时的 backend 是"按基座规约重建"的第一版代码（提交 `e2586a0` 全量代码一版）；随后在提交 `18691a9` 中，backend 已整体重建为 go-wind-cms `backend/` **源码**的移植裁剪版（三端同批重建），并完成业务域移植与多轮收尾。因此本报告的结论（"手写源码逐字节相同数为 0""6/8 项基座数据层基建未引入"等）**只对旧实现成立，不再描述仓库现状**——例如报告中"我方无 user_credential / login_policy / membership / permission_group / OperatorMetadata / 审计日志、无 pkg/entgo"等条目，现版本均已随基座源码引入。
+> 现状与基座的差异以 [UPSTREAM.md](./UPSTREAM.md) §2.4 的偏离清单为准；本报告保留作为当时裁剪决策（哪些 CMS 域被裁、为何）的取证依据。
+
 | 项目 | 内容 |
 |---|---|
 | 被检对象（我方） | `D:\GoProject\go-wind-shortplay\backend`（module `go-wind-shortplay`，go 1.26.4） |

@@ -26,6 +26,7 @@ const OperationVideoServiceChangeStatus = "/admin.service.v1.VideoService/Change
 const OperationVideoServiceDelete = "/admin.service.v1.VideoService/Delete"
 const OperationVideoServiceGet = "/admin.service.v1.VideoService/Get"
 const OperationVideoServiceList = "/admin.service.v1.VideoService/List"
+const OperationVideoServiceUpdate = "/admin.service.v1.VideoService/Update"
 
 type VideoServiceHTTPServer interface {
 	// ChangeStatus 审核通过 / 驳回 / 强制下架
@@ -36,12 +37,15 @@ type VideoServiceHTTPServer interface {
 	Get(context.Context, *v11.GetVideoRequest) (*v11.Video, error)
 	// List 视频列表（按状态 / 作者过滤）
 	List(context.Context, *v1.PagingRequest) (*v11.ListVideoResponse, error)
+	// Update 编辑视频（标题 / 简介 / 封面 / 标签，复用 video 域 UpdateVideoRequest）
+	Update(context.Context, *v11.UpdateVideoRequest) (*v11.Video, error)
 }
 
 func RegisterVideoServiceHTTPServer(s *http.Server, srv VideoServiceHTTPServer) {
 	r := s.Route("/")
 	r.GET("/admin/v1/videos", _VideoService_List28_HTTP_Handler(srv))
 	r.GET("/admin/v1/videos/{id}", _VideoService_Get29_HTTP_Handler(srv))
+	r.PUT("/admin/v1/videos/{id}", _VideoService_Update21_HTTP_Handler(srv))
 	r.PUT("/admin/v1/videos/{id}/status", _VideoService_ChangeStatus0_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/videos/{id}", _VideoService_Delete21_HTTP_Handler(srv))
 }
@@ -77,6 +81,31 @@ func _VideoService_Get29_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.
 		http.SetOperation(ctx, OperationVideoServiceGet)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Get(ctx, req.(*v11.GetVideoRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v11.Video)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _VideoService_Update21_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v11.UpdateVideoRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationVideoServiceUpdate)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.Update(ctx, req.(*v11.UpdateVideoRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -143,6 +172,8 @@ type VideoServiceHTTPClient interface {
 	Get(ctx context.Context, req *v11.GetVideoRequest, opts ...http.CallOption) (rsp *v11.Video, err error)
 	// List 视频列表（按状态 / 作者过滤）
 	List(ctx context.Context, req *v1.PagingRequest, opts ...http.CallOption) (rsp *v11.ListVideoResponse, err error)
+	// Update 编辑视频（标题 / 简介 / 封面 / 标签，复用 video 域 UpdateVideoRequest）
+	Update(ctx context.Context, req *v11.UpdateVideoRequest, opts ...http.CallOption) (rsp *v11.Video, err error)
 }
 
 type VideoServiceHTTPClientImpl struct {
@@ -203,6 +234,20 @@ func (c *VideoServiceHTTPClientImpl) List(ctx context.Context, in *v1.PagingRequ
 	opts = append(opts, http.Operation(OperationVideoServiceList))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Update 编辑视频（标题 / 简介 / 封面 / 标签，复用 video 域 UpdateVideoRequest）
+func (c *VideoServiceHTTPClientImpl) Update(ctx context.Context, in *v11.UpdateVideoRequest, opts ...http.CallOption) (*v11.Video, error) {
+	var out v11.Video
+	pattern := "/admin/v1/videos/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationVideoServiceUpdate))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

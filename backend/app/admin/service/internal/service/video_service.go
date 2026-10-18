@@ -126,6 +126,12 @@ func (s *VideoService) Get(ctx context.Context, req *videoV1.GetVideoRequest) (*
 	return s.videoClient.GetVideo(ctx, req)
 }
 
+// Update 编辑视频（标题 / 简介 / 封面 / 标签）：
+// core UpdateVideo 内部按管理端 viewer 放行（spIsAdminCaller），BFF 只做转发。
+func (s *VideoService) Update(ctx context.Context, req *videoV1.UpdateVideoRequest) (*videoV1.Video, error) {
+	return s.videoClient.UpdateVideo(ctx, req)
+}
+
 func (s *VideoService) ChangeStatus(ctx context.Context, req *videoV1.ChangeVideoStatusRequest) (*videoV1.Video, error) {
 	return s.videoClient.ChangeVideoStatus(ctx, req)
 }
