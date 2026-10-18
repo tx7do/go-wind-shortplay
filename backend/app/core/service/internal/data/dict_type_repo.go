@@ -70,25 +70,10 @@ func (r *DictTypeRepo) init() {
 	r.mapper.AppendConverters(copierutil.NewTimeTimestamppbConverterPair())
 }
 
-func (r *DictTypeRepo) count(ctx context.Context, whereCond []func(s *sql.Selector)) (int, error) {
-	builder := r.entClient.Client().DictType.Query()
-	if len(whereCond) != 0 {
-		builder.Modify(whereCond...)
-	}
-
-	count, err := builder.Count(ctx)
-	if err != nil {
-		r.log.Errorf("query count failed: %s", err.Error())
-		return 0, dictV1.ErrorInternalServerError("query count failed")
-	}
-
-	return count, nil
-}
-
 func (r *DictTypeRepo) Count(ctx context.Context, req *paginationV1.PagingRequest) (int, error) {
 	builder := r.entClient.Client().DictType.Query()
 
-	whereSelectors, _, err := r.repository.BuildListSelectorWithPaging(builder, req)
+	whereSelectors, _, _ := r.repository.BuildListSelectorWithPaging(builder, req)
 	if len(whereSelectors) != 0 {
 		builder.Modify(whereSelectors...)
 	}

@@ -114,7 +114,7 @@ const UserProfile = () => {
     onError: (error: Error) => {
       // 旧密码错误：基座返回 400 BAD_REQUEST（message: invalid old password）
       const reason = extractReason(error);
-      const msgText = (error as any)?.message || '';
+      const msgText = error.message || '';
       if (reason === 'WRONG_PASSWORD' || msgText.includes('invalid old password')) {
         message.error(t('wrongOldPassword'));
       } else {

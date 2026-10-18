@@ -190,8 +190,11 @@ func (a *Authenticator) Authenticate(ctx context.Context, req *authenticationV1.
 		}, nil
 
 	case authenticationV1.TokenCategory_REFRESH:
-		var exist bool
-		if exist, _, err = a.userTokenCache.IsExistRefreshToken(ctx, req.GetClientType(), req.GetUserId(), req.GetToken()); !exist {
+		exist, _, cacheErr := a.userTokenCache.IsExistRefreshToken(ctx, req.GetClientType(), req.GetUserId(), req.GetToken())
+		if cacheErr != nil {
+			a.log.Errorf("check refresh token exist failed: %s", cacheErr.Error())
+		}
+		if !exist {
 			return &authenticationV1.ValidateTokenResponse{
 				IsValid: false,
 			}, authenticationV1.ErrorUnauthorized("refresh token not found for user")

@@ -91,7 +91,8 @@ func (r *PermissionApiRepo) AssignApis(
 	}()
 
 	if err = r.CleanNotExistApis(ctx, tx, permissionID, apiIDs); err != nil {
-
+		r.log.Errorf("clean not exist apis failed: %s", err.Error())
+		return err
 	}
 
 	return r.AssignApisWithTx(ctx, tx, permissionID, apiIDs)

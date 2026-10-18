@@ -457,7 +457,7 @@ func (s *TaskService) stopTask(t *taskV1.Task) error {
 		return taskV1.ErrorServiceUnavailable("task scheduler is not available")
 	}
 
-	if t.GetEnable() == false {
+	if !t.GetEnable() {
 		return errors.New("task is not enable")
 	}
 
@@ -531,7 +531,7 @@ func (s *TaskService) startTask(t *taskV1.Task) error {
 		return taskV1.ErrorServiceUnavailable("task scheduler is not available")
 	}
 
-	if t.GetEnable() == false {
+	if !t.GetEnable() {
 		return errors.New("task is not enable")
 	}
 

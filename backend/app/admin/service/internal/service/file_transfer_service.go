@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"io"
-	"net/http"
 	"path"
 	"strings"
 	"time"
@@ -22,7 +21,6 @@ import (
 	storageV1 "go-wind-shortplay/api/gen/go/storage/service/v1"
 
 	"go-wind-shortplay/pkg/middleware/auth"
-	"go-wind-shortplay/pkg/netutil"
 	"go-wind-shortplay/pkg/oss"
 )
 
@@ -220,41 +218,6 @@ func (s *FileTransferService) UploadFile(ctx context.Context, req *storageV1.Upl
 	}
 }
 
-// downloadFileFromURL 从指定的 URL 下载文件内容
-func (s *FileTransferService) downloadFileFromURL(ctx context.Context, downloadUrl string) (*storageV1.DownloadFileResponse, error) {
-	parsedURL, err := netutil.ValidateURL(downloadUrl)
-	if err != nil {
-		return nil, storageV1.ErrorDownloadFailed("%s", err.Error())
-	}
-
-	httpReq, err := http.NewRequestWithContext(ctx, "GET", parsedURL.String(), nil)
-	if err != nil {
-		return nil, storageV1.ErrorDownloadFailed("%s", err.Error())
-	}
-
-	client := netutil.SafeHTTPClient()
-	resp, err := client.Do(httpReq)
-	if err != nil {
-		return nil, storageV1.ErrorDownloadFailed("%s", err.Error())
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusPartialContent {
-		return nil, storageV1.ErrorDownloadFailed("unexpected status: %s", resp.Status)
-	}
-
-	fileData, err := io.ReadAll(netutil.LimitReader(resp.Body))
-	if err != nil {
-		return nil, storageV1.ErrorDownloadFailed("%s", err.Error())
-	}
-
-	return &storageV1.DownloadFileResponse{
-		Content: &storageV1.DownloadFileResponse_File{
-			File: fileData,
-		},
-	}, nil
-}
-
 // DownloadFile 下载文件
 func (s *FileTransferService) DownloadFile(ctx context.Context, req *storageV1.DownloadFileRequest) (*storageV1.DownloadFileResponse, error) {
 	// 下载须凭 fileId 走归属校验：StorageObject/DownloadUrl 两个 selector
@@ -432,7 +395,6 @@ func (s *FileTransferService) UploadMediaAsset(ctx context.Context, req *storage
 		return nil, err
 	}
 	fileHash := hex.EncodeToString(hasher.Sum(nil))
-
 
 	var file *storageV1.File
 	if file, err = s.recordFile(

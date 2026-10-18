@@ -362,19 +362,6 @@ func (r *UserTokenCache) set(ctx context.Context, key string, value string, expi
 	return nil
 }
 
-func (r *UserTokenCache) get(ctx context.Context, key string) string {
-	result, err := r.rdb.Get(ctx, key).Result()
-	if err != nil {
-		if errors.Is(err, redis.Nil) {
-			return ""
-		}
-
-		r.log.Errorf("get key[%s] failed: %v", key, err)
-		return ""
-	}
-	return result
-}
-
 // del 删除键
 func (r *UserTokenCache) del(ctx context.Context, key string) error {
 	if err := r.rdb.Del(ctx, key).Err(); err != nil {

@@ -13,7 +13,7 @@ import { fetchGenerateCaptcha } from '@/api/hooks/auth';
  */
 const CaptchaField: React.FC<{
   value?: string;
-  onChange?: (...event: any[]) => void;
+  onChange?: (...event: unknown[]) => void;
   placeholder?: string;
   imageEl?: React.ReactNode;
 }> = ({ value, onChange, placeholder, imageEl }) => (
@@ -95,11 +95,12 @@ const Login: React.FC = () => {
       );
 
       message.success(t('loginSuccess'));
-    } catch (error: any) {
+    } catch (error) {
       // 登录失败后刷新验证码（后端一次性消费，旧图必然失效）
       refreshCaptcha();
       // 弹出错误提示（与 CRUD 页面统一模式：优先用后端 message，兜底走 i18n）
-      message.error(error?.message || t('loginFailed'));
+      const msg = error instanceof Error ? error.message : '';
+      message.error(msg || t('loginFailed'));
     }
   };
 

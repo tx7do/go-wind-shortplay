@@ -334,7 +334,7 @@ func (s *InternalMessageService) StartNotifySubscriber(redisClient *redis.Client
 
 	go func() {
 		sub := redisClient.Subscribe(ctx, sseevent.RedisChannelNotify)
-		defer sub.Close()
+		defer func() { _ = sub.Close() }()
 		for {
 			select {
 			case <-ctx.Done():

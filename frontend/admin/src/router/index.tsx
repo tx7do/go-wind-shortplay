@@ -4,7 +4,7 @@ import { Navigate, RouterProvider } from 'react-router-dom';
 import { createAccessibleRouter } from '@/core/router/factory';
 import { AccessibleRoutesContext } from '@/core/router';
 import { useAuthStore } from '@/stores';
-import { useAuth } from '@/hooks/useAuth';
+import { getUserPermissionCodes } from '@/hooks/useAuth';
 import { getAccessStatic } from '@/core/access';
 import { usePreferencesStore } from '@/core/preferences/store';
 import { useI18n } from '@/core/i18n';
@@ -65,7 +65,8 @@ for (const [globPath, module] of Object.entries(rawPageModules)) {
       .replace(/\/index$/, ''); // "dashboard"
 
     const normalizedKey = `/${relativePath}`; // "/dashboard"
-    const Component = Candidate as ComponentType<any>;
+    // 页面 props 由后端路由数据动态注入，无静态形态可约束，收窄为索引签名
+    const Component = Candidate as ComponentType<Record<string, unknown>>;
     pageMap[normalizedKey] = Component;
     pageMap[`${normalizedKey}/index`] = Component; // "/dashboard/index"
     pageMap[`${normalizedKey}.tsx`] = Component; // "/dashboard.tsx"
@@ -229,8 +230,14 @@ export const allRoutes: AppRouteObject[] = [
   ...errorRoutes, // 错误路由放在最后
 ];
 
+// 路由器实例类型随 createAccessibleRouter 的返回签名走，避免手写 any
+type RouterBundle = {
+  router: Awaited<ReturnType<typeof createAccessibleRouter>>['router'];
+  routes: AppRouteObject[];
+};
+
 export const AppRouter = () => {
-  const [routerBundle, setRouterBundle] = useState<{ router: any; routes: AppRouteObject[] } | null>(null);
+  const [routerBundle, setRouterBundle] = useState<RouterBundle | null>(null);
   const [loading, setLoading] = useState(true);
 
   const { accessToken } = useAuthStore();
@@ -249,11 +256,11 @@ export const AppRouter = () => {
         // ========== 已认证时的初始化流程 ==========
         if (isAuthenticated) {
           try {
-            const auth = useAuth();
-
             // 校验本地身份完整（角色码来自登录响应，无权限服务可调）；
-            // 身份缺失=脏存储，forceLogout 后走未认证分支
-            await auth.getUserPermissionCodes();
+            // 身份缺失=脏存储，forceLogout 后走未认证分支。
+            // 用非 hook 版本 getUserPermissionCodes：useAuth() 名义上是 hook，
+            // 不能在 effect 内的普通异步函数里调用（rules-of-hooks）。
+            await getUserPermissionCodes();
           } catch (authErr) {
             console.warn('Auth initialization failed, will redirect to login:', authErr);
             useAuthStore.getState().forceLogout();

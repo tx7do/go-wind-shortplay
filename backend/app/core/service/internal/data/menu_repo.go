@@ -91,7 +91,7 @@ func (r *MenuRepo) count(ctx context.Context, whereCond []func(s *sql.Selector))
 func (r *MenuRepo) Count(ctx context.Context, req *paginationV1.PagingRequest) (int, error) {
 	builder := r.entClient.Client().Menu.Query()
 
-	whereSelectors, _, err := r.repository.BuildListSelectorWithPaging(builder, req)
+	whereSelectors, _, _ := r.repository.BuildListSelectorWithPaging(builder, req)
 	if len(whereSelectors) != 0 {
 		builder.Modify(whereSelectors...)
 	}
@@ -103,19 +103,6 @@ func (r *MenuRepo) Count(ctx context.Context, req *paginationV1.PagingRequest) (
 	}
 
 	return count, nil
-}
-
-func (r *MenuRepo) buildMenuTree(items []*permissionV1.Menu, parentId uint32) []*permissionV1.Menu {
-	var tree []*permissionV1.Menu
-	for _, item := range items {
-		if item.GetParentId() == parentId {
-			// 递归查找子节点
-			children := r.buildMenuTree(items, item.GetId())
-			item.Children = children
-			tree = append(tree, item)
-		}
-	}
-	return tree
 }
 
 func (r *MenuRepo) List(ctx context.Context, req *paginationV1.PagingRequest, treeTravel bool) (*permissionV1.ListMenuResponse, error) {

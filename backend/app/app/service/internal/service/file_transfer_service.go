@@ -2,8 +2,6 @@ package service
 
 import (
 	"context"
-	"io"
-	"net/http"
 	"path"
 	"strings"
 
@@ -18,7 +16,6 @@ import (
 	storageV1 "go-wind-shortplay/api/gen/go/storage/service/v1"
 
 	"go-wind-shortplay/pkg/middleware/auth"
-	"go-wind-shortplay/pkg/netutil"
 	"go-wind-shortplay/pkg/oss"
 )
 
@@ -208,41 +205,6 @@ func (s *FileTransferService) UploadFile(ctx context.Context, req *storageV1.Upl
 	default:
 		return nil, storageV1.ErrorUploadFailed("unknown upload source")
 	}
-}
-
-// downloadFileFromURL 从指定的 URL 下载文件内容
-func (s *FileTransferService) downloadFileFromURL(ctx context.Context, downloadContext string) (*storageV1.DownloadFileResponse, error) {
-	parsedURL, err := netutil.ValidateURL(downloadContext)
-	if err != nil {
-		return nil, storageV1.ErrorDownloadFailed("%s", err.Error())
-	}
-
-	httpReq, err := http.NewRequestWithContext(ctx, "GET", parsedURL.String(), nil)
-	if err != nil {
-		return nil, storageV1.ErrorDownloadFailed("%s", err.Error())
-	}
-
-	client := netutil.SafeHTTPClient()
-	resp, err := client.Do(httpReq)
-	if err != nil {
-		return nil, storageV1.ErrorDownloadFailed("%s", err.Error())
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusPartialContent {
-		return nil, storageV1.ErrorDownloadFailed("unexpected status: %s", resp.Status)
-	}
-
-	fileData, err := io.ReadAll(netutil.LimitReader(resp.Body))
-	if err != nil {
-		return nil, storageV1.ErrorDownloadFailed("%s", err.Error())
-	}
-
-	return &storageV1.DownloadFileResponse{
-		Content: &storageV1.DownloadFileResponse_File{
-			File: fileData,
-		},
-	}, nil
 }
 
 // DownloadFile 下载文件

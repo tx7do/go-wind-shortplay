@@ -72,8 +72,11 @@ export interface AuthState {
   $reset: () => void;
 }
 
+/** /me 原始 JSON 载荷（基座 i_user 响应，字段可缺省；索引签名宽松承接额外字段） */
+type MePayload = Partial<UserInfo> & Record<string, unknown>;
+
 /** /me（基座 i_user）→ 底座 BasicUserInfo（avatar 字段对齐 + 角色码透传） */
-function toUserInfo(me: Partial<UserInfo> & Record<string, any>): UserInfo {
+function toUserInfo(me: MePayload): UserInfo {
   return {
     id: me.id ?? 0,
     username: me.username ?? '',
@@ -153,9 +156,9 @@ export const useAuthStore = create<AuthState>()(
             }
             return resp.json();
           };
-          let me: Record<string, any> = {};
+          let me: MePayload = {};
           try {
-            me = (await fetchWithToken('me')) as Record<string, any>;
+            me = (await fetchWithToken('me')) as MePayload;
           } catch (error) {
             console.error('fetch /me failed after login:', error);
           }
@@ -187,8 +190,9 @@ export const useAuthStore = create<AuthState>()(
           if (onSuccess) {
             onSuccess();
           }
-        } catch (err: any) {
-          const errorMsg = err?.message || i18next.t('auth:loginFailed');
+        } catch (err) {
+          // 后端错误形态为 Error（axios/手动 throw），取 message；非 Error 抛出兜底 i18n
+          const errorMsg = (err instanceof Error && err.message) || i18next.t('auth:loginFailed');
           set({
             error: errorMsg,
             accessToken: null,

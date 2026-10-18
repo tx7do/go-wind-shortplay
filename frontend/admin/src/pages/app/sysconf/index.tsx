@@ -48,7 +48,8 @@ const SysConfPage = () => {
     },
   });
 
-  const handleSubmit = async (values: Record<string, any>) => {
+  // ProForm 表单原始值为宽松键值袋，消费处逐字段显式转换（String/Number/!!）
+  const handleSubmit = async (values: Record<string, unknown>) => {
     // 逗号分隔输入 → string[]。后端用文件名扩展名（".mp4"）与配置做 EqualFold
     // 等值比较，因此统一补齐前导点（"."），而非剥除。
     const types = String(values.allowedVideoTypesText ?? '')

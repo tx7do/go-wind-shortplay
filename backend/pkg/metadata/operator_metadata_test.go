@@ -15,12 +15,12 @@ import (
 func TestNewContext_FromContext_RoundTrip(t *testing.T) {
 	// 使用空的 OperatorMetadata 做回环测试
 	info := &authenticationV1.OperatorMetadata{}
-	b, err := EncodeOperatorMetadata(info)
+	b, _ := EncodeOperatorMetadata(info)
 	ctx2 := metadata.NewServerContext(context.Background(), metadata.Metadata{
 		mdOperatorKey: []string{b},
 	})
 
-	_, err = FromServerContext(ctx2)
+	_, err := FromServerContext(ctx2)
 	assert.Equal(t, err, ErrNoOperatorHeader)
 }
 
@@ -53,7 +53,7 @@ func TestNewContext_FromContext_InvalidData(t *testing.T) {
 		DataScope: identityV1.DataScope_ALL,
 		RoleIds:   []uint64{1},
 	}
-	b, err := EncodeOperatorMetadata(info)
+	b, _ := EncodeOperatorMetadata(info)
 	ctx2 := metadata.NewServerContext(context.Background(), metadata.Metadata{
 		mdOperatorKey: []string{b},
 	})

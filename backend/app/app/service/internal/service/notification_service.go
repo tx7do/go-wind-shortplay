@@ -87,27 +87,11 @@ func (s *NotificationService) MarkNotificationsRead(ctx context.Context, req *ap
 }
 
 // MarkAllNotificationsRead 全部标记为已读。
-// core 的 MarkNotificationAsRead 要求显式 recipientIds（空列表会被拒绝），
-// 故先拉全量未读收件记录 ID 再批量标记；两步都由 core 按调用者身份过滤。
+// core 的 MarkNotificationAsRead 约定 recipientIds 为空 = 调用者全部未读置已读，
+// 直接转发空列表即可，无需先拉未读 ID。
 func (s *NotificationService) MarkAllNotificationsRead(ctx context.Context, req *emptypb.Empty) (*emptypb.Empty, error) {
-	pageReq := withUnreadFilter()
-	pageReq.NoPaging = trans.Ptr(true) // 全量拉取未读收件记录 ID
-	list, err := s.messageRecipientServiceClient.ListUserInbox(ctx, pageReq)
+	_, err := s.messageRecipientServiceClient.MarkNotificationAsRead(ctx, &internalMessageV1.MarkNotificationAsReadRequest{})
 	if err != nil {
-		return nil, err
-	}
-
-	ids := make([]uint32, 0, len(list.GetItems()))
-	for _, item := range list.GetItems() {
-		ids = append(ids, item.GetId())
-	}
-	if len(ids) == 0 {
-		return &emptypb.Empty{}, nil
-	}
-
-	if _, err = s.messageRecipientServiceClient.MarkNotificationAsRead(ctx, &internalMessageV1.MarkNotificationAsReadRequest{
-		RecipientIds: ids,
-	}); err != nil {
 		return nil, err
 	}
 	return &emptypb.Empty{}, nil

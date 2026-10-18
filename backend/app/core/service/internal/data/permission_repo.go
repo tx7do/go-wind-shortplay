@@ -91,7 +91,7 @@ func (r *PermissionRepo) init() {
 func (r *PermissionRepo) Count(ctx context.Context, req *paginationV1.PagingRequest) (*permissionV1.CountPermissionResponse, error) {
 	builder := r.entClient.Client().Permission.Query()
 
-	whereSelectors, _, err := r.repository.BuildListSelectorWithPaging(builder, req)
+	whereSelectors, _, _ := r.repository.BuildListSelectorWithPaging(builder, req)
 	if len(whereSelectors) != 0 {
 		builder.Modify(whereSelectors...)
 	}

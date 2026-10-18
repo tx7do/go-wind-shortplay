@@ -10,7 +10,6 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 
 	"github.com/tx7do/go-crud/viewer"
-	appMetadata "go-wind-shortplay/pkg/metadata"
 	"go.opentelemetry.io/otel/trace"
 
 	authenticationV1 "go-wind-shortplay/api/gen/go/authentication/service/v1"
@@ -153,7 +152,7 @@ func InjectViewerForStream(ctx context.Context) context.Context {
 		traceID = spanContext.TraceID().String()
 	}
 
-	op, opErr := appMetadata.FromServerContext(ctx)
+	op, opErr := metadata.FromServerContext(ctx)
 	if opErr != nil || op == nil {
 		return viewer.WithContext(ctx, resolveAnonymousViewer(ctx, nil, traceID))
 	}

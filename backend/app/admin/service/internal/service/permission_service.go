@@ -267,16 +267,9 @@ func (s *PermissionService) SyncPermissions(ctx context.Context, req *emptypb.Em
 	})
 
 	for _, menu := range menus.Items {
-		var title string
-		//if menu.GetMeta() != nil && menu.GetMeta().GetTitle() != "" {
-		//	title = menu.GetMeta().GetTitle()
-		//} else {
-		//	title = menu.GetName()
-		//}
-		title = menu.GetName()
+		title := menu.GetName()
 
-		var permissionCode string
-		permissionCode = s.menuPermissionConverter.ConvertCode(menu.GetPath(), title, menu.GetType())
+		permissionCode := s.menuPermissionConverter.ConvertCode(menu.GetPath(), title, menu.GetType())
 		if permissionCode == "" {
 			continue
 		}

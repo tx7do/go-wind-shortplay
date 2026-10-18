@@ -90,19 +90,6 @@ func (r *PermissionGroupRepo) Count(ctx context.Context, whereCond []func(s *sql
 	return count, nil
 }
 
-func (r *PermissionGroupRepo) buildPermissionGroupTree(items []*permissionV1.PermissionGroup, parentId uint32) []*permissionV1.PermissionGroup {
-	var tree []*permissionV1.PermissionGroup
-	for _, item := range items {
-		if item.GetParentId() == parentId {
-			// 递归查找子节点
-			children := r.buildPermissionGroupTree(items, item.GetId())
-			item.Children = children
-			tree = append(tree, item)
-		}
-	}
-	return tree
-}
-
 func (r *PermissionGroupRepo) List(ctx context.Context, req *paginationV1.PagingRequest, treeTravel bool) (*permissionV1.ListPermissionGroupResponse, error) {
 	if req == nil {
 		return nil, permissionV1.ErrorBadRequest("invalid parameter")

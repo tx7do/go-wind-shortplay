@@ -684,11 +684,6 @@ func (r *MembershipRepo) ListMembershipRelationIDs(ctx context.Context, userID u
 	return
 }
 
-// createMembership 创建 Membership 记录
-func (r *MembershipRepo) createMembership(ctx context.Context, tx *ent.Tx, data *identityV1.Membership) (*ent.Membership, error) {
-	return r.upsertMembership(ctx, tx, data)
-}
-
 // upsertMembership 更新或插入 Membership 记录
 func (r *MembershipRepo) upsertMembership(ctx context.Context, tx *ent.Tx, data *identityV1.Membership) (*ent.Membership, error) {
 	now := time.Now()

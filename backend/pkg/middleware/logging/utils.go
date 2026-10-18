@@ -5,8 +5,6 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"io"
 	"math/big"
@@ -185,35 +183,6 @@ func getStatusCode(err error) (uint32, string, bool) {
 	}
 }
 
-// printUserAgent 打印User-Agent信息
-func printUserAgent(strUserAgent string) {
-	ua := useragent.Parse(strUserAgent)
-
-	fmt.Println("User-Agent", ua)
-	fmt.Println()
-	fmt.Println(ua.String)
-	fmt.Println(strings.Repeat("=", len(ua.String)))
-	fmt.Println("Name:", ua.Name, "v", ua.Version)
-	fmt.Println("OS:", ua.OS, "v", ua.OSVersion)
-	fmt.Println("Device:", ua.Device)
-
-	if ua.Mobile {
-		fmt.Println("(Mobile)")
-	}
-	if ua.Tablet {
-		fmt.Println("(Tablet)")
-	}
-	if ua.Desktop {
-		fmt.Println("(Desktop)")
-	}
-	if ua.Bot {
-		fmt.Println("(Bot)")
-	}
-	if ua.URL != "" {
-		fmt.Println(ua.URL)
-	}
-}
-
 var reUsername = regexp.MustCompile(`"username"\s*:\s*"([^"]+)"`)
 
 // parseUsernameFromBytes 从请求体中解析用户名
@@ -262,12 +231,6 @@ func clientIpToLocation(ip string) *geoip.Result {
 		return nil
 	}
 	return &res
-}
-
-// TokenHash 返回 token 的 SHA-256 十六进制摘要，用于审计存储（避免存明文）
-func tokenHash(token string) string {
-	sum := sha256.Sum256([]byte(token))
-	return hex.EncodeToString(sum[:])
 }
 
 // generateECDSAKeyPair 生成 ECDSA 密钥对（secp256r1 曲线）

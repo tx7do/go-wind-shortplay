@@ -94,20 +94,6 @@ func (r *MediaAssetRepo) IsExist(ctx context.Context, id uint32) (bool, error) {
 	return exist, nil
 }
 
-func (r *MediaAssetRepo) count(ctx context.Context, whereCond []func(s *sql.Selector)) (int, error) {
-	builder := r.entClient.Client().MediaAsset.Query()
-	if len(whereCond) != 0 {
-		builder.Modify(whereCond...)
-	}
-
-	count, err := builder.Count(ctx)
-	if err != nil {
-		r.log.Errorf("query count failed: %s", err.Error())
-	}
-
-	return count, err
-}
-
 func (r *MediaAssetRepo) List(ctx context.Context, req *paginationV1.PagingRequest) (*mediaV1.ListMediaAssetResponse, error) {
 	if req == nil {
 		return nil, mediaV1.ErrorBadRequest("invalid parameter")

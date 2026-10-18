@@ -87,7 +87,7 @@ func (r *LanguageRepo) HasAny(ctx context.Context) (bool, error) {
 func (r *LanguageRepo) Count(ctx context.Context, req *paginationV1.PagingRequest) (int, error) {
 	builder := r.entClient.Client().Language.Query()
 
-	whereSelectors, _, err := r.repository.BuildListSelectorWithPaging(builder, req)
+	whereSelectors, _, _ := r.repository.BuildListSelectorWithPaging(builder, req)
 	if len(whereSelectors) != 0 {
 		builder.Modify(whereSelectors...)
 	}

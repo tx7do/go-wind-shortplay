@@ -74,21 +74,18 @@ func (s *InternalMessageRecipientService) Create(ctx context.Context, req *inter
 }
 
 func (s *InternalMessageRecipientService) DeleteNotificationFromInbox(ctx context.Context, req *internalMessageV1.DeleteNotificationFromInboxRequest) (*emptypb.Empty, error) {
-	var err error
-	err = s.internalMessageRecipientRepo.DeleteNotificationFromInbox(ctx, req)
+	err := s.internalMessageRecipientRepo.DeleteNotificationFromInbox(ctx, req)
 	return &emptypb.Empty{}, err
 }
 
 // MarkNotificationAsRead 将通知标记为已读
 func (s *InternalMessageRecipientService) MarkNotificationAsRead(ctx context.Context, req *internalMessageV1.MarkNotificationAsReadRequest) (*emptypb.Empty, error) {
-	var err error
-	err = s.internalMessageRecipientRepo.MarkNotificationAsRead(ctx, req)
+	err := s.internalMessageRecipientRepo.MarkNotificationAsRead(ctx, req)
 	return &emptypb.Empty{}, err
 }
 
 // MarkNotificationsStatus 标记特定用户的某些或所有通知的状态
 func (s *InternalMessageRecipientService) MarkNotificationsStatus(ctx context.Context, req *internalMessageV1.MarkNotificationsStatusRequest) (*emptypb.Empty, error) {
-	var err error
-	err = s.internalMessageRecipientRepo.MarkNotificationsStatus(ctx, req)
+	err := s.internalMessageRecipientRepo.MarkNotificationsStatus(ctx, req)
 	return &emptypb.Empty{}, err
 }

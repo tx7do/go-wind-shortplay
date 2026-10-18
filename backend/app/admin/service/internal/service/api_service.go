@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"sort"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-kratos/kratos/v2/log"
@@ -185,49 +184,6 @@ func (s *ApiService) syncWithOpenAPI(ctx context.Context) error {
 	}); err != nil {
 		// 不吞错：同步失败必须暴露给管理页（否则界面显示成功而权限表未更新）
 		s.log.Errorf("sync apis via OpenAPI failed: %v", err)
-		return adminV1.ErrorInternalServerError("sync apis failed")
-	}
-
-	return nil
-}
-
-// syncWithWalkRoute 使用 WalkRoute 同步 API 资源
-func (s *ApiService) syncWithWalkRoute(ctx context.Context) error {
-	if s.routeWalker == nil {
-		return adminV1.ErrorInternalServerError("router walker is nil")
-	}
-
-	var count uint32 = 0
-
-	var apiList []*permissionV1.Api
-
-	if err := s.routeWalker.WalkRoute(func(info http.RouteInfo) error {
-		//log.Infof("Path[%s] Method[%s]", info.Path, info.Method)
-		count++
-
-		apiList = append(apiList, &permissionV1.Api{
-			Id:     trans.Ptr(count),
-			Path:   trans.Ptr(info.Path),
-			Method: trans.Ptr(info.Method),
-		})
-
-		return nil
-	}); err != nil {
-		s.log.Errorf("failed to walk route: %v", err)
-		return adminV1.ErrorInternalServerError("failed to walk route")
-	}
-
-	sort.SliceStable(apiList, func(i, j int) bool {
-		if apiList[i].GetPath() == apiList[j].GetPath() {
-			return apiList[i].GetMethod() < apiList[j].GetMethod()
-		}
-		return apiList[i].GetPath() < apiList[j].GetPath()
-	})
-
-	if _, err := s.apiServiceClient.SyncApis(ctx, &permissionV1.SyncApisRequest{
-		Apis: apiList,
-	}); err != nil {
-		s.log.Errorf("sync apis via WalkRoute failed: %v", err)
 		return adminV1.ErrorInternalServerError("sync apis failed")
 	}
 

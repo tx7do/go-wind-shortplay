@@ -117,6 +117,7 @@ declare global {
   const getDictEntryLabelByValue: typeof import('../src/hooks/useDictCache').getDictEntryLabelByValue
   const getDictTypes: typeof import('../src/hooks/useDictCache').getDictTypes
   const getTableHeight: typeof import('../src/components/Table/utils/helper').getTableHeight
+  const getUserPermissionCodes: typeof import('../src/hooks/useAuth').getUserPermissionCodes
   const handleRowHeight: typeof import('../src/components/Table/utils/helper').handleRowHeight
   const handleValuePropName: typeof import('../src/components/common/Form/utils/helper').handleValuePropName
   const indexTsxTmp536: typeof import('../src/components/common/UploadImage/index.tsx.tmp.536.bfcb02d654df').default

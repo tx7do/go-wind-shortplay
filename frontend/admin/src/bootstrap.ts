@@ -191,10 +191,9 @@ export function getErrorMsg(error: unknown) {
   // 获取后端返回数据：兼容 AxiosError（响应体在 response.data）
   // 与已被 request() 解包的响应体（{code, reason, message}）两类形态
   const source =
-    error && typeof error === 'object' ? (error as Record<string, any>) : undefined;
-  const resData = (source?.response?.data ?? source) as
-    | { reason?: string }
-    | undefined;
+    error && typeof error === 'object' ? (error as Record<string, unknown>) : undefined;
+  const sourceResponse = source?.response as { data?: unknown } | undefined;
+  const resData = (sourceResponse?.data ?? source) as { reason?: string } | undefined;
 
   // 仅基于 reason 查询 i18n；不再回退到后端 message
   if (resData) {

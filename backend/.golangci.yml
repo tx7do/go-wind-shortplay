@@ -1,0 +1,22 @@
+version: "2"
+
+# 生成代码不纳入 lint（告警无法在源头修复，只会淹没真实问题）：
+# - api/gen            proto 生成代码（buf generate 产物）
+# - internal/data/ent  ent 生成代码（含各实体子包与 enttest）
+# - *.pb.go            proto 生成代码（各服务内的 *_http.pb.go 等）
+linters:
+  default: standard
+  exclusions:
+    rules:
+      # 测试/示例代码忽略返回值是常见惯例，errcheck 对 *_test.go 放宽；
+      # 生产代码的 errcheck 仍保持严格
+      - path: _test\.go
+        linters:
+          - errcheck
+          - ineffassign
+    paths:
+      - api/gen
+      - internal/data/ent
+      - internal/data/enttest
+      - vendor
+      - ".*\\.pb\\.go$"

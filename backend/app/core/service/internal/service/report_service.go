@@ -20,6 +20,8 @@ import (
 	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
 	reportV1 "go-wind-shortplay/api/gen/go/report/service/v1"
 	videoV1 "go-wind-shortplay/api/gen/go/video/service/v1"
+
+	appViewer "go-wind-shortplay/pkg/entgo/viewer"
 )
 
 // InternalMessageNotifier 站内信系统能力（由 InternalMessageService 实现，装配期注入）。
@@ -119,10 +121,14 @@ func (s *ReportService) CreateReport(ctx context.Context, req *reportV1.CreateRe
 const spBizMarkerPrefix = "\nsp-biz:"
 
 // notifySuperAdmins 经基座通知域投递缝给全部超管发站内信。
+// 整条链路固定以系统 viewer 执行：举报请求携带租户用户上下文，直接透传会让
+// 消息/收件行被 TenantPrivacy 强注举报者租户（收件人租户归属失真），且超管角色
+// 解析在租户过滤下命不中平台级 platform:admin。
 func (s *ReportService) notifySuperAdmins(ctx context.Context, reportID uint32, req *reportV1.CreateReportRequest) {
 	if s.internalMessage == nil || s.superAdmins == nil {
 		return
 	}
+	ctx = appViewer.NewSystemViewerContext(ctx)
 	adminIDs, err := s.superAdmins.ListSuperAdminUserIDs(ctx)
 	if err != nil || len(adminIDs) == 0 {
 		s.log.Warnf("report notify: no super admins resolved (err=%v)", err)

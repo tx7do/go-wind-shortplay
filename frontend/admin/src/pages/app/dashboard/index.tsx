@@ -266,7 +266,12 @@ function TrendChartCard() {
   const { isDark } = usePreferences();
   const trendsQuery = useGetDashboardTrends(7);
 
-  const items: DashboardTrendItem[] = trendsQuery.data?.items ?? [];
+  // items 直接进入下方 useMemo 依赖：data 缺失时 ?? [] 每次渲染都会产出新数组
+  // 引用，导致 memo 无效——这里用 useMemo 固定引用，data 不变则 items 不变。
+  const items = useMemo<DashboardTrendItem[]>(
+    () => trendsQuery.data?.items ?? [],
+    [trendsQuery.data],
+  );
   const hasData = !trendsQuery.isError && items.length > 0;
 
   const option = useMemo(() => {
@@ -373,7 +378,9 @@ const TopVideosCard = ({ layout = 'wide' }: { layout?: 'wide' | 'narrow' }) => {
   const [metric, setMetric] = useState<TopMetric>(TOP_METRIC.VIEW);
   const { data, isLoading } = useListTopVideos(metric, 10);
 
-  const items = data?.items ?? [];
+  // items 直接进入下方 useMemo 依赖：data 缺失时 ?? [] 每次渲染都会产出新数组
+  // 引用，导致 memo 无效——这里用 useMemo 固定引用，data 不变则 items 不变。
+  const items = useMemo(() => data?.items ?? [], [data]);
   const narrow = layout === 'narrow';
 
   const option = useMemo(() => {

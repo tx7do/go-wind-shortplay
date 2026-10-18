@@ -25,6 +25,7 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent"
 	"go-wind-shortplay/app/core/service/internal/data/ent/predicate"
 	"go-wind-shortplay/app/core/service/internal/data/ent/user"
+	"go-wind-shortplay/app/core/service/internal/data/ent/usercredential"
 
 	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
 	permissionV1 "go-wind-shortplay/api/gen/go/permission/service/v1"
@@ -144,7 +145,7 @@ func (r *userRepo) init() {
 func (r *userRepo) Count(ctx context.Context, req *paginationV1.PagingRequest) (int, error) {
 	builder := r.entClient.Client().User.Query()
 
-	whereSelectors, _, err := r.repository.BuildListSelectorWithPaging(builder, req)
+	whereSelectors, _, _ := r.repository.BuildListSelectorWithPaging(builder, req)
 	if len(whereSelectors) != 0 {
 		builder.Modify(whereSelectors...)
 	}
@@ -777,33 +778,19 @@ func (r *userRepo) Delete(ctx context.Context, req *identityV1.DeleteUserRequest
 		}
 	}()
 
-	builder := tx.User.Delete()
-
-	switch req.QueryBy.(type) {
-	case *identityV1.DeleteUserRequest_Id:
-		builder.Where(user.IDEQ(req.GetId()))
-		// 租户作用域：仅删除本租户用户，避免跨租户删他人账号
-		if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
-			builder.Where(user.TenantIDEQ(tid))
-		}
-	case *identityV1.DeleteUserRequest_Username:
-		// username 仅在 (tenant_id, username) 维度唯一，平台上下文(tid=0)下按 username 删除
-		// 会误删所有租户的同名用户。仅允许在具名租户上下文(tid>0)下按 username 删除。
-		// (Delete 不经 Querier interceptor，必须显式加租户过滤)
-		tid, hasTenant := maybeTenantFromViewer(ctx)
-		if !hasTenant {
-			return identityV1.ErrorBadRequest("tenant scope required to delete user by username")
-		}
-		builder.Where(user.UsernameEQ(req.GetUsername()), user.TenantIDEQ(tid))
-	default:
-		builder.Where(user.IDEQ(req.GetId()))
-		// 租户作用域：仅删除本租户用户，避免跨租户删他人账号
-		if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
-			builder.Where(user.TenantIDEQ(tid))
-		}
+	// 先解析待删用户 ID 集合：角色绑定/凭证等联动清理都以 user_id 为键，
+	// username 删除路径也要能命中；解析与删除同租户过滤口径，命中 0 行视为不存在。
+	targetIDs, err := r.deleteTargetIDs(ctx, tx, req)
+	if err != nil {
+		return err
+	}
+	if len(targetIDs) == 0 {
+		return identityV1.ErrorNotFound("user not found")
 	}
 
-	if _, err = builder.Exec(ctx); err != nil {
+	if _, err = tx.User.Delete().
+		Where(user.IDIn(targetIDs...)).
+		Exec(ctx); err != nil {
 		if ent.IsNotFound(err) {
 			return identityV1.ErrorNotFound("user not found")
 		}
@@ -815,15 +802,69 @@ func (r *userRepo) Delete(ctx context.Context, req *identityV1.DeleteUserRequest
 
 	switch constants.DefaultUserTenantRelationType {
 	case constants.UserTenantRelationNone, constants.UserTenantRelationOneToOne:
-		if err = r.removeUserRelations(ctx, tx, req.GetId()); err != nil {
-			return err
+		for _, id := range targetIDs {
+			if err = r.removeUserRelations(ctx, tx, id); err != nil {
+				return err
+			}
 		}
 	case constants.UserTenantRelationOneToMany:
-		if err = r.removeMembershipRelations(ctx, tx, req.GetId()); err != nil {
-			return err
+		for _, id := range targetIDs {
+			if err = r.removeMembershipRelations(ctx, tx, id); err != nil {
+				return err
+			}
 		}
 	}
 
+	// 联动清理用户凭证：只删 sys_users 行会遗留孤儿凭证，同名用户重建后
+	// 登录按 identifier 命中多条凭证（ent Only 报错），该用户名永远无法登录。
+	if err = r.cleanUserCredentials(ctx, tx, targetIDs); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// deleteTargetIDs 解析删除请求命中的用户 ID 集合（与删除同租户过滤口径）。
+// username 仅在 (tenant_id, username) 维度唯一，平台上下文(tid=0)下按 username
+// 删除会误删所有租户的同名用户，仅允许具名租户上下文(tid>0)使用。
+// (Delete 不经 Querier interceptor，必须显式加租户过滤)
+func (r *userRepo) deleteTargetIDs(ctx context.Context, tx *ent.Tx, req *identityV1.DeleteUserRequest) ([]uint32, error) {
+	query := tx.User.Query()
+	switch req.QueryBy.(type) {
+	case *identityV1.DeleteUserRequest_Username:
+		tid, hasTenant := maybeTenantFromViewer(ctx)
+		if !hasTenant {
+			return nil, identityV1.ErrorBadRequest("tenant scope required to delete user by username")
+		}
+		query.Where(user.UsernameEQ(req.GetUsername()), user.TenantIDEQ(tid))
+	default:
+		query.Where(user.IDEQ(req.GetId()))
+		// 租户作用域：仅删除本租户用户，避免跨租户删他人账号
+		if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
+			query.Where(user.TenantIDEQ(tid))
+		}
+	}
+	ids, err := query.IDs(ctx)
+	if err != nil {
+		r.log.Errorf("resolve delete target ids failed: %s", err.Error())
+		return nil, identityV1.ErrorInternalServerError("resolve delete targets failed")
+	}
+	return ids, nil
+}
+
+// cleanUserCredentials 清理用户认证凭证（sys_user_credentials）。
+// 删除用户不清理凭证会遗留孤儿行：同名用户重建后登录按 identifier 查询
+// 命中多条凭证（ent Only 报错），该用户名永远无法登录。
+func (r *userRepo) cleanUserCredentials(ctx context.Context, tx *ent.Tx, userIDs []uint32) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
+	if _, err := tx.UserCredential.Delete().
+		Where(usercredential.UserIDIn(userIDs...)).
+		Exec(ctx); err != nil {
+		r.log.Errorf("clean user credentials failed: %s", err.Error())
+		return identityV1.ErrorInternalServerError("clean user credentials failed")
+	}
 	return nil
 }
 

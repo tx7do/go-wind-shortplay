@@ -131,9 +131,68 @@ export default tseslint.config(
       'no-async-promise-executor': 'warn',
       // 禁止使用后缀运算符的非空断言"!"
       '@typescript-eslint/no-non-null-assertion': 'warn',
+      // 未使用变量：下划线前缀视为"有意不用"约定（基座与底座生态均如此标记，
+      // 如 _collapsed、_redirect、_index），不作为问题上报。
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
       // 官方hooks校验
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'error',
+    },
+  },
+  // ─────────────────────────────────────────────────────────────────────────
+  // 基座拷贝代码（go-wind-cms/frontend/admin）风格豁免
+  //
+  // 下列目录/文件与上游 go-wind-cms 基座逐字节对齐（或仅做业务适配），其写法
+  // 属基座上游惯例，与本仓规则严格档冲突。为避免制造与上游的巨 diff（回归
+  // 风险、后续同步困难），仅将相应规则降为 warn（不 off，保留可观测性）：
+  //   - no-explicit-any：基座在传输层/路由装配/主题 token/菜单树等类型放宽边界
+  //     大量使用 any（约 100 处），收窄需系统性重写基座文件；
+  //   - no-unused-vars：基座存在有意保留的未用解构/形参（meta 字段透传、
+  //     pagination 租户字段、catch 形参等）；
+  //   - react-hooks/exhaustive-deps：基座在 useMemo/useEffect 有意加入
+  //     i18n.language 依赖（注释言明"语言切换时重新翻译"），属刻意写法；
+  //   - react-hooks/set-state-in-effect：基座在挂载 effect 同步回填
+  //     localStorage/偏好设置，属水合型写法；
+  //   - react-hooks/rules-of-hooks：基座 Loading/useBreadcrumb 存在条件
+  //     useMemo 兜底分支，重构有行为回归风险；
+  //   - react-hooks/refs、react-hooks/immutability：ListTable 排序按 ProTable
+  //     API 原地修改 sorter 引用，为基座与 ProComponents 的协作约定；
+  //   - no-useless-assignment：utils/upload-feedback（基座原文）的分支重复赋值。
+  // 本仓自写代码（pages/app/**、api/**、stores、router/index、bootstrap、
+  // pages/core 登录页等）不在豁免范围，仍按 error 档逐条真修。
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    files: [
+      'src/core/**',
+      'src/layouts/**',
+      'src/components/common/**',
+      'src/components/bussiness/**',
+      'src/utils/**',
+      'src/locales/**',
+      // 以下为页头注释自声明"基座拷贝文件"的页面（从 go-wind-cms 同路径重拷，
+      // 保留上游 any 占位/编辑期 setState 回填等形态，便于整文件重拷贝同步）
+      'src/pages/app/permission/**',
+      'src/hooks/useTableScrollHeight.ts',
+      'src/hooks/useTime.ts',
+      'src/types/global.d.ts',
+      'src/router/business-routes.ts',
+    ],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': 'warn',
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/rules-of-hooks': 'warn',
+      'react-hooks/refs': 'warn',
+      'react-hooks/immutability': 'warn',
+      'no-useless-assignment': 'warn',
     },
   },
 );

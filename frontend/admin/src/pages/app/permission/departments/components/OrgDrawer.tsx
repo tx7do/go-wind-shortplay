@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect */
 // 基座拷贝文件（源：go-wind-cms frontend/admin 同路径实现）：为方便后续整文件重拷贝同步，
-// 保持上游代码形态（any 占位/编辑期 setState 回填等），仅按文件禁用本仓更严格的 lint 规则。
+// 保持上游代码形态（any 占位/编辑期 setState 回填等），lint 严格规则已在 eslint.config.js 集中降档。
 import { useRef, useState, useEffect } from 'react';
 import type { ProFormInstance } from '@ant-design/pro-components';
 import {

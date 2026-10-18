@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"image"
 	"strings"
 
 	"github.com/disintegration/imaging"
@@ -77,16 +76,6 @@ func generateImageVariants(ctx context.Context, mc *oss.MinIOClient, bucket, bas
 	return result
 }
 
-// imageDimensions 读原图宽高（非图片返回 0,0）。
-// 供上传链路填充 width/height 元数据；当前 UploadMediaAsset 未接——预留。
-func imageDimensionsUnused(data []byte) (uint32, uint32) {
-	cfg, _, err := image.DecodeConfig(bytes.NewReader(data))
-	if err != nil {
-		return 0, 0
-	}
-	return uint32(cfg.Width), uint32(cfg.Height)
-}
-
 // generateImageVariantsAsync 读回原图→生成变体→上传 MinIO（后台协程入口）。
 // media_variants 落库行待 media proto 扩展后补（对象名 = 原图去扩展名 + -变体名.jpg，
 // 前端/消费方可按该约定推导变体 URL）；当前只做文件层。
@@ -110,7 +99,7 @@ func generateImageVariantsAsync(
 		fmt.Println("[img-variant] get object failed:", err)
 		return
 	}
-	defer obj.Close()
+	defer func() { _ = obj.Close() }()
 	var buf bytes.Buffer
 	if _, err := buf.ReadFrom(obj); err != nil {
 		fmt.Println("[img-variant] read object failed:", err)
@@ -118,10 +107,4 @@ func generateImageVariantsAsync(
 	}
 
 	generateImageVariants(ctx, mc, bucket, objName, mimeType, buf.Bytes())
-}
-
-// mediaVariantDeps 变体生成的依赖端口（避免直接依赖 gRPC 客户端具体类型）。
-type mediaVariantDeps struct {
-	// recordVariant 落一条 media_variants 行
-	recordVariant func(ctx context.Context, mediaID uint32, fileID uint32, variantName string) error
 }

@@ -96,26 +96,10 @@ func (r *RoleRepo) init() {
 	r.mapper.AppendConverters(r.typeConverter.NewConverterPair())
 }
 
-// Count 统计角色数量
-func (r *RoleRepo) count(ctx context.Context, whereCond []func(s *sql.Selector)) (int, error) {
-	builder := r.entClient.Client().Role.Query()
-	if len(whereCond) != 0 {
-		builder.Modify(whereCond...)
-	}
-
-	count, err := builder.Count(ctx)
-	if err != nil {
-		r.log.Errorf("query count failed: %s", err.Error())
-		return 0, permissionV1.ErrorInternalServerError("query count failed")
-	}
-
-	return count, nil
-}
-
 func (r *RoleRepo) Count(ctx context.Context, req *paginationV1.PagingRequest) (int, error) {
 	builder := r.entClient.Client().Role.Query()
 
-	whereSelectors, _, err := r.repository.BuildListSelectorWithPaging(builder, req)
+	whereSelectors, _, _ := r.repository.BuildListSelectorWithPaging(builder, req)
 	if len(whereSelectors) != 0 {
 		builder.Modify(whereSelectors...)
 	}
@@ -779,20 +763,6 @@ func (r *RoleRepo) BindPermissions(ctx context.Context, tenantID, roleID uint32,
 	}()
 
 	return r.rolePermissionRepo.AssignPermissions(ctx, tx, tenantID, 0, roleID, permissionIDs)
-}
-
-// assignPermissionCodesToRole 分配权限编码给角色
-func (r *RoleRepo) assignPermissionCodesToRole(ctx context.Context, tx *ent.Tx,
-	tenantID, operatorID uint32,
-	roleID uint32,
-	codes []string,
-) error {
-	ids, err := r.permissionRepo.GetPermissionIDsByCodesWithTx(ctx, tx, codes)
-	if err != nil {
-		return err
-	}
-
-	return r.rolePermissionRepo.AssignPermissions(ctx, tx, tenantID, operatorID, roleID, ids)
 }
 
 // assignPermissionsToRole 分配权限给角色

@@ -108,7 +108,9 @@ const CommentList = () => {
           title={t('deleteConfirmTitle')}
           description={t('deleteConfirmDesc', { moduleName: t('moduleName') })}
           onConfirm={() => {
-            record.id && deleteMutation.mutate(record.id);
+            if (record.id) {
+              deleteMutation.mutate(record.id);
+            }
           }}
           okText={t('common:button.ok')}
           cancelText={t('common:button.cancel')}

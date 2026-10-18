@@ -7,20 +7,25 @@
 import { useAuthStore } from '@/stores/auth';
 import { useUserStore } from '@/stores/user';
 
+/**
+ * 获取用户权限码（角色码 + 权限码）——非 hook 的纯函数版本。
+ * 无权限服务：全部来自登录时写入的 userStore，仅做一次空值兜底。
+ *
+ * 独立导出以便在 effect / 普通异步流程（如路由初始化）中调用：
+ * useAuth() 名义上是 React hook，按 rules-of-hooks 约定不能在
+ * 组件渲染流之外的普通函数里调用；本函数内部只读 store 快照，
+ * 不触发 React 调度，无此限制。
+ */
+export async function getUserPermissionCodes(): Promise<{ roles: string[]; codes: string[] }> {
+  const { userInfo, userRoles, accessCodes } = useUserStore.getState();
+  if (userInfo === null) {
+    throw new Error('userInfo missing: not authenticated');
+  }
+  return { roles: userRoles.length ? userRoles : (userInfo.roles ?? []), codes: accessCodes };
+}
+
 export function useAuth() {
   const authStore = useAuthStore;
-
-  /**
-   * 获取用户权限码（角色码 + 权限码）。
-   * 无权限服务：全部来自登录时写入的 userStore，仅做一次空值兜底。
-   */
-  async function getUserPermissionCodes(): Promise<{ roles: string[]; codes: string[] }> {
-    const { userInfo, userRoles, accessCodes } = useUserStore.getState();
-    if (userInfo === null) {
-      throw new Error('userInfo missing: not authenticated');
-    }
-    return { roles: userRoles.length ? userRoles : (userInfo.roles ?? []), codes: accessCodes };
-  }
 
   return {
     /** 登录加载状态 */

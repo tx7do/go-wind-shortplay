@@ -380,17 +380,19 @@ func (s *RoleService) ListPermissionIds(ctx context.Context, req *permissionV1.L
 
 // ListSuperAdminUserIDs 平台管理员（platform:admin 角色）用户 ID 列表。
 // shortplay 举报工单超管通知的收件人解析入口（SuperAdminResolver 接口实现）。
-// 系统通知链路无请求租户上下文，roleRepo 的按码查询要求具名租户——这里以系统
-// viewer 直查平台角色（platform:admin 为受保护系统角色，仅平台租户持有）。
+// 系统通知链路可能携带请求租户上下文（如租户用户发举报），Role 的 TenantPrivacy
+// 会按 viewer 强注 tenant_id 过滤，与按码查询的 platform（tenant_id=0）口径冲突——
+// 这里固定以系统 viewer 直查平台角色（platform:admin 为受保护系统角色，仅平台租户持有）。
 func (s *RoleService) ListSuperAdminUserIDs(ctx context.Context) ([]uint32, error) {
-	role, err := s.roleRepo.GetPlatformRoleByCode(ctx, constants.PlatformAdminRoleCode)
+	sysCtx := appViewer.NewSystemViewerContext(ctx)
+	role, err := s.roleRepo.GetPlatformRoleByCode(sysCtx, constants.PlatformAdminRoleCode)
 	if err != nil {
 		return nil, err
 	}
 	if role == nil || role.GetId() == 0 {
 		return nil, nil
 	}
-	return s.userRoleRepo.ListUserIDsByRoleIDs(ctx, []uint32{role.GetId()}, false)
+	return s.userRoleRepo.ListUserIDsByRoleIDs(sysCtx, []uint32{role.GetId()}, false)
 }
 
 func (s *RoleService) ListUserRoleIDs(ctx context.Context, req *permissionV1.ListUserRoleIDsRequest) (*permissionV1.ListUserRoleIDsResponse, error) {

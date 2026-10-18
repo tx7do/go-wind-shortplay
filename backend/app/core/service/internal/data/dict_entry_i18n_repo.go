@@ -68,8 +68,7 @@ func (r *DictEntryI18nRepo) Upsert(ctx context.Context,
 	langCode string, data *dictV1.DictEntryI18N,
 ) error {
 	now := time.Now()
-	var err error
-	err = r.entClient.Client().DictEntryI18n.Create().
+	err := r.entClient.Client().DictEntryI18n.Create().
 		SetTenantID(tenantID).
 		SetLanguageCode(langCode).
 		SetDictEntryID(entryID).

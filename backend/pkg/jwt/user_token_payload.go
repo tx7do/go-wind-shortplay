@@ -273,5 +273,5 @@ func IsTokenNotValidYet(claims *authn.AuthClaims) bool {
 	}
 
 	now := time.Now().UTC()
-	return now.Add(defaultTokenLeeway).Before(nbf.Time.UTC())
+	return now.Add(defaultTokenLeeway).Before(nbf.UTC())
 }

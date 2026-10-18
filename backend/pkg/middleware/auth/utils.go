@@ -51,7 +51,7 @@ func setRequestOperationId(req interface{}, payload *authenticationV1.UserTokenP
 
 	v := reflect.ValueOf(req).Elem()
 	field := v.FieldByName("OperatorId")
-	if field.IsValid() && field.Kind() == reflect.Ptr {
+	if field.IsValid() && field.Kind() == reflect.Pointer {
 		field.Set(reflect.ValueOf(&payload.UserId))
 	}
 
@@ -65,7 +65,7 @@ func setRequestTenantId(req interface{}, payload *authenticationV1.UserTokenPayl
 
 	v := reflect.ValueOf(req).Elem()
 	field := v.FieldByName("tenantId")
-	if field.IsValid() && field.Kind() == reflect.Ptr {
+	if field.IsValid() && field.Kind() == reflect.Pointer {
 		field.Set(reflect.ValueOf(&payload.TenantId))
 	}
 

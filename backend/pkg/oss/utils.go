@@ -470,7 +470,7 @@ func ReplaceEndpointHost(rawURL, host, endpoint string) string {
 	if rawURL == "" || host == "" {
 		return rawURL
 	}
-	return strings.Replace(rawURL, endpoint, host, -1)
+	return strings.ReplaceAll(rawURL, endpoint, host)
 }
 
 func ExtractFileExtension(fileName string) string {

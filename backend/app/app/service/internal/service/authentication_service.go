@@ -187,7 +187,7 @@ func (s *AuthenticationService) Register(ctx context.Context, req *authenticatio
 // ── shortplay 旧契约兼容面（/auth/*）──
 
 // authLoginResponseOf 基座登录响应 → 旧契约包装（authenticator + user）
-func (s *AuthenticationService) authLoginResponseOf(ctx context.Context, resp *authenticationV1.LoginResponse, uid uint32, username string) (*appV1.AuthLoginResponse, error) {
+func (s *AuthenticationService) authLoginResponseOf(ctx context.Context, resp *authenticationV1.LoginResponse, uid uint32) (*appV1.AuthLoginResponse, error) {
 	out := &appV1.AuthLoginResponse{}
 	if resp != nil {
 		out.Authenticator = &appV1.Authenticator{
@@ -198,14 +198,11 @@ func (s *AuthenticationService) authLoginResponseOf(ctx context.Context, resp *a
 		}
 	}
 	// uid 从访问令牌 payload 反解：令牌是刚从 core 内网调用拿到的（非客户端传入），
-	// payload 解码仅用于取 uid/username 展示字段，鉴权语义仍在 core。
+	// payload 解码仅用于取 uid，鉴权语义仍在 core。
 	// username 直查需要租户上下文，C 端匿名链路不可用，故不走 user Get(by username)。
 	if uid == 0 && resp != nil && resp.GetAccessToken() != "" {
 		if payload := decodeJWTPayloadSP(resp.GetAccessToken()); payload != nil {
 			uid = payload.UserId
-			if username == "" {
-				username = payload.Username
-			}
 		}
 	}
 	if uid > 0 {
@@ -233,7 +230,7 @@ func (s *AuthenticationService) AuthLogin(ctx context.Context, req *authenticati
 	if err != nil {
 		return nil, err
 	}
-	return s.authLoginResponseOf(ctx, resp, 0, req.GetUsername())
+	return s.authLoginResponseOf(ctx, resp, 0)
 }
 
 // AuthRegister 旧契约注册：开放注册开关由系统配置把关；成功即登录。
@@ -302,7 +299,7 @@ func (s *AuthenticationService) AuthRefresh(ctx context.Context, req *appV1.Auth
 	if err != nil {
 		return nil, err
 	}
-	return s.authLoginResponseOf(ctx, resp, uid, "")
+	return s.authLoginResponseOf(ctx, resp, uid)
 }
 
 // findRefreshBinding 按刷新令牌值反查 Redis 绑定键（gwc:rt:1:{uid}:{jti}）。
