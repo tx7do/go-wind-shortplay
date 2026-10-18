@@ -81,6 +81,18 @@ async function _initI18n() {
     }
     // 续期失败时 forceLogout 已清空 token，跳过 SSE 建连（SSE 携带的是旧凭证）
     if (useAuthStore.getState().accessToken) {
+      // 半残会话守卫：路由守卫只查 token，放行有 token 无 userInfo 的会话会让
+      // 依赖 userInfo.id 的页面把字面量 "undefined" 当用户 ID 发出去（后端解析
+      // 500）。userInfo 缺失时重拉身份（3 次重试消化后端重启窗口期），仍失败
+      // 则强制登出收敛到干净的重登录。
+      if (!useAuthStore.getState().userInfo) {
+        const restored = await restoreIdentityWithRetry();
+        if (!restored) {
+          useAuthStore.getState().forceLogout();
+          // 半残会话到此为止：不再起定时器、不再连 SSE
+          return;
+        }
+      }
       // 会话恢复后重建站内信 SSE 实时通道（整页刷新会断开旧连接）
       connectSSEServer();
     }
@@ -91,15 +103,49 @@ async function _initI18n() {
     try {
       const newToken = await useAuthStore.getState().refreshToken();
       if (newToken) {
-        await restoreIdentity(newToken);
-        connectSSEServer();
-        startRefreshTimer();
-        console.log('[Bootstrap] session silently restored via refresh cookie');
+        // profile 拉取失败不能只留痕继续跑（同上半残会话守卫）：短暂重试消化
+        // 后端重启窗口期，仍失败则强制登出收敛到干净的重登录。
+        const restored = await restoreIdentityWithRetry(newToken);
+        if (restored) {
+          connectSSEServer();
+          startRefreshTimer();
+          console.log('[Bootstrap] session silently restored via refresh cookie');
+        } else {
+          useAuthStore.getState().forceLogout();
+        }
       }
     } catch (e) {
       console.error('[Bootstrap] silent restore failed (refresh cookie 可能无效或过期):', e);
     }
   }
+}
+
+/**
+ * 拉取身份（/me + /perm-codes）带 3 次重试：短暂重试消化后端重启窗口期；
+ * 全部失败返回 false，由调用方 forceLogout 收敛到干净的重登录。
+ */
+async function restoreIdentityWithRetry(token?: string): Promise<boolean> {
+  let lastError: unknown = null;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      await restoreIdentity(token ?? useAuthStore.getState().accessToken ?? '');
+      return true;
+    } catch (e) {
+      lastError = e;
+      console.error(
+        `[Bootstrap] identity restore failed (attempt ${attempt}/3):`,
+        e,
+      );
+      if (attempt < 3) {
+        await new Promise((resolve) => setTimeout(resolve, 400));
+      }
+    }
+  }
+  console.error(
+    '[Bootstrap] identity unavailable after retries, forcing logout:',
+    lastError,
+  );
+  return false;
 }
 
 /**
@@ -159,7 +205,10 @@ async function restoreIdentity(token: string): Promise<void> {
       console.error('[Bootstrap] restore /perm-codes failed:', error);
     }
   } catch (error) {
+    // /me 失败必须向上抛：静默吞掉会放行"有 token 无 userInfo"的半残会话，
+    // 重试与强制登出的收敛由 restoreIdentityWithRetry 的调用方负责
     console.error('[Bootstrap] restore /me failed:', error);
+    throw error;
   }
 }
 
