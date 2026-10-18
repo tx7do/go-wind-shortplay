@@ -1,0 +1,6 @@
+# 环境变量覆盖链路开关（由 pkg/configenv 注册的 "env" 配置源消费）：
+# 进程环境变量以顶层键并入 kratos 配置表，使各 yaml 中 `${VAR:default}`
+# 占位符按「环境变量优先、缺省值兜底」解析。本地经 backend/.env 注入，
+# 生产经部署环境注入（见 backend/.env.example）。
+config:
+  type: "env"

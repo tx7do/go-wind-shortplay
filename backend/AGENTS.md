@@ -137,7 +137,7 @@ backend/
 - **依赖**：Citus PG `127.0.0.1:5432/shortplay`、Redis `127.0.0.1:6379`（密码见 configs）、MinIO `127.0.0.1:9000`、etcd `127.0.0.1:2379`（复用宿主机既有容器）。
 - **建库**：PostgreSQL 建库 `shortplay`；表结构由 core 首次启动 `migrate: true` 自动创建。
 - **种子**：Go 自动初始化——默认管理员 `admin / admin`（`pkg/constants.DefaultUsers`，UserService 构造期空表播种）、默认角色/权限/菜单/语言/通知规则同样自动播种。**不要找 SQL 种子脚本。**
-- **登录**：`POST /admin/v1/login`，密码授权强制验证码：先 `GET /admin/v1/captcha`（答案落 Redis `gowind-shortplay:captcha:<id>`），请求头带 `X-Captcha-Id` / `X-Captcha-Value`；**密码字段须 AES 加密**：`base64(AES-CBC(明文, key=iv="f51d66a73d8a0927"))`（`crypto.DefaultAESKey`，前端同款逻辑）。
+- **登录**：`POST /admin/v1/login`，密码授权强制验证码：先 `GET /admin/v1/captcha`（答案落 Redis `gowind-shortplay:captcha:<id>`），请求头带 `X-Captcha-Id` / `X-Captcha-Value`；**密码字段须 AES 加密**：`base64(AES-CBC(明文, key=iv=<AES_KEY>))`（`crypto.DefaultAESKey`，前端同款逻辑）。dev 缺省 key 为基座公开缺省「f51d66a73d8a0927」仅限本地；生产经环境变量 `AES_KEY` 覆盖（`pkg/configenv`，须与前端 `VITE_AES_KEY` 一致）。
 - **游客边界**：app 白名单（登录/注册/刷新/评论读写/媒体读取）匿名可达；其余需 Bearer。
 - **CORS**：admin 白名单 `localhost:16800`（`app/admin/service/configs/server.yaml`），换端口要同步改。
 - **JWT_SIGNING_KEY**：三服务共享（`${jwt_signing_key:...}` 插值），生产必须环境变量注入。

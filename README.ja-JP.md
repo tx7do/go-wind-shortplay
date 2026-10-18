@@ -65,15 +65,26 @@
 ## アーキテクチャ
 
 ```
-React Admin ──▶ admin-service (BFF :7600) ──┐
-                                            ├──gRPC──▶ core-service (:7900, 唯一のデータ投影先)
-Flutter App ──▶ app-service   (BFF :7700) ──┘              │
-                                        PostgreSQL / Redis / MinIO / FFmpeg
+React Admin ──▶ admin-service (BFF :7600, SSE :7601) ──┐
+                                                       ├──gRPC──▶ core-service (:7900, 唯一のデータ投影先)
+Flutter App ──▶ app-service   (BFF :7700) ─────────────┘              │
+                                            PostgreSQL / Redis / MinIO / FFmpeg
 ```
 
 - **admin / app は薄い BFF ゲートウェイ**（パラメータ検証 + 転送）。業務ロジックとデータ操作はすべて core に集約
 - ドメイン分割は proto と core 内部モジュール（video / feed / interaction / report / uba / sysconf / notify / identity / stats）に反映され、プロセスには反映されない
 - サービス分割の検討と商用版拡張パスは [docs/ROADMAP.md](./docs/ROADMAP.md) 参照
+
+### ポート一覧
+
+| ポート | サービス | 説明 |
+|---|---|---|
+| :7600 | admin BFF（REST） | 管理画面 API。Swagger は `/docs/` |
+| :7601 | admin BFF（SSE） | 通知のリアルタイム配信 `/events`（`?stream=<accessToken>` が Bearer トークンと一致する必要あり） |
+| :7700 | app BFF（REST） | Flutter アプリ API。Swagger は `/docs/` |
+| :7900 | core（gRPC） | 唯一のデータ投影先。etcd に登録 |
+| :16800 | 管理画面フロントエンド dev サーバー | Vite（`frontend/admin`）。バックエンド CORS 許可リストは既定で `localhost:16800` のみ |
+| :8280 | ZLMediaKit HTTP | ローカルストリーミングメディア（ライブ / トランスコード拡張の予約、`docker run` でマッピング） |
 
 ## コア機能
 
@@ -156,7 +167,16 @@ docker run -d --name shortplay-zlmediakit --restart unless-stopped \
 CREATE DATABASE shortplay;
 ```
 
-### 2. 初期化とバックエンド起動
+### 2. 環境変数の設定
+
+```bash
+cd backend
+cp .env.example .env    # ローカルの PostgreSQL / Redis / MinIO 接続値を記入（.env は gitignore 済み）
+```
+
+`.env` は `make run`（app.mk が自動読み込み）と docker compose の両方で拾われます。各サービスの `configs/*.yaml` にある `${VAR:default}` プレースホルダは「環境変数優先、デフォルトはフォールバック」で解決されます（デフォルトはプレースホルダ文字列なので、依存サービスに接続するには `.env` に実値を記入**必須**です）。本番ではデプロイ環境から注入し、実 credentials をコミットしないでください。
+
+### 3. 初期化とバックエンド起動
 
 ```bash
 cd backend
@@ -168,19 +188,17 @@ cd app/admin/service && make run   # REST :7600
 cd app/app/service   && make run   # REST :7700
 ```
 
-依存接続パラメータは `configs/*.yaml` の `${ENV:default}` 補間を環境変数で上書きできます（`DB_HOST` / `DB_PORT` / `DB_NAME` / `REDIS_ADDR` / `OSS_ENDPOINT` / `JWT_SIGNING_KEY` など）。
-
-動作確認：
+動作確認（ログインパスワードは AES 暗号化して送信します。下の暗号文は dev 既定キーで `demo123` を暗号化したものです。`AES_KEY` を変更した場合は `frontend/admin/src/utils/crypto.ts` と同じアルゴリズムで再計算してください）：
 
 ```bash
 curl -X POST http://127.0.0.1:7700/app/v1/auth/register \
   -H 'Content-Type: application/json' \
-  -d '{"username":"demo","password":"demo123","nickname":"Demo"}'
+  -d '{"username":"demo","password":"SjM/2yeJT+/3xpCGydysrA==","nickname":"Demo"}'
 ```
 
 API ドキュメント：サービス起動後、`http://127.0.0.1:7600/docs/` と `http://127.0.0.1:7700/docs/`（Swagger）にアクセスしてください。
 
-### 3. フロントエンドの起動
+### 4. フロントエンドの起動
 
 ```bash
 # 管理画面
@@ -193,6 +211,17 @@ cd frontend/app
 flutter pub get
 flutter run --dart-define=API_BASE=http://127.0.0.1:7700   # Android エミュレータは既定 10.0.2.2
 ```
+
+> ゲスト境界：フィード / 動画詳細 / 検索 / プロフィール / コメント一覧はゲストでもアクセス可能（アプリは 401 を静かに降格処理）。投稿 / いいね / コメント / フォローはログイン必須。管理画面は全体にログイン必須。
+
+## 既知の制限（オープンソース ベーシック版）
+
+- **シングルビットレート直出し**：トランスコードクラスタなし。動画はアップロードのまま再生（商用版はマルチビットレート transcoding + コンテンツモデレーションを提供）
+- **通知はアプリ内のみ**：管理画面 SSE（:7601）のリアルタイム配信 + アプリ側ポーリング。メール / SMS / Push チャネルなし
+- **手動審査**：審査ループは手動操作。機械審査は未接続
+- **フィード順位**：3 系統のルールベース召回 + 加重スコアリング。モデルランキングではない
+- **フロントエンド AES キー**：ログインパスワード転送暗号化の dev 既定キーはベースの公開既定値（ローカル限定）。本番では前後端で同期変更すること（`AES_KEY` / `VITE_AES_KEY`）
+- **依存サービスは持ち込み**：PostgreSQL / Redis / MinIO / etcd は自身で用意（コンテナまたはマネージド）。本リポジトリはそれらをオーケストレートしない
 
 ### よく使うコマンド
 
@@ -226,6 +255,7 @@ docker compose up -d --build
 - Flutter アプリ：[frontend/app/AGENTS.md](./frontend/app/AGENTS.md)
 - REST API 契約サマリ：[docs/API.md](./docs/API.md)
 - アーキテクチャ決定 & サービス分割検討：[docs/ROADMAP.md](./docs/ROADMAP.md)
+- ベースからの上流変更の同期方法：[docs/UPSTREAM.md](./docs/UPSTREAM.md)
 
 ## お問い合わせ
 

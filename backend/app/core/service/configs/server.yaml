@@ -13,9 +13,8 @@ server:
   asynq:
     # db2 专库：db1 的 asynq:{default} 队列被本机多个项目共用，外来 asynq
     # worker 会抢走本项目的任务（handler not found → 重试归档，任务丢失）。
-    # asynq 队列 URI：密码内嵌，${ENV:default} 插值不支持嵌套默认值，此处写死；
-    # 换环境用整体覆盖（如需环境变量化可改为 ${ASYNQ_REDIS_URI:...} 单层插值）。
-    uri: "redis://:*Abcd123456@127.0.0.1:6379/2"
+    # asynq 队列 URI 密码内嵌、无法嵌套引用 ${REDIS_PASSWORD}，故整体单层插值。
+    uri: "${ASYNQ_REDIS_URI:redis://:please_change_me@127.0.0.1:6379/2}"
     enable_gracefully_shutdown: true
     shutdown_timeout: 3s
     codec: "json"

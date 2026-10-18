@@ -14,6 +14,7 @@ import (
 	_ "github.com/tx7do/kratos-bootstrap/registry/etcd"
 	_ "github.com/tx7do/kratos-bootstrap/tracer"
 
+	"go-wind-shortplay/pkg/configenv"
 	"go-wind-shortplay/pkg/serviceid"
 )
 
@@ -47,6 +48,9 @@ func runApp() error {
 }
 
 func main() {
+	if err := configenv.OverrideAESKeyFromEnv(); err != nil {
+		panic(err)
+	}
 	if err := runApp(); err != nil {
 		panic(err)
 	}

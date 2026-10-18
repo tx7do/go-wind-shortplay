@@ -3,8 +3,16 @@
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR  := $(dir $(MKFILE_PATH))
 ENV_FILE    := $(MKFILE_DIR).env
+ROOT_ENV_FILE := $(MKFILE_DIR)../../..env
 
-# load environment variables from .env file if it exists
+# load environment variables from the repo-root backend/.env（共享，
+# 模板见 .env.example）以及服务目录下的 .env（可选，同名变量本地覆盖）。
+# 经 pkg/configenv 注册的 env 配置源，这些变量在各服务 configs/*.yaml 的
+# ${VAR:default} 占位符解析时优先生效。
+ifneq (,$(wildcard $(ROOT_ENV_FILE)))
+    include $(ROOT_ENV_FILE)
+    export
+endif
 ifneq (,$(wildcard $(ENV_FILE)))
     include $(ENV_FILE)
     export

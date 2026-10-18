@@ -1,7 +1,7 @@
 data:
   redis:
     addr: "${REDIS_ADDR:127.0.0.1:6379}"
-    password: "${REDIS_PASSWORD:*Abcd123456}"
+    password: "${REDIS_PASSWORD:please_change_me}"
     dial_timeout: 10s
     read_timeout: 0.4s
     write_timeout: 0.6s

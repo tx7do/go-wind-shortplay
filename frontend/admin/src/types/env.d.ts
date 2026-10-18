@@ -13,6 +13,9 @@ interface ImportMetaEnv {
     readonly VITE_ENV: string
 
     readonly VITE_ANALYZE: boolean
+
+    /** 登录密码传输加密密钥（AES key=iv，须与后端 AES_KEY 一致；未设置时回退基座 dev 缺省，仅限本地） */
+    readonly VITE_AES_KEY: string
 }
 
 interface ImportMeta {

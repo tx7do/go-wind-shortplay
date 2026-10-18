@@ -15,6 +15,7 @@ import (
 
 	authenticationV1 "go-wind-shortplay/api/gen/go/authentication/service/v1"
 
+	"go-wind-shortplay/pkg/configenv"
 	"go-wind-shortplay/pkg/serviceid"
 )
 
@@ -50,6 +51,9 @@ func runApp() error {
 }
 
 func main() {
+	if err := configenv.OverrideAESKeyFromEnv(); err != nil {
+		panic(err)
+	}
 	if err := runApp(); err != nil {
 		panic(err)
 	}

@@ -3,6 +3,7 @@ package oss
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -15,22 +16,30 @@ import (
 	conf "github.com/tx7do/kratos-bootstrap/api/gen/go/conf/v1"
 )
 
-func createTestClient() *MinIOClient {
+func createTestClient(t *testing.T) *MinIOClient {
+	// 连接参数经环境变量注入（本地开发由 backend/.env 经 make 导出），
+	// 未配置时跳过：避免开源裸跑 go test 因缺少真实 MinIO 而误报。
+	endpoint := os.Getenv("OSS_ENDPOINT")
+	accessKey := os.Getenv("OSS_ACCESS_KEY")
+	secretKey := os.Getenv("OSS_SECRET_KEY")
+	if endpoint == "" || accessKey == "" || secretKey == "" {
+		t.Skip("OSS_ENDPOINT/OSS_ACCESS_KEY/OSS_SECRET_KEY not set; skip MinIO integration test")
+	}
 	return NewMinIoClient(&conf.Bootstrap{
 		Oss: &conf.OSS{
 			Minio: &conf.OSS_MinIO{
-				Endpoint:     "127.0.0.1:9000",
-				UploadHost:   "127.0.0.1:9000",
-				DownloadHost: "127.0.0.1:9000",
-				AccessKey:    "root",
-				SecretKey:    "*Abcd123456",
+				Endpoint:     endpoint,
+				UploadHost:   endpoint,
+				DownloadHost: endpoint,
+				AccessKey:    accessKey,
+				SecretKey:    secretKey,
 			},
 		},
 	}, log.DefaultLogger)
 }
 
 func TestMinIoClient(t *testing.T) {
-	cli := createTestClient()
+	cli := createTestClient(t)
 	assert.NotNil(t, cli)
 
 	resp, err := cli.GetUploadPresignedUrl(t.Context(), &storageV1.GetUploadPresignedUrlRequest{
@@ -44,7 +53,7 @@ func TestMinIoClient(t *testing.T) {
 }
 
 func TestListFile(t *testing.T) {
-	cli := createTestClient()
+	cli := createTestClient(t)
 	assert.NotNil(t, cli)
 
 	req := &storageV1.ListOssFileRequest{
@@ -58,7 +67,7 @@ func TestListFile(t *testing.T) {
 }
 
 func TestDownloadFile(t *testing.T) {
-	cli := createTestClient()
+	cli := createTestClient(t)
 	assert.NotNil(t, cli)
 
 	// 自播种：下载测试不再依赖外部 MinIO 里恰好存在的对象（fixture 早已漂移），

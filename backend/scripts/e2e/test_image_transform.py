@@ -14,6 +14,7 @@
 import io
 import json
 import struct
+import os
 import subprocess
 import time
 import urllib.error
@@ -193,7 +194,8 @@ check("非法参数 400", st == 400, f"status={st}")
 # ===== 4. 派生对象落 MinIO =====
 mc_add = subprocess.run(
     ["docker", "exec", "minio-server", "mc", "alias", "set", "local",
-     "http://127.0.0.1:9000", "root", "*Abcd123456"],
+     "http://127.0.0.1:9000", os.environ.get("OSS_ACCESS_KEY", "root"),
+     os.environ.get("OSS_SECRET_KEY", "please_change_me")],
     capture_output=True, text=True, timeout=20)
 ls = subprocess.run(
     ["docker", "exec", "minio-server", "mc", "ls", "--recursive", "local/images"],

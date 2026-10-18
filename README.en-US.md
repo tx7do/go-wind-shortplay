@@ -65,15 +65,26 @@ GoWind ShortPlay is an out-of-the-box, enterprise-grade short-video community ba
 ## Architecture
 
 ```
-React Admin ──▶ admin-service (BFF :7600) ──┐
-                                            ├──gRPC──▶ core-service (:7900, single data sink)
-Flutter App ──▶ app-service   (BFF :7700) ──┘              │
-                                        PostgreSQL / Redis / MinIO / FFmpeg
+React Admin ──▶ admin-service (BFF :7600, SSE :7601) ──┐
+                                                       ├──gRPC──▶ core-service (:7900, single data sink)
+Flutter App ──▶ app-service   (BFF :7700) ─────────────┘              │
+                                            PostgreSQL / Redis / MinIO / FFmpeg
 ```
 
 - **admin / app are thin BFF gateways** (parameter validation + forwarding); all business logic and data operations converge in core
 - Domain separation lives in protos and core's internal modules (video / feed / interaction / report / uba / sysconf / notify / identity / stats), not in processes
 - See [docs/ROADMAP.md](./docs/ROADMAP.md) for the service-splitting analysis and the Pro edition expansion path
+
+### Ports
+
+| Port | Service | Notes |
+|---|---|---|
+| :7600 | admin BFF (REST) | Admin API; Swagger at `/docs/` |
+| :7601 | admin BFF (SSE) | Real-time notifications at `/events` (requires `?stream=<accessToken>` matching the Bearer token) |
+| :7700 | app BFF (REST) | Flutter app API; Swagger at `/docs/` |
+| :7900 | core (gRPC) | Single data sink, registered in etcd |
+| :16800 | admin frontend dev server | Vite (`frontend/admin`); backend CORS whitelist allows `localhost:16800` by default |
+| :8280 | ZLMediaKit HTTP | Local streaming media (reserved for live/transcoding extensions, mapped via `docker run`) |
 
 ## Core Features
 
@@ -156,7 +167,16 @@ docker run -d --name shortplay-zlmediakit --restart unless-stopped \
 CREATE DATABASE shortplay;
 ```
 
-### 2. Initialize and Start the Backend
+### 2. Configure Environment Variables
+
+```bash
+cd backend
+cp .env.example .env    # fill in your local PostgreSQL / Redis / MinIO connection values (.env is gitignored)
+```
+
+`.env` is picked up automatically by `make run` (via app.mk) and by docker compose; `${VAR:default}` placeholders in each service's `configs/*.yaml` resolve with "environment variable first, default as fallback" (defaults are placeholder strings — you **must** supply real values in `.env` to reach the dependencies). For production, inject via the deployment environment instead; never commit real credentials.
+
+### 3. Initialize and Start the Backend
 
 ```bash
 cd backend
@@ -168,19 +188,17 @@ cd app/admin/service && make run   # REST :7600
 cd app/app/service   && make run   # REST :7700
 ```
 
-Dependency connection parameters are overridden via `${ENV:default}` interpolation in `configs/*.yaml` using environment variables (`DB_HOST` / `DB_PORT` / `DB_NAME` / `REDIS_ADDR` / `OSS_ENDPOINT` / `JWT_SIGNING_KEY`, etc.).
-
-Smoke test:
+Smoke test (login passwords travel AES-encrypted; the ciphertext below equals `demo123` encrypted with the dev default key — if you change `AES_KEY`, recompute it with the algorithm in `frontend/admin/src/utils/crypto.ts`):
 
 ```bash
 curl -X POST http://127.0.0.1:7700/app/v1/auth/register \
   -H 'Content-Type: application/json' \
-  -d '{"username":"demo","password":"demo123","nickname":"Demo"}'
+  -d '{"username":"demo","password":"SjM/2yeJT+/3xpCGydysrA==","nickname":"Demo"}'
 ```
 
 API docs: once the services are up, visit `http://127.0.0.1:7600/docs/` and `http://127.0.0.1:7700/docs/` (Swagger).
 
-### 3. Start the Frontends
+### 4. Start the Frontends
 
 ```bash
 # Admin panel
@@ -193,6 +211,17 @@ cd frontend/app
 flutter pub get
 flutter run --dart-define=API_BASE=http://127.0.0.1:7700   # Android emulator defaults to 10.0.2.2
 ```
+
+> Guest boundary: feed / video detail / search / profiles / comment lists are accessible to guests (the app silently downgrades on 401); publishing / liking / commenting / following require login; the admin panel requires login everywhere.
+
+## Known Limitations (Open-Source Base Edition)
+
+- **Single-bitrate passthrough**: no transcoding cluster; videos play as uploaded (the Pro edition adds multi-bitrate transcoding + content moderation)
+- **Notifications are in-app only**: admin SSE (:7601) real-time push + app-side polling; no email / SMS / push channels
+- **Manual review**: the review loop is manual; no machine moderation
+- **Feed ranking**: three-way rule-based recall with weighted scoring, not model ranking
+- **Frontend AES key**: the dev default for login password transport encryption is the public base default (local only); in production rotate it on both ends (`AES_KEY` / `VITE_AES_KEY`)
+- **Bring your own dependencies**: PostgreSQL / Redis / MinIO / etcd instances must be provisioned by you (containers or managed); this repo does not orchestrate them
 
 ### Common Commands
 
@@ -226,6 +255,7 @@ docker compose up -d --build
 - Flutter app: [frontend/app/AGENTS.md](./frontend/app/AGENTS.md)
 - REST API contract digest: [docs/API.md](./docs/API.md)
 - Architecture decisions & service-splitting analysis: [docs/ROADMAP.md](./docs/ROADMAP.md)
+- Syncing upstream changes from the base: [docs/UPSTREAM.md](./docs/UPSTREAM.md)
 
 ## Contact
 

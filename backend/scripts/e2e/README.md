@@ -5,7 +5,7 @@
 ## 前置
 
 - admin(:6600)/core/app(:6700) 已启动，且**清代理启动**（`HTTP_PROXY='' NO_PROXY='*'`）
-- redis 容器名 `redis-server`（密码 `*Abcd123456`）
+- redis 容器名 `redis-server`（密码取 `backend/.env` 的 `REDIS_PASSWORD`）
 - `pip install pycryptodome`
 - 管理员账号 admin/admin
 

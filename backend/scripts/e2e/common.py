@@ -1,8 +1,9 @@
 """E2E 公共助手：登录（验证码+AES 密码）、admin API 调用、curl 透传。
 
 前置条件：
-- admin(:6600)/core/app(:6700) 服务已启动且清代理（HTTP_PROXY='' NO_PROXY='*'）
-- redis 容器名 redis-server（密码 *Abcd123456），验证码存 gowind-cms:captcha:{id}
+- admin(:7600)/core/app(:7700) 服务已启动且清代理（HTTP_PROXY='' NO_PROXY='*'）
+- redis 容器名 redis-server，密码取 REDIS_PASSWORD 环境变量（与 backend/.env 一致），
+  验证码存 gowind-shortplay:captcha:{id}
 - python 依赖：pycryptodome
 - 本机 curl 可用（app 侧请求走 curl --noproxy '*'，规避代理劫持）
 
@@ -14,6 +15,7 @@
 """
 import base64
 import json
+import os
 import subprocess
 import urllib.error
 import urllib.request
@@ -21,9 +23,10 @@ import urllib.request
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 
-AES_KEY = b"f51d66a73d8a0927"  # DefaultAESKey（前端同款）
-ADMIN_BASE = "http://localhost:6600"
-APP_BASE = "http://localhost:6700"
+AES_KEY = os.environ.get("AES_KEY", "f51d66a73d8a0927").encode()  # DefaultAESKey（前端 VITE_AES_KEY 同款）
+REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", "please_change_me")
+ADMIN_BASE = "http://localhost:7600"
+APP_BASE = "http://localhost:7700"
 
 
 def _admin_api_raw(path, method="GET", body=None, headers=None):
@@ -48,8 +51,8 @@ def admin_login(username="admin", password="admin"):
     d = json.loads(raw)
     ans = subprocess.check_output([
         "docker", "exec", "redis-server", "redis-cli",
-        "-a", "*Abcd123456", "--no-auth-warning", "GET",
-        "gowind-cms:captcha:" + d["captchaId"],
+        "-a", REDIS_PASSWORD, "--no-auth-warning", "GET",
+        "gowind-shortplay:captcha:" + d["captchaId"],
     ]).decode().strip()
     enc = base64.b64encode(
         AES.new(AES_KEY, AES.MODE_CBC, AES_KEY).encrypt(pad(password.encode(), 16))
@@ -80,7 +83,7 @@ class AdminApi:
 
 
 def app_curl(path, method="GET", body=None, cookie=None, user_agent=None):
-    """app(:6700) 请求走 curl --noproxy '*'，返回 (stdout, set_cookie_header)。"""
+    """app(:7700) 请求走 curl --noproxy '*'，返回 (stdout, set_cookie_header)。"""
     cmd = ["curl", "-s", "--noproxy", "*", "--max-time", "15", "--retry", "2", "--retry-connrefused", "-i", "-X", method]
     if cookie:
         cmd += ["-H", f"Cookie: {cookie}"]

@@ -44,7 +44,7 @@
 | 鉴权 | HS256 JWT | core 签发、网关校验、metadata 透传 |
 | 服务发现 | etcd | 三服务 gRPC 注册/发现 |
 
-> 后端以 [go-wind-cms](https://github.com/tx7do/go-wind-cms) 的 `backend/` 基座源码移植裁剪而来（Phase 1：保留 identity/permission/authentication/audit/dict/media/storage/task/notify/internal_message 等全部基建域，CMS 内容类业务域已裁剪）；与基座差异仅模块名/端口/数据指向，shortplay 业务域（video/feed 等）按基座既有模式在 Phase 2 接入，详见 [backend/AGENTS.md](./backend/AGENTS.md)。
+> 后端以 [go-wind-cms](https://github.com/tx7do/go-wind-cms) 的 `backend/` 基座源码移植裁剪而来（Phase 1：保留 identity/permission/authentication/audit/dict/media/storage/task/notify/internal_message 等全部基建域，CMS 内容类业务域已裁剪）；与基座差异仅模块名/端口/数据指向，shortplay 业务域（video/feed 等）按基座既有模式在 Phase 2 接入，详见 [backend/AGENTS.md](./backend/AGENTS.md)。从基座同步上游改动的方法见 [docs/UPSTREAM.md](./docs/UPSTREAM.md)。
 
 ### 管理后台前端
 
@@ -68,15 +68,26 @@
 ## 架构
 
 ```
-React Admin ──▶ admin-service (BFF :7600) ──┐
-                                            ├──gRPC──▶ core-service (:7900, 唯一数据落点)
-Flutter App ──▶ app-service   (BFF :7700) ──┘              │
-                                        PostgreSQL / Redis / MinIO / FFmpeg
+React Admin ──▶ admin-service (BFF :7600, SSE :7601) ──┐
+                                                       ├──gRPC──▶ core-service (:7900, 唯一数据落点)
+Flutter App ──▶ app-service   (BFF :7700) ─────────────┘              │
+                                            PostgreSQL / Redis / MinIO / FFmpeg
 ```
 
 - **admin / app 是瘦网关 BFF**（参数校验 + 转发），所有业务与数据操作收敛在 core
 - 领域拆分体现在 proto 与 core 内部模块上（video / feed / interaction / report / uba / sysconf / notify / identity / stats），不体现在进程上
 - 服务拆分研判与商业版扩展路径见 [docs/ROADMAP.md](./docs/ROADMAP.md)
+
+### 端口表
+
+| 端口 | 服务 | 说明 |
+|---|---|---|
+| :7600 | admin BFF（REST） | 管理后台 API；Swagger `/docs/` |
+| :7601 | admin BFF（SSE） | 通知实时推送 `/events`（需 `?stream=<accessToken>` 与 Bearer 同令牌） |
+| :7700 | app BFF（REST） | Flutter App API；Swagger `/docs/` |
+| :7900 | core（gRPC） | 唯一数据落点，etcd 注册 |
+| :16800 | admin 前端 dev server | Vite（`frontend/admin`）；后端 CORS 白名单缺省只放行 `localhost:16800` |
+| :8280 | ZLMediaKit HTTP | 本地流媒体（直播/转码扩展预留，`docker run` 映射） |
 
 ## 核心功能
 
@@ -159,7 +170,16 @@ docker run -d --name shortplay-zlmediakit --restart unless-stopped \
 CREATE DATABASE shortplay;
 ```
 
-### 2. 初始化并启动后端
+### 2. 配置环境变量
+
+```bash
+cd backend
+cp .env.example .env    # 填入本机 PostgreSQL / Redis / MinIO 连接值（.env 已 gitignore）
+```
+
+`.env` 会被 `make run`（app.mk 自动装载）与 docker compose 读取；各服务 `configs/*.yaml` 中的 `${VAR:default}` 占位符按「环境变量优先、缺省值兜底」解析（缺省值为占位串，**必须**在 `.env` 里给真实值才能连上依赖）。生产部署改经部署环境注入，严禁提交真实凭据。
+
+### 3. 初始化并启动后端
 
 ```bash
 cd backend
@@ -171,19 +191,17 @@ cd app/admin/service && make run   # REST :7600
 cd app/app/service   && make run   # REST :7700
 ```
 
-依赖连接参数经 `configs/*.yaml` 的 `${ENV:default}` 插值用环境变量覆盖（`DB_HOST` / `DB_PORT` / `DB_NAME` / `REDIS_ADDR` / `OSS_ENDPOINT` / `JWT_SIGNING_KEY` 等）。
-
-冒烟验证：
+冒烟验证（登录密码为 AES 密文传输；下例密文 = dev 缺省 key 加密的 `demo123`，自改 `AES_KEY` 后需按 `frontend/admin/src/utils/crypto.ts` 同款算法重算）：
 
 ```bash
-curl -X POST http://127.0.0.1:7700/app/v1/register \
+curl -X POST http://127.0.0.1:7700/app/v1/auth/register \
   -H 'Content-Type: application/json' \
-  -d '{"username":"demo","password":"demo123","nickname":"Demo"}'
+  -d '{"username":"demo","password":"SjM/2yeJT+/3xpCGydysrA==","nickname":"Demo"}'
 ```
 
 API 文档：服务启动后访问 `http://127.0.0.1:7600/docs/`、`http://127.0.0.1:7700/docs/`（Swagger）。
 
-### 3. 启动前端
+### 4. 启动前端
 
 ```bash
 # 管理后台
@@ -196,6 +214,17 @@ cd frontend/app
 flutter pub get
 flutter run --dart-define=API_BASE=http://127.0.0.1:7700   # 安卓模拟器缺省 10.0.2.2
 ```
+
+> 游客边界：Feed / 详情 / 搜索 / 主页 / 评论列表允许游客访问（App 端 401 静默降级），发布 / 点赞 / 评论 / 关注需登录；管理后台全部需登录。
+
+## 已知限制（开源基础版）
+
+- **单码率直出**：无转码集群，视频按上传原样播放（商业版提供多码率转码 + 内容安全审核）
+- **通知为站内信形态**：管理端 SSE（:7601）实时推送 + App 端拉取，无邮件 / 短信 / Push 通道
+- **人工审核**：审核闭环为人工操作，未接机审
+- **Feed 排序**：三路召回为规则加权，非模型排序
+- **前端 AES key**：登录密码传输加密的 dev 缺省 key 为基座公开缺省（仅限本地），生产必须前后端同步更换（`AES_KEY` / `VITE_AES_KEY`）
+- **依赖服务自备**：PostgreSQL / Redis / MinIO / etcd 需自备实例（容器或托管），本仓库不编排它们
 
 ### 常用命令
 
@@ -229,6 +258,7 @@ docker compose up -d --build
 - Flutter App：[frontend/app/AGENTS.md](./frontend/app/AGENTS.md)
 - REST API 契约摘要：[docs/API.md](./docs/API.md)
 - 架构决策与服务拆分研判：[docs/ROADMAP.md](./docs/ROADMAP.md)
+- 从基座同步上游改动：[docs/UPSTREAM.md](./docs/UPSTREAM.md)
 
 ## 联系我们
 

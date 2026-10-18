@@ -24,7 +24,7 @@ server:
     middleware:
       auth:
         method: "HS256"
-        key: "${jwt_signing_key:dev_only_change_me_in_prod}"
+        key: "${JWT_SIGNING_KEY:dev_only_change_me_in_prod}"
 
   sse:
     addr: "${APP_SSE_ADDR::7701}"
