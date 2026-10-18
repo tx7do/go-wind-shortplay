@@ -1,6 +1,9 @@
+import 'dart:io' show File;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:shortplay_app/generated/l10n.dart';
 import 'package:shortplay_app/src/core/repositories/user_auth_cache.dart';
@@ -9,7 +12,7 @@ import 'package:shortplay_app/src/features/common/widgets/user_avatar.dart';
 import 'package:shortplay_app/src/features/profile/services/user_service.dart';
 import 'package:get_it/get_it.dart' show GetIt;
 
-/// 编辑资料：昵称 / 头像地址 / 简介（PUT /profile，id 取令牌）
+/// 编辑资料：头像（上传或手填 URL）/ 昵称 / 简介（PUT /profile，id 取令牌）
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
 
@@ -20,6 +23,7 @@ class EditProfilePage extends StatefulWidget {
 class _EditProfilePageState extends State<EditProfilePage> {
   final UserAuthCache _auth = GetIt.instance<UserAuthCache>();
   final UserService _userService = UserService();
+  final ImagePicker _picker = ImagePicker();
 
   late final TextEditingController _nicknameController =
       TextEditingController(text: _auth.userNickname);
@@ -55,6 +59,50 @@ class _EditProfilePageState extends State<EditProfilePage> {
       setState(() {});
     } catch (_) {
       // 用缓存兜底
+    }
+  }
+
+  /// 相册选图 → 直传 /uploads/image → 回填头像 URL（保存时随 PUT /profile 持久化）
+  Future<void> _pickAndUploadAvatar() async {
+    final loc = S.of(context);
+    try {
+      final picked = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 90,
+      );
+      if (picked == null) return;
+      final file = File(picked.path);
+      if (file.lengthSync() > avatarUploadMaxBytes) {
+        EasyLoading.showToast(loc.avatarTooLarge);
+        return;
+      }
+
+      final total = file.lengthSync();
+      EasyLoading.showProgress(0, status: loc.uploadingPercent(0));
+      final url = await _userService.uploadAvatar(
+        file,
+        onSendProgress: (count, sent) {
+          final p = total <= 0 ? 0.0 : (sent / total).clamp(0.0, 1.0);
+          EasyLoading.showProgress(
+            p,
+            status: loc.uploadingPercent((p * 100).round()),
+          );
+        },
+      );
+
+      EasyLoading.dismiss();
+      if (!mounted) return;
+      setState(() => _avatarController.text = url);
+      EasyLoading.showToast(loc.profileSaved);
+    } on ApiStatusException catch (e) {
+      EasyLoading.dismiss();
+      EasyLoading.showToast(e.status.message ?? loc.errorUploadFailed);
+    } catch (_) {
+      // 选图取消之外的未知异常：统一按上传失败提示（与发布页 _pickVideo 同策略）
+      EasyLoading.dismiss();
+      EasyLoading.showToast(loc.errorUploadFailed);
     }
   }
 
@@ -117,14 +165,37 @@ class _EditProfilePageState extends State<EditProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 头像预览
+            // 头像预览（点按从相册选图直传，成功回填 URL）
             Center(
               child: Column(
                 children: [
-                  UserAvatar(
-                    avatarUrl: _avatarController.text.trim(),
-                    nickname: _nicknameController.text.trim(),
-                    radius: 40.r,
+                  GestureDetector(
+                    onTap: _saving ? null : _pickAndUploadAvatar,
+                    child: Stack(
+                      children: [
+                        UserAvatar(
+                          avatarUrl: _avatarController.text.trim(),
+                          nickname: _nicknameController.text.trim(),
+                          radius: 40.r,
+                        ),
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            padding: EdgeInsets.all(4.w),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.photo_camera_outlined,
+                              size: 14.sp,
+                              color: theme.colorScheme.onPrimary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   SizedBox(height: 8.h),
                   Text(

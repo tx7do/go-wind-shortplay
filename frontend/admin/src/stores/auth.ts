@@ -21,13 +21,23 @@ import { queryClient } from '@/core/query-client';
  * 3. 成功响应 {access_token, expires_in,...}（snake_case，与 cms 基座一致），
  *    随后 GET /admin/v1/me 恢复身份与角色、GET /admin/v1/perm-codes 恢复权限码。
  *
+ * 会话续期（基座机制，2026-10-18 接通；curl 契约实测见下）：
+ * - 登录/刷新响应体只含 {token_type, access_token, expires_in, refresh_expires_in}，
+ *   refresh token 经 Set-Cookie 下发：HttpOnly `refresh_token`
+ *   （Path=/admin/v1/refresh-token，JS 不可读）+ 可读 `refresh_exp`（Path=/，
+ *   Unix 秒过期时间戳，供定时器判失效）。登出由后端 clearRefreshCookies 清除；
+ * - 续期 = POST /admin/v1/refresh-token（鉴权白名单端点），body 携带绑定键
+ *   {grant_type:'refresh_token', user_id, jti}（从 access token payload 解出，
+ *   非机密；真凭证是浏览器自动携带的 HttpOnly cookie），响应同登录形状并轮换
+ *   refresh cookie；到期前由 useTokenRefresh 定时续期，401 时由 transport
+ *   拦截器凭 cookie 静默重试一次，cookie 失效才 forceLogout。
+ *
  * 与底座差异（裁剪说明）：
- * - 后端无 MFA / 管理端 refresh 端点，相关链路全部移除；
+ * - 后端无 MFA，相关链路移除；
  * - SSE 保留：后端 internal-message 域有管理端 SSE（server.sse → :7601 /events），
  *   登录成功 / 会话恢复后建连，登出 / token 失效时断开（useTokenRefresh）；
  * - 登录响应不含 user，身份经 /me 获取；为支撑刷新页面后恢复身份，
- *   userInfo 随 accessToken 一并持久化（不含任何凭证信息）；
- * - 401 由 transport 拦截器直接 forceLogout（无静默续期）。
+ *   userInfo 随 accessToken 一并持久化（不含任何凭证信息）。
  */
 export interface AuthState {
   // Token 状态
@@ -48,6 +58,12 @@ export interface AuthState {
     captcha?: { id: string; value: string },
   ) => Promise<void>;
   logout: (redirect?: boolean) => Promise<void>;
+  /**
+   * 刷新 Token（基座机制）：凭 HttpOnly refresh cookie 换新 access token，
+   * 绑定键 (uid/jti) 从当前 access token payload 解出随 body 回传。
+   * 成功返回新 token，失败 forceLogout 并返回空串。
+   */
+  refreshToken: () => Promise<string>;
   reauthenticate: () => void;
   /** 强制登出：纯前端清除认证状态，不调后端接口（用于 401 场景） */
   forceLogout: () => void;
@@ -76,7 +92,7 @@ function toUserInfo(me: Partial<UserInfo> & Record<string, any>): UserInfo {
 // ========== Store 实现 ==========
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       accessToken: null,
       accessTokenExpireAt: null,
       userInfo: null,
@@ -217,6 +233,52 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      // 刷新 Token（基座机制）：真凭证是 HttpOnly refresh cookie（浏览器同源
+      // 自动携带，withCredentials 已开），绑定键 (uid/jti) 从持久化的 access
+      // token payload 解出随 body 回传（过期 token 的未验签 payload 也可解，
+      // 后端容忍）。响应同登录形状，含轮换后的新 access token 与新 refresh
+      // cookie；响应体不含 refresh token（后端剥进 cookie）。
+      refreshToken: async () => {
+        try {
+          let binding: { user_id?: number; jti?: string } = {};
+          const at = get().accessToken;
+          if (at) {
+            try {
+              const payload = JSON.parse(
+                atob(at.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')),
+              ) as { uid?: number; jti?: string };
+              binding = { user_id: payload.uid, jti: payload.jti };
+            } catch {
+              // 解码失败则空绑定键，交由服务端判定（不吞错：留痕后继续）
+              console.error('[Auth] decode access token payload for refresh binding failed');
+            }
+          }
+          // ⚠ 与登录同为 snake_case 契约（curl 实测：grant_type/user_id/jti）；
+          // 走 RequestClient 单例（401 拦截器对 /refresh-token 特判：cookie
+          // 失效直接重认证，不会死锁刷新队列）。
+          const response = await RequestClient.getInstance().post<LoginResponse>(
+            adminPath('refresh-token'),
+            { grant_type: 'refresh_token', ...binding } as never,
+          );
+
+          const token = response?.access_token || response?.accessToken || '';
+          if (!token) {
+            throw new Error('refresh response missing access_token');
+          }
+          const expiresIn = Number(response?.expires_in ?? response?.expiresIn ?? 0) || 7200;
+
+          set({
+            accessToken: token,
+            accessTokenExpireAt: Date.now() + expiresIn * 1000,
+          });
+          return token;
+        } catch (err) {
+          console.error('Refresh token failed:', err);
+          get().forceLogout();
+          return '';
+        }
+      },
+
       // 重认证（兜底）
       reauthenticate: () => {
         console.warn('Token invalid, please re-login');
@@ -261,9 +323,10 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage', // localStorage key
-      // 持久化 access token 与用户信息：后端无管理端 refresh 端点，
-      // 刷新页面后凭持久化的 accessToken + userInfo 直接恢复会话（免二次登录）。
-      // token 过期后首个 API 401 会经拦截器 forceLogout 清空本存储。
+      // 持久化 access token 与用户信息：刷新页面后凭持久化 token 恢复会话；
+      // token 已过期时 bootstrap 凭 HttpOnly refresh cookie 静默续期（过期
+      // token 的 payload 仍可解出 uid/jti 作刷新绑定键）。续期失效则由
+      // 401 拦截器 / useTokenRefresh 的 forceLogout 清空本存储。
       partialize: (s) => ({
         accessToken: s.accessToken,
         accessTokenExpireAt: s.accessTokenExpireAt,

@@ -136,6 +136,7 @@
   "bioLabel": "Bio",
   "bioHint": "Introduce yourself…",
   "avatarLabel": "Avatar",
+  "avatarTooLarge": "Avatar image must be under 2MB",
   "saveProfile": "Save",
   "profileSaved": "Profile updated",
   "logout": "Log out",

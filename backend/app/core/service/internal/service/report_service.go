@@ -111,6 +111,13 @@ func (s *ReportService) CreateReport(ctx context.Context, req *reportV1.CreateRe
 	return dto, nil
 }
 
+// spBizMarkerPrefix 站内信 content 机器可读尾标记前缀（方案 A）：
+// content 最后一行为独立一行 "sp-biz:{...}"，JSON 载荷按业务类型携带跳转
+// 定位字段——视频类通知为 {"videoId":<id>}。客户端解析该行提取 videoId 实现
+// 点击直达视频详情；无标记或解析失败一律视为普通文本通知（向后兼容）。
+// 该行由展示端剔除，不影响人读文案。
+const spBizMarkerPrefix = "\nsp-biz:"
+
 // notifySuperAdmins 经基座通知域投递缝给全部超管发站内信。
 func (s *ReportService) notifySuperAdmins(ctx context.Context, reportID uint32, req *reportV1.CreateReportRequest) {
 	if s.internalMessage == nil || s.superAdmins == nil {
@@ -126,6 +133,11 @@ func (s *ReportService) notifySuperAdmins(ctx context.Context, reportID uint32, 
 		"：目标类型=" + req.GetTargetType().String() +
 		"，目标ID=" + strconv.FormatUint(uint64(req.GetTargetId()), 10) +
 		"，原因=" + req.GetReason()
+	// 视频举报在 content 末尾追加机器可读尾标记（约定见 spBizMarkerPrefix），
+	// 供客户端点击通知直达视频详情；其余目标类型不带标记。
+	if req.GetTargetType() == reportV1.ReportTargetType_REPORT_TARGET_TYPE_VIDEO {
+		content += spBizMarkerPrefix + `{"videoId":` + strconv.FormatUint(uint64(req.GetTargetId()), 10) + `}`
+	}
 	if _, err = s.internalMessage.SendSystemNotification(ctx, title, content, adminIDs); err != nil {
 		s.log.Errorf("report notify super admins failed: %v", err)
 	}

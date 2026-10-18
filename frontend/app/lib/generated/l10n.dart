@@ -654,6 +654,16 @@ class S {
     return Intl.message('头像', name: 'avatarLabel', desc: '', args: []);
   }
 
+  /// `头像图片不能超过 2MB`
+  String get avatarTooLarge {
+    return Intl.message(
+      '头像图片不能超过 2MB',
+      name: 'avatarTooLarge',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `保存`
   String get saveProfile {
     return Intl.message('保存', name: 'saveProfile', desc: '', args: []);

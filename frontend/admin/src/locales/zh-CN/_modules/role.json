@@ -57,6 +57,5 @@
       "lastLoginAt": "最后登录时间",
       "lastLoginIp": "最后登录 IP"
     }
-  },
-  "permissionsEditHint": "基座缺陷规避：编辑保存不提交权限变更（后端 updateMask 链路会清空角色授权），权限树仅作当前授权展示；权限分配请通过新建角色或在后端修复后开放。"
+  }
 }

@@ -57,6 +57,5 @@
       "lastLoginAt": "Last Login At",
       "lastLoginIp": "Last Login IP"
     }
-  },
-  "permissionsEditHint": "Upstream workaround: permission changes are not submitted on edit (the backend updateMask path wipes role grants); the tree shows current grants only. Assign permissions via role creation until the backend is fixed."
+  }
 }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:shortplay_app/generated/l10n.dart';
+import 'package:shortplay_app/src/app_router/app_router.dart' show RouteNames;
 import 'package:shortplay_app/src/features/common/widgets/login_guard.dart';
 import 'package:shortplay_app/src/features/notify/bloc/notify_bloc.dart';
 import 'package:shortplay_app/src/features/notify/models/notification.dart';
@@ -43,6 +45,14 @@ class _NotifyPageState extends State<NotifyPage>
 
   void _openItem(NotificationItem item) {
     context.read<NotifyBloc>().add(NotifyMarkedRead(item));
+    // sp-biz 尾标记携带 videoId 的通知（视频举报等）点击直达视频详情页
+    final videoId = item.videoId;
+    if (videoId != null) {
+      context.pushNamed(
+        RouteNames.videoDetail,
+        pathParameters: {'videoId': '$videoId'},
+      );
+    }
   }
 
   @override

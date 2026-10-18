@@ -26,8 +26,9 @@ import (
 	mediaV1 "go-wind-shortplay/api/gen/go/media/service/v1"
 
 	"go-wind-shortplay/pkg/middleware/auth"
-	applogging "go-wind-shortplay/pkg/middleware/logging"
 	entmiddleware "go-wind-shortplay/pkg/middleware/ent"
+	applogging "go-wind-shortplay/pkg/middleware/logging"
+	"go-wind-shortplay/pkg/oss"
 )
 
 // OperationAuthenticationServiceRegister 手工挂载的 C 端注册路由操作名。
@@ -62,7 +63,6 @@ func NewRestMiddleware(
 
 		// C 端注册（手工挂载路由，见 NewRestServer；app proto 暂未声明该接口）。
 		OperationAuthenticationServiceRegister,
-
 
 		// MediaAssetService.Get：公开资源读取，租户隔离由 core viewer 保证。
 		appV1.OperationMediaAssetServiceGet,
@@ -127,6 +127,8 @@ func NewRestServer(
 	ctx *bootstrap.Context,
 
 	middlewares []middleware.Middleware,
+
+	minIOClient *oss.MinIOClient,
 
 	authenticationService *service.AuthenticationService,
 	fileTransferService *service.FileTransferService,
@@ -195,6 +197,10 @@ func NewRestServer(
 
 	appV1.RegisterFileTransferServiceHTTPServer(srv, fileTransferService)
 	appV1.RegisterUserProfileServiceHTTPServer(srv, userProfileService)
+
+	// 图片直传（头像等；二进制 body，手工路由；MinIO 上传，返回 {url}；
+	// 不入游客白名单——必须登录，与 admin 端 /admin/v1/uploads/image 同规）
+	registerImageUploadHandler(srv, minIOClient)
 
 	appV1.RegisterMediaAssetServiceHTTPServer(srv, mediaAssetService)
 

@@ -1,3 +1,5 @@
+import 'dart:io' show File;
+
 import 'package:get_it/get_it.dart' show GetIt;
 
 import 'package:shortplay_app/src/core/services/base_service.dart';
@@ -5,6 +7,28 @@ import 'package:shortplay_app/src/core/services/pagination_query.dart';
 import 'package:shortplay_app/src/core/transport/http/index.dart';
 import 'package:shortplay_app/src/core/utilities/convert.dart';
 import 'package:shortplay_app/src/features/common/data/models.dart';
+
+/// 头像图片直传上限（与后端 /uploads/image 契约一致：2MB）
+const avatarUploadMaxBytes = 2 * 1024 * 1024;
+
+/// 按扩展名映射图片 MIME（后端按 Content-Type 白名单校验：
+/// jpeg/png/webp/gif；其余返回 415）
+String? _imageMimeFromPath(String path) {
+  final ext = path.split('.').last.toLowerCase();
+  switch (ext) {
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'png':
+      return 'image/png';
+    case 'webp':
+      return 'image/webp';
+    case 'gif':
+      return 'image/gif';
+    default:
+      return null;
+  }
+}
 
 /// 用户服务：主页资料 / 统计 / 作品列表 / 收藏列表 / 编辑资料
 class UserService extends BaseService {
@@ -100,6 +124,48 @@ class UserService extends BaseService {
         pageNum: query.pageNum,
         pageSize: query.pageSize,
       );
+    } on DioException catch (e) {
+      throw ApiStatusException(handleDioError(e));
+    }
+  }
+
+  /// 头像图片直传 POST /uploads/image（需登录，Bearer 由全局认证拦截器附加）
+  ///
+  /// 契约与 admin 端 /admin/v1/uploads/image 对称：body = 图片原始字节，
+  /// Content-Type = 图片 MIME（非 multipart），≤2MB，成功返回 {url}。
+  /// [onSendProgress] 上传进度回调（已发送字节 / 总字节）。
+  Future<String> uploadAvatar(
+    File file, {
+    void Function(int count, int total)? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
+    final mime = _imageMimeFromPath(file.path);
+    if (mime == null) {
+      throw ApiStatusException(Status(message: 'unsupported image type'));
+    }
+    final bytes = await file.readAsBytes();
+    if (bytes.isEmpty) {
+      throw ApiStatusException(Status(message: 'empty image body'));
+    }
+    if (bytes.length > avatarUploadMaxBytes) {
+      throw ApiStatusException(Status(message: 'image exceeds 2MB limit'));
+    }
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/uploads/image',
+        data: Stream.fromIterable([bytes]),
+        options: Options(
+          contentType: mime,
+          headers: {'Content-Length': '${bytes.length}'},
+        ),
+        onSendProgress: onSendProgress,
+        cancelToken: cancelToken,
+      );
+      final url = res.data?['url'];
+      if (url is! String || url.isEmpty) {
+        throw ApiStatusException(Status(message: 'empty response'));
+      }
+      return url;
     } on DioException catch (e) {
       throw ApiStatusException(handleDioError(e));
     }

@@ -69,21 +69,16 @@ export function useUpdateRole(
   options?: UseMutationOptions<unknown, Error, { id: number; values: Record<string, unknown> }>,
 ) {
   return useMutation({
-    mutationFn: ({ id, values }: { id: number; values: Record<string, unknown> }) => {
-      // ⚠ 后端缺陷规避（实测 2026-10-18）：更新载荷携带 permissions + updateMask
-      // 含 permissions 时，核心库 FilterByFieldMask 会在 ReplacePermissions 之前
-      // 就地剥掉 data.permissions（permissions 已被后端移出 mask），ReplacePermissions
-      // 拿到空列表 → 角色既有授权被整体清空（cms 基座同源同病）。
-      // 故更新路径一律剔除 permissions（后端维持既有授权不变）；权限分配仅在
-      // 创建路径提交（Create 的 ReplacePermissions 不经 mask 过滤，实测可用）。
-      const metaValues: Record<string, unknown> = { ...values };
-      delete metaValues.permissions;
-      return adminHttp.put<unknown>(`roles/${id}`, {
+    // 对齐基座原生行为：Update 载荷整体透传（含 permissions）+ 全量字段 updateMask。
+    // 后端 role_repo.Update 已修复「mask 剥离 permissions 致 ReplacePermissions
+    // 拿空列表清空授权」缺陷（字段掩码过滤前快照权限集合，后置替换），编辑提交
+    // 权限即生效，无需再规避剔除。
+    mutationFn: ({ id, values }: { id: number; values: Record<string, unknown> }) =>
+      adminHttp.put<unknown>(`roles/${id}`, {
         id,
-        data: metaValues,
-        updateMask: makeUpdateMask(Object.keys(metaValues)),
-      });
-    },
+        data: values,
+        updateMask: makeUpdateMask(Object.keys(values)),
+      }),
     ...options,
   });
 }

@@ -208,22 +208,17 @@ const RoleDrawer: React.FC<RoleDrawerProps> = ({ open, mode, data, onClose, onSu
         fieldProps={{ allowClear: true, rows: 2 }}
       />
 
-      {/* 权限树（创建：可勾选分配，随 Create 提交；编辑：只读展示既有授权，
-          见 useUpdateRole 的后端缺陷规避说明——编辑提交权限会被基座链路清空） */}
+      {/* 权限树（创建/编辑均可勾选，随 Create/Update 提交；后端更新链路已修复
+          「mask 剥离 permissions 致授权清空」缺陷，编辑提交权限即生效） */}
       <div className="mb-6">
         <label className="block mb-2 text-sm font-medium text-[color:var(--ant-color-text)]">
           {t('permissions')}
         </label>
-        {mode === 'edit' && (
-          <p className="mb-2 text-xs text-[color:var(--ant-color-text-quaternary)]">
-            {t('permissionsEditHint')}
-          </p>
-        )}
         <Spin spinning={treeLoading}>
           {treeData.length > 0 ? (
             <div className="rounded-lg border border-[color:var(--ant-color-border-secondary)] bg-[color:var(--ant-color-fill-quaternary)] p-2.5">
               <Tree
-                checkable={mode === 'create'}
+                checkable
                 checkedKeys={checkedKeys}
                 onCheck={(checked) => {
                   setCheckedKeys(checked as number[]);

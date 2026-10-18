@@ -136,6 +136,7 @@
   "bioLabel": "简介",
   "bioHint": "介绍一下自己…",
   "avatarLabel": "头像",
+  "avatarTooLarge": "头像图片不能超过 2MB",
   "saveProfile": "保存",
   "profileSaved": "资料已更新",
   "logout": "退出登录",

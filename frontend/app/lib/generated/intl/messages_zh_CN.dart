@@ -45,6 +45,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "appName": MessageLookupByLibrary.simpleMessage("GoWind 短视频社区"),
     "asDraftOption": MessageLookupByLibrary.simpleMessage("存为草稿（仅自己可见）"),
     "avatarLabel": MessageLookupByLibrary.simpleMessage("头像"),
+    "avatarTooLarge": MessageLookupByLibrary.simpleMessage("头像图片不能超过 2MB"),
     "backToHome": MessageLookupByLibrary.simpleMessage("返回首页"),
     "bioHint": MessageLookupByLibrary.simpleMessage("介绍一下自己…"),
     "bioLabel": MessageLookupByLibrary.simpleMessage("简介"),

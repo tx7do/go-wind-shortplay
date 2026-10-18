@@ -49,6 +49,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Save as draft (only visible to me)",
     ),
     "avatarLabel": MessageLookupByLibrary.simpleMessage("Avatar"),
+    "avatarTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Avatar image must be under 2MB",
+    ),
     "backToHome": MessageLookupByLibrary.simpleMessage("Back to Home"),
     "bioHint": MessageLookupByLibrary.simpleMessage("Introduce yourself…"),
     "bioLabel": MessageLookupByLibrary.simpleMessage("Bio"),
