@@ -967,6 +967,10 @@ func (m *RegisterUserRequest) validate(all bool) error {
 		// no validation rules for ClientType
 	}
 
+	if m.Nickname != nil {
+		// no validation rules for Nickname
+	}
+
 	if len(errors) > 0 {
 		return RegisterUserRequestMultiError(errors)
 	}

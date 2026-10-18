@@ -277,6 +277,20 @@ func ErrorConflict(format string, args ...interface{}) *errors.Error {
 	return errors.New(409, IdentityErrorReason_CONFLICT.String(), fmt.Sprintf(format, args...))
 }
 
+// 用户名已被占用
+func IsUsernameTaken(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == IdentityErrorReason_USERNAME_TAKEN.String() && e.Code == 409
+}
+
+// 用户名已被占用
+func ErrorUsernameTaken(format string, args ...interface{}) *errors.Error {
+	return errors.New(409, IdentityErrorReason_USERNAME_TAKEN.String(), fmt.Sprintf(format, args...))
+}
+
 // 410
 func IsGone(err error) bool {
 	if err == nil {

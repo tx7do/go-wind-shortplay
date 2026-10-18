@@ -65,7 +65,7 @@ func (r *UploadTaskRepo) Create(ctx context.Context, taskID, fileName string, fi
 		SetStatus(uploadtask.StatusUploading).
 		SetUploadedChunks([]uint32{}).
 		SetCreatedAt(time.Now())
-	if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
+	if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
 		builder.SetTenantID(tid)
 	}
 	e, err := builder.Save(ctx)
@@ -180,7 +180,7 @@ func (r *VideoDraftRepo) Create(ctx context.Context, dto *videoV1.VideoDraft) (*
 		SetAuthorID(dto.GetAuthorId()).
 		SetCreatedAt(time.Now()).
 		SetUpdatedAt(time.Now())
-	if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
+	if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
 		builder.SetTenantID(tid)
 	}
 	e, err := builder.Save(ctx)

@@ -3,6 +3,9 @@
 interface ImportMetaEnv {
     readonly VITE_API_URL: string
 
+    /** 管理端 SSE 端点（后端 server.sse，默认 http://localhost:7601/events） */
+    readonly VITE_SSE_URL: string
+
     readonly VITE_APP_TITLE: string
     readonly VITE_APP_NAMESPACE: string
     readonly VITE_APP_VERSION: string

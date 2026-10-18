@@ -46,6 +46,7 @@ enum IdentityErrorReason {
 
   // 409
   CONFLICT = 900 [(errors.code) = 409];                   // 冲突
+  USERNAME_TAKEN = 901 [(errors.code) = 409];             // 用户名已被占用
 
   // 410
   GONE = 1000 [(errors.code) = 410];                       // 已删除

@@ -1,5 +1,5 @@
 import { useState, useEffect, type ComponentType } from 'react';
-import { RouterProvider } from 'react-router-dom';
+import { Navigate, RouterProvider } from 'react-router-dom';
 
 import { createAccessibleRouter } from '@/core/router/factory';
 import { AccessibleRoutesContext } from '@/core/router';
@@ -161,6 +161,36 @@ const PROFILE_BACKEND_ROUTE: BackendRoute = {
 };
 
 /**
+ * 旧扁平路径兼容重定向：初版静态树把业务页挂在 '/' 顶层（/users、/videos 等），
+ * 对齐后端菜单种子后统一嵌套为 /opm/users、/shortplay/*。这里保留旧路径 →
+ * 新路径的重定向，前端回退树（allRoutes 合并）与后端树（ensureLayoutRoot）
+ * 共用，历史书签 / 旧标签页两种模式下都能落地。
+ */
+const LEGACY_REDIRECT_PAIRS: ReadonlyArray<{ from: string; to: string; title: string }> = [
+  { from: 'users', to: '/opm/users', title: 'routes:users' },
+  { from: 'videos', to: '/shortplay/videos', title: 'menu.shortPlay.video' },
+  { from: 'comments', to: '/shortplay/comments', title: 'menu.shortPlay.comment' },
+  { from: 'reports', to: '/shortplay/reports', title: 'menu.shortPlay.report' },
+  { from: 'sysconf', to: '/shortplay/sysconf', title: 'menu.shortPlay.sysconf' },
+];
+
+/** 静态树形态（element 直挂 Navigate，随 allRoutes 并入 '/' 容器） */
+const LEGACY_REDIRECT_ROUTES: AppRouteObject[] = LEGACY_REDIRECT_PAIRS.map(({ from, to, title }) => ({
+  name: `${from}-legacy`,
+  path: from,
+  element: <Navigate to={to} replace />,
+  meta: { title, hideInMenu: true, hideInTab: true },
+}));
+
+/** 后端树形态（redirect 经 generateRoutesByBackend 转 index Navigate） */
+const LEGACY_REDIRECT_BACKEND_ROUTES: BackendRoute[] = LEGACY_REDIRECT_PAIRS.map(({ from, to, title }) => ({
+  name: `${from}-legacy`,
+  path: from,
+  redirect: to,
+  meta: { title, hideInMenu: true, hideInTab: true },
+}));
+
+/**
  * 统一合成 '/' 主布局根节点：
  * - navigation 下发的多棵目录子树（Dashboard/组织人事/权限/短剧管理等）全部
  *   挂到同一 BasicLayout 根下，侧栏（useMenuData 取 '/' 容器的 children）才能
@@ -174,7 +204,7 @@ function ensureLayoutRoot(routes: BackendRoute[]): BackendRoute[] {
       path: '/',
       component: 'BasicLayout',
       meta: { title: 'routes:home', hideInMenu: true, hideInTab: true },
-      children: [...routes, PROFILE_BACKEND_ROUTE],
+      children: [...routes, PROFILE_BACKEND_ROUTE, ...LEGACY_REDIRECT_BACKEND_ROUTES],
     },
   ];
 }
@@ -190,7 +220,7 @@ export const allRoutes: AppRouteObject[] = [
     if (route.path === '/' && route.children) {
       return {
         ...route,
-        children: [...route.children, ...businessRoutes],
+        children: [...route.children, ...businessRoutes, ...LEGACY_REDIRECT_ROUTES],
       };
     }
     return route;
@@ -227,25 +257,42 @@ export const AppRouter = () => {
           } catch (authErr) {
             console.warn('Auth initialization failed, will redirect to login:', authErr);
             useAuthStore.getState().forceLogout();
-
-            if (stale) return; // 已过期，不继续创建路由
+            // 立即终止本轮初始化：isAuthenticated 翻转会重触发本 effect 并按
+            // 未登录分支重建路由。若继续往下跑，会用 effect 闭包里过期的
+            // isAuthenticated=true 去拉 navigation（此时 token 已清）→ 必 401
+            // → 静默回退前端静态树，把深链打进 404 通配符。
+            return;
           }
         }
 
         // ========== 后端菜单模式探测 ==========
         // 先拉 navigation：成功才走 backend 模式；失败/为空回退 frontend
         // 模式（静态路由全量仍在，登录不闪断）。
+        // ⚠ 重试一次再回退：后端重启/网络抖动的瞬时失败若直接回退静态树，
+        // 深链（/opm/users 等）会在静态树里落 404 通配符——静态树虽已按
+        // 种子路径嵌套对齐，但权限页等后端独有路径仍只有后端树才有。
         let backendMenuRoutes: BackendRoute[] | null = null;
         if (accessMode === 'backend' && isAuthenticated) {
-          try {
-            const mapped = toBackendRoutes(await fetchNavigation());
-            if (mapped.length) {
-              backendMenuRoutes = ensureLayoutRoot(mapped);
+          const fetchNavWithRetry = async (): Promise<BackendRoute[] | null> => {
+            try {
+              const mapped = toBackendRoutes(await fetchNavigation());
+              // 空 navigation 视同失败：回退静态树（保持既有行为，
+              // 避免后端模式 + 空路由树把静态页全部打丢）
+              return mapped.length ? ensureLayoutRoot(mapped) : null;
+            } catch (navErr) {
+              // 首次失败按瞬时故障处理：短暂退避后重试一次
+              console.warn('[Router] navigation 拉取失败，300ms 后重试一次:', navErr);
+              await new Promise((resolve) => setTimeout(resolve, 300));
+              try {
+                const mapped = toBackendRoutes(await fetchNavigation());
+                return mapped.length ? ensureLayoutRoot(mapped) : null;
+              } catch (retryErr) {
+                console.warn('[Router] navigation 重试仍失败，回退静态路由:', retryErr);
+                return null;
+              }
             }
-          } catch (navErr) {
-            console.warn('[Router] navigation 拉取失败，回退静态路由:', navErr);
-            backendMenuRoutes = null;
-          }
+          };
+          backendMenuRoutes = await fetchNavWithRetry();
         }
 
         // await 之后，通过 useAccess 获取最新合并权限（角色码 + 权限码）

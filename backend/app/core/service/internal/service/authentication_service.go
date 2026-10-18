@@ -429,6 +429,7 @@ func (s *AuthenticationService) RegisterUser(ctx context.Context, req *authentic
 	user, err := s.userRepo.CreateWithTx(ctx, tx, &identityV1.User{
 		TenantId: tenantId,
 		Username: trans.Ptr(req.Username),
+		Nickname: req.Nickname,
 		Email:    req.Email,
 		Status:   trans.Ptr(identityV1.User_NORMAL),
 		RoleId:   roleID,

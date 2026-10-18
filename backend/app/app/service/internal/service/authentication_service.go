@@ -258,9 +258,15 @@ func (s *AuthenticationService) AuthRegister(ctx context.Context, req *appV1.Aut
 	if derr != nil {
 		return nil, authenticationV1.ErrorBadRequest("invalid password encoding")
 	}
+	// 昵称可选：未传不下发（保持 nil，落库为 NULL），避免空串覆盖语义
+	var nickname *string
+	if req.GetNickname() != "" {
+		nickname = trans.Ptr(req.GetNickname())
+	}
 	if _, err := s.authenticationServiceClient.RegisterUser(ctx, &authenticationV1.RegisterUserRequest{
 		Username:   req.GetUsername(),
 		Password:   string(plain),
+		Nickname:   nickname,
 		TenantCode: constants.DefaultTenantCode,
 		ClientType: authenticationV1.ClientType_app.Enum(),
 	}); err != nil {

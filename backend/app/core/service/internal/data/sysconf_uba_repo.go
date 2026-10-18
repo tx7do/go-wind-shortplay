@@ -141,7 +141,7 @@ func (r *UbaRepo) CreateBatch(ctx context.Context, userID uint32, events []*ubaV
 			SetNillableExtra(ev.Extra).
 			SetNillableOccurredAt(timePtrOfUba(ev.OccurredAt.AsTime(), ev.OccurredAt != nil)).
 			SetCreatedAt(time.Now())
-		if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
+		if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
 			builder.SetTenantID(tid)
 		}
 		if _, err := builder.Save(ctx); err != nil {

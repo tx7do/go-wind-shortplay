@@ -265,24 +265,26 @@ func (r *InternalMessageRecipientRepo) Delete(ctx context.Context, id uint32) er
 	return nil
 }
 
-// MarkNotificationAsRead 将通知标记为已读
+// MarkNotificationAsRead 将通知标记为已读。
+// recipientIds 为空 = 调用者全部未读置已读（对齐基座契约）；非空 = 仅指定的收件行。
 func (r *InternalMessageRecipientRepo) MarkNotificationAsRead(ctx context.Context, req *internalMessageV1.MarkNotificationAsReadRequest) error {
-	if len(req.GetRecipientIds()) == 0 {
-		return internalMessageV1.ErrorBadRequest("invalid parameter")
-	}
 	// 强制使用调用者 user_id，忽略请求体中的 user_id
 	callerUserID, hasUser := viewerUserIDFromContext(ctx)
 	if !hasUser {
 		return internalMessageV1.ErrorBadRequest("missing viewer context")
 	}
 
+	whereCond := []predicate.InternalMessageRecipient{
+		internalmessagerecipient.RecipientUserIDEQ(callerUserID),
+		internalmessagerecipient.StatusNEQ(internalmessagerecipient.StatusRead),
+	}
+	if len(req.GetRecipientIds()) > 0 {
+		whereCond = append(whereCond, internalmessagerecipient.IDIn(req.GetRecipientIds()...))
+	}
+
 	now := time.Now()
 	_, err := r.entClient.Client().InternalMessageRecipient.Update().
-		Where(
-			internalmessagerecipient.IDIn(req.GetRecipientIds()...),
-			internalmessagerecipient.RecipientUserIDEQ(callerUserID),
-			internalmessagerecipient.StatusNEQ(internalmessagerecipient.StatusRead),
-		).
+		Where(whereCond...).
 		SetStatus(internalmessagerecipient.StatusRead).
 		SetNillableReadAt(trans.Ptr(now)).
 		SetNillableUpdatedAt(trans.Ptr(now)).

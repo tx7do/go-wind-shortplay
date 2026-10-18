@@ -5,7 +5,11 @@
  * - GET /admin/v1/me、PUT /admin/v1/me（{data,updateMask} 信封；可改字段
  *   nickname/avatar/realname/mobile/email/remark/gender，基座白名单过滤）；
  * - POST /admin/v1/me/password（旧密码错误 400 BAD_REQUEST，页面内友好提示）；
- * 站内通知段为 Phase 2 契约（后端暂无对应端点，保留供后续接通）。
+ * 站内通知走基座 internal-message 域（管理端收件箱）：
+ * - GET /admin/v1/internal-message/inbox（服务端强制按调用者 user_id 过滤）；
+ * - POST /admin/v1/internal-message/read（recipientIds 必填非空，空数组 400）；
+ * 实时推送走管理端 SSE（server.sse :7601 /events，事件 notification），
+ * 失联时由 useGetUnreadCount 的兜底轮询补拉。
  */
 import {
   useMutation,
@@ -16,14 +20,12 @@ import {
 
 import { adminHttp } from '@/api/client';
 import type {
-  AdminNotification,
   AdminUser,
   ChangePasswordRequest,
   Int64,
-  ListNotificationsResponse,
   UpdateProfileRequest,
 } from '@/api/types';
-import { queryClient } from '@/core';
+import { PaginationQuery, queryClient } from '@/core';
 
 // ==============================
 // 个人中心（基座 /admin/v1/me）
@@ -76,82 +78,118 @@ export function useChangePassword(
 }
 
 // ==============================
-// 站内通知（轮询，不依赖 SSE）
+// 站内通知（基座 internal-message 收件箱 + SSE 实时推送）
 // ==============================
 
-export interface ListNotificationsParams {
-  unreadOnly?: boolean;
-  pageNum?: number;
+/**
+ * 收件箱行：internal_message.service.v1.InternalMessageRecipient 的 protojson 形状。
+ * status 枚举为名字符串；uint64 total 为 JSON 字符串（protojson 约定）。
+ */
+export interface InboxItem {
+  id?: number;
+  messageId?: number;
+  recipientUserId?: number;
+  status?: 'SENT' | 'RECEIVED' | 'READ' | 'REVOKED' | 'DELETED';
+  title?: string;
+  content?: string;
+  receivedAt?: string;
+  readAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface InboxListResponse {
+  items?: InboxItem[];
+  total?: Int64;
+}
+
+export interface ListInboxParams {
+  page?: number;
   pageSize?: number;
+  /** 只看未读（服务端按 status=SENT 过滤；本后端未读即 SENT，已读置 READ） */
+  unreadOnly?: boolean;
+  /** 不分页全量拉（标记全部已读前收集 id 用） */
+  noPaging?: boolean;
 }
 
 /**
- * 通知列表（Admin 端复用 notify 域，pageNum 从 1 起）。
- * 注意：必须直接发请求，不能用 queryClient.fetchQuery——调用方 useQuery 的
- * queryKey 与此处相同，fetchQuery 会去重返回外层在途 promise 造成自等死锁。
+ * 收件箱列表（GET /admin/v1/internal-message/inbox）。
+ * 服务端强制按调用者 user_id 过滤（repo 内 viewerUserIDFromContext），
+ * 前端无需（也不应）传 recipient_user_id。
  */
-export async function fetchListNotifications(params: ListNotificationsParams) {
-  return adminHttp.get<ListNotificationsResponse>('notifications', {
-    unreadOnly: params.unreadOnly || undefined,
-    pageNum: params.pageNum || 1,
-    pageSize: params.pageSize || 10,
+export async function fetchListInbox(params: ListInboxParams): Promise<InboxListResponse> {
+  const query = new PaginationQuery({
+    paging: params.noPaging ? undefined : { page: params.page || 1, pageSize: params.pageSize || 10 },
+    orderBy: ['-created_at'],
+    formValues: params.unreadOnly ? { status: 'SENT' } : undefined,
   });
+  return adminHttp.get<InboxListResponse>('internal-message/inbox', query.toRawParams());
+}
+
+/** 未读判定：SENT（待拉取）与 RECEIVED（已拉取未读）都算未读；READ/REVOKED/DELETED 不算 */
+export function isInboxItemUnread(item: InboxItem): boolean {
+  return item.status === 'SENT' || item.status === 'RECEIVED';
 }
 
 /**
- * 未读数角标：顶栏通知铃以 30s 轮询拉取（原 cms 为 SSE 实时推送 + 5 分钟兜底轮询，
- * 本后端无管理端 SSE，统一改为轮询）。
- * ⚠ 后端暂无 /notifications* 管理端端点（Phase 2 契约保留待接通）：
- * retry:false 避免每次轮询 404 × 默认 3 次重试放大请求量；失败静默（角标恒 0）。
+ * 未读数角标：未读 total（服务端 COUNT）。
+ * 实时性由 SSE notification 事件 invalidate 驱动；这里保留 5 分钟兜底轮询，
+ * 仅在 SSE 失联时补拉（与基座 HeaderContent 的节奏一致）。
+ * retry:false：SSE 正常时无需重试放大请求；失败角标短暂滞后可接受。
  */
-export function useGetUnreadCount(
-  options?: UseQueryOptions<{ count?: Int64 }, Error>,
-) {
-  return useQuery<{ count?: Int64 }, Error>({
-    queryKey: ['adminUnreadCount'],
-    queryFn: () => adminHttp.get<{ count?: Int64 }>('notifications/unread-count'),
-    refetchInterval: 30_000,
+export function useGetUnreadCount(options?: UseQueryOptions<InboxListResponse, Error>) {
+  return useQuery<InboxListResponse, Error>({
+    queryKey: ['inbox', 'unread'],
+    queryFn: () => fetchListInbox({ page: 1, pageSize: 1, unreadOnly: true }),
+    refetchInterval: 300_000,
     refetchIntervalInBackground: false,
     retry: false,
     ...options,
   });
 }
 
-export function useMarkNotificationsRead(
-  options?: UseMutationOptions<void, Error, { ids: number[] }>,
+/** 失效全部收件箱查询（SSE 推送 / 已读操作后调用） */
+export function invalidateInboxQueries() {
+  queryClient.invalidateQueries({ queryKey: ['inbox'] });
+}
+
+/**
+ * 标记已读（POST /admin/v1/internal-message/read）。
+ * ⚠ 与基座差异：本后端 recipientIds 必须非空（空数组 400 BadRequest），
+ * 「全部已读」由 markAllInboxRead 先拉未读 id 列表再提交。
+ */
+export function useMarkInboxRead(
+  options?: UseMutationOptions<unknown, Error, { ids: number[] }>,
 ) {
   const { onSuccess: callerOnSuccess, ...rest } = options ?? {};
-  return useMutation<void, Error, { ids: number[] }>({
-    mutationFn: ({ ids }) => adminHttp.put<void>('notifications/read', { ids }),
+  return useMutation<unknown, Error, { ids: number[] }>({
+    mutationFn: ({ ids }) => adminHttp.post('internal-message/read', { recipientIds: ids }),
     ...rest,
     onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['adminUnreadCount'] });
-      queryClient.invalidateQueries({ queryKey: ['listAdminNotifications'] });
+      invalidateInboxQueries();
       callerOnSuccess?.(...args);
     },
   });
 }
 
-export function useMarkAllNotificationsRead(options?: UseMutationOptions<void, Error, void>) {
+/** 全部已读：拉全量未读 id（noPaging）后一次性提交；无未读时不发请求 */
+export function useMarkAllInboxRead(
+  options?: UseMutationOptions<unknown, Error, void>,
+) {
   const { onSuccess: callerOnSuccess, ...rest } = options ?? {};
-  return useMutation<void, Error, void>({
-    mutationFn: () => adminHttp.put<void>('notifications/read-all', {}),
+  return useMutation<unknown, Error, void>({
+    mutationFn: async () => {
+      const res = await fetchListInbox({ noPaging: true, unreadOnly: true });
+      const ids = (res.items ?? [])
+        .map((item) => item.id)
+        .filter((id): id is number => id !== null && id !== undefined);
+      if (ids.length === 0) return;
+      await adminHttp.post('internal-message/read', { recipientIds: ids });
+    },
     ...rest,
     onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['adminUnreadCount'] });
-      queryClient.invalidateQueries({ queryKey: ['listAdminNotifications'] });
+      invalidateInboxQueries();
       callerOnSuccess?.(...args);
     },
   });
 }
-
-/** 类型收窄辅助：判断通知类型 Tag 展示用 */
-export function getNotificationTypeLabel(type: unknown): 'LIKE' | 'COMMENT' | 'FOLLOW' | 'SYSTEM' {
-  const s = String(type ?? '');
-  if (s.includes('COMMENT')) return 'COMMENT';
-  if (s.includes('FOLLOW')) return 'FOLLOW';
-  if (s.includes('SYSTEM')) return 'SYSTEM';
-  return 'LIKE';
-}
-
-export type { AdminNotification };

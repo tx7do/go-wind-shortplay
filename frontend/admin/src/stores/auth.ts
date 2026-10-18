@@ -5,6 +5,7 @@ import i18next from 'i18next';
 import { adminHttp, adminPath } from '@/api/client';
 import type { LoginResponse } from '@/api/types';
 import { RequestClient } from '@/core/transport/rest';
+import { connectSSEServer, disconnectSSEServer, startRefreshTimer, stopRefreshTimer } from '@/hooks/useTokenRefresh';
 import { encryptPassword } from '@/utils';
 import { useUserStore } from './user';
 import { useTabsStore } from './tabs';
@@ -21,7 +22,9 @@ import { queryClient } from '@/core/query-client';
  *    随后 GET /admin/v1/me 恢复身份与角色、GET /admin/v1/perm-codes 恢复权限码。
  *
  * 与底座差异（裁剪说明）：
- * - 后端无 MFA / SSE / 管理端 refresh 端点，相关链路全部移除；
+ * - 后端无 MFA / 管理端 refresh 端点，相关链路全部移除；
+ * - SSE 保留：后端 internal-message 域有管理端 SSE（server.sse → :7601 /events），
+ *   登录成功 / 会话恢复后建连，登出 / token 失效时断开（useTokenRefresh）；
  * - 登录响应不含 user，身份经 /me 获取；为支撑刷新页面后恢复身份，
  *   userInfo 随 accessToken 一并持久化（不含任何凭证信息）；
  * - 401 由 transport 拦截器直接 forceLogout（无静默续期）。
@@ -161,6 +164,10 @@ export const useAuthStore = create<AuthState>()(
           useUserStore.getState().setUserRoles(userInfo.roles ?? []);
           useUserStore.getState().setAccessCodes(permCodes);
 
+          // 建立站内信 SSE 实时通道（internal-message 域通知推送）
+          connectSSEServer();
+          startRefreshTimer();
+
           if (onSuccess) {
             onSuccess();
           }
@@ -186,6 +193,8 @@ export const useAuthStore = create<AuthState>()(
             console.error('服务端登出请求失败（已继续本地清理）:', error);
           });
         } finally {
+          disconnectSSEServer();
+          stopRefreshTimer();
           queryClient.clear();
 
           // 清除 localStorage 中的持久化数据
@@ -217,6 +226,8 @@ export const useAuthStore = create<AuthState>()(
       // 强制登出：纯前端操作，不调后端接口（token 已失效 401 场景）
       forceLogout: () => {
         console.warn('Force logout: clearing auth state');
+        disconnectSSEServer();
+        stopRefreshTimer();
         queryClient.clear();
         localStorage.removeItem('auth-storage');
         localStorage.removeItem('user-storage');

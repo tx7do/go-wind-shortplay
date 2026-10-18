@@ -63,6 +63,16 @@ func (s *InternalMessageRecipientService) ListUserInbox(ctx context.Context, req
 	return resp, nil
 }
 
+// Create 创建收件行：admin BFF 发送站内信（SendMessage 扇出）时经 gRPC 逐人落地
+// 收件记录。收件行落库只能发生在 core（BFF 不碰数据库）；该 RPC 在 proto 契约中
+// 已声明，此前未实现导致 admin 发送链路收件行静默丢失（gRPC Unimplemented）。
+func (s *InternalMessageRecipientService) Create(ctx context.Context, req *internalMessageV1.CreateInternalMessageRecipientRequest) (*internalMessageV1.InternalMessageRecipient, error) {
+	if req == nil || req.Data == nil {
+		return nil, internalMessageV1.ErrorBadRequest("invalid parameter")
+	}
+	return s.internalMessageRecipientRepo.Create(ctx, req.Data)
+}
+
 func (s *InternalMessageRecipientService) DeleteNotificationFromInbox(ctx context.Context, req *internalMessageV1.DeleteNotificationFromInboxRequest) (*emptypb.Empty, error) {
 	var err error
 	err = s.internalMessageRecipientRepo.DeleteNotificationFromInbox(ctx, req)

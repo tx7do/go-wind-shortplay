@@ -532,6 +532,10 @@ func (r *userRepo) CreateWithTx(ctx context.Context, tx *ent.Tx, data *identityV
 	var entity *ent.User
 	if entity, err = builder.Save(ctx); err != nil {
 		r.log.Errorf("insert user failed: %s", err.Error())
+		// 唯一约束冲突（注册/建户重复用户名）返回域错误 409，而非裸 500
+		if ent.IsConstraintError(err) {
+			return nil, identityV1.ErrorUsernameTaken("username already exists")
+		}
 		return nil, identityV1.ErrorInternalServerError("insert user failed")
 	}
 

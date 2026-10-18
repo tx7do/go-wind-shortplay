@@ -385,7 +385,7 @@ func (r *VideoRepo) Create(ctx context.Context, dto *videoV1.Video, tags []strin
 		SetNillablePublishedAt(timeutil.TimestamppbToTime(dto.PublishedAt)).
 		SetCreatedAt(time.Now())
 
-	if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
+	if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
 		builder.SetTenantID(tid)
 	}
 

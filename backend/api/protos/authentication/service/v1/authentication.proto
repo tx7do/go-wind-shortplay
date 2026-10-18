@@ -407,6 +407,13 @@ message RegisterUserRequest {
       description: "客户端类型"
     }
   ]; // 客户端类型
+
+  optional string nickname = 6 [
+    json_name = "nickname",
+    (gnostic.openapi.v3.property) = {
+      description: "用户昵称"
+    }
+  ]; // 用户昵称（可选，注册时随用户一并落库）
 }
 message RegisterUserResponse {
   uint32 user_id = 1 [

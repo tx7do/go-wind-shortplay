@@ -183,7 +183,7 @@ func (r *VideoCommentRepo) Create(ctx context.Context, videoID, userID uint32, c
 		SetContent(content).
 		SetParentID(parentID).
 		SetCreatedAt(time.Now())
-	if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
+	if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
 		builder.SetTenantID(tid)
 	}
 	if userID > 0 {
@@ -234,7 +234,7 @@ func (r *VideoCommentRepo) CreateWithCounter(ctx context.Context, userID, videoI
 		SetContent(content).
 		SetParentID(parentID).
 		SetCreatedAt(time.Now())
-	if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
+	if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
 		builder.SetTenantID(tid)
 	}
 	if userID > 0 {
@@ -455,7 +455,7 @@ func (r *ReportRepo) Create(ctx context.Context, reporterID uint32, t reportV1.R
 		SetDescription(description).
 		SetStatus(videoreport.StatusPending).
 		SetCreatedAt(time.Now())
-	if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
+	if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
 		builder.SetTenantID(tid)
 	}
 	if reporterID > 0 {

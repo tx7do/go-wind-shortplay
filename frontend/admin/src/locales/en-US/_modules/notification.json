@@ -10,10 +10,5 @@
   "viewAll": "View all",
   "unreadOnly": "Unread only",
   "prevPage": "Prev",
-  "nextPage": "Next",
-  "hasVideo": "Related video",
-  "type.LIKE": "Like",
-  "type.COMMENT": "Comment",
-  "type.FOLLOW": "Follow",
-  "type.SYSTEM": "System"
+  "nextPage": "Next"
 }

@@ -352,6 +352,8 @@ func (x *RegisterUserRequest) Redact() {
 	// Safe field: Email
 
 	// Safe field: ClientType
+
+	// Safe field: Nickname
 }
 
 // Ensure RegisterUserResponse implements the Redactor interface at compile time.

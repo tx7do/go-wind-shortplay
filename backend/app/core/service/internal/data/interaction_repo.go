@@ -62,7 +62,7 @@ func (r *InteractionRepo) CreateLike(ctx context.Context, userID uint32, t inter
 		SetTargetType(likeTargetEntity(t)).
 		SetTargetID(targetID).
 		SetCreatedAt(time.Now())
-	if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
+	if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
 		builder.SetTenantID(tid)
 	}
 	if _, err := builder.Save(ctx); err != nil {
@@ -122,7 +122,7 @@ func (r *InteractionRepo) LikeVideoWithCounter(ctx context.Context, userID, vide
 		SetTargetType(videolike.TargetTypeVideo).
 		SetTargetID(videoID).
 		SetCreatedAt(time.Now())
-	if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
+	if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
 		builder.SetTenantID(tid)
 	}
 	if _, err = builder.Save(ctx); err != nil {
@@ -197,7 +197,7 @@ func (r *InteractionRepo) LikeCommentWithCounter(ctx context.Context, userID, co
 		SetTargetType(videolike.TargetTypeComment).
 		SetTargetID(commentID).
 		SetCreatedAt(time.Now())
-	if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
+	if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
 		builder.SetTenantID(tid)
 	}
 	if _, err = builder.Save(ctx); err != nil {
@@ -270,7 +270,7 @@ func (r *InteractionRepo) CollectWithCounter(ctx context.Context, userID, videoI
 		SetUserID(userID).
 		SetVideoID(videoID).
 		SetCreatedAt(time.Now())
-	if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
+	if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
 		builder.SetTenantID(tid)
 	}
 	if _, err = builder.Save(ctx); err != nil {
@@ -353,7 +353,7 @@ func (r *InteractionRepo) CreateCollect(ctx context.Context, userID, videoID uin
 		SetUserID(userID).
 		SetVideoID(videoID).
 		SetCreatedAt(time.Now())
-	if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
+	if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
 		builder.SetTenantID(tid)
 	}
 	if _, err := builder.Save(ctx); err != nil {
@@ -441,7 +441,7 @@ func (r *InteractionRepo) CreateFollow(ctx context.Context, followerID, followee
 		SetFollowerID(followerID).
 		SetFolloweeID(followeeID).
 		SetCreatedAt(time.Now())
-	if tid, hasTenant := maybeTenantFromViewer(ctx); hasTenant {
+	if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
 		builder.SetTenantID(tid)
 	}
 	if _, err := builder.Save(ctx); err != nil {

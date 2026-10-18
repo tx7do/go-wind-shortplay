@@ -606,6 +606,10 @@ func (r *RoleRepo) Update(ctx context.Context, req *permissionV1.UpdateRoleReque
 	// 关联关系由下方的 ReplacePermissions 单独维护。
 	// 同时记录是否需要处理权限（用户在表单中提交了权限项，含清空场景）。
 	updatePermissions := req.UpdateMask != nil && hasPath("permissions", req.UpdateMask)
+	// UpdateOne 内部的 FilterByFieldMask 会就地剥掉 mask 之外的字段（含 data.permissions），
+	// 须在调用前快照待替换的权限集合，否则「更新基本信息+权限」一次调用时
+	// ReplacePermissions 拿到 nil，角色既有授权被整体清空（基座同源缺陷）。
+	pendingPermissions := append([]uint32(nil), req.Data.GetPermissions()...)
 	if req.UpdateMask != nil {
 		req.UpdateMask.Paths = utils.FilterBlacklist(req.UpdateMask.GetPaths(), []string{
 			"permissions",
@@ -652,10 +656,11 @@ func (r *RoleRepo) Update(ctx context.Context, req *permissionV1.UpdateRoleReque
 
 	// 处理权限关联：只要用户提交了权限项（含清空场景），即整体替换角色的权限。
 	// 使用 entity.GetTenantId() 避免 SYSTEM 角色（TenantId 为 nil）解引用 panic。
+	// 权限集合用上方快照（data.permissions 已被字段掩码剥离）。
 	if updatePermissions {
 		if err = r.rolePermissionRepo.ReplacePermissions(ctx, tx,
 			entity.GetTenantId(), req.Data.GetUpdatedBy(),
-			req.GetId(), req.Data.Permissions); err != nil {
+			req.GetId(), pendingPermissions); err != nil {
 			r.log.Errorf("assign permissions to role failed: %s", err.Error())
 			return permissionV1.ErrorInternalServerError("assign permissions to role failed")
 		}

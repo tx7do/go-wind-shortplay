@@ -3,7 +3,7 @@ import { usePreferencesStore } from '@/core/preferences';
 import { RequestClient } from '@/core/transport/rest';
 import i18n from 'i18next';
 import { useAuthStore, useUserStore } from '@/stores';
-import { startRefreshTimer } from '@/hooks/useTokenRefresh';
+import { connectSSEServer, startRefreshTimer } from '@/hooks/useTokenRefresh';
 
 /**
  * 应用启动初始化
@@ -62,6 +62,8 @@ async function _initI18n() {
       useUserStore.getState().setUserRoles(userInfo.roles ?? []);
     }
     startRefreshTimer();
+    // 会话恢复后重建站内信 SSE 实时通道（整页刷新会断开旧连接）
+    connectSSEServer();
   }
 }
 

@@ -838,6 +838,7 @@ type RegisterUserRequest struct {
 	TenantCode    string                 `protobuf:"bytes,3,opt,name=tenant_code,json=tenantCode,proto3" json:"tenant_code,omitempty"`                                  // 租户代码
 	Email         *string                `protobuf:"bytes,4,opt,name=email,proto3,oneof" json:"email,omitempty"`                                                        // 电子邮件地址
 	ClientType    *ClientType            `protobuf:"varint,5,opt,name=client_type,proto3,enum=authentication.service.v1.ClientType,oneof" json:"client_type,omitempty"` // 客户端类型
+	Nickname      *string                `protobuf:"bytes,6,opt,name=nickname,proto3,oneof" json:"nickname,omitempty"`                                                  // 用户昵称（可选，注册时随用户一并落库）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -905,6 +906,13 @@ func (x *RegisterUserRequest) GetClientType() ClientType {
 		return *x.ClientType
 	}
 	return ClientType_admin
+}
+
+func (x *RegisterUserRequest) GetNickname() string {
+	if x != nil && x.Nickname != nil {
+		return *x.Nickname
+	}
+	return ""
 }
 
 type RegisterUserResponse struct {
@@ -1670,16 +1678,18 @@ const file_authentication_service_v1_authentication_proto_rawDesc = "" +
 	"\n" +
 	"is_blocked\x18\x03 \x01(\bB+\xbaG(\x92\x02%令牌是否被阻塞/列入黑名单R\tisBlockedB\n" +
 	"\n" +
-	"\b_payload\"\xdb\x02\n" +
+	"\b_payload\"\x9d\x03\n" +
 	"\x13RegisterUserRequest\x12+\n" +
 	"\busername\x18\x01 \x01(\tB\x0f\xbaG\f\x92\x02\t用户名R\busername\x12.\n" +
 	"\bpassword\x18\x02 \x01(\tB\x12\xbaG\x0f\x92\x02\f登入密码R\bpassword\x123\n" +
 	"\vtenant_code\x18\x03 \x01(\tB\x12\xbaG\x0f\x92\x02\f租户代码R\n" +
 	"tenantCode\x123\n" +
 	"\x05email\x18\x04 \x01(\tB\x18\xbaG\x15\x92\x02\x12电子邮件地址H\x00R\x05email\x88\x01\x01\x12c\n" +
-	"\vclient_type\x18\x05 \x01(\x0e2%.authentication.service.v1.ClientTypeB\x15\xbaG\x12\x92\x02\x0f客户端类型H\x01R\vclient_type\x88\x01\x01B\b\n" +
+	"\vclient_type\x18\x05 \x01(\x0e2%.authentication.service.v1.ClientTypeB\x15\xbaG\x12\x92\x02\x0f客户端类型H\x01R\vclient_type\x88\x01\x01\x123\n" +
+	"\bnickname\x18\x06 \x01(\tB\x12\xbaG\x0f\x92\x02\f用户昵称H\x02R\bnickname\x88\x01\x01B\b\n" +
 	"\x06_emailB\x0e\n" +
-	"\f_client_type\"?\n" +
+	"\f_client_typeB\v\n" +
+	"\t_nickname\"?\n" +
 	"\x14RegisterUserResponse\x12'\n" +
 	"\auser_id\x18\x01 \x01(\rB\x0e\xbaG\v\x92\x02\b用户IDR\x06userId\"r\n" +
 	"\x0eWhoAmIResponse\x12$\n" +
