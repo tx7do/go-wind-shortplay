@@ -235,19 +235,19 @@ func (s *InternalMessageService) SendMessage(ctx context.Context, req *internalM
 				if senderTenantID != 0 && user.GetTenantId() != senderTenantID {
 					continue
 				}
-				_ = s.sendNotification(ctx, msg.GetId(), user.GetId(), operator.GetUserId(), &now, msg.GetTitle(), msg.GetContent())
+				_ = s.sendNotification(ctx, msg.GetId(), user.GetId(), user.GetTenantId(), operator.GetUserId(), &now, msg.GetTitle(), msg.GetContent())
 			}
 		}
 	} else {
 		if req.RecipientUserId != nil {
-			if s.isRecipientAllowed(ctx, req.GetRecipientUserId(), senderTenantID) {
-				_ = s.sendNotification(ctx, msg.GetId(), req.GetRecipientUserId(), operator.GetUserId(), &now, msg.GetTitle(), msg.GetContent())
+			if recipientTenantID, allowed := s.isRecipientAllowed(ctx, req.GetRecipientUserId(), senderTenantID); allowed {
+				_ = s.sendNotification(ctx, msg.GetId(), req.GetRecipientUserId(), recipientTenantID, operator.GetUserId(), &now, msg.GetTitle(), msg.GetContent())
 			}
 		} else {
 			if len(req.TargetUserIds) != 0 {
 				for _, uid := range req.TargetUserIds {
-					if s.isRecipientAllowed(ctx, uid, senderTenantID) {
-						_ = s.sendNotification(ctx, msg.GetId(), uid, operator.GetUserId(), &now, msg.GetTitle(), msg.GetContent())
+					if recipientTenantID, allowed := s.isRecipientAllowed(ctx, uid, senderTenantID); allowed {
+						_ = s.sendNotification(ctx, msg.GetId(), uid, recipientTenantID, operator.GetUserId(), &now, msg.GetTitle(), msg.GetContent())
 					}
 				}
 			}
@@ -259,27 +259,33 @@ func (s *InternalMessageService) SendMessage(ctx context.Context, req *internalM
 	}, nil
 }
 
-// isRecipientAllowed 校验收件人是否在发送者的可发送范围内。
+// isRecipientAllowed 校验收件人是否在发送者的可发送范围内，并带回收件人自身的租户 ID
+//（收件行按收件人租户落库，照 core NotifyUser 先例——租户归属收件人，不从发送者推导）。
 // 平台上下文(senderTenantID==0)可向任意租户用户发送；普通租户用户只能向本租户用户发送。
 // 收件人不存在或跨租户时拒绝。与 core InternalMessageService.SendMessage 的实现保持一致。
-func (s *InternalMessageService) isRecipientAllowed(ctx context.Context, recipientUserID uint32, senderTenantID uint32) bool {
+func (s *InternalMessageService) isRecipientAllowed(ctx context.Context, recipientUserID uint32, senderTenantID uint32) (recipientTenantID uint32, allowed bool) {
 	recipient, err := s.userServiceClient.Get(ctx, &identityV1.GetUserRequest{
 		QueryBy: &identityV1.GetUserRequest_Id{Id: recipientUserID},
 	})
 	if err != nil || recipient == nil {
 		s.log.Errorf("send message failed, recipient not found [%d]: %v", recipientUserID, err)
-		return false
+		return 0, false
 	}
 	if senderTenantID != 0 && recipient.GetTenantId() != senderTenantID {
 		s.log.Errorf("send message forbidden, tenant mismatch: sender tenant [%d], recipient [%d] tenant [%d]", senderTenantID, recipientUserID, recipient.GetTenantId())
-		return false
+		return 0, false
 	}
-	return true
+	return recipient.GetTenantId(), true
 }
 
-// sendNotification 向客户端发送通知消息
-func (s *InternalMessageService) sendNotification(ctx context.Context, messageId uint32, recipientUserId uint32, senderUserId uint32, now *time.Time, title, content string) error {
+// sendNotification 向客户端发送通知消息。
+// recipientTenantID 是收件人自身的租户 ID（照 core NotifyUser 先例，从收件人用户记录
+// 推导）：收件行按收件人租户落库——租户用户查收件箱经基座 TenantPrivacy 按 viewer
+// 租户过滤，行租户落成发送者侧租户（平台管理员直发时为 0）会让收件人看不见这条消息。
+// core 侧仓储对平台上下文尊重显式 tenant_id（TenantPrivacy.EvalMutation）。
+func (s *InternalMessageService) sendNotification(ctx context.Context, messageId uint32, recipientUserId uint32, recipientTenantID uint32, senderUserId uint32, now *time.Time, title, content string) error {
 	recipient := &internalMessageV1.InternalMessageRecipient{
+		TenantId:        trans.Ptr(recipientTenantID),
 		MessageId:       trans.Ptr(messageId),
 		RecipientUserId: trans.Ptr(recipientUserId),
 		Status:          trans.Ptr(internalMessageV1.InternalMessageRecipient_SENT),

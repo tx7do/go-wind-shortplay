@@ -58,7 +58,11 @@ func (s *InternalMessageSender) Send(ctx context.Context, req *channel.SendReque
 	}
 
 	now := time.Now()
-	if err := s.messages.sendNotification(ctx, req.RelatedID, req.RecipientUserID, req.OperatorUserID, &now, req.Title, req.Content); err != nil {
+	// 收件行按收件人自身租户落库（照 NotifyUser 先例）：通知域投递缝的上下文
+	// 可能是系统或发送者侧身份，而租户用户查收件箱按收件人租户过滤（TenantPrivacy），
+	// 行租户必须归收件人，否则租户用户看不见这条消息。
+	recipientTenantID := s.messages.recipientTenantID(ctx, req.RecipientUserID)
+	if err := s.messages.sendNotification(ctx, req.RelatedID, req.RecipientUserID, recipientTenantID, req.OperatorUserID, &now, req.Title, req.Content); err != nil {
 		return nil, err
 	}
 

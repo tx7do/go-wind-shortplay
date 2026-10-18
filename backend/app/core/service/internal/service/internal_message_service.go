@@ -341,19 +341,19 @@ func (s *InternalMessageService) SendMessage(ctx context.Context, req *internalM
 				if senderTenantID != 0 && user.GetTenantId() != senderTenantID {
 					continue
 				}
-				_ = s.sendNotification(ctx, msg.GetId(), user.GetId(), senderUserID, &now, msg.GetTitle(), msg.GetContent(), req.GetSendEmail())
+				_ = s.sendNotification(ctx, msg.GetId(), user.GetId(), user.GetTenantId(), senderUserID, &now, msg.GetTitle(), msg.GetContent(), req.GetSendEmail())
 			}
 		}
 	} else {
 		if req.RecipientUserId != nil {
-			if s.isRecipientAllowed(ctx, req.GetRecipientUserId(), senderTenantID) {
-				_ = s.sendNotification(ctx, msg.GetId(), req.GetRecipientUserId(), senderUserID, &now, msg.GetTitle(), msg.GetContent(), req.GetSendEmail())
+			if recipientTenantID, allowed := s.isRecipientAllowed(ctx, req.GetRecipientUserId(), senderTenantID); allowed {
+				_ = s.sendNotification(ctx, msg.GetId(), req.GetRecipientUserId(), recipientTenantID, senderUserID, &now, msg.GetTitle(), msg.GetContent(), req.GetSendEmail())
 			}
 		} else {
 			if len(req.TargetUserIds) != 0 {
 				for _, uid := range req.TargetUserIds {
-					if s.isRecipientAllowed(ctx, uid, senderTenantID) {
-						_ = s.sendNotification(ctx, msg.GetId(), uid, senderUserID, &now, msg.GetTitle(), msg.GetContent(), req.GetSendEmail())
+					if recipientTenantID, allowed := s.isRecipientAllowed(ctx, uid, senderTenantID); allowed {
+						_ = s.sendNotification(ctx, msg.GetId(), uid, recipientTenantID, senderUserID, &now, msg.GetTitle(), msg.GetContent(), req.GetSendEmail())
 					}
 				}
 			}
@@ -365,22 +365,23 @@ func (s *InternalMessageService) SendMessage(ctx context.Context, req *internalM
 	}, nil
 }
 
-// isRecipientAllowed 校验收件人是否在发送者的可发送范围内。
+// isRecipientAllowed 校验收件人是否在发送者的可发送范围内，并带回收件人自身的租户 ID
+//（收件行按收件人租户落库，照 NotifyUser 先例——租户归属收件人，不从发送者推导）。
 // 平台管理员（senderTenantID==0）可向任意租户用户发送；
 // 普通租户用户只能向本租户用户发送。收件人不存在或跨租户时拒绝。
-func (s *InternalMessageService) isRecipientAllowed(ctx context.Context, recipientUserID uint32, senderTenantID uint32) bool {
+func (s *InternalMessageService) isRecipientAllowed(ctx context.Context, recipientUserID uint32, senderTenantID uint32) (recipientTenantID uint32, allowed bool) {
 	recipient, err := s.userRepo.Get(ctx, &identityV1.GetUserRequest{
 		QueryBy: &identityV1.GetUserRequest_Id{Id: recipientUserID},
 	})
 	if err != nil || recipient == nil {
 		s.log.Errorf("send message failed, recipient not found [%d]: %v", recipientUserID, err)
-		return false
+		return 0, false
 	}
 	if senderTenantID != 0 && recipient.GetTenantId() != senderTenantID {
 		s.log.Errorf("send message forbidden, tenant mismatch: sender tenant [%d], recipient [%d] tenant [%d]", senderTenantID, recipientUserID, recipient.GetTenantId())
-		return false
+		return 0, false
 	}
-	return true
+	return recipient.GetTenantId(), true
 }
 
 
@@ -421,7 +422,7 @@ func (s *InternalMessageService) NotifyUser(ctx context.Context, recipientUserID
 		return
 	}
 
-	if err = s.sendNotification(ctx, msg.GetId(), recipientUserID, 0, &now, title, content); err != nil {
+	if err = s.sendNotification(ctx, msg.GetId(), recipientUserID, tenantID, 0, &now, title, content); err != nil {
 		s.log.Errorf("notify user: create recipient failed (recipient=%d): %v", recipientUserID, err)
 		return
 	}
@@ -519,11 +520,16 @@ func (s *InternalMessageService) publishNotifyEvent(recipientUserID uint32, titl
 	}
 }
 
-// sendNotification 向客户端发送通知消息
+// sendNotification 向客户端发送通知消息。
+// recipientTenantID 是收件人自身的租户 ID（照 NotifyUser 先例，从收件人用户记录推导）：
+// 收件行按收件人租户落库——租户用户查收件箱经基座 TenantPrivacy 按 viewer 租户过滤，
+// 行租户落成发送者侧租户（平台管理员直发时为 0）会让收件人永远看不见这条消息。
+// 消息本体（internal_messages）的租户归属发送者侧，此处不处理。
 // sendEmailOut 差异化参数：显式传 true 时该收件人出站邮件（群发开关）；
 // 省略时保持各调用方既有口径（系统级通知=有邮箱即出站，群发=默认不出站）。
-func (s *InternalMessageService) sendNotification(ctx context.Context, messageId uint32, recipientUserId uint32, senderUserId uint32, now *time.Time, title, content string, sendEmailOut ...bool) error {
+func (s *InternalMessageService) sendNotification(ctx context.Context, messageId uint32, recipientUserId uint32, recipientTenantID uint32, senderUserId uint32, now *time.Time, title, content string, sendEmailOut ...bool) error {
 	recipient := &internalMessageV1.InternalMessageRecipient{
+		TenantId:        trans.Ptr(recipientTenantID),
 		MessageId:       trans.Ptr(messageId),
 		RecipientUserId: trans.Ptr(recipientUserId),
 		Status:          trans.Ptr(internalMessageV1.InternalMessageRecipient_SENT),
@@ -542,4 +548,18 @@ func (s *InternalMessageService) sendNotification(ctx context.Context, messageId
 	recipient.Id = entity.Id
 
 	return nil
+}
+
+// recipientTenantID 推导收件人自身的租户 ID（照 NotifyUser 先例：租户归属收件人，
+// 从收件人用户记录读取，不从发送者/调用上下文推导）。收件人不可达时回落 0
+//（平台域，与收件行缺省租户一致），错误只记日志不阻断投递——落库为准。
+func (s *InternalMessageService) recipientTenantID(ctx context.Context, recipientUserID uint32) uint32 {
+	recipient, err := s.userRepo.Get(ctx, &identityV1.GetUserRequest{
+		QueryBy: &identityV1.GetUserRequest_Id{Id: recipientUserID},
+	})
+	if err != nil || recipient == nil {
+		s.log.Errorf("send message failed, resolve recipient tenant failed [%d]: %v", recipientUserID, err)
+		return 0
+	}
+	return recipient.GetTenantId()
 }
