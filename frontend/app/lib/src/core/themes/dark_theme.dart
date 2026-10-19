@@ -1,94 +1,127 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'app_colors.dart';
 import 'const.dart';
 import 'fonts.dart';
 import 'snackbar_color.dart' show SnackBarColor;
 import 'app_theme_extension.dart';
 
 class DarkColor {
-  // 深空夜蓝（docs/design-language.md 深色模式），非死黑
-  static const Color bgColor = Color.fromRGBO(5, 11, 20, 1.0);
-  static const Color surfaceColor = Color.fromRGBO(13, 22, 38, 1.0);
-  static const Color cardColor = Color.fromRGBO(20, 32, 56, 1.0);
-  static const Color onSurface = Color.fromRGBO(248, 250, 252, 1.0);
-  static const Color cursorColor = Color(0xFF2E96FF);
+  // 深空黑微紫调（docs/design-language.md 深色模式），非死黑非蓝灰
+  static const Color bgColor = DarkPalette.bg;
+  static const Color surfaceColor = DarkPalette.surface;
+  static const Color cardColor = DarkPalette.card;
+  static const Color onSurface = Color(0xFFF4F4F8);
+  static const Color cursorColor = BrandColor.roseBright;
 }
 
-ColorScheme _buildDarkColorScheme(Color seedColor) => ColorScheme.fromSeed(
+/// 暗色语义色板（显式指定，主色提亮一档保证黑底可读）
+ColorScheme _buildDarkColorScheme(Color seedColor) => ColorScheme(
   brightness: Brightness.dark,
-  seedColor: seedColor,
-
-  /// 主色调，用于突出显示和主要操作
-  primary: seedColor,
-
-  /// 主色调上的文字或图标颜色
+  primary: BrandColor.roseBright,
   onPrimary: Colors.white,
-
-  /// 主色调的容器背景色
-  primaryContainer: Color.alphaBlend(
-    seedColor.withAlpha((0.3 * 255).round()),
-    DarkColor.surfaceColor,
-  ),
-
-  /// 主色调容器上的文字或图标颜色
-  onPrimaryContainer: Color.alphaBlend(
-    seedColor.withAlpha((0.15 * 255).round()),
-    Colors.white,
-  ),
-
-  /// 背景颜色
-  surface: DarkColor.surfaceColor,
-
-  /// 背景颜色上的文字或图标颜色
-  onSurface: DarkColor.onSurface,
-
-  /// 次级容器
-  secondaryContainer: Color.alphaBlend(
-    seedColor.withAlpha((0.15 * 255).round()),
-    DarkColor.surfaceColor,
-  ),
-  onSecondaryContainer: Color.alphaBlend(
-    seedColor.withAlpha((0.1 * 255).round()),
-    Colors.white,
-  ),
-
-  /// 错误状态的颜色
-  error: const Color.fromRGBO(242, 80, 80, 1.0),
-
-  /// 错误状态上的文字或图标颜色
+  primaryContainer: const Color(0xFF3D1526),
+  onPrimaryContainer: const Color(0xFFFFD3E1),
+  secondary: const Color(0xFFA78BFA),
+  onSecondary: const Color(0xFF1B1030),
+  secondaryContainer: const Color(0xFF291D3F),
+  onSecondaryContainer: const Color(0xFFE4D8FF),
+  tertiary: const Color(0xFFA78BFA),
+  onTertiary: const Color(0xFF1B1030),
+  tertiaryContainer: const Color(0xFF291D3F),
+  onTertiaryContainer: const Color(0xFFE4D8FF),
+  error: const Color(0xFFFF6B6B),
   onError: Colors.white,
+  errorContainer: const Color(0xFF3D1414),
+  onErrorContainer: const Color(0xFFFFD1D1),
+  surface: DarkPalette.surface,
+  onSurface: DarkColor.onSurface,
+  onSurfaceVariant: const Color(0xFF9B9BA8),
+  outline: const Color(0xFF33333F),
+  outlineVariant: DarkPalette.divider,
+  shadow: Colors.black,
+  inverseSurface: DarkPalette.snackBar,
+  onInverseSurface: DarkPalette.onSnackBar,
+  inversePrimary: BrandColor.rose,
+  surfaceTint: Colors.transparent,
 );
 
 /// 标题栏主题
 AppBarTheme _buildAppBarTheme(ColorScheme colorScheme) => AppBarTheme(
-  backgroundColor: DarkColor.surfaceColor,
+  backgroundColor: DarkPalette.surface,
+  surfaceTintColor: Colors.transparent,
   titleSpacing: kDefaultPadding,
   elevation: 0,
-  scrolledUnderElevation: 1,
+  scrolledUnderElevation: 0.5,
   titleTextStyle: TextStyle(
     color: DarkColor.onSurface,
-    fontSize: 20.sp,
+    fontSize: 17.sp,
     fontWeight: FontWeight.w700,
   ),
   iconTheme: IconThemeData(color: DarkColor.onSurface),
 );
 
-/// 凸出按钮主题
-ElevatedButtonThemeData _buildElevatedButtonTheme(ColorScheme colorScheme) =>
-    ElevatedButtonThemeData(
+/// 实心主按钮
+FilledButtonThemeData _buildFilledButtonTheme(ColorScheme colorScheme) =>
+    FilledButtonThemeData(
       style: ButtonStyle(
         elevation: WidgetStateProperty.all(0),
-        backgroundColor: WidgetStateProperty.all(colorScheme.primary),
-        foregroundColor: WidgetStateProperty.all(Colors.white),
+        backgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return const Color(0xFF2C2C38);
+          }
+          return colorScheme.primary;
+        }),
+        foregroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return const Color(0xFF6E6E7C);
+          }
+          return Colors.white;
+        }),
         textStyle: WidgetStateProperty.all(
-          TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-          ),
+          TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
         ),
+        minimumSize: WidgetStateProperty.all(Size(0, 46.h)),
         shape: WidgetStateProperty.all(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+      ),
+    );
+
+/// 描边次按钮
+OutlinedButtonThemeData _buildOutlinedButtonTheme(ColorScheme colorScheme) =>
+    OutlinedButtonThemeData(
+      style: ButtonStyle(
+        textStyle: WidgetStateProperty.all(
+          TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
+        ),
+        minimumSize: WidgetStateProperty.all(Size(0, 46.h)),
+        side: WidgetStateProperty.resolveWith((states) {
+          final color = states.contains(WidgetState.disabled)
+              ? const Color(0xFF2C2C38)
+              : colorScheme.primary.withAlpha(170);
+          return BorderSide(color: color, width: 1.2);
+        }),
+        foregroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return const Color(0xFF6E6E7C);
+          }
+          return colorScheme.primary;
+        }),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+      ),
+    );
+
+/// 文本按钮
+TextButtonThemeData _buildTextButtonTheme(ColorScheme colorScheme) =>
+    TextButtonThemeData(
+      style: ButtonStyle(
+        foregroundColor: WidgetStateProperty.all(colorScheme.primary),
+        textStyle: WidgetStateProperty.all(
+          TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -102,38 +135,30 @@ TextSelectionThemeData _buildTextSelectionTheme(Color seedColor) =>
     );
 
 /// 图标
-const _iconTheme = IconThemeData(
-  color: DarkColor.onSurface,
-);
+const _iconTheme = IconThemeData(color: DarkColor.onSurface);
 
 ///
 const _snackBarColor = SnackBarColor(
-  error: Color.fromRGBO(242, 80, 80, 1),
-  info: Color.fromRGBO(26, 181, 148, 1),
-  warning: Color.fromRGBO(26, 181, 148, 1),
-  success: Color.fromRGBO(26, 181, 148, 1),
-);
-
-/// 顶部搜索栏
-final _searchBarTheme = SearchBarThemeData(
-  backgroundColor: WidgetStateProperty.all(DarkColor.cardColor),
-  elevation: WidgetStateProperty.all(0),
-  shape: WidgetStateProperty.all(
-    RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-  ),
+  error: Color(0xFFFF6B6B),
+  info: Color(0xFF34D399),
+  warning: Color(0xFFFFB43A),
+  success: Color(0xFF34D399),
 );
 
 /// 弹出菜单
-PopupMenuThemeData _buildPopupMenuTheme(Color seedColor) => PopupMenuThemeData(
-  color: DarkColor.cardColor,
-  iconColor: seedColor,
-  elevation: 4,
-);
+PopupMenuThemeData _buildPopupMenuTheme(ColorScheme colorScheme) =>
+    PopupMenuThemeData(
+      color: DarkColor.cardColor,
+      surfaceTintColor: Colors.transparent,
+      iconColor: DarkColor.onSurface,
+      elevation: 8,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(14)),
+      ),
+    );
 
 /// 分割线
-const _dividerTheme = DividerThemeData(
-  color: Color.fromRGBO(55, 55, 58, 1.0),
-);
+const _dividerTheme = DividerThemeData(color: DarkPalette.divider);
 
 /// 构建 Scrollbar 主题
 ScrollbarThemeData _buildScrollbarTheme(Color seedColor) => ScrollbarThemeData(
@@ -148,15 +173,50 @@ ScrollbarThemeData _buildScrollbarTheme(Color seedColor) => ScrollbarThemeData(
   thumbVisibility: WidgetStateProperty.all(true),
 );
 
-///
-InputDecorationTheme _buildInputDecorationTheme(Color seedColor) =>
-    const InputDecorationTheme(
-      labelStyle: TextStyle(
-        color: DarkColor.onSurface,
+/// 输入框：填充式圆角，聚焦时品牌色描边
+InputDecorationTheme _buildInputDecorationTheme(ColorScheme colorScheme) =>
+    InputDecorationTheme(
+      filled: true,
+      fillColor: DarkPalette.inputFill,
+      hintStyle: TextStyle(color: const Color(0xFF6E6E7C), fontSize: 14.sp),
+      labelStyle: TextStyle(color: const Color(0xFF9B9BA8), fontSize: 14.sp),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 13.h),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: colorScheme.primary, width: 1.4),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: colorScheme.error, width: 1),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: colorScheme.error, width: 1.4),
       ),
     );
 
-const _textTheme = TextTheme();
+/// 正文/标题字阶：与亮色一致的重字重层级
+TextTheme _buildTextTheme() => TextTheme(
+  headlineMedium: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w800, height: 1.25),
+  headlineSmall: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w800, height: 1.25),
+  titleLarge: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700, height: 1.3),
+  titleMedium: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, height: 1.35),
+  titleSmall: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, height: 1.35),
+  bodyLarge: TextStyle(fontSize: 15.sp, height: 1.5),
+  bodyMedium: TextStyle(fontSize: 14.sp, height: 1.5),
+  bodySmall: TextStyle(fontSize: 12.sp, height: 1.45),
+  labelLarge: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
+  labelMedium: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500),
+  labelSmall: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w500),
+);
 
 ///
 ThemeData _buildDarkTheme(Color seedColor) {
@@ -166,58 +226,107 @@ ThemeData _buildDarkTheme(Color seedColor) {
     useMaterial3: true,
     fontFamily: kDefaultFontFamily,
     fontFamilyFallback: AppFont.fontFamilyFallback,
-    textTheme: _textTheme,
+    textTheme: _buildTextTheme(),
     colorScheme: colorScheme,
     scaffoldBackgroundColor: DarkColor.bgColor,
     primaryColor: colorScheme.primary,
     appBarTheme: _buildAppBarTheme(colorScheme),
     textSelectionTheme: _buildTextSelectionTheme(seedColor),
-    elevatedButtonTheme: _buildElevatedButtonTheme(colorScheme),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: _buildFilledButtonTheme(colorScheme).style,
+    ),
+    outlinedButtonTheme: _buildOutlinedButtonTheme(colorScheme),
+    textButtonTheme: _buildTextButtonTheme(colorScheme),
+    filledButtonTheme: _buildFilledButtonTheme(colorScheme),
     iconTheme: _iconTheme,
-    searchBarTheme: _searchBarTheme,
-    popupMenuTheme: _buildPopupMenuTheme(seedColor),
+    popupMenuTheme: _buildPopupMenuTheme(colorScheme),
     dividerTheme: _dividerTheme,
     scrollbarTheme: _buildScrollbarTheme(seedColor),
-    inputDecorationTheme: _buildInputDecorationTheme(seedColor),
+    inputDecorationTheme: _buildInputDecorationTheme(colorScheme),
     cardTheme: CardThemeData(
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(14)),
-      ),
       color: DarkColor.cardColor,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      ),
+      margin: EdgeInsets.zero,
     ),
-    chipTheme: const ChipThemeData(
+    dialogTheme: DialogThemeData(
+      backgroundColor: DarkColor.cardColor,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(20)),
+      ),
+      titleTextStyle: TextStyle(
+        color: DarkColor.onSurface,
+        fontSize: 17.sp,
+        fontWeight: FontWeight.w700,
+      ),
+      contentTextStyle: TextStyle(
+        color: DarkColor.onSurface.withAlpha(200),
+        fontSize: 14.sp,
+        height: 1.5,
+      ),
+    ),
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: DarkPalette.surface,
+      surfaceTintColor: Colors.transparent,
+      modalBackgroundColor: DarkPalette.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      showDragHandle: true,
+      dragHandleColor: const Color(0xFF3C3C4A),
+    ),
+    tabBarTheme: TabBarThemeData(
+      labelColor: BrandColor.roseBright,
+      unselectedLabelColor: const Color(0xFF8A8A96),
+      labelStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+      unselectedLabelStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
+      indicatorColor: BrandColor.roseBright,
+      indicatorSize: TabBarIndicatorSize.label,
+      dividerColor: Colors.transparent,
+    ),
+    chipTheme: ChipThemeData(
+      backgroundColor: DarkPalette.chipFill,
       side: BorderSide.none,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(100),
+      ),
+      labelStyle: TextStyle(
+        fontSize: 12.sp,
+        fontWeight: FontWeight.w500,
+        color: const Color(0xFFC6C6D2),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 2.h),
+    ),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: DarkPalette.snackBar,
+      contentTextStyle: TextStyle(fontSize: 13.sp, color: DarkPalette.onSnackBar),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return Colors.white;
+        return const Color(0xFF55555F);
+      }),
+      trackColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return colorScheme.primary;
+        return const Color(0xFF33333F);
+      }),
+    ),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: BrandColor.roseBright,
+      linearTrackColor: Color(0xFF2C2C38),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: DarkColor.surfaceColor,
-      indicatorColor: colorScheme.primaryContainer,
-      labelTextStyle: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.selected)) {
-          return TextStyle(
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w600,
-            color: colorScheme.primary,
-          );
-        }
-        return TextStyle(
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w400,
-          color: DarkColor.onSurface.withAlpha((0.6 * 255).round()),
-        );
-      }),
-      iconTheme: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.selected)) {
-          return IconThemeData(
-            size: 24.sp,
-            color: colorScheme.primary,
-          );
-        }
-        return IconThemeData(
-          size: 24.sp,
-          color: DarkColor.onSurface.withAlpha((0.6 * 255).round()),
-        );
-      }),
+      backgroundColor: DarkPalette.surface,
+      surfaceTintColor: Colors.transparent,
+      indicatorColor: Colors.transparent,
     ),
     extensions: const <ThemeExtension<dynamic>>[
       AppThemeExtension(snackBarColor: _snackBarColor),
@@ -228,6 +337,6 @@ ThemeData _buildDarkTheme(Color seedColor) {
 /// 获取暗黑系主题
 /// [seedColor] 种子颜色，用于动态生成配色方案
 ThemeData getDarkTheme({Color? seedColor}) {
-  final color = seedColor ?? const Color(0xFF006BE6);
+  final color = seedColor ?? BrandColor.rose;
   return _buildDarkTheme(color);
 }

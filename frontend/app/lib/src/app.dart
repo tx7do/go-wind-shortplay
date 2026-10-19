@@ -12,6 +12,7 @@ import 'package:shortplay_app/src/core/extensions/app_localizations_context.dart
 import 'package:shortplay_app/src/core/constants/breakpoints.dart';
 import 'package:shortplay_app/src/core/themes/index.dart' as theme;
 import 'package:shortplay_app/src/core/utilities/logger.dart' show debug;
+import 'package:shortplay_app/src/core/utilities/platform.dart';
 
 import 'app_router/app_router.dart' as pages;
 
@@ -33,8 +34,10 @@ class _ShortPlayAppState extends State<ShortPlayApp> {
       splitScreenMode: true,
       ensureScreenSize: true,
       builder: (ctx, child) {
-        // Web 端：动态将 designSize 设为当前视窗尺寸，使 .w/.h/.sp 始终 1:1
-        if (kIsWeb) {
+        // Web / 桌面端：窗口尺寸可自由变化且远大于手机设计稿，
+        // 动态将 designSize 设为当前视窗尺寸，使 .w/.h/.sp 始终 1:1，
+        // 避免 375 设计稿在 1080p 窗口下整体放大 3 倍+。
+        if (kIsWeb || PlatformUtils.isDesktop) {
           ScreenUtil.init(
             ctx,
             designSize: Size(

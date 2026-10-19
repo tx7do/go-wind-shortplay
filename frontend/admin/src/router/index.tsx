@@ -161,6 +161,18 @@ const PROFILE_BACKEND_ROUTE: BackendRoute = {
   meta: { title: 'routes:profile', hideInMenu: true },
 };
 
+// 站内信收件箱伪节点：菜单种子（id 5/6）HideInMenu 且 component
+// "message/index.vue" 不在 navigation 的 resolvableComponents 白名单，永不下发；
+// 静态容器的 inbox 子路由又随 replaceByBackendLayout 整体被丢弃。顶栏铃铛/
+// 用户下拉的入口始终需要路由，与 profile 同法在后端模式追加为隐藏节点
+// （component 'inbox' 命中 pageMap 自动注册的 pages/app/inbox）。
+const INBOX_BACKEND_ROUTE: BackendRoute = {
+  name: '/inbox',
+  path: '/inbox',
+  component: 'inbox',
+  meta: { title: 'routes:inbox', hideInMenu: true },
+};
+
 /**
  * 旧扁平路径兼容重定向：初版静态树把业务页挂在 '/' 顶层（/users、/videos 等），
  * 对齐后端菜单种子后统一嵌套为 /opm/users、/shortplay/*。这里保留旧路径 →
@@ -232,7 +244,12 @@ function resolveFirstMenuPath(nodes: BackendRoute[], parentPath: string = ''): s
  *   目标取菜单树首个可落地页面（当前种子即 /dashboard），种子变化时自动跟随。
  */
 function ensureLayoutRoot(routes: BackendRoute[]): BackendRoute[] {
-  const children: BackendRoute[] = [...routes, PROFILE_BACKEND_ROUTE, ...LEGACY_REDIRECT_BACKEND_ROUTES];
+  const children: BackendRoute[] = [
+    ...routes,
+    PROFILE_BACKEND_ROUTE,
+    INBOX_BACKEND_ROUTE,
+    ...LEGACY_REDIRECT_BACKEND_ROUTES,
+  ];
   const firstMenuPath = resolveFirstMenuPath(routes);
   if (firstMenuPath && firstMenuPath !== '/') {
     children.unshift({

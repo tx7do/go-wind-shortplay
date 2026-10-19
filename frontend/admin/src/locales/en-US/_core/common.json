@@ -2,6 +2,7 @@
   "button": {
     "back": "Back",
     "ok": "OK",
+    "confirm": "Confirm",
     "cancel": "Cancel",
     "edit": "Edit",
     "delete": "Delete",
@@ -12,7 +13,11 @@
   "header": {
     "profile": "Profile",
     "settings": "Preferences",
+    "inbox": "Inbox",
+    "lockScreen": "Lock Screen",
     "logout": "Logout",
+    "logoutConfirmTitle": "Notice",
+    "logoutConfirmMessage": "Do you want to logout?",
     "fullscreen": "Fullscreen",
     "exitFullscreen": "Exit Fullscreen",
     "helpDoc": "Help Docs",
@@ -116,8 +121,19 @@
     "copyFailed": "Copy failed, please copy manually",
     "copyDenied": "Copy operation was denied"
   },
+  "lockScreen": {
+    "title": "Lock Screen",
+    "placeholder": "Please enter password",
+    "lock": "Locking",
+    "unlock": "Click to unlock",
+    "entry": "Enter the system",
+    "backToLogin": "Back to login",
+    "errorTip": "Password error, please re-enter"
+  },
   "placeholder": {
-    "underDevelopment": "{{pageName}} - Under Development"
+    "underDevelopment": "{{pageName}} - Under Development",
+    "input": "Please enter",
+    "select": "Please select"
   },
   "requestError": {
     "networkError": "Network connection error, please check your network settings and try again",

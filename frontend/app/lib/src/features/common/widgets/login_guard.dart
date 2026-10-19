@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shortplay_app/generated/l10n.dart';
 import 'package:shortplay_app/src/app_router/app_router.dart' show RouteNames;
 import 'package:shortplay_app/src/core/repositories/user_auth_cache.dart';
+import 'package:shortplay_app/src/core/widgets/gradient_button.dart';
 import 'package:get_it/get_it.dart' show GetIt;
 
 /// 登录守卫：游客触发互动时引导登录
@@ -21,6 +22,8 @@ Future<bool> ensureLogin(BuildContext context) async {
   final goLogin = await showModalBottomSheet<bool>(
     context: context,
     showDragHandle: true,
+    // 桌面宽窗下收窄居中（手机端无感）
+    constraints: const BoxConstraints(maxWidth: 560),
     builder: (sheetContext) {
       final theme = Theme.of(sheetContext);
       return SafeArea(
@@ -53,13 +56,12 @@ Future<bool> ensureLogin(BuildContext context) async {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 20.h),
-              SizedBox(
+              GradientButton(
+                label: loc.goLogin,
+                onPressed: () => Navigator.of(sheetContext).pop(true),
+                height: 44,
+                fontSize: 15,
                 width: double.infinity,
-                height: 44.h,
-                child: FilledButton(
-                  onPressed: () => Navigator.of(sheetContext).pop(true),
-                  child: Text(loc.goLogin),
-                ),
               ),
               SizedBox(height: 8.h),
               TextButton(

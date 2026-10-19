@@ -10,7 +10,9 @@
   "permission-menus": "Menu Management",
   "permission-apis": "API Permission Management",
   "permission-departments": "Department Management",
+  "permission-groups": "Permission Group Management",
   "profile": "Profile",
+  "inbox": "Inbox",
   "auth": "Auth",
   "login": "Login",
   "error-pages": "Error",
@@ -48,7 +50,8 @@
       "permission": "API Management",
       "role": "Role Management",
       "menu": "Menu Management",
-      "department": "Department Management"
+      "department": "Department Management",
+      "groups": "Permission Group Management"
     },
     "internalMessage": {
       "moduleName": "Internal Messages",
@@ -95,6 +98,7 @@
   "permission.role": "Role Management",
   "permission.menu": "Menu Management",
   "permission.department": "Department Management",
+  "permission.groups": "Permission Group Management",
   "internalMessage.moduleName": "Internal Messages",
   "internalMessage.internalMessage": "Message List",
   "internalMessage.internalMessageCategory": "Message Categories",

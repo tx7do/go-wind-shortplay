@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:shortplay_app/generated/l10n.dart';
-import 'package:shortplay_app/src/core/constants/index.dart';
+import 'package:shortplay_app/src/core/widgets/empty_state.dart';
 
 class CustomErrorWidget extends StatelessWidget {
   final String errorMessage;
@@ -10,24 +10,10 @@ class CustomErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GlobalIcons.error(),
-          const SizedBox(height: 10.0),
-          Text(
-            S.of(context).errorOccurred,
-            style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10.0),
-          Text(
-            errorMessage,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16.0),
-          ),
-        ],
-      ),
+    return EmptyState(
+      icon: Icons.error_outline,
+      title: S.of(context).errorOccurred,
+      subtitle: errorMessage,
     );
   }
 }

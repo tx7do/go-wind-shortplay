@@ -32,7 +32,20 @@ abstract class AuthService extends BaseService {
 class AuthenticationInterceptor extends Interceptor {
   final AuthService Function() _authServiceFactory;
   final bool _autoRefreshToken;
-  late Completer _refreshLock = Completer();
+
+  /// 进行中的刷新任务（并发 401 共享同一次刷新，避免刷新令牌轮换竞态）
+  Future<String?>? _refreshing;
+
+  /// 不触发刷新重试的认证接口（相对 baseUrl 路径）：
+  /// 刷新接口自身 401 再刷新会无限递归；登录 401 是凭证错误，
+  /// 误走刷新链路会把登录失败放大成登出跳转
+  static const Set<String> _noRefreshPaths = <String>{
+    '/auth/login',
+    '/auth/refresh',
+  };
+
+  /// 重试标记（extra 键）：每个请求最多自动刷新重试一次，防止循环
+  static const String _kExtraAuthRetried = 'authRetried';
 
   /// 创建认证拦截器实例
   /// [authServiceFactory] - 认证服务的懒工厂（推迟到首次请求时解析，
@@ -65,8 +78,9 @@ class AuthenticationInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
+    // 网络层错误（无响应）直接透传；不调用 handler 会让请求 Future 永不完成
     if (err.response == null) {
-      return;
+      return handler.next(err);
     }
 
     // 如果不需要自动刷新令牌或不是401错误，则直接传递错误
@@ -74,70 +88,55 @@ class AuthenticationInterceptor extends Interceptor {
       return handler.next(err);
     }
 
+    // 认证接口自身的 401 不刷新重试
+    if (_noRefreshPaths.contains(err.requestOptions.path)) {
+      return handler.next(err);
+    }
+
+    // 已刷新重试过仍 401，不再刷新
+    if (err.requestOptions.extra[_kExtraAuthRetried] == true) {
+      return handler.next(err);
+    }
+
+    // 尝试刷新令牌
+    String? newToken;
     try {
-      // 尝试刷新令牌并重新发送请求
-      final newToken = await _refreshToken();
-      if (newToken == null) {
-        // 刷新令牌失败，清除令牌并返回错误
-        // await _authServiceFactory().authenticationFailed();
-        return handler.next(err);
-      }
-
-      // 使用新令牌重试请求
-      final options = err.requestOptions;
-      options.headers['Authorization'] = _makeBearerToken(
-        accessToken: newToken,
-      );
-
-      // 清除错误响应
-      // err.response = null;
-      final newException = DioException(
-        requestOptions: err.requestOptions,
-        error: err.error,
-        type: err.type,
-        // 不提供 response 参数，默认值为 null
-      );
-      err = newException;
-
-      // 重新发送请求（复用全局 Dio，携带 baseUrl 等配置）
-      final response = await GetIt.instance<Dio>().fetch(options);
-      return handler.resolve(response);
+      newToken = await _refreshToken();
     } catch (e) {
       fatal('Error refreshing token: $e');
-      // 发生异常时清除令牌并传递错误
       _authServiceFactory().authenticationFailed();
       return handler.next(err);
     }
+    if (newToken == null || newToken.isEmpty) {
+      // 刷新失败：AuthenticationService 已清理本地凭证并回首页（游客态），
+      // 这里透传原始 401 给调用方收尾
+      return handler.next(err);
+    }
+
+    // 使用新令牌重试请求（每个请求只重试一次）
+    final options = err.requestOptions;
+    options.headers['Authorization'] = _makeBearerToken(accessToken: newToken);
+    options.extra[_kExtraAuthRetried] = true;
+
+    // 重新发送请求（复用全局 Dio，携带 baseUrl 等配置）
+    try {
+      final response = await GetIt.instance<Dio>().fetch(options);
+      return handler.resolve(response);
+    } on DioException catch (e) {
+      return handler.next(e);
+    }
   }
 
-  /// 刷新令牌的方法，使用锁机制防止并发刷新
-  Future<String?> _refreshToken() async {
-    final auth = _authServiceFactory();
-    // 如果已经有刷新请求在进行，等待它完成
-    if (!_refreshLock.isCompleted) {
-      await _refreshLock.future;
-      return auth.getAccessToken();
+  /// 刷新令牌（单飞：并发触发共享同一次刷新）
+  Future<String?> _refreshToken() {
+    final pending = _refreshing;
+    if (pending != null) {
+      return pending;
     }
-
-    // 创建新的锁
-    final Completer newLock = Completer();
-    _refreshLock.complete();
-    _refreshLock = newLock;
-
-    try {
-      // 尝试刷新令牌
-      final newToken = await auth.refreshToken();
-      if (newToken != null) {
-        _refreshLock.complete();
-        return newToken;
-      }
-
-      _refreshLock.complete();
-      return null;
-    } catch (e) {
-      _refreshLock.complete();
-      rethrow;
-    }
+    final task = _authServiceFactory().refreshToken();
+    _refreshing = task;
+    unawaited(task.whenComplete(() => _refreshing = null));
+    return task;
   }
 
   /// 创建Bearer令牌

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -31,7 +33,12 @@ class Environments {
   /// 真机联调改成宿主机局域网 IP。
   static String get apiBaseUrl {
     if (_apiBaseDefine.isNotEmpty) return _apiBaseDefine;
-    return dotenv.maybeGet('API_BASE_URL') ?? '';
+    final fromEnv = dotenv.maybeGet('API_BASE_URL');
+    if (fromEnv != null && fromEnv.isNotEmpty) return fromEnv;
+    // 未显式配置时按平台给缺省：安卓模拟器 10.0.2.2 映射宿主机，
+    // 其余平台（Windows 桌面/iOS 模拟器/macOS/Linux/Web）同机用 127.0.0.1。
+    if (!kIsWeb && Platform.isAndroid) return 'http://10.0.2.2:7700';
+    return 'http://127.0.0.1:7700';
   }
 
   /// App 接口基地址（dio baseUrl）：根地址 + `/app/v1`
@@ -50,7 +57,12 @@ class Environments {
   /// 需要拼接该前缀才能播放/展示：`{MEDIA_BASE}/{key}`。
   static String get mediaBaseUrl {
     if (_mediaBaseDefine.isNotEmpty) return _mediaBaseDefine;
-    return dotenv.maybeGet('MEDIA_BASE_URL') ?? '';
+    final fromEnv = dotenv.maybeGet('MEDIA_BASE_URL');
+    if (fromEnv != null && fromEnv.isNotEmpty) return fromEnv;
+    if (!kIsWeb && Platform.isAndroid) {
+      return 'http://10.0.2.2:9000/shortplay';
+    }
+    return 'http://127.0.0.1:9000/shortplay';
   }
 
   /// 密码传输加密 AES 密钥（同时用作 IV，16 字节）

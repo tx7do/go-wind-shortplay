@@ -1,5 +1,5 @@
 {
-  "appName": "GoWind ShortPlay",
+  "appName": "Fengyin ShortPlay",
 
   "@@locale": "en_US",
 
@@ -107,6 +107,11 @@
   "titleRequired": "Title is required",
   "asDraftOption": "Save as draft (only visible to me)",
   "drafts": "Drafts",
+  "chooseVideoToCreate": "Select a video to start creating",
+  "publishGuideSubtitle": "Short videos up to 5 minutes",
+  "advancedSettings": "Advanced",
+  "tagInlineHint": "Type a tag, press enter or comma",
+  "removeVideo": "Remove video",
 
   "markAllRead": "Mark all read",
   "unreadOnly": "Unread only",
@@ -152,6 +157,16 @@
   "deleteVideo": "Delete video",
   "deleteVideoConfirm": "Delete this video? This cannot be undone",
   "videoDeletedSuccess": "Video deleted",
+
+  "settings": "Settings",
+  "appearance": "Appearance",
+  "darkMode": "Dark Mode",
+  "light": "Light",
+  "followSystem": "Follow System",
+  "dark": "Dark",
+  "language": "Language",
+  "about": "About",
+  "versionLabel": "Version",
 
   "searchHint": "Search videos, tags",
   "searchEmpty": "No videos found for \"{query}\"",

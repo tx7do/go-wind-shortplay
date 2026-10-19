@@ -39,6 +39,13 @@ export const staticRoutes: AppRouteObject[] = [
         element: createLazyRoute(() => import('@/pages/app/profile')),
         meta: { title: 'routes:profile', hideInMenu: true },
       },
+      // 站内信收件箱：不进菜单（顶栏铃铛/用户下拉进入），静态/后端两种模式都需挂载
+      {
+        name: 'inbox',
+        path: 'inbox',
+        element: createLazyRoute(() => import('@/pages/app/inbox')),
+        meta: { title: 'routes:inbox', hideInMenu: true },
+      },
     ],
   },
 ];

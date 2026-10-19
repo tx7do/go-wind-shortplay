@@ -43,6 +43,7 @@ var resolvableComponents = map[string]bool{
 	"permission/menus":       true,
 	"permission/apis":        true,
 	"permission/departments": true,
+	"permission/groups":      true,
 }
 
 // NavigationService 动态菜单服务（admin BFF）：读基座菜单域，映射为前端

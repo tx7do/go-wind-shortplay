@@ -20,6 +20,7 @@
     "axios": "^1.16.1",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.20",
+    "dompurify": "^3.4.14",
     "echarts": "^6.1.0",
     "echarts-for-react": "^3.0.6",
     "exceljs": "^4.4.0",
@@ -31,7 +32,9 @@
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-i18next": "^17.0.8",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^6.26.0",
+    "remark-gfm": "^4.0.1",
     "zustand": "^5.0.13"
   },
   "devDependencies": {

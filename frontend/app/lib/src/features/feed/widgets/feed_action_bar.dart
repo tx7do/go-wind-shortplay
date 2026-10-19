@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shortplay_app/generated/l10n.dart';
 import 'package:shortplay_app/src/core/config/environments.dart';
 import 'package:shortplay_app/src/core/repositories/user_auth_cache.dart';
+import 'package:shortplay_app/src/core/themes/app_colors.dart';
 import 'package:shortplay_app/src/core/utilities/number_format.dart';
 import 'package:shortplay_app/src/features/common/services/interaction_service.dart';
 import 'package:shortplay_app/src/features/common/services/uba_service.dart';
@@ -214,9 +215,18 @@ class _FeedActionBarState extends State<FeedActionBar> {
                       height: 20.r,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
+                        gradient: _following
+                            ? null
+                            : BrandColor.gradient,
                         color: _following
                             ? theme.colorScheme.surface
-                            : theme.colorScheme.primary,
+                            : null,
+                        border: _following
+                            ? Border.all(
+                                color: theme.colorScheme.primary,
+                                width: 1.2,
+                              )
+                            : null,
                       ),
                       child: Icon(
                         _following ? Icons.check : Icons.add,
@@ -234,7 +244,11 @@ class _FeedActionBarState extends State<FeedActionBar> {
         SizedBox(height: 18.h),
         _ActionButton(
           icon: _liked ? Icons.favorite : Icons.favorite_border,
-          color: _liked ? theme.colorScheme.error : Colors.white,
+          color: _liked
+              ? (theme.brightness == Brightness.dark
+                  ? BrandColor.roseBright
+                  : BrandColor.rose)
+              : Colors.white,
           label: NumberFormatUtils.formatCount(_likeCount),
           onTap: _toggleLike,
         ),
@@ -251,7 +265,7 @@ class _FeedActionBarState extends State<FeedActionBar> {
           icon: _collected
               ? Icons.bookmark
               : Icons.bookmark_border_rounded,
-          color: _collected ? theme.colorScheme.tertiary : Colors.white,
+          color: _collected ? BrandColor.collect : Colors.white,
           label: NumberFormatUtils.formatCount(_collectCount),
           onTap: _toggleCollect,
         ),

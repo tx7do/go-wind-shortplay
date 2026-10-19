@@ -38,8 +38,16 @@
 | ![ログイン](docs/images/admin-login.png) | ![ダッシュボード](docs/images/dashboard.png) | ![動画管理](docs/images/admin-videos.png) |
 | ![コメント管理](docs/images/admin-comments.png) | ![通報管理](docs/images/admin-reports.png) | ![システム設定](docs/images/admin-sysconf.png) |
 | ![ユーザー管理](docs/images/admin-users.png) | ![ロール管理](docs/images/admin-roles.png) | ![メニュー管理](docs/images/admin-menus.png) |
+| ![権限グループ](docs/images/admin-permission-groups.png) | ![API 管理](docs/images/admin-apis.png) | ![部署管理](docs/images/admin-departments.png) |
 
-> その他：API 管理・部署管理は `docs/images/` にあります。Flutter アプリ（iOS/Android/Windows）と H5 共有ページのスクリーンショットはリリースごとに更新されます。
+**Flutter アプリ**（Windows デスクトップで実測、iOS / Android は同一コードベース）：
+
+| | | |
+|---|---|---|
+| ![没入フィード](docs/images/app-feed.png) | ![ログイン](docs/images/app-login.png) | ![投稿](docs/images/app-publish.png) |
+| ![メッセージ](docs/images/app-notify.png) | ![マイページ](docs/images/app-profile.png) | ![設定](docs/images/app-settings.png) |
+
+> H5 共有ページのスクリーンショットはリリースごとに更新されます。
 
 ## テクノロジースタック
 
@@ -135,6 +143,7 @@ Flutter App ──▶ app-service   (BFF :7700) ──────────�
 | コメント管理 | コメント照会・削除 |
 | 通報チケット | 通報の受付・処分、処分は対象コンテンツに連動 |
 | ユーザー管理 | ユーザー照会・管理 |
+| 権限管理 | ロール / メニュー / API / 部門 / 権限グループ、navigation による動的メニュー |
 | ダッシュボード | 主要指標の概観 + 動画 TOP10 ランキング + 直近 7 日間のトレンド |
 | システム設定 | アップロード制限 / 長さ制限 / 手動審査スイッチ |
 

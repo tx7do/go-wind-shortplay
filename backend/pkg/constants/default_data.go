@@ -105,7 +105,7 @@ var DefaultPermissions = []*permissionV1.Permission{
 			1, 2, 3, 4, 5, 6,
 			10, 11,
 			20, 21, 22, 23, 24,
-			30, 31, 32, 33, 34,
+			30, 31, 32, 33, 34, 35,
 			40, 41, 42,
 			50, 51, 52, 53, 54, 55,
 			60, 62, 63, 64, 65, 66, 67,
@@ -647,6 +647,24 @@ var DefaultMenus = []*permissionV1.Menu{
 			Icon:      trans.Ptr("lucide:network"),
 			Order:     trans.Ptr(int32(4)),
 			Authority: []string{"sys:platform_admin", "sys:tenant_manager"},
+		},
+	},
+	{
+		// 增量种子：权限组管理页（React admin pageMap permission/groups）。
+		// 菜单种子为空表播种（MenuService.init count==0 门控），既有库升级
+		// 不会自动补此行，需按同 Id（35）手工补种或重建库；id 顺延 30 段。
+		Id:        trans.Ptr(uint32(35)),
+		ParentId:  trans.Ptr(uint32(30)),
+		Type:      permissionV1.Menu_MENU.Enum(),
+		Name:      trans.Ptr("PermissionGroupManagement"),
+		Path:      trans.Ptr("groups"),
+		Component: trans.Ptr("permission/groups"),
+		CreatedAt: timeutil.TimeToTimestamppb(trans.Ptr(time.Now())),
+		Meta: &permissionV1.MenuMeta{
+			Title:     trans.Ptr("menu.permission.groups"),
+			Icon:      trans.Ptr("lucide:key-round"),
+			Order:     trans.Ptr(int32(5)),
+			Authority: []string{"sys:platform_admin"},
 		},
 	},
 

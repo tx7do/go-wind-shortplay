@@ -6,7 +6,7 @@
 
 GoWind 短视频社区（shortplay）移动端 App。**基于 go-wind-cms 的 Flutter 底座裁剪适配而来**：保留底座基建（transport/preference/repositories/themes/logic/widgets 组织范式），裁掉 CMS 内容业务，按既有 feature 范式新增短剧业务。
 
-**核心技术栈**：Flutter 3.x (Dart 3.12+) + flutter_bloc/Cubit（状态管理）+ GoRouter（StatefulShellRoute 底部导航）+ GetIt（IoC）+ Dio（HTTP）+ media_kit（短视频播放）+ image_picker（拍摄/选视频）+ cached_query（缓存/Mutation）+ flutter_screenutil（响应式）+ encrypt（登录密码 AES 传输加密）+ flutter_intl/intl_utils（i18n）+ Material 3
+**核心技术栈**：Flutter 3.x (Dart 3.12+) + flutter_bloc/Cubit（状态管理）+ GoRouter（StatefulShellRoute 底部导航）+ GetIt（IoC）+ Dio（HTTP）+ media_kit（短视频播放）+ image_picker（拍摄/选视频）+ cached_query（缓存/Mutation）+ flutter_screenutil（响应式）+ encrypt（登录密码 AES 传输加密）+ flutter_intl/intl_utils（i18n）+ Material 3（仅作骨架，其上叠加品牌设计语言，见硬性约束 7）
 
 ## 硬性约束
 
@@ -22,6 +22,10 @@ GoWind 短视频社区（shortplay）移动端 App。**基于 go-wind-cms 的 Fl
 4. 后端契约以 `docs/API.md`「App 端（:7700 /app/v1）」为准；错误响应为 HTTP 状态码 + `{code,reason,message,metadata}`，用 `ApiStatusException(handleDioError(e))` 抛出、UI 层用 `localizedApiErrorMessage` 转文案。
 5. 新增/修改文案必须进 `lib/l10n/intl_zh_CN.arb` 与 `intl_en_US.arb`，然后 `dart run intl_utils:generate`（生成到 `lib/generated`，已从 analyze 排除）。
 6. `flutter analyze` 必须保持 **No issues found**；平台目录（android/ios）改动要真实可用，不留 TODO 占位。
+7. **品牌设计语言**（`docs/design-language.md` §5，权威值表）：去 MD3 化——品牌色/语义色板只取
+   `core/themes/app_colors.dart`（`BrandColor` / `LightPalette` / `DarkPalette`），组件内禁止裸色值；
+   页面级 CTA 用 `GradientButton`、空态用 `EmptyState`、底导只用 `AppBottomNavBar`（自绘、无 MD3 胶囊
+   指示器）；品牌标用 `BrandLogoMark`。新页面必须沿用，改视觉值先改文档再改代码。
 
 ## 目录结构
 
@@ -43,10 +47,10 @@ lib/
     │   ├── preference/                # 用户偏好（语言/主题）
     │   ├── repositories/              # UserAuthCache（token+用户信息+JWT userId）/偏好缓存
     │   ├── services/                  # BaseService / PaginationQuery+PageData
-    │   ├── themes/                    # 亮暗主题 / AppThemeCubit
+    │   ├── themes/                    # 亮暗主题 / AppThemeCubit / app_colors（品牌设计令牌）
     │   ├── transport/http/            # Dio 封装 / 认证拦截器 / Status / ApiStatusException
     │   ├── utilities/                 # convert(jsonInt…) / media_url / number_format / logger…
-    │   └── widgets/                   # AppBottomNavBar(角标) / error / not_found
+    │   └── widgets/                   # AppBottomNavBar(自绘底导) / GradientButton / EmptyState / BrandLogo / error / not_found
     └── features/                  # Feature-First（data/models + services + bloc + pages + widgets）
         ├── auth/                  # 登录/注册（/auth/login|register|refresh|logout，密码 AES 加密）
         ├── common/                # 跨 feature：models(Video/UserBrief/UserStats…) + 互动/UBA/举报/标签服务 + 通用组件
@@ -58,6 +62,8 @@ lib/
         ├── notify/                # 消息（基座收件箱 notifications/*；sp-biz 尾标记解析 videoId 直达视频）
         └── search/                # 搜索（关键词/标签聚合）
 ```
+
+另有 `features/settings/`（系统设置页 `/settings`：外观/语言设备级偏好，游客可用）。
 
 ## 后端联调
 

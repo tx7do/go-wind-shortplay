@@ -1,5 +1,5 @@
 {
-  "appName": "GoWind 短视频社区",
+  "appName": "风印短剧",
 
   "@@locale": "zh_CN",
 
@@ -107,6 +107,11 @@
   "titleRequired": "请填写视频标题",
   "asDraftOption": "存为草稿（仅自己可见）",
   "drafts": "草稿箱",
+  "chooseVideoToCreate": "选择一段视频开始创作",
+  "publishGuideSubtitle": "支持 5 分钟以内的短视频",
+  "advancedSettings": "高级设置",
+  "tagInlineHint": "输入标签，回车或逗号添加",
+  "removeVideo": "移除视频",
 
   "markAllRead": "全部已读",
   "unreadOnly": "只看未读",
@@ -152,6 +157,16 @@
   "deleteVideo": "删除视频",
   "deleteVideoConfirm": "确定删除该视频吗？删除后不可恢复",
   "videoDeletedSuccess": "视频已删除",
+
+  "settings": "设置",
+  "appearance": "外观",
+  "darkMode": "深色模式",
+  "light": "浅色",
+  "followSystem": "跟随系统",
+  "dark": "深色",
+  "language": "语言",
+  "about": "关于",
+  "versionLabel": "版本",
 
   "searchHint": "搜索视频、标签",
   "searchEmpty": "没有找到「{query}」相关视频",

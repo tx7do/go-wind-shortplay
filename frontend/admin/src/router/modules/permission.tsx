@@ -9,7 +9,7 @@ import { createLazyRoute } from '@/core/router';
  * 后端菜单模式下由 navigation 下发同名 component（permission/roles 等），
  * 这里的静态声明仅作为 navigation 失败回退时的兜底，路径与后端种子约定
  * （docs/API.md「约定」节）保持一致：/permission/roles、/permission/menus、
- * /permission/apis、/permission/departments。
+ * /permission/apis、/permission/departments、/permission/groups。
  */
 export const permissionRoutes: AppRouteObject[] = [
   {
@@ -65,6 +65,16 @@ export const permissionRoutes: AppRouteObject[] = [
           title: 'routes:permission-departments',
           icon: 'ClusterOutlined',
           order: 4,
+        },
+      },
+      {
+        name: 'permission-groups',
+        path: 'groups',
+        element: createLazyRoute(() => import('@/pages/app/permission/groups')),
+        meta: {
+          title: 'routes:permission-groups',
+          icon: 'KeyOutlined',
+          order: 5,
         },
       },
     ],

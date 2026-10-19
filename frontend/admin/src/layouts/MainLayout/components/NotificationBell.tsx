@@ -1,16 +1,17 @@
 /**
- * 顶栏通知铃（基座站内信接法，从 cms HeaderContent 通知弹出框移植）
+ * 顶栏通知铃（基座 HeaderContent 通知弹出框的独立组件形态——
+ * 本项目把铃铛从 HeaderContent 抽出成组件，其余行为与基座一致）
  *
  * 数据源：基座 internal-message 域管理端收件箱（GET /admin/v1/internal-message/inbox，
- * 服务端按调用者身份过滤），字段形状 title/content/createdAt/status；
+ * 服务端按调用者身份过滤），hooks 见 @/api/hooks/internal-message；
  * - 未读角标：未读 total（服务端 COUNT）+ SSE 'notification' 事件实时失效
  *   + 5 分钟兜底轮询（useGetUnreadCount 内置）；
- * - 已读：POST /admin/v1/internal-message/read（recipientIds 必填非空，
- *   「全部已读」由 hook 先拉未读 id 再一次性提交）；
- * - 弹出层最近 5 条；「查看全部」抽屉分页 + 只看未读。
+ * - 已读：POST /admin/v1/internal-message/read（recipientIds 为空 = 全部未读）；
+ * - 弹出层最近 5 条预览；点击行 / 「进入收件箱」跳收件箱页（/inbox）看全文。
  */
 import { useEffect, useState } from 'react';
-import { App as AntdApp, Badge, Button, Drawer, Empty, Popover, Switch, Tooltip } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { Badge, Button, Empty, Popover, Spin, Tooltip } from 'antd';
 import { BellOutlined, CheckOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -23,10 +24,9 @@ import {
   fetchListInbox,
   isInboxItemUnread,
   useGetUnreadCount,
-  useMarkAllInboxRead,
-  useMarkInboxRead,
+  useMarkNotificationAsRead,
   type InboxItem,
-} from '@/api/hooks/profile';
+} from '@/api/hooks/internal-message';
 import { useAuthStore } from '@/stores';
 import { SSE_EVENT, globalSSEClient } from '@/core/transport/sse';
 import { usePreferencesStore } from '@/core/preferences/store';
@@ -54,14 +54,12 @@ interface NotificationBellProps {
 }
 
 const NotificationBell = ({ btnStyle }: NotificationBellProps) => {
-  const { t } = useTranslation('notification');
-  const { message } = AntdApp.useApp();
+  const { t } = useTranslation('inbox');
+  const navigate = useNavigate();
   const appLocale = usePreferencesStore((state) => state.preferences.app.locale);
   const userId = useAuthStore((state) => state.userInfo?.id);
 
-  // 弹出层 / 抽屉开关
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
 
   // 未读数角标（SSE 实时失效 + 5 分钟兜底轮询见 hook 内部）
   const { data: unreadRes } = useGetUnreadCount();
@@ -76,17 +74,10 @@ const NotificationBell = ({ btnStyle }: NotificationBellProps) => {
   });
   const recentItems = recentRes?.items ?? [];
 
-  // 抽屉列表：分页 + 只看未读
-  const [drawerPage, setDrawerPage] = useState(1);
-  const [unreadOnly, setUnreadOnly] = useState(false);
-  const drawerPageSize = 20;
-  const { data: listRes, isLoading: listLoading } = useQuery({
-    queryKey: ['inbox', 'list', { page: drawerPage, pageSize: drawerPageSize, unreadOnly }],
-    queryFn: () => fetchListInbox({ page: drawerPage, pageSize: drawerPageSize, unreadOnly }),
-    enabled: drawerOpen,
-  });
-  const listItems = listRes?.items ?? [];
-  const listTotal = Number(listRes?.total ?? 0);
+  const goInbox = () => {
+    setPopoverOpen(false);
+    navigate('/inbox');
+  };
 
   // SSE 实时通知：收到新站内信即刷新预览与角标（后端按用户全部在线会话推送）
   useEffect(() => {
@@ -100,25 +91,10 @@ const NotificationBell = ({ btnStyle }: NotificationBellProps) => {
     };
   }, [userId]);
 
-  const markReadMutation = useMarkInboxRead();
-  const markAllMutation = useMarkAllInboxRead({
-    onSuccess: () => message.success(t('markAllReadSuccess')),
-    onError: (error: Error) => message.error(error.message || t('markAllReadFailed')),
-  });
+  // 一键全部已读（后端契约：recipientIds 为空 = 该用户全部未读）
+  const markAllMutation = useMarkNotificationAsRead();
 
-  /** 单条已读（未读才调接口） */
-  const markOneRead = (item: InboxItem) => {
-    if (!isInboxItemUnread(item) || item.id === null || item.id === undefined) return;
-    markReadMutation.mutate({ ids: [item.id] });
-  };
-
-  /** 点击通知：标记已读并收起弹层 */
-  const handleItemClick = (item: InboxItem) => {
-    markOneRead(item);
-    setPopoverOpen(false);
-  };
-
-  /** 单条通知行（弹层与抽屉共用渲染） */
+  /** 单条通知行（弹层渲染；点击跳收件箱页，阅读动作在页面里完成） */
   const renderItem = (item: InboxItem, index: number) => {
     const unreadItem = isInboxItemUnread(item);
     const preview = contentPreview(item.content);
@@ -134,7 +110,7 @@ const NotificationBell = ({ btnStyle }: NotificationBellProps) => {
           cursor: 'pointer',
           gap: 10,
         }}
-        onClick={() => handleItemClick(item)}
+        onClick={goInbox}
       >
         {/* 未读圆点 */}
         <span
@@ -176,20 +152,6 @@ const NotificationBell = ({ btnStyle }: NotificationBellProps) => {
             </div>
           )}
         </div>
-        {/* 单条已读按钮 */}
-        {unreadItem && item.id !== null && item.id !== undefined && (
-          <Tooltip title={t('markRead')}>
-            <Button
-              type="text"
-              size="small"
-              icon={<CheckOutlined />}
-              onClick={(e) => {
-                e.stopPropagation();
-                markOneRead(item);
-              }}
-            />
-          </Tooltip>
-        )}
         <span style={{ fontSize: 12, color: 'var(--ant-color-text-secondary)', flexShrink: 0 }}>
           {fromNow(item.createdAt, appLocale)}
         </span>
@@ -197,17 +159,7 @@ const NotificationBell = ({ btnStyle }: NotificationBellProps) => {
     );
   };
 
-  const renderList = (items: InboxItem[], loading: boolean, emptyText: string) => (
-    <div style={{ maxHeight: 420, overflowY: 'auto', minWidth: 300 }}>
-      {items.length > 0 ? (
-        items.map((item, index) => renderItem(item, index))
-      ) : (
-        <Empty description={loading ? t('loading') : emptyText} image={Empty.PRESENTED_IMAGE_SIMPLE} style={{ padding: '16px 0' }} />
-      )}
-    </div>
-  );
-
-  // 弹出层内容：标题 + 未读数 + 全部已读 / 最近 5 条 / 查看全部入口
+  // 弹出层内容：标题 + 未读数 + 全部已读 / 最近 5 条 / 进入收件箱
   const popoverContent = (
     <div className="notification-popover" style={{ width: 336 }}>
       <div
@@ -244,13 +196,25 @@ const NotificationBell = ({ btnStyle }: NotificationBellProps) => {
           icon={<CheckOutlined />}
           loading={markAllMutation.isPending}
           disabled={unreadCount <= 0}
-          onClick={() => markAllMutation.mutate()}
+          onClick={() => markAllMutation.mutate({ recipientIds: [] })}
         >
           {t('markAllRead')}
         </Button>
       </div>
 
-      {renderList(recentItems, recentLoading, t('noMessages'))}
+      <Spin spinning={recentLoading}>
+        {recentItems.length > 0 ? (
+          <div style={{ maxHeight: 420, overflowY: 'auto', minWidth: 300 }}>
+            {recentItems.map((item, index) => renderItem(item, index))}
+          </div>
+        ) : (
+          <Empty
+            description={t('noMessages')}
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            style={{ padding: '16px 0' }}
+          />
+        )}
+      </Spin>
 
       <div
         style={{
@@ -260,83 +224,28 @@ const NotificationBell = ({ btnStyle }: NotificationBellProps) => {
           marginTop: 4,
         }}
       >
-        <Button
-          type="link"
-          size="small"
-          onClick={() => {
-            setPopoverOpen(false);
-            setDrawerPage(1);
-            setDrawerOpen(true);
-          }}
-        >
-          {t('viewAll')}
+        <Button type="link" size="small" onClick={goInbox}>
+          {t('goToInbox')}
         </Button>
       </div>
     </div>
   );
 
   return (
-    <>
-      <Popover
-        content={popoverContent}
-        trigger="click"
-        placement="bottomRight"
-        open={popoverOpen}
-        onOpenChange={setPopoverOpen}
-        styles={{ body: { padding: '10px 10px 6px' } } as never}
-      >
-        <Badge count={unreadCount} size="small" offset={[0, 4]}>
-          <Tooltip title={t('pageTitle')}>
-            <Button type="text" icon={<BellOutlined />} size="small" style={btnStyle} />
-          </Tooltip>
-        </Badge>
-      </Popover>
-
-      {/* 全量通知抽屉：分页 + 只看未读 */}
-      <Drawer
-        title={t('pageTitle')}
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        width={420}
-        destroyOnHidden
-        extra={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 13 }}>{t('unreadOnly')}</span>
-            <Switch
-              size="small"
-              checked={unreadOnly}
-              onChange={(v) => {
-                setUnreadOnly(v);
-                setDrawerPage(1);
-              }}
-            />
-          </div>
-        }
-      >
-        {renderList(listItems, listLoading, t('noMessages'))}
-        {listTotal > drawerPageSize && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
-            <Button
-              size="small"
-              disabled={drawerPage <= 1}
-              onClick={() => setDrawerPage((p) => p - 1)}
-            >
-              {t('prevPage')}
-            </Button>
-            <span style={{ lineHeight: '24px', padding: '0 12px', fontSize: 13 }}>
-              {drawerPage} / {Math.max(1, Math.ceil(listTotal / drawerPageSize))}
-            </span>
-            <Button
-              size="small"
-              disabled={drawerPage >= Math.ceil(listTotal / drawerPageSize)}
-              onClick={() => setDrawerPage((p) => p + 1)}
-            >
-              {t('nextPage')}
-            </Button>
-          </div>
-        )}
-      </Drawer>
-    </>
+    <Popover
+      content={popoverContent}
+      trigger="click"
+      placement="bottomRight"
+      open={popoverOpen}
+      onOpenChange={setPopoverOpen}
+      styles={{ body: { padding: '10px 10px 6px' } } as never}
+    >
+      <Badge count={unreadCount} size="small" offset={[0, 4]}>
+        <Tooltip title={t('pageTitle')}>
+          <Button type="text" icon={<BellOutlined />} size="small" style={btnStyle} />
+        </Tooltip>
+      </Badge>
+    </Popover>
   );
 };
 

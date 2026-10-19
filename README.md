@@ -19,7 +19,7 @@
   <p><sub>管理后台 · 数据看板（React 19 + Ant Design，基于 GoWind Admin 底座）</sub></p>
 </div>
 
-风行短剧（GoWind ShortPlay）是一款开箱即用的企业级短视频社区基础版（开源 MVP），基于 GoWind 生态构建：上下滑沉浸式视频流、拍摄发布、互动社区与后台审核闭环，小流量企业内部场景可直接上线。
+风印短剧（GoWind ShortPlay）是一款开箱即用的企业级短视频社区基础版（开源 MVP），基于 GoWind 生态构建：上下滑沉浸式视频流、拍摄发布、互动社区与后台审核闭环，小流量企业内部场景可直接上线。
 
 **核心亮点：**
 
@@ -38,8 +38,16 @@
 | ![登录](docs/images/admin-login.png) | ![数据看板](docs/images/dashboard.png) | ![视频管理](docs/images/admin-videos.png) |
 | ![评论管理](docs/images/admin-comments.png) | ![举报管理](docs/images/admin-reports.png) | ![系统配置](docs/images/admin-sysconf.png) |
 | ![用户管理](docs/images/admin-users.png) | ![角色管理](docs/images/admin-roles.png) | ![菜单管理](docs/images/admin-menus.png) |
+| ![权限分组](docs/images/admin-permission-groups.png) | ![接口管理](docs/images/admin-apis.png) | ![部门管理](docs/images/admin-departments.png) |
 
-> 更多：接口管理、部门管理见 `docs/images/`；Flutter App（iOS/Android/Windows 桌面）与 H5 分享页运行实测截图随版本更新。
+**Flutter App**（Windows 桌面实测，iOS / Android 同源渲染）：
+
+| | | |
+|---|---|---|
+| ![沉浸 Feed](docs/images/app-feed.png) | ![登录](docs/images/app-login.png) | ![发布](docs/images/app-publish.png) |
+| ![消息](docs/images/app-notify.png) | ![我的](docs/images/app-profile.png) | ![设置](docs/images/app-settings.png) |
+
+> H5 分享页截图随版本更新。
 
 ## 技术栈
 
@@ -138,6 +146,7 @@ Flutter App ──▶ app-service   (BFF :7700) ──────────�
 | 评论管理 | 评论查询与删除 |
 | 举报工单 | 举报受理与处置，处置联动目标内容 |
 | 用户管理 | 用户查询与管理 |
+| 权限管理 | 角色 / 菜单 / 接口 / 部门 / 权限组，动态菜单经 navigation 下发 |
 | 数据看板 | 核心指标概览 + 视频 TOP10 排行 + 近 7 日趋势 |
 | 系统配置 | 上传限制 / 时长限制 / 人工审核开关 |
 

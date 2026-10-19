@@ -32,6 +32,9 @@ class AppRoutePath {
   /// 他人主页路径模板
   static String userPath(int userId) => '/user/$userId';
 
+  /// 系统设置
+  static const settings = '/settings';
+
   /// 未找到
   static const notFound = '/not_found';
 }

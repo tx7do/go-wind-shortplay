@@ -6,6 +6,8 @@ import {
   UserOutlined,
   SettingOutlined,
   LogoutOutlined,
+  InboxOutlined,
+  LockOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
   ReloadOutlined,
@@ -23,10 +25,12 @@ import { useTranslation } from 'react-i18next';
 import { getIconFromName } from '@/layouts/MainLayout/utils/iconResolver';
 
 import NotificationBell from './NotificationBell';
+import { LockScreenModal } from './LockScreenModal';
 
 import { useI18n } from '@/core/i18n';
 import { usePreferencesStore } from '@/core/preferences/store';
 import type { SupportedLanguagesType } from '@/core/preferences/types/layout';
+import { useLockStore } from '@/stores';
 
 /** 键位提示条的小 kbd 徽标（与触发条上的 Ctrl K 同族样式） */
 const searchHintKbdStyle: React.CSSProperties = {
@@ -274,32 +278,83 @@ export const HeaderContent = ({
     },
   ];
 
-  // 用户菜单
-  const userMenuItems: MenuProps['items'] = [
+  // ===== 用户下拉菜单 =====
+  // 条目口径三端统一（头部卡 / 个人中心 / 收件箱 / 锁定屏幕 / 退出登录），
+  // 基准实现见 vue-vben framework/effects/layouts/widgets/user-dropdown。
+  const lockScreenEnabled = usePreferencesStore((state) => state.preferences.widget?.lockScreen ?? true);
+  const shortcutKeys = usePreferencesStore((state) => state.preferences.shortcutKeys);
+
+  const [lockModalOpen, setLockModalOpen] = useState(false);
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+
+  const altView = /Mac|iPod|iPhone|iPad/.test(navigator.platform) ? '⌥' : 'Alt';
+  const shortcutsEnabled = shortcutKeys?.enable ?? true;
+  const showLockShortcut = shortcutsEnabled && (shortcutKeys?.globalLockScreen ?? true);
+  const showLogoutShortcut = shortcutsEnabled && (shortcutKeys?.globalLogout ?? true);
+
+  // 菜单项右侧的键位提示：与下面的全局监听读同一份开关，避免"显示却按不动"
+  const labeledItem = (text: string, shortcut?: string) => (
+    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
+      <span>{text}</span>
+      {shortcut && <span style={searchHintKbdStyle}>{shortcut}</span>}
+    </span>
+  );
+
+  useEffect(() => {
+    if (!shortcutsEnabled) return undefined;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!event.altKey) return;
+      if (event.code === 'KeyL' && lockScreenEnabled && showLockShortcut) {
+        event.preventDefault();
+        setLockModalOpen(true);
+      } else if (event.code === 'KeyQ' && showLogoutShortcut) {
+        event.preventDefault();
+        setLogoutConfirmOpen(true);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [shortcutsEnabled, lockScreenEnabled, showLockShortcut, showLogoutShortcut]);
+
+  const userMenuItems: NonNullable<MenuProps['items']> = [
     {
       key: 'profile',
       icon: <UserOutlined />,
-      label: t('header.profile'),
+      label: labeledItem(t('header.profile')),
       onClick: () => {
         navigate('/profile');
       },
     },
     {
-      key: 'settings',
-      icon: <SettingOutlined />,
-      label: t('header.settings'),
-      onClick: onOpenSettings,
+      key: 'inbox',
+      icon: <InboxOutlined />,
+      label: labeledItem(t('header.inbox')),
+      onClick: () => {
+        navigate('/inbox');
+      },
     },
-    {
-      type: 'divider',
-    },
-    {
-      key: 'logout',
-      icon: <LogoutOutlined style={{ color: '#ff4d4f' }} />,
-      label: <span style={{ color: '#ff4d4f' }}>{t('header.logout')}</span>,
-      onClick: onLogout,
-    },
+    { type: 'divider' },
   ];
+
+  if (lockScreenEnabled) {
+    userMenuItems.push(
+      {
+        key: 'lock',
+        icon: <LockOutlined />,
+        label: labeledItem(t('header.lockScreen'), showLockShortcut ? `${altView} L` : undefined),
+        onClick: () => setLockModalOpen(true),
+      },
+      { type: 'divider' },
+    );
+  }
+
+  userMenuItems.push({
+    key: 'logout',
+    danger: true,
+    icon: <LogoutOutlined />,
+    label: labeledItem(t('header.logout'), showLogoutShortcut ? `${altView} Q` : undefined),
+    onClick: () => setLogoutConfirmOpen(true),
+  });
 
   // 通用按钮样式
   const btnStyle: React.CSSProperties = {
@@ -789,7 +844,81 @@ export const HeaderContent = ({
         {widgetConfig.notification && <NotificationBell btnStyle={btnStyle} />}
 
         {/* 用户头像 + 下拉菜单 */}
-        <Dropdown menu={{ items: userMenuItems }} trigger={['click']} placement="bottomRight">
+        <Dropdown
+          trigger={['click']}
+          placement="bottomRight"
+          menu={{
+            items: userMenuItems,
+            // 卡片盒子由 popupRender 的容器承担，菜单自身必须收平，否则头部卡会浮在卡外
+            style: { background: 'transparent', boxShadow: 'none', borderRadius: 0 },
+          }}
+          popupRender={(originNode) => (
+            <div
+              style={{
+                minWidth: 240,
+                overflow: 'hidden',
+                backgroundColor: 'var(--ant-color-bg-elevated, var(--ant-color-bg-container))',
+                borderRadius: 'var(--ant-border-radius-lg, 8px)',
+                boxShadow:
+                  'var(--ant-box-shadow-secondary, 0 6px 16px 0 rgba(0,0,0,0.08), 0 3px 6px -4px rgba(0,0,0,0.12), 0 9px 28px 8px rgba(0,0,0,0.05))',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: '14px 16px',
+                  borderBottom: '1px solid var(--ant-color-border-secondary)',
+                }}
+              >
+                <span style={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>
+                  <Avatar src={userInfo?.avatar || defaultAvatar || undefined} icon={<UserOutlined />} size={48} />
+                  <span
+                    style={{
+                      position: 'absolute',
+                      right: 1,
+                      bottom: 2,
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      backgroundColor: 'var(--ant-color-success)',
+                      border: '2px solid var(--ant-color-bg-elevated, var(--ant-color-bg-container))',
+                    }}
+                  />
+                </span>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span
+                    style={{
+                      display: 'block',
+                      fontSize: 14,
+                      fontWeight: 500,
+                      color: 'var(--ant-color-text)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {userInfo?.realname || userInfo?.username || t('header.guest')}
+                  </span>
+                  <span
+                    style={{
+                      display: 'block',
+                      fontSize: 12,
+                      color: 'var(--ant-color-text-secondary)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {userInfo?.email}
+                  </span>
+                </span>
+              </div>
+              {originNode}
+            </div>
+          )}
+        >
           <div
             style={{
               display: 'flex',
@@ -821,10 +950,37 @@ export const HeaderContent = ({
                 whiteSpace: 'nowrap',
               }}
             >
-              {userInfo?.username || t('header.guest')}
+              {userInfo?.realname || userInfo?.username || t('header.guest')}
             </span>
           </div>
         </Dropdown>
+
+        <LockScreenModal
+          open={lockModalOpen}
+          avatar={userInfo?.avatar || defaultAvatar || undefined}
+          text={userInfo?.realname || userInfo?.username}
+          onCancel={() => setLockModalOpen(false)}
+          onSubmit={(password) => {
+            useLockStore.getState().lockScreen(password);
+            setLockModalOpen(false);
+          }}
+        />
+
+        {/* 退出登录二次确认：与 vue-element / vue-vben 一致，不做"点一下就掉线" */}
+        <Modal
+          open={logoutConfirmOpen}
+          title={t('header.logoutConfirmTitle')}
+          okText={t('button.ok')}
+          cancelText={t('button.cancel')}
+          okButtonProps={{ danger: true }}
+          onOk={() => {
+            setLogoutConfirmOpen(false);
+            onLogout();
+          }}
+          onCancel={() => setLogoutConfirmOpen(false)}
+        >
+          {t('header.logoutConfirmMessage')}
+        </Modal>
       </div>
     </div>
   );

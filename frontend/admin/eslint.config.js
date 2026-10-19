@@ -179,6 +179,10 @@ export default tseslint.config(
       // 以下为页头注释自声明"基座拷贝文件"的页面（从 go-wind-cms 同路径重拷，
       // 保留上游 any 占位/编辑期 setState 回填等形态，便于整文件重拷贝同步）
       'src/pages/app/permission/**',
+      // 站内信收件箱与个人中心：自 go-wind-admin react 端同步移植（收件箱页/详情
+      // 抽屉/通知偏好/个人中心左页签壳均保留基座形态，便于后续整文件同步）
+      'src/pages/app/inbox/**',
+      'src/pages/app/profile/**',
       'src/hooks/useTableScrollHeight.ts',
       'src/hooks/useTime.ts',
       'src/types/global.d.ts',

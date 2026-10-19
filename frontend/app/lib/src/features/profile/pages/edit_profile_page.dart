@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:shortplay_app/generated/l10n.dart';
 import 'package:shortplay_app/src/core/repositories/user_auth_cache.dart';
+import 'package:shortplay_app/src/core/themes/app_colors.dart';
 import 'package:shortplay_app/src/core/transport/http/index.dart';
 import 'package:shortplay_app/src/features/common/widgets/user_avatar.dart';
 import 'package:shortplay_app/src/features/profile/services/user_service.dart';
@@ -96,10 +97,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
       if (!mounted) return;
       setState(() => _avatarController.text = url);
       EasyLoading.showToast(loc.profileSaved);
-    } on ApiStatusException catch (e) {
-      EasyLoading.dismiss();
-      EasyLoading.showToast(e.status.message ?? loc.errorUploadFailed);
-    } catch (_) {
+      } on ApiStatusException catch (e) {
+        EasyLoading.dismiss();
+        EasyLoading.showToast(localizedErrorText(loc, e));
+      } catch (_) {
       // 选图取消之外的未知异常：统一按上传失败提示（与发布页 _pickVideo 同策略）
       EasyLoading.dismiss();
       EasyLoading.showToast(loc.errorUploadFailed);
@@ -131,7 +132,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       EasyLoading.showToast(loc.profileSaved);
       Navigator.of(context).pop(updated);
     } on ApiStatusException catch (e) {
-      EasyLoading.showToast(e.status.message ?? loc.errorDefault);
+      EasyLoading.showToast(localizedErrorText(loc, e));
     } catch (_) {
       EasyLoading.showToast(loc.errorDefault);
     } finally {
@@ -183,14 +184,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           bottom: 0,
                           child: Container(
                             padding: EdgeInsets.all(4.w),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary,
+                            decoration: const BoxDecoration(
+                              gradient: BrandColor.gradient,
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
                               Icons.photo_camera_outlined,
                               size: 14.sp,
-                              color: theme.colorScheme.onPrimary,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -214,12 +215,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
               controller: _avatarController,
               onChanged: (_) => setState(() {}),
               style: TextStyle(fontSize: 14.sp),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'https://…',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                isDense: true,
               ),
             ),
             SizedBox(height: 14.h),
@@ -231,10 +228,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
               decoration: InputDecoration(
                 hintText: loc.nicknameHint,
                 counterText: '',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                isDense: true,
               ),
             ),
             SizedBox(height: 14.h),
@@ -247,10 +240,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
               decoration: InputDecoration(
                 hintText: loc.bioHint,
                 counterText: '',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                isDense: true,
               ),
             ),
           ],

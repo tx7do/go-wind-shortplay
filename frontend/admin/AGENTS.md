@@ -19,6 +19,9 @@ GoWind 短视频社区管理后台（shortplay），从 go-wind-cms/frontend/adm
 - **页面写法**：列表用 `ListTable`（底座封装的 ProTable）+ `ContentContainer`；
   表单用 pro-components（DrawerForm/ProForm）；状态枚举映射集中在各模块
   `constants.ts`；文案全部走 i18n（`src/locales/{zh-CN,en-US}/_modules/*.json`）。
+- **设计令牌**：颜色/圆角/字体等视觉值以 `docs/design-language.md` 为权威
+  （admin 端继承 go-wind-admin 底座规范），组件内禁止裸色值；改动先改文档再同步代码，
+  与上游共管的值须回写上游避免底座同步回退。
 
 ## 鉴权与会话
 

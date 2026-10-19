@@ -74,7 +74,8 @@ class UploadProgress {
 class PublishService extends BaseService {
   PublishService() : super(tag: 'PublishService');
 
-  /// 上传用独立 Dio：不走全局认证外的拦截器配置，且放宽超时
+  /// 上传用独立 Dio：放宽超时，并复用全局认证拦截器
+  /// （/uploads 需 Bearer Token，缺失会导致 401 发布失败）
   Dio get _dio {
     final global = GetIt.instance<Dio>();
     return Dio(BaseOptions(
@@ -83,7 +84,7 @@ class PublishService extends BaseService {
       sendTimeout: const Duration(minutes: 10),
       receiveTimeout: const Duration(minutes: 10),
       responseType: ResponseType.json,
-    ));
+    ))..interceptors.addAll(global.interceptors);
   }
 
   /// 创建上传任务

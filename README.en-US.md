@@ -38,8 +38,16 @@ GoWind ShortPlay is an out-of-the-box, enterprise-grade short-video community ba
 | ![Login](docs/images/admin-login.png) | ![Dashboard](docs/images/dashboard.png) | ![Videos](docs/images/admin-videos.png) |
 | ![Comments](docs/images/admin-comments.png) | ![Reports](docs/images/admin-reports.png) | ![System Config](docs/images/admin-sysconf.png) |
 | ![Users](docs/images/admin-users.png) | ![Roles](docs/images/admin-roles.png) | ![Menus](docs/images/admin-menus.png) |
+| ![Permission Groups](docs/images/admin-permission-groups.png) | ![APIs](docs/images/admin-apis.png) | ![Departments](docs/images/admin-departments.png) |
 
-> More: API management, departments under `docs/images/`; Flutter App (iOS/Android/Windows) and H5 share page screenshots ship with each release.
+**Flutter App** (captured on the Windows desktop build; iOS / Android render from the same codebase):
+
+| | | |
+|---|---|---|
+| ![Immersive Feed](docs/images/app-feed.png) | ![Login](docs/images/app-login.png) | ![Publish](docs/images/app-publish.png) |
+| ![Messages](docs/images/app-notify.png) | ![Profile](docs/images/app-profile.png) | ![Settings](docs/images/app-settings.png) |
+
+> H5 share page screenshots ship with each release.
 
 ## Tech Stack
 
@@ -135,6 +143,7 @@ Flutter App ──▶ app-service   (BFF :7700) ──────────�
 | Comment management | Comment query and deletion |
 | Report tickets | Report handling linked to target content |
 | User management | User query and administration |
+| Permission management | Roles / menus / APIs / departments / permission groups; dynamic menus via navigation |
 | Dashboard | Key metrics overview + video TOP10 ranking + 7-day trends |
 | System settings | Upload limits / duration limits / manual-review switch |
 

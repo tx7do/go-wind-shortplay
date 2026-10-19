@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:shortplay_app/generated/l10n.dart';
 import 'package:shortplay_app/src/core/repositories/user_auth_cache.dart';
+import 'package:shortplay_app/src/core/themes/app_colors.dart';
 import 'package:shortplay_app/src/core/transport/http/index.dart'
     show ApiStatusException;
 import 'package:shortplay_app/src/features/comment/bloc/comment_bloc.dart';
@@ -29,6 +30,8 @@ Future<void> showCommentSheet(
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
+    // 桌面宽窗下收窄居中（手机端无感）
+    constraints: const BoxConstraints(maxWidth: 560),
     builder: (sheetContext) {
       return BlocProvider(
         create: (_) => CommentBloc()..add(CommentListRequested(videoId)),
@@ -156,18 +159,28 @@ class _CommentSheetState extends State<CommentSheet> {
           constraints: BoxConstraints(maxHeight: maxHeight),
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: 8.h),
+              // 拖拽把手
+              Container(
+                width: 36.w,
+                height: 4.h,
+                margin: EdgeInsets.only(top: 10.h),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.onSurface.withAlpha(40),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+              ),
+              SizedBox(height: 10.h),
               // 标题
               Text(
                 loc.commentsCount(state.total),
                 style: TextStyle(
                   fontSize: 15.sp,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   color: theme.colorScheme.onSurface,
                 ),
               ),
@@ -284,14 +297,24 @@ class _CommentSheetState extends State<CommentSheet> {
             ),
           ),
           SizedBox(width: 8.w),
+          // 渐变圆形发送按钮
           GestureDetector(
             onTap: _submit,
-            child: Text(
-              loc.confirmSend,
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.primary,
+            child: Semantics(
+              label: loc.confirmSend,
+              button: true,
+              child: Container(
+                width: 36.r,
+                height: 36.r,
+                decoration: const BoxDecoration(
+                  gradient: BrandColor.gradient,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.send_rounded,
+                  size: 17.r,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),

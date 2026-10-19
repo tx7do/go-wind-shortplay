@@ -1,19 +1,25 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:media_kit/media_kit.dart' show Player;
 
 import 'package:shortplay_app/generated/l10n.dart';
 import 'package:shortplay_app/src/core/repositories/user_auth_cache.dart';
+import 'package:shortplay_app/src/core/widgets/empty_state.dart';
 import 'package:shortplay_app/src/features/comment/widgets/comment_sheet.dart';
 import 'package:shortplay_app/src/core/transport/http/index.dart'
-    show ApiStatusException;
+    show ApiStatusException, localizedErrorText;
 import 'package:shortplay_app/src/features/common/data/models.dart';
 import 'package:shortplay_app/src/features/common/services/report_service.dart'
     show ReportTargetType;
 import 'package:shortplay_app/src/features/common/services/uba_service.dart';
 import 'package:shortplay_app/src/features/feed/widgets/feed_action_bar.dart';
+import 'package:shortplay_app/src/features/feed/widgets/feed_progress_bar.dart';
 import 'package:shortplay_app/src/features/feed/widgets/feed_video_info.dart';
+import 'package:shortplay_app/src/features/feed/widgets/like_burst.dart';
 import 'package:shortplay_app/src/features/feed/widgets/video_player_item.dart';
 import 'package:shortplay_app/src/features/video_detail/services/video_service.dart';
 import 'package:shortplay_app/src/features/video_detail/widgets/report_sheet.dart';
@@ -33,11 +39,19 @@ class VideoDetailPage extends StatefulWidget {
 
 class _VideoDetailPageState extends State<VideoDetailPage> {
   final VideoService _videoService = VideoService();
+  final LikeBurstController _burst = LikeBurstController();
 
   VideoDetail? _detail;
   String? _error;
   bool _loading = true;
   Video? _current;
+  Player? _player;
+
+  @override
+  void dispose() {
+    _burst.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -62,15 +76,13 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
     } on ApiStatusException catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.status.reason == 'VIDEO_NOT_FOUND'
-            ? S.of(context).videoNotFound
-            : e.status.message;
+        _error = localizedErrorText(S.of(context), e);
         _loading = false;
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = '$e';
+        _error = localizedErrorText(S.of(context), e);
         _loading = false;
       });
     }
@@ -106,7 +118,7 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
       EasyLoading.showToast(loc.videoDeletedSuccess);
       context.pop(true);
     } on ApiStatusException catch (e) {
-      EasyLoading.showToast(e.status.message ?? loc.errorDefault);
+      EasyLoading.showToast(localizedErrorText(loc, e));
     } catch (_) {
       EasyLoading.showToast(loc.errorDefault);
     }
@@ -134,6 +146,8 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
+      // 桌面宽窗下收窄居中（手机端无感）
+      constraints: const BoxConstraints(maxWidth: 480),
       builder: (sheetContext) {
         return SafeArea(
           child: Column(
@@ -204,24 +218,12 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
   }
 
   Widget _buildError(S loc) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.videocam_off_outlined,
-            size: 56.sp,
-            color: Colors.white.withAlpha(120),
-          ),
-          SizedBox(height: 12.h),
-          Text(
-            _error ?? loc.videoNotFound,
-            style: TextStyle(fontSize: 14.sp, color: Colors.white.withAlpha(180)),
-          ),
-          SizedBox(height: 16.h),
-          FilledButton(onPressed: _load, child: Text(loc.retry)),
-        ],
-      ),
+    return EmptyState(
+      icon: Icons.videocam_off_outlined,
+      title: _error ?? loc.videoNotFound,
+      actionLabel: loc.retry,
+      onAction: _load,
+      onDark: true,
     );
   }
 
@@ -236,6 +238,19 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
           key: ValueKey('detail-video-${video.id}'),
           video: video,
           isActive: true,
+          onPlayerReady: (player) {
+            if (mounted) setState(() => _player = player);
+          },
+          onDoubleTapLike: (position) {
+            _burst.burst(position);
+            unawaited(runDoubleTapLike(
+              context,
+              video: video,
+              onUpdated: (updated) {
+                if (mounted) setState(() => _current = updated);
+              },
+            ));
+          },
           onPlayStart: (_) => uba.report(
             UbaEvent(eventType: UbaEventType.videoPlay, videoId: video.id),
           ),
@@ -262,7 +277,11 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
           left: 16.w,
           right: 88.w,
           bottom: 24.h,
-          child: FeedVideoInfo(video: video, reason: ''),
+          child: FeedVideoInfo(
+            video: video,
+            reason: '',
+            authorNickname: detail.author?.nickname ?? '',
+          ),
         ),
         Positioned(
           right: 12.w,
@@ -276,6 +295,13 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
               if (mounted) setState(() => _current = updated);
             },
           ),
+        ),
+        // 底部细进度条（拖动 seek + 时间气泡）
+        if (_player != null)
+          FeedProgressBar(player: _player!, bottomInset: 16.h),
+        // 双击点赞红心动画层
+        Positioned.fill(
+          child: LikeBurstLayer(controller: _burst),
         ),
       ],
     );

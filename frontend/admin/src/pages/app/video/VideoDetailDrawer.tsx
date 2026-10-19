@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 
 import type { Video } from '@/api/types';
+import { resolveMediaUrl } from '@/utils/media';
 import { formatDuration, getVideoStatusConfig, toNum } from './constants';
 
 interface VideoDetailDrawerProps {
@@ -23,6 +24,7 @@ const VideoDetailDrawer = ({ open, data, onClose, extra }: VideoDetailDrawerProp
   const { t } = useTranslation('video');
 
   const statusConfig = useMemo(() => getVideoStatusConfig(data?.status), [data?.status]);
+  const videoSrc = resolveMediaUrl(data?.videoUrl);
   const resolution =
     data?.width && data?.height ? `${data.width}×${data.height}` : '-';
 
@@ -40,11 +42,11 @@ const VideoDetailDrawer = ({ open, data, onClose, extra }: VideoDetailDrawerProp
     >
       {data && (
         <>
-          {/* 视频预览 */}
-          {data.videoUrl ? (
+          {/* 视频预览（videoUrl 是对象键，按媒体基地址拼播放 URL） */}
+          {videoSrc ? (
             <video
-              key={data.videoUrl}
-              src={data.videoUrl}
+              key={videoSrc}
+              src={videoSrc}
               controls
               playsInline
               poster={data.coverUrl || undefined}

@@ -10,9 +10,20 @@ String localizedApiErrorMessage(S s, Status status) {
   return resolver != null ? resolver(s) : s.errorDefault;
 }
 
+/// 任意异常 → 用户可见文案：ApiStatusException 按 reason 本地化，
+/// 其余（解析失败/未知异常）一律回退默认文案，原始异常文本不出口。
+String localizedErrorText(S s, Object error) {
+  if (error is ApiStatusException) {
+    return localizedApiErrorMessage(s, error.status);
+  }
+  return s.errorDefault;
+}
+
 /// 后端 kratos reason 枚举 → S 错误文案 getter 映射
 final Map<String, String Function(S)> _kApiErrorReasonText = {
   'BAD_REQUEST': (s) => s.errorBadRequest,
+  'CONNECTION_ERROR': (s) => s.errorNetworkError,
+  'TIMEOUT': (s) => s.errorTimeout,
   'INVALID_GRANT_TYPE': (s) => s.errorInvalidGrantType,
   'INVALID_USERID': (s) => s.errorInvalidUserid,
   'INVALID_TOKEN': (s) => s.errorInvalidToken,
@@ -28,6 +39,7 @@ final Map<String, String Function(S)> _kApiErrorReasonText = {
   'FORBIDDEN': (s) => s.errorForbidden,
   'NOT_FOUND': (s) => s.errorNotFound,
   'USER_NOT_FOUND': (s) => s.errorUserNotFound,
+  'VIDEO_NOT_FOUND': (s) => s.errorVideoNotFound,
   'METHOD_NOT_ALLOWED': (s) => s.errorMethodNotAllowed,
   'NOT_ACCEPTABLE': (s) => s.errorNotAcceptable,
   'PROXY_AUTHENTICATION_REQUIRED': (s) => s.errorProxyAuthenticationRequired,

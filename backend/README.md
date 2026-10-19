@@ -1,6 +1,6 @@
 # GoWind ShortPlay Backend
 
-GoWind ShortPlay（风行短剧）后端 —— 基于 [go-wind-cms](https://github.com/tx7do/go-wind-cms) `backend/`
+GoWind ShortPlay（风印短剧）后端 —— 基于 [go-wind-cms](https://github.com/tx7do/go-wind-cms) `backend/`
 基座源码移植裁剪，保留身份/权限/认证/审计/字典/媒体/存储/任务/通知/站内信等全部基建域，
 短视频社区业务域（video / feed / report / sysconf / uba 等）按基座既有模式接入；
 详见 [AGENTS.md](./AGENTS.md)。

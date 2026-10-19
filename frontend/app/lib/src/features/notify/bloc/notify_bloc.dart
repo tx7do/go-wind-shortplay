@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:get_it/get_it.dart' show GetIt;
 
+import 'package:shortplay_app/generated/l10n.dart';
 import 'package:shortplay_app/src/core/repositories/user_auth_cache.dart';
 import 'package:shortplay_app/src/core/transport/http/index.dart';
 import 'package:shortplay_app/src/features/notify/models/notification.dart';
@@ -166,11 +167,14 @@ class NotifyBloc extends Bloc<NotifyEvent, NotifyState> {
     } on ApiStatusException catch (e) {
       emit(state.copyWith(
         isLoading: false,
-        errorMessage: e.status.message,
+        errorMessage: localizedErrorText(S.current, e),
         requireLogin: e.status.code == 401,
       ));
     } catch (e) {
-      emit(state.copyWith(isLoading: false, errorMessage: '$e'));
+      emit(state.copyWith(
+        isLoading: false,
+        errorMessage: localizedErrorText(S.current, e),
+      ));
     }
   }
 

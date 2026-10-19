@@ -134,11 +134,29 @@ bool Win32Window::Create(const std::wstring& title,
   UINT dpi = FlutterDesktopGetDpiForMonitor(monitor);
   double scale_factor = dpi / 96.0;
 
-  HWND window = CreateWindow(
-      window_class, title.c_str(), WS_OVERLAPPEDWINDOW,
-      Scale(origin.x, scale_factor), Scale(origin.y, scale_factor),
-      Scale(size.width, scale_factor), Scale(size.height, scale_factor),
-      nullptr, nullptr, GetModuleHandle(nullptr), this);
+  // 在目标显示器工作区内居中启动（忽略 origin 的具体坐标，仅用其选屏）
+  MONITORINFO monitor_info = {};
+  monitor_info.cbSize = sizeof(monitor_info);
+  GetMonitorInfo(monitor, &monitor_info);
+  const LONG window_width = static_cast<LONG>(Scale(size.width, scale_factor));
+  const LONG window_height =
+      static_cast<LONG>(Scale(size.height, scale_factor));
+  const LONG work_width =
+      monitor_info.rcWork.right - monitor_info.rcWork.left;
+  const LONG work_height =
+      monitor_info.rcWork.bottom - monitor_info.rcWork.top;
+  LONG window_x = monitor_info.rcWork.left + (work_width - window_width) / 2;
+  LONG window_y = monitor_info.rcWork.top + (work_height - window_height) / 2;
+  if (window_x < monitor_info.rcWork.left) {
+    window_x = monitor_info.rcWork.left;
+  }
+  if (window_y < monitor_info.rcWork.top) {
+    window_y = monitor_info.rcWork.top;
+  }
+
+  HWND window = CreateWindow(window_class, title.c_str(), WS_OVERLAPPEDWINDOW,
+                             window_x, window_y, window_width, window_height,
+                             nullptr, nullptr, GetModuleHandle(nullptr), this);
 
   if (!window) {
     return false;
@@ -186,6 +204,20 @@ Win32Window::MessageHandler(HWND hwnd,
         PostQuitMessage(0);
       }
       return 0;
+
+    case WM_GETMINMAXINFO: {
+      // Min window size 360x640 logical pixels (readability floor for the
+      // portrait short-video UI), scaled to physical pixels by monitor DPI.
+      auto minmax_info = reinterpret_cast<MINMAXINFO*>(lparam);
+      UINT dpi = FlutterDesktopGetDpiForMonitor(
+          MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST));
+      double scale_factor = dpi / 96.0;
+      minmax_info->ptMinTrackSize.x =
+          static_cast<LONG>(Scale(360, scale_factor));
+      minmax_info->ptMinTrackSize.y =
+          static_cast<LONG>(Scale(640, scale_factor));
+      return 0;
+    }
 
     case WM_DPICHANGED: {
       auto newRectSize = reinterpret_cast<RECT*>(lparam);

@@ -5,6 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:shortplay_app/generated/l10n.dart';
 import 'package:shortplay_app/src/core/services/pagination_query.dart';
+import 'package:shortplay_app/src/core/themes/app_colors.dart';
+import 'package:shortplay_app/src/core/widgets/empty_state.dart';
 import 'package:shortplay_app/src/features/common/services/tag_service.dart';
 import 'package:shortplay_app/src/features/common/widgets/paged_video_list.dart';
 import 'package:shortplay_app/src/features/common/data/models.dart';
@@ -102,12 +104,12 @@ class _SearchPageState extends State<SearchPage> {
             autofocus: false,
             textInputAction: TextInputAction.search,
             onChanged: _onChanged,
-            onSubmitted: (value) =>
-                setState(() => _keyword = value.trim()),
+            onSubmitted: (value) => setState(() => _keyword = value.trim()),
             style: TextStyle(fontSize: 14.sp),
             decoration: InputDecoration(
               hintText: loc.searchHint,
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: const Icon(Icons.search, size: 20),
+              prefixIconColor: theme.colorScheme.onSurface.withAlpha(110),
               suffixIcon: _controller.text.isEmpty
                   ? null
                   : IconButton(
@@ -119,11 +121,21 @@ class _SearchPageState extends State<SearchPage> {
                       },
                     ),
               filled: true,
-              fillColor: theme.colorScheme.surfaceContainerHighest,
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+              fillColor: theme.colorScheme.onSurface.withAlpha(12),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 12.w,
+                vertical: 8.h,
+              ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20.r),
+                borderRadius: BorderRadius.circular(100),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(100),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(100),
                 borderSide: BorderSide.none,
               ),
               isDense: true,
@@ -142,50 +154,103 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget _buildHotTags(ThemeData theme, S loc) {
-    return ListView(
-      padding: EdgeInsets.all(16.w),
-      children: [
-        Row(
+    final isDark = theme.brightness == Brightness.dark;
+    // 榜单式配色：前三名品牌渐变系高亮，其余中性
+    final rankColors = [
+      isDark ? BrandColor.roseBright : BrandColor.roseDeep,
+      BrandColor.violet,
+      isDark ? const Color(0xFFFFB43A) : const Color(0xFFE8890C),
+    ];
+
+    if (_hotTags.isEmpty) {
+      return EmptyState(
+        icon: Icons.search_rounded,
+        title: loc.searchSomeKeyword,
+      );
+    }
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 560),
+        child: ListView(
+          padding: EdgeInsets.all(16.w),
           children: [
-            Icon(
-              Icons.local_fire_department,
-              size: 16.sp,
-              color: theme.colorScheme.error,
+            Row(
+              children: [
+                Icon(
+                  Icons.local_fire_department,
+                  size: 18.sp,
+                  color: BrandColor.rose,
+                ),
+                SizedBox(width: 6.w),
+                Text(
+                  loc.hotTags,
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(width: 4.w),
-            Text(
-              loc.hotTags,
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 12.h),
-        if (_hotTags.isEmpty)
-          Text(
-            loc.searchSomeKeyword,
-            style: TextStyle(
-              fontSize: 13.sp,
-              color: theme.colorScheme.onSurface.withAlpha(120),
-            ),
-          )
-        else
-          Wrap(
-            spacing: 8.w,
-            runSpacing: 8.h,
-            children: _hotTags.map((tag) {
-              return ActionChip(
-                label: Text('#$tag'),
-                onPressed: () {
+            SizedBox(height: 14.h),
+            ...List.generate(_hotTags.length, (index) {
+              final tag = _hotTags[index];
+              final rank = index + 1;
+              final rankColor = index < rankColors.length
+                  ? rankColors[index]
+                  : theme.colorScheme.onSurface.withAlpha(110);
+              return InkWell(
+                onTap: () {
                   _controller.text = '#$tag';
                   setState(() => _keyword = '#$tag');
                 },
+                borderRadius: BorderRadius.circular(10.r),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 6.w,
+                    vertical: 11.h,
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 22.w,
+                        child: Text(
+                          '$rank',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w800,
+                            fontStyle: FontStyle.italic,
+                            color: rankColor,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: Text(
+                          '#$tag',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: index < 3
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      if (index < 3)
+                        Icon(
+                          Icons.local_fire_department,
+                          size: 14.sp,
+                          color: rankColor,
+                        ),
+                    ],
+                  ),
+                ),
               );
-            }).toList(),
-          ),
-      ],
+            }),
+          ],
+        ),
+      ),
     );
   }
 }

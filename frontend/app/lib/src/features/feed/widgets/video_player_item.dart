@@ -3,7 +3,8 @@ import 'dart:async' show StreamSubscription, Timer, unawaited;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:media_kit/media_kit.dart' show Media, Player, PlayerConfiguration;
+import 'package:media_kit/media_kit.dart'
+    show Media, Player, PlayerConfiguration, PlaylistMode;
 import 'package:media_kit_video/media_kit_video.dart' as media_video;
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -23,7 +24,8 @@ class PlaybackProgress {
 /// 沉浸式单视频播放组件（media_kit 内核）
 ///
 /// - [isActive] 为 true 时自动播放，false 时自动暂停（Feed 上下滑联动）
-/// - 单击切换播放/暂停
+/// - 单击切换播放/暂停；双击点赞（回调宿主，见 [onDoubleTapLike]）
+/// - 按住 2 倍速快进，松手恢复
 /// - 通过回调向宿主抛出 播放/划走/完播/心跳 事件（宿主自行上报 UBA）
 class VideoPlayerItem extends StatefulWidget {
   final Video video;
@@ -43,6 +45,12 @@ class VideoPlayerItem extends StatefulWidget {
   /// 周期心跳（默认 10s）
   final ValueChanged<PlaybackProgress>? onHeartbeat;
 
+  /// 双击点赞（参数为点击位置，组件局部坐标，宿主用于播放心形动画）
+  final ValueChanged<Offset>? onDoubleTapLike;
+
+  /// 播放器就绪（宿主可取 [Player] 渲染进度条/自定义控制）
+  final ValueChanged<Player>? onPlayerReady;
+
   const VideoPlayerItem({
     super.key,
     required this.video,
@@ -51,6 +59,8 @@ class VideoPlayerItem extends StatefulWidget {
     this.onSwipeAway,
     this.onComplete,
     this.onHeartbeat,
+    this.onDoubleTapLike,
+    this.onPlayerReady,
   });
 
   @override
@@ -69,6 +79,20 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
 
   bool _isBuffering = true;
   bool _opened = false;
+
+  /// 播放状态（流监听里 setState 同步，驱动暂停角标显隐）
+  bool _isPlaying = false;
+
+  /// 2 倍速快进中（按住屏幕）
+  bool _boostRate = false;
+
+  // ─── 单击/双击手势判定（抖音口径：单击秒切换，双击点赞并回退单击）───
+  static const Duration _doubleTapWindow = Duration(milliseconds: 300);
+  DateTime _lastTapAt = DateTime.fromMillisecondsSinceEpoch(0);
+
+  /// 上一次单击是否切换了播放状态（双击时需回退）
+  bool _toggledByLastTap = false;
+  Timer? _tapMarkTimer;
 
   /// 是否静音（仅 Web 有意义：浏览器禁止非静音自动播放，进页面须静音起播）
   bool _isMuted = kIsWeb;
@@ -95,12 +119,17 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     });
 
     unawaited(_open(widget.video.playUrl));
+
+    // 播放器就绪后交给宿主（渲染进度条等）
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.onPlayerReady?.call(_player);
+    });
   }
 
   @override
   void didUpdateWidget(covariant VideoPlayerItem oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // 离开当前页：暂停并上报划走
+    // 离开当前页：暂停并上报划走（顺带收掉倍速/单击判定）
     if (oldWidget.isActive && !widget.isActive) {
       unawaited(_player.pause());
       final progress = _snapshot();
@@ -108,6 +137,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
         widget.onSwipeAway?.call(progress);
       }
       _stopHeartbeat();
+      _resetGestures();
     }
     // 进入当前页：恢复播放
     if (!oldWidget.isActive && widget.isActive) {
@@ -118,6 +148,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
   @override
   void dispose() {
     _heartbeatTimer?.cancel();
+    _tapMarkTimer?.cancel();
     _completedSub?.cancel();
     _playingSub?.cancel();
     _positionSub?.cancel();
@@ -126,11 +157,69 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     super.dispose();
   }
 
+  /// 离开当前页/组件销毁时，收掉倍速与单击判定状态
+  void _resetGestures() {
+    _tapMarkTimer?.cancel();
+    _tapMarkTimer = null;
+    _toggledByLastTap = false;
+    if (_boostRate) {
+      _boostRate = false;
+      unawaited(_player.setRate(1.0));
+    }
+  }
+
+  /// 单击/双击统一处理（抖音口径）：
+  /// - 单击立即切换播放/暂停（秒响应，无 300ms 延迟）
+  /// - 双击点赞，并回退第一次单击造成的播放切换（双击不改变播放状态）
+  void _onTapUp(TapUpDetails details) {
+    final now = DateTime.now();
+    final isDoubleTap = now.difference(_lastTapAt) < _doubleTapWindow;
+    _lastTapAt = now;
+    _tapMarkTimer?.cancel();
+
+    if (isDoubleTap) {
+      if (_toggledByLastTap) {
+        // 撤销第一次单击的切换，回到双击前的播放状态
+        _toggledByLastTap = false;
+        unawaited(
+          _player.state.playing ? _player.pause() : _player.play(),
+        );
+      }
+      widget.onDoubleTapLike?.call(details.localPosition);
+      return;
+    }
+
+    unawaited(_player.state.playing ? _player.pause() : _player.play());
+    _toggledByLastTap = true;
+    _tapMarkTimer = Timer(_doubleTapWindow, () {
+      _toggledByLastTap = false;
+    });
+  }
+
+  /// 按住 2 倍速快进（仅播放中生效，抖音口径）
+  void _onLongPressStart(LongPressStartDetails details) {
+    if (!_player.state.playing) return;
+    unawaited(_player.setRate(2.0));
+    if (mounted) setState(() => _boostRate = true);
+  }
+
+  void _onLongPressEnd(LongPressEndDetails details) => _stopBoostRate();
+
+  void _onLongPressCancel() => _stopBoostRate();
+
+  void _stopBoostRate() {
+    if (!_boostRate) return;
+    unawaited(_player.setRate(1.0));
+    if (mounted) setState(() => _boostRate = false);
+  }
+
   Future<void> _open(String url) async {
     if (url.isEmpty) {
       if (mounted) setState(() => _isBuffering = false);
       return;
     }
+    // 单视频无限循环（抖音口径）：播完自动重头播，不会冻在末帧
+    await _player.setPlaylistMode(PlaylistMode.loop);
     await _player.open(Media(url), play: widget.isActive);
     _opened = true;
     if (mounted) setState(() {});
@@ -138,6 +227,10 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
 
   void _onPlayingChanged(bool playing) {
     if (!mounted) return;
+    // 同步本地状态触发重建，否则暂停角标不随播放状态显隐
+    if (playing != _isPlaying) {
+      setState(() => _isPlaying = playing);
+    }
     if (playing) {
       if (widget.isActive) {
         unawaited(WakelockPlus.enable());
@@ -197,15 +290,6 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     _heartbeatTimer = null;
   }
 
-  /// 单击切换播放/暂停
-  Future<void> _togglePlay() async {
-    if (_player.state.playing) {
-      await _player.pause();
-    } else {
-      await _player.play();
-    }
-  }
-
   /// 静音切换（仅 Web 暴露按钮）。media_kit 无 setMuted，用音量 0/100 表达；
   /// Web 端 setVolume 内部会先解除 <video> 的 muted 属性，故 100 即恢复声音。
   Future<void> _toggleMuted() async {
@@ -215,12 +299,14 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
 
   @override
   Widget build(BuildContext context) {
-    final playing = _player.state.playing;
-    final showPlayBadge = _opened && !playing && !_isBuffering;
+    final showPlayBadge = _opened && !_isPlaying && !_isBuffering;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: _togglePlay,
+      onTapUp: _onTapUp,
+      onLongPressStart: _onLongPressStart,
+      onLongPressEnd: _onLongPressEnd,
+      onLongPressCancel: _onLongPressCancel,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -242,6 +328,41 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                 Icons.play_arrow_rounded,
                 size: 80.sp,
                 color: Colors.white.withAlpha(200),
+              ),
+            ),
+          // 2x 快进提示（按住屏幕时，顶部中央）
+          if (_boostRate)
+            Positioned(
+              top: MediaQuery.paddingOf(context).top + 12.h,
+              left: 0,
+              right: 0,
+              child: IgnorePointer(
+                child: Center(
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 14.w, vertical: 5.h),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withAlpha(140),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.fast_forward_rounded,
+                            size: 15.sp, color: Colors.white),
+                        SizedBox(width: 5.w),
+                        Text(
+                          '2x 快进中',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           // 静音切换（仅 Web：自动播放须静音，声音由用户手动开启）

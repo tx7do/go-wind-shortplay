@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 128 128" role="img" aria-label="GoWind ShortPlay icon - gradient full bleed">
+  <title>GoWind ShortPlay - 渐变满幅（iOS/Android 底层用）</title>
+  <defs>
+    <linearGradient id="gw-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF3D77"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" fill="url(#gw-bg)"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="11" stroke-linecap="round"><path d="M31 44h21"/><path d="M24 64h28"/><path d="M31 84h21"/></g>
+  <path d="M66 42v44l38-22z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="12" stroke-linejoin="round"/>
+</svg>

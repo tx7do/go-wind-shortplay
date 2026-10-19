@@ -30,4 +30,7 @@ class RouteNames {
 
   /// 编辑资料
   static const String editProfile = 'edit_profile';
+
+  /// 系统设置
+  static const String settings = 'settings';
 }

@@ -43,3 +43,9 @@ backend/bin/
 
 # playwright mcp artifacts
 .playwright-mcp/
+
+# zcode agent scratch files
+.zcode/tmp/
+
+# app GUI test screenshots
+gui-test-screenshots/

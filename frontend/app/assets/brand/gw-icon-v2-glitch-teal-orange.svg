@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 128 128" role="img" aria-label="GoWind ShortPlay icon - teal orange glitch">
+  <title>GoWind ShortPlay - 青橙错位故障风</title>
+  <rect width="128" height="128" rx="28" fill="#0B1020"/>
+  <g style="mix-blend-mode:screen" transform="translate(-5 -4)">
+    <g fill="none" stroke="#22D3EE" stroke-width="11" stroke-linecap="round"><path d="M31 44h21"/><path d="M24 64h28"/><path d="M31 84h21"/></g>
+    <path d="M66 42v44l38-22z" fill="#22D3EE" stroke="#22D3EE" stroke-width="12" stroke-linejoin="round"/>
+  </g>
+  <g style="mix-blend-mode:screen" transform="translate(5 4)">
+    <g fill="none" stroke="#FF8A3D" stroke-width="11" stroke-linecap="round"><path d="M31 44h21"/><path d="M24 64h28"/><path d="M31 84h21"/></g>
+    <path d="M66 42v44l38-22z" fill="#FF8A3D" stroke="#FF8A3D" stroke-width="12" stroke-linejoin="round"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="11" stroke-linecap="round"><path d="M31 44h21"/><path d="M24 64h28"/><path d="M31 84h21"/></g>
+  <path d="M66 42v44l38-22z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="12" stroke-linejoin="round"/>
+</svg>

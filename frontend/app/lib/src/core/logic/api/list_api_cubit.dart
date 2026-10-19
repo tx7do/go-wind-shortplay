@@ -16,8 +16,9 @@ class ListApiCubit<T> extends Cubit<ApiResponse<List<T>>> {
       emit(Success<List<T>>(items));
       return true;
     } on Exception catch (e) {
+      // 面向用户展示友好提示；原始异常仅进日志
       fatal("list items from api exception: $e");
-      emit(Error<List<T>>(e.toString()));
+      emit(Error<List<T>>('内容加载失败，请检查网络后重试'));
       return false;
     }
   }

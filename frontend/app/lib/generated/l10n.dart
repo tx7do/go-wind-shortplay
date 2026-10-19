@@ -54,9 +54,9 @@ class S {
     return Localizations.of<S>(context, S);
   }
 
-  /// `GoWind 短视频社区`
+  /// `风印短剧`
   String get appName {
-    return Intl.message('GoWind 短视频社区', name: 'appName', desc: '', args: []);
+    return Intl.message('风印短剧', name: 'appName', desc: '', args: []);
   }
 
   /// `首页`
@@ -514,6 +514,46 @@ class S {
     return Intl.message('草稿箱', name: 'drafts', desc: '', args: []);
   }
 
+  /// `选择一段视频开始创作`
+  String get chooseVideoToCreate {
+    return Intl.message(
+      '选择一段视频开始创作',
+      name: 'chooseVideoToCreate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `支持 5 分钟以内的短视频`
+  String get publishGuideSubtitle {
+    return Intl.message(
+      '支持 5 分钟以内的短视频',
+      name: 'publishGuideSubtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `高级设置`
+  String get advancedSettings {
+    return Intl.message('高级设置', name: 'advancedSettings', desc: '', args: []);
+  }
+
+  /// `输入标签，回车或逗号添加`
+  String get tagInlineHint {
+    return Intl.message(
+      '输入标签，回车或逗号添加',
+      name: 'tagInlineHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `移除视频`
+  String get removeVideo {
+    return Intl.message('移除视频', name: 'removeVideo', desc: '', args: []);
+  }
+
   /// `全部已读`
   String get markAllRead {
     return Intl.message('全部已读', name: 'markAllRead', desc: '', args: []);
@@ -762,6 +802,51 @@ class S {
       desc: '',
       args: [],
     );
+  }
+
+  /// `设置`
+  String get settings {
+    return Intl.message('设置', name: 'settings', desc: '', args: []);
+  }
+
+  /// `外观`
+  String get appearance {
+    return Intl.message('外观', name: 'appearance', desc: '', args: []);
+  }
+
+  /// `深色模式`
+  String get darkMode {
+    return Intl.message('深色模式', name: 'darkMode', desc: '', args: []);
+  }
+
+  /// `浅色`
+  String get light {
+    return Intl.message('浅色', name: 'light', desc: '', args: []);
+  }
+
+  /// `跟随系统`
+  String get followSystem {
+    return Intl.message('跟随系统', name: 'followSystem', desc: '', args: []);
+  }
+
+  /// `深色`
+  String get dark {
+    return Intl.message('深色', name: 'dark', desc: '', args: []);
+  }
+
+  /// `语言`
+  String get language {
+    return Intl.message('语言', name: 'language', desc: '', args: []);
+  }
+
+  /// `关于`
+  String get about {
+    return Intl.message('关于', name: 'about', desc: '', args: []);
+  }
+
+  /// `版本`
+  String get versionLabel {
+    return Intl.message('版本', name: 'versionLabel', desc: '', args: []);
   }
 
   /// `搜索视频、标签`

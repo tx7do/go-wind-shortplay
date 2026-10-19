@@ -181,7 +181,9 @@ class UserAuthCache {
 
   /// 从JWT令牌解析出UserID
   ///
-  /// shortplay 后端签发的令牌 claim 为 `userId`（uint32）。
+  /// shortplay 后端签发的令牌 claim 为 `uid`（uint32；载荷形如
+  /// `{"sub":"demo","tid":1,"uid":21,"roc":["tenant:user"]}`），
+  /// 兼容回退旧约定 `userId`。
   int? _getUserIdFromJwt(String jwtToken) {
     try {
       // 解析JWT
@@ -189,7 +191,7 @@ class UserAuthCache {
 
       // debug('parse jwt payload: ${jwt.claims.toJson()}');
 
-      int? userId = jwt.claims.getTyped('userId');
+      int? userId = jwt.claims.getTyped('uid') ?? jwt.claims.getTyped('userId');
       if (userId == null) {
         fatal('UserID not found in JWT payload: $jwtToken');
         return null;

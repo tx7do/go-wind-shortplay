@@ -1,9 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
+import 'package:shortplay_app/generated/l10n.dart';
 import 'package:shortplay_app/src/core/services/pagination_query.dart';
 import 'package:shortplay_app/src/core/transport/http/index.dart'
-    show ApiStatusException;
+    show ApiStatusException, localizedErrorText;
 import 'package:shortplay_app/src/features/common/data/models.dart';
 import 'package:shortplay_app/src/features/feed/services/feed_service.dart';
 
@@ -106,10 +107,13 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     } on ApiStatusException catch (e) {
       emit(state.copyWith(
         isLoading: false,
-        errorMessage: e.status.message,
+        errorMessage: localizedErrorText(S.current, e),
       ));
     } catch (e) {
-      emit(state.copyWith(isLoading: false, errorMessage: '$e'));
+      emit(state.copyWith(
+        isLoading: false,
+        errorMessage: localizedErrorText(S.current, e),
+      ));
     }
   }
 

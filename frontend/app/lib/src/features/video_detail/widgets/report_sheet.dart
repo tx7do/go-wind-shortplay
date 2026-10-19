@@ -35,6 +35,8 @@ Future<void> showReportSheet(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
+    // 桌面宽窗下收窄居中（手机端无感）
+    constraints: const BoxConstraints(maxWidth: 560),
     builder: (sheetContext) {
       return _ReportSheet(targetType: targetType, targetId: targetId);
     },

@@ -10,7 +10,9 @@
   "permission-menus": "菜单管理",
   "permission-apis": "权限点管理",
   "permission-departments": "部门管理",
+  "permission-groups": "权限组管理",
   "profile": "个人中心",
+  "inbox": "收件箱",
   "auth": "认证",
   "login": "登录",
   "error-pages": "错误",
@@ -48,7 +50,8 @@
       "permission": "接口管理",
       "role": "角色管理",
       "menu": "菜单管理",
-      "department": "部门管理"
+      "department": "部门管理",
+      "groups": "权限组管理"
     },
     "internalMessage": {
       "moduleName": "内部消息",
@@ -95,6 +98,7 @@
   "permission.role": "角色管理",
   "permission.menu": "菜单管理",
   "permission.department": "部门管理",
+  "permission.groups": "权限组管理",
   "internalMessage.moduleName": "内部消息",
   "internalMessage.internalMessage": "消息列表",
   "internalMessage.internalMessageCategory": "消息分类",

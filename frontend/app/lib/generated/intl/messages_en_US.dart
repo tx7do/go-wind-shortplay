@@ -40,11 +40,14 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+    "about": MessageLookupByLibrary.simpleMessage("About"),
     "addTags": MessageLookupByLibrary.simpleMessage("Add tags"),
+    "advancedSettings": MessageLookupByLibrary.simpleMessage("Advanced"),
     "allLoaded": MessageLookupByLibrary.simpleMessage(
       "— You\'ve reached the end —",
     ),
-    "appName": MessageLookupByLibrary.simpleMessage("GoWind ShortPlay"),
+    "appName": MessageLookupByLibrary.simpleMessage("Fengyin ShortPlay"),
+    "appearance": MessageLookupByLibrary.simpleMessage("Appearance"),
     "asDraftOption": MessageLookupByLibrary.simpleMessage(
       "Save as draft (only visible to me)",
     ),
@@ -59,6 +62,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cannotFollowSelf": MessageLookupByLibrary.simpleMessage(
       "You cannot follow yourself",
     ),
+    "chooseVideoToCreate": MessageLookupByLibrary.simpleMessage(
+      "Select a video to start creating",
+    ),
     "collects": MessageLookupByLibrary.simpleMessage("Collected"),
     "comment": MessageLookupByLibrary.simpleMessage("Comments"),
     "commentDeleted": MessageLookupByLibrary.simpleMessage("Comment deleted"),
@@ -72,6 +78,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "copyLink": MessageLookupByLibrary.simpleMessage("Copy link"),
     "creatorCenter": MessageLookupByLibrary.simpleMessage("Creator center"),
     "creatorOverview": MessageLookupByLibrary.simpleMessage("Overview"),
+    "dark": MessageLookupByLibrary.simpleMessage("Dark"),
+    "darkMode": MessageLookupByLibrary.simpleMessage("Dark Mode"),
     "delete": MessageLookupByLibrary.simpleMessage("Delete"),
     "deleteCommentConfirm": MessageLookupByLibrary.simpleMessage(
       "Delete this comment?",
@@ -274,6 +282,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "This feature is coming soon",
     ),
     "follow": MessageLookupByLibrary.simpleMessage("Follow"),
+    "followSystem": MessageLookupByLibrary.simpleMessage("Follow System"),
     "followed": MessageLookupByLibrary.simpleMessage("Following"),
     "followers": MessageLookupByLibrary.simpleMessage("Followers"),
     "followingCountLabel": MessageLookupByLibrary.simpleMessage("Following"),
@@ -286,6 +295,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "home": MessageLookupByLibrary.simpleMessage("Home"),
     "hotTags": MessageLookupByLibrary.simpleMessage("Hot tags"),
+    "language": MessageLookupByLibrary.simpleMessage("Language"),
+    "light": MessageLookupByLibrary.simpleMessage("Light"),
     "likeReceived": MessageLookupByLibrary.simpleMessage("Likes"),
     "loadFailed": MessageLookupByLibrary.simpleMessage("Failed to load"),
     "loading": MessageLookupByLibrary.simpleMessage("Loading…"),
@@ -350,6 +361,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "publishFailed": MessageLookupByLibrary.simpleMessage(
       "Publish failed, please retry",
     ),
+    "publishGuideSubtitle": MessageLookupByLibrary.simpleMessage(
+      "Short videos up to 5 minutes",
+    ),
     "publishSuccess": MessageLookupByLibrary.simpleMessage(
       "Published, pending review",
     ),
@@ -367,6 +381,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "registerSuccess": MessageLookupByLibrary.simpleMessage("Account created"),
     "registerTitle": MessageLookupByLibrary.simpleMessage("Create account"),
     "rejectReasonLabel": MessageLookupByLibrary.simpleMessage("Reject reason"),
+    "removeVideo": MessageLookupByLibrary.simpleMessage("Remove video"),
     "repliesCount": m2,
     "reply": MessageLookupByLibrary.simpleMessage("Reply"),
     "replyTo": m3,
@@ -402,6 +417,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "searchSomeKeyword": MessageLookupByLibrary.simpleMessage(
       "Search something to explore",
     ),
+    "settings": MessageLookupByLibrary.simpleMessage("Settings"),
     "share": MessageLookupByLibrary.simpleMessage("Share"),
     "shareCopied": MessageLookupByLibrary.simpleMessage(
       "Link copied, go share it",
@@ -411,6 +427,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "statusRejected": MessageLookupByLibrary.simpleMessage("Rejected"),
     "statusReviewing": MessageLookupByLibrary.simpleMessage("In review"),
     "submitPublish": MessageLookupByLibrary.simpleMessage("Publish"),
+    "tagInlineHint": MessageLookupByLibrary.simpleMessage(
+      "Type a tag, press enter or comma",
+    ),
     "tagInputHint": MessageLookupByLibrary.simpleMessage(
       "Search or create tags",
     ),
@@ -441,6 +460,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "uploadingPercent": m8,
     "username": MessageLookupByLibrary.simpleMessage("Username"),
     "usernameHint": MessageLookupByLibrary.simpleMessage("Enter username"),
+    "versionLabel": MessageLookupByLibrary.simpleMessage("Version"),
     "videoCountLabel": MessageLookupByLibrary.simpleMessage("Videos"),
     "videoDeleted": MessageLookupByLibrary.simpleMessage("Video deleted"),
     "videoDeletedSuccess": MessageLookupByLibrary.simpleMessage(

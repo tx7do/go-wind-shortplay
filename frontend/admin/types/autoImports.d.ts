@@ -163,6 +163,7 @@ declare global {
   const useLayoutEffect: typeof import('react').useLayoutEffect
   const useLinkClickHandler: typeof import('react-router-dom').useLinkClickHandler
   const useLocation: typeof import('react-router-dom').useLocation
+  const useLockStore: typeof import('../src/stores/lock').useLockStore
   const useLogout: typeof import('../src/hooks/useLogout').useLogout
   const useMemo: typeof import('react').useMemo
   const useNavigate: typeof import('react-router-dom').useNavigate

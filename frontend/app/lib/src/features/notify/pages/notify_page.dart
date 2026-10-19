@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:shortplay_app/generated/l10n.dart';
 import 'package:shortplay_app/src/app_router/app_router.dart' show RouteNames;
+import 'package:shortplay_app/src/core/themes/app_colors.dart';
+import 'package:shortplay_app/src/core/widgets/empty_state.dart';
 import 'package:shortplay_app/src/features/common/widgets/login_guard.dart';
 import 'package:shortplay_app/src/features/notify/bloc/notify_bloc.dart';
 import 'package:shortplay_app/src/features/notify/models/notification.dart';
@@ -59,7 +61,6 @@ class _NotifyPageState extends State<NotifyPage>
   Widget build(BuildContext context) {
     super.build(context);
     final loc = S.of(context);
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -67,16 +68,19 @@ class _NotifyPageState extends State<NotifyPage>
         actions: [
           BlocBuilder<NotifyBloc, NotifyState>(
             builder: (context, state) {
-              return IconButton(
-                tooltip: loc.markAllRead,
-                icon: const Icon(Icons.done_all),
-                onPressed: state.unreadCount <= 0
-                    ? null
-                    : () {
-                        context
-                            .read<NotifyBloc>()
-                            .add(const NotifyAllMarkedRead());
-                      },
+              if (state.unreadCount <= 0) return const SizedBox.shrink();
+              return Padding(
+                padding: EdgeInsets.only(right: 12.w),
+                child: TextButton.icon(
+                  onPressed: () {
+                    context.read<NotifyBloc>().add(const NotifyAllMarkedRead());
+                  },
+                  icon: Icon(Icons.done_all_rounded, size: 16.sp),
+                  label: Text(
+                    loc.markAllRead,
+                    style: TextStyle(fontSize: 13.sp),
+                  ),
+                ),
               );
             },
           ),
@@ -85,54 +89,27 @@ class _NotifyPageState extends State<NotifyPage>
       body: BlocBuilder<NotifyBloc, NotifyState>(
         builder: (context, state) {
           if (state.requireLogin) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.notifications_none,
-                    size: 56.sp,
-                    color: theme.colorScheme.onSurface.withAlpha(90),
-                  ),
-                  SizedBox(height: 12.h),
-                  Text(
-                    loc.loginToViewMessages,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: theme.colorScheme.onSurface.withAlpha(140),
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-                  FilledButton(
-                    onPressed: () async {
-                      final ok = await ensureLogin(context);
-                      if (ok && context.mounted) {
-                        context
-                            .read<NotifyBloc>()
-                            .add(const NotifyRefreshed());
-                      }
-                    },
-                    child: Text(loc.login),
-                  ),
-                ],
-              ),
+            return EmptyState(
+              icon: Icons.notifications_none,
+              title: loc.loginToViewMessages,
+              actionLabel: loc.login,
+              onAction: () async {
+                final ok = await ensureLogin(context);
+                if (ok && context.mounted) {
+                  context.read<NotifyBloc>().add(const NotifyRefreshed());
+                }
+              },
             );
           }
 
           if (state.errorMessage != null && state.items.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(state.errorMessage!),
-                  FilledButton(
-                    onPressed: () => context
-                        .read<NotifyBloc>()
-                        .add(NotifyRefreshed(unreadOnly: state.unreadOnly)),
-                    child: Text(loc.retry),
-                  ),
-                ],
-              ),
+            return EmptyState(
+              icon: Icons.wifi_off_rounded,
+              title: state.errorMessage!,
+              actionLabel: loc.retry,
+              onAction: () => context
+                  .read<NotifyBloc>()
+                  .add(NotifyRefreshed(unreadOnly: state.unreadOnly)),
             );
           }
 
@@ -141,14 +118,9 @@ class _NotifyPageState extends State<NotifyPage>
           }
 
           if (state.items.isEmpty) {
-            return Center(
-              child: Text(
-                loc.noNewMessages,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  color: theme.colorScheme.onSurface.withAlpha(130),
-                ),
-              ),
+            return EmptyState(
+              icon: Icons.notifications_none,
+              title: loc.noNewMessages,
             );
           }
 
@@ -158,30 +130,33 @@ class _NotifyPageState extends State<NotifyPage>
                     NotifyRefreshed(unreadOnly: state.unreadOnly),
                   );
             },
-            child: ListView.separated(
-              controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: state.items.length + (state.hasMore ? 1 : 0),
-              separatorBuilder: (_, _) => Divider(
-                height: 1,
-                indent: 68.w,
-                color: theme.dividerColor.withAlpha(80),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 560),
+                child: ListView.separated(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                  itemCount: state.items.length + (state.hasMore ? 1 : 0),
+                  separatorBuilder: (_, _) => SizedBox(height: 6.h),
+                  itemBuilder: (context, index) {
+                    if (index >= state.items.length) {
+                      return Padding(
+                        padding: EdgeInsets.all(12.h),
+                        child: const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      );
+                    }
+                    final item = state.items[index];
+                    return _NotifyTile(
+                      item: item,
+                      onTap: () => _openItem(item),
+                    );
+                  },
+                ),
               ),
-              itemBuilder: (context, index) {
-                if (index >= state.items.length) {
-                  return Padding(
-                    padding: EdgeInsets.all(12.h),
-                    child: const Center(
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  );
-                }
-                final item = state.items[index];
-                return _NotifyTile(
-                  item: item,
-                  onTap: () => _openItem(item),
-                );
-              },
             ),
           );
         },
@@ -199,80 +174,104 @@ class _NotifyTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final unread = !item.isRead;
 
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor:
-                      theme.colorScheme.secondaryContainer,
-                  child: Icon(
-                    item.isRead
-                        ? Icons.notifications_none
-                        : Icons.notifications_active,
-                    size: 20.sp,
-                    color: theme.colorScheme.onSecondaryContainer,
+    return Material(
+      color: unread
+          ? BrandColor.rose.withAlpha(10)
+          : theme.colorScheme.surface,
+      borderRadius: BorderRadius.circular(14.r),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 13.h),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 38.r,
+                    height: 38.r,
+                    decoration: BoxDecoration(
+                      color: unread
+                          ? BrandColor.rose.withAlpha(24)
+                          : theme.colorScheme.onSurface.withAlpha(12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      unread
+                          ? Icons.notifications_active
+                          : Icons.notifications_none,
+                      size: 18.r,
+                      color: unread
+                          ? (theme.brightness == Brightness.dark
+                              ? BrandColor.roseBright
+                              : BrandColor.roseDeep)
+                          : theme.colorScheme.onSurface.withAlpha(140),
+                    ),
                   ),
-                ),
-                if (!item.isRead)
-                  Positioned(
-                    right: -2,
-                    bottom: -2,
-                    child: Container(
-                      width: 10.r,
-                      height: 10.r,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.error,
-                        shape: BoxShape.circle,
-                        border: Border.fromBorderSide(
-                          BorderSide(
-                            color: theme.colorScheme.surface,
-                            width: 1.5,
+                  if (unread)
+                    Positioned(
+                      right: -1,
+                      top: -1,
+                      child: Container(
+                        width: 9.r,
+                        height: 9.r,
+                        decoration: BoxDecoration(
+                          color: BrandColor.rose,
+                          shape: BoxShape.circle,
+                          border: Border.fromBorderSide(
+                            BorderSide(
+                              color: theme.colorScheme.surface,
+                              width: 1.5,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-              ],
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight:
-                          item.isRead ? FontWeight.w500 : FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    item.content,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      color: theme.colorScheme.onSurface.withAlpha(170),
-                    ),
-                  ),
                 ],
               ),
-            ),
-          ],
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: unread ? FontWeight.w700 : FontWeight.w500,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      item.content,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        height: 1.45,
+                        color: theme.colorScheme.onSurface
+                            .withAlpha(unread ? 190 : 150),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 18.sp,
+                color: theme.colorScheme.onSurface.withAlpha(60),
+              ),
+            ],
+          ),
         ),
       ),
     );

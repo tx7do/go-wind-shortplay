@@ -6,15 +6,19 @@ import 'package:shortplay_app/generated/l10n.dart';
 import 'package:shortplay_app/src/app_router/app_router.dart' show RouteNames;
 import 'package:shortplay_app/src/features/common/data/models.dart';
 
-/// 底部视频信息：标题 / 简介 / 标签 / 召回原因
+/// 底部视频信息：作者 / 标题 / 简介 / 标签 / 召回原因
 class FeedVideoInfo extends StatelessWidget {
   final Video video;
   final String reason;
+
+  /// 作者昵称（feed 列表不回传，由详情接口补充；空则不展示作者行）
+  final String authorNickname;
 
   const FeedVideoInfo({
     super.key,
     required this.video,
     this.reason = FeedReason.latest,
+    this.authorNickname = '',
   });
 
   @override
@@ -26,7 +30,31 @@ class FeedVideoInfo extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // 作者名
+        // 作者行
+        if (authorNickname.isNotEmpty)
+          GestureDetector(
+            onTap: video.authorId > 0
+                ? () => context.pushNamed(
+                      RouteNames.userProfile,
+                      pathParameters: {'userId': '${video.authorId}'},
+                    )
+                : null,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 6.h),
+              child: Text(
+                '@$authorNickname',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(color: Colors.black.withAlpha(120), blurRadius: 6),
+                  ],
+                ),
+              ),
+            ),
+          ),
         if (video.title.isNotEmpty)
           Text(
             video.title,
@@ -34,8 +62,9 @@ class FeedVideoInfo extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: Colors.white,
+              height: 1.35,
               shadows: [
                 Shadow(color: Colors.black.withAlpha(120), blurRadius: 6),
               ],
@@ -72,7 +101,7 @@ class FeedVideoInfo extends StatelessWidget {
                   '#$tag',
                   style: TextStyle(
                     fontSize: 13.sp,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                     color: Colors.white,
                     shadows: [
                       Shadow(color: Colors.black.withAlpha(120), blurRadius: 6),
@@ -84,27 +113,30 @@ class FeedVideoInfo extends StatelessWidget {
           ),
         ],
         // 召回原因角标
-        SizedBox(height: 6.h),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-          decoration: BoxDecoration(
-            color: Colors.black.withAlpha(70),
-            borderRadius: BorderRadius.circular(4.r),
-          ),
-          child: Text(
-            _reasonLabel(loc),
-            style: TextStyle(
-              fontSize: 10.sp,
-              color: Colors.white.withAlpha(210),
+        if (reason.isNotEmpty) ...[
+          SizedBox(height: 8.h),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+            decoration: BoxDecoration(
+              color: Colors.black.withAlpha(80),
+              borderRadius: BorderRadius.circular(100),
+            ),
+            child: Text(
+              _reasonLabel(loc),
+              style: TextStyle(
+                fontSize: 10.sp,
+                color: Colors.white.withAlpha(210),
+              ),
             ),
           ),
-        ),
+        ],
         if (video.status != VideoStatus.published) ...[
           SizedBox(height: 6.h),
           Text(
             _statusLabel(loc, video.status),
             style: TextStyle(
               fontSize: 11.sp,
+              fontWeight: FontWeight.w600,
               color: theme.colorScheme.tertiary,
             ),
           ),

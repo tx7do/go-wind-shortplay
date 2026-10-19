@@ -26,8 +26,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
-  Win32Window::Size size(1280, 720);
-  if (!window.Create(L"shortplay_app", origin, size)) {
+  // 竖屏短视频 App：默认手机比例窗口（逻辑像素，Create 内部按 DPI 缩放），
+  // 启动居中与最小尺寸见 win32_window.cpp（Create / WM_GETMINMAXINFO）。
+  Win32Window::Size size(420, 780);
+  // 窗口标题「风印短剧」（runner 已开 /utf-8，标题仍用 UTF-16 转义双保险）
+  if (!window.Create(L"\u98CE\u5370\u77ED\u5267", origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);

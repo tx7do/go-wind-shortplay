@@ -22,9 +22,11 @@ void _configureInterceptors(Dio dio) {
   // 以规避 transport 初始化（早）与 UserAuthCache 注册（晚）的顺序依赖。
   // 修复 AUD9-M4 相关的拦截器未注册 bug：此前该拦截器被整段注释，
   // 导致 Flutter 端所有需鉴权的 API 调用都不带 Authorization 头。
+  // autoRefreshToken 必须开启：access token 过期后凭 refresh token 换新并
+  // 重试原请求，刷新失败才回落游客态（此前写死 false，401 直接抛给页面）。
   dio.interceptors.add(AuthenticationInterceptor(
     authServiceFactory: () => AuthenticationService(),
-    autoRefreshToken: false,
+    autoRefreshToken: true,
   ));
 }
 

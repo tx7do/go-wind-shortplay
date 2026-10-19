@@ -478,6 +478,8 @@ export interface UpdateProfileRequest {
   realname?: string;
   mobile?: string;
   email?: string;
+  /** 性别枚举名（MALE/FEMALE/SECRET），基座白名单可改 */
+  gender?: string;
 }
 
 export interface ChangePasswordRequest {

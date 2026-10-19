@@ -22,6 +22,7 @@ import 'package:shortplay_app/src/features/profile/pages/profile_page.dart';
 import 'package:shortplay_app/src/features/profile/pages/user_profile_page.dart';
 import 'package:shortplay_app/src/features/publish/pages/publish_page.dart';
 import 'package:shortplay_app/src/features/search/pages/search_page.dart';
+import 'package:shortplay_app/src/features/settings/pages/settings_page.dart';
 import 'package:shortplay_app/src/features/video_detail/pages/video_detail_page.dart';
 import 'package:get_it/get_it.dart' show GetIt;
 
@@ -128,6 +129,12 @@ class AppRouter {
         name: RouteNames.editProfile,
         builder: (context, state) => const EditProfilePage(),
       ),
+      // 系统设置（全屏，游客可用：外观/语言为设备级偏好）
+      GoRoute(
+        path: constants.AppRoutePath.settings,
+        name: RouteNames.settings,
+        builder: (context, state) => const SettingsPage(),
+      ),
     ],
   );
 }
@@ -148,7 +155,7 @@ class _HomeShell extends StatelessWidget {
         builder: (context, notifyState) {
           return Scaffold(
             body: shell,
-            extendBody: true,
+            // 底栏为实体栏（抖音口径：仅顶部沉浸），body 不延伸到栏后
             bottomNavigationBar: ValueListenableBuilder<bool>(
               valueListenable:
                   GetIt.instance<UserAuthCache>().loginStateNotifier,

@@ -1,5 +1,6 @@
 import 'dart:async' show Completer, StreamSubscription, unawaited;
 import 'dart:io' show File;
+import 'dart:math' show min;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -7,7 +8,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'package:media_kit/media_kit.dart' show Media, Player;
+import 'package:media_kit/media_kit.dart'
+    show Media, Player, PlayerConfiguration, PlaylistMode;
 import 'package:media_kit_video/media_kit_video.dart'
     show Video, VideoController, VideoState;
 
@@ -16,14 +18,21 @@ import 'package:shortplay_app/src/app_router/app_router.dart'
     show AppRoutePath, RouteNames;
 import 'package:shortplay_app/src/core/repositories/user_auth_cache.dart';
 import 'package:shortplay_app/src/core/services/pagination_query.dart';
+import 'package:shortplay_app/src/core/themes/app_colors.dart';
 import 'package:shortplay_app/src/core/transport/http/index.dart';
+import 'package:shortplay_app/src/core/utilities/platform.dart';
 import 'package:shortplay_app/src/features/common/services/tag_service.dart';
 import 'package:shortplay_app/src/features/common/widgets/cover_image.dart';
 import 'package:shortplay_app/src/features/publish/services/draft_service.dart';
 import 'package:shortplay_app/src/features/publish/services/upload_service.dart';
 import 'package:get_it/get_it.dart' show GetIt;
 
-/// 发布页：选/拍视频 → 填标题/简介/标签 → 分片上传（进度）→ 提交或存草稿
+/// 发布页（抖音风格重设计）：
+/// - 未选视频：整页大区块引导（大图标 + 引导文案 + 双大按钮）
+/// - 已选视频：9:16 播放预览卡（时长角标 / 重选 / 移除）+ 卡片式表单
+///   （标题 x/50、简介 x/200、标签 Chip 流式、高级设置收纳存草稿开关）
+///   + 底部固定双按钮（存草稿描边 / 发布实心带进度）
+/// 逻辑（校验 / 分片上传进度 / 草稿箱）与重设计前一致。
 class PublishPage extends StatefulWidget {
   const PublishPage({super.key});
 
@@ -33,6 +42,9 @@ class PublishPage extends StatefulWidget {
 
 class _PublishPageState extends State<PublishPage>
     with AutomaticKeepAliveClientMixin {
+  static const int _titleMaxLength = 50;
+  static const int _descriptionMaxLength = 200;
+
   final ImagePicker _picker = ImagePicker();
   final PublishService _publishService = PublishService();
   final TagService _tagService = TagService();
@@ -43,12 +55,10 @@ class _PublishPageState extends State<PublishPage>
 
   File? _videoFile;
 
-  /// 本地预览播放器（media_kit，与 feed 播放同一内核）
+  /// 本地预览播放器（media_kit，与 feed 播放同一内核，循环静音预览）
   Player? _previewPlayer;
   VideoController? _previewController;
   int? _videoDurationMs;
-  int _previewWidth = 720;
-  int _previewHeight = 1280;
 
   final List<String> _tags = [];
 
@@ -118,23 +128,23 @@ class _PublishPageState extends State<PublishPage>
       );
       if (xfile == null) return;
 
-      final player = Player();
+      // 循环静音预览，自动播放
+      final player = Player(
+        configuration: const PlayerConfiguration(muted: true),
+      );
+      await player.setPlaylistMode(PlaylistMode.loop);
       var durationMs = 0;
-      int? width;
-      int? height;
 
-      // 等待媒体就绪，取时长与分辨率
+      // 等待媒体就绪，取时长
       final ready = Completer<void>();
       late final StreamSubscription<Duration> sub;
       sub = player.stream.duration.listen((duration) {
         if (duration > Duration.zero && !ready.isCompleted) {
           durationMs = duration.inMilliseconds;
-          width = player.state.width;
-          height = player.state.height;
           ready.complete();
         }
       });
-      await player.open(Media(xfile.path), play: false);
+      await player.open(Media(xfile.path), play: true);
       await ready.future.timeout(const Duration(seconds: 10), onTimeout: () {});
       unawaited(sub.cancel());
 
@@ -148,8 +158,6 @@ class _PublishPageState extends State<PublishPage>
         _previewPlayer = player;
         _previewController = VideoController(player);
         _videoDurationMs = durationMs;
-        _previewWidth = width ?? 720;
-        _previewHeight = height ?? 1280;
       });
     } catch (_) {
       EasyLoading.showToast(loc.errorDefault);
@@ -168,18 +176,42 @@ class _PublishPageState extends State<PublishPage>
     if (mounted) setState(() {});
   }
 
+  String _formatDuration(int? ms) {
+    final totalSeconds = ((ms ?? 0) / 1000).round();
+    final minutes = totalSeconds ~/ 60;
+    final seconds = totalSeconds % 60;
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  }
+
   // ─── 标签 ────────────────────────────────────────────
 
-  void _addTag(String raw) {
+  /// 尝试添加标签（去 # / 去重），返回是否真正新增
+  bool _tryAddTag(String raw) {
     var tag = raw.trim();
     while (tag.startsWith('#')) {
       tag = tag.substring(1);
     }
-    if (tag.isEmpty || _tags.contains(tag)) return;
-    setState(() {
-      _tags.add(tag);
+    if (tag.isEmpty || _tags.contains(tag)) return false;
+    _tags.add(tag);
+    return true;
+  }
+
+  void _addTag(String raw) {
+    if (_tryAddTag(raw)) {
       _tagInputController.clear();
-    });
+      setState(() {});
+    }
+  }
+
+  /// 行内输入：回车或逗号（中英文）均可提交标签
+  void _commitTagInput(String raw) {
+    final parts = raw.split(RegExp('[,，]'));
+    var added = false;
+    for (final part in parts) {
+      if (_tryAddTag(part)) added = true;
+    }
+    if (added) _tagInputController.clear();
+    setState(() {});
   }
 
   Future<void> _showTagPicker() async {
@@ -201,6 +233,8 @@ class _PublishPageState extends State<PublishPage>
     await showModalBottomSheet(
       context: context,
       showDragHandle: true,
+      // 桌面宽窗下收窄居中（手机端无感）
+      constraints: const BoxConstraints(maxWidth: 560),
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (sheetContext, setSheetState) {
@@ -208,8 +242,8 @@ class _PublishPageState extends State<PublishPage>
             final filtered = keyword.isEmpty
                 ? suggestions
                 : suggestions
-                    .where((tag) => tag.toLowerCase().contains(keyword))
-                    .toList();
+                      .where((tag) => tag.toLowerCase().contains(keyword))
+                      .toList();
             return SafeArea(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 20.h),
@@ -367,6 +401,8 @@ class _PublishPageState extends State<PublishPage>
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
+      // 桌面宽窗下收窄居中（手机端无感）
+      constraints: const BoxConstraints(maxWidth: 560),
       builder: (sheetContext) {
         return const _DraftsSheet();
       },
@@ -379,248 +415,675 @@ class _PublishPageState extends State<PublishPage>
   Widget build(BuildContext context) {
     super.build(context);
     final loc = S.of(context);
-    final theme = Theme.of(context);
+    final hasVideo = _previewController != null && _videoFile != null;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(loc.publish),
         actions: [
-          TextButton.icon(
-            onPressed: _showDrafts,
-            icon: const Icon(Icons.inventory_2_outlined, size: 18),
-            label: Text(loc.drafts),
+          Padding(
+            padding: EdgeInsets.only(right: 8.w),
+            child: TextButton.icon(
+              onPressed: _showDrafts,
+              icon: Icon(Icons.inventory_2_outlined, size: 18.sp),
+              label: Text(loc.drafts, style: TextStyle(fontSize: 13.sp)),
+            ),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.w),
+      body: hasVideo ? _buildEditorBody(loc) : _buildEmptyGuide(loc),
+    );
+  }
+
+  /// 未选视频：整页大区块引导
+  Widget _buildEmptyGuide(S loc) {
+    final theme = Theme.of(context);
+    return Center(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 24.h),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // 视频预览 / 选择
-            _buildVideoPicker(theme, loc),
-            SizedBox(height: 16.h),
-            // 标题
-            Text(loc.titleLabel,
-                style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface.withAlpha(180))),
-            SizedBox(height: 6.h),
-            TextField(
-              controller: _titleController,
-              maxLength: 50,
-              style: TextStyle(fontSize: 15.sp),
-              decoration: InputDecoration(
-                hintText: loc.titleHint,
-                counterText: '',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                isDense: true,
+            // 主视觉：品牌渐变大图标
+            Container(
+              width: 116.w,
+              height: 116.w,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(32.r),
+                gradient: BrandColor.gradient,
+                boxShadow: [
+                  BoxShadow(
+                    color: BrandColor.rose.withAlpha(70),
+                    blurRadius: 32.r,
+                    offset: Offset(0, 10.h),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.movie_filter_outlined,
+                size: 60.sp,
+                color: Colors.white,
               ),
             ),
-            SizedBox(height: 12.h),
-            // 简介
-            Text(loc.descriptionLabel,
-                style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface.withAlpha(180))),
-            SizedBox(height: 6.h),
-            TextField(
-              controller: _descriptionController,
-              maxLength: 500,
-              maxLines: 3,
-              style: TextStyle(fontSize: 14.sp),
-              decoration: InputDecoration(
-                hintText: loc.descriptionHint,
-                counterText: '',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                isDense: true,
+            SizedBox(height: 28.h),
+            Text(
+              loc.chooseVideoToCreate,
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w700,
+                color: theme.colorScheme.onSurface,
               ),
+              textAlign: TextAlign.center,
             ),
-            SizedBox(height: 12.h),
-            // 标签
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(loc.addTags,
-                    style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurface.withAlpha(180))),
-                IconButton(
-                  icon: const Icon(Icons.add_circle_outline),
-                  onPressed: _showTagPicker,
-                ),
-              ],
+            SizedBox(height: 10.h),
+            Text(
+              loc.publishGuideSubtitle,
+              style: TextStyle(
+                fontSize: 13.sp,
+                color: theme.colorScheme.onSurface.withAlpha(130),
+              ),
+              textAlign: TextAlign.center,
             ),
-            Wrap(
-              spacing: 8.w,
-              runSpacing: 8.h,
-              children: _tags
-                  .map((tag) => InputChip(
-                        label: Text('#$tag'),
-                        onDeleted: () =>
-                            setState(() => _tags.remove(tag)),
-                      ))
-                  .toList(),
+            SizedBox(height: 44.h),
+            _GuideButton(
+              icon: Icons.photo_library_outlined,
+              label: loc.pickVideo,
+              filled: true,
+              onTap: () => _pickVideo(ImageSource.gallery),
             ),
-            SizedBox(height: 24.h),
-            // 存草稿选项
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              value: _asDraft,
-              onChanged: _uploading
-                  ? null
-                  : (value) => setState(() => _asDraft = value),
-              title: Text(loc.asDraftOption, style: TextStyle(fontSize: 14.sp)),
-            ),
-            // 提交按钮
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed:
-                        _uploading ? null : () => _submit(asDraft: true),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
-                    ),
-                    child: Text(loc.saveDraft),
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  flex: 2,
-                  child: FilledButton(
-                    onPressed:
-                        _uploading ? null : () => _submit(asDraft: false),
-                    style: FilledButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
-                    ),
-                    child: Text(
-                      _uploading
-                          ? loc.uploadingPercent(_uploadPercent)
-                          : loc.submitPublish,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 24.h),
+            // 拍摄仅移动端提供（image_picker 桌面实现只支持文件选择）
+            if (PlatformUtils.isMobile) ...[
+              SizedBox(height: 14.h),
+              _GuideButton(
+                icon: Icons.videocam_outlined,
+                label: loc.recordVideo,
+                onTap: () => _pickVideo(ImageSource.camera),
+              ),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildVideoPicker(ThemeData theme, S loc) {
-    final controller = _previewController;
-    if (controller != null && _videoFile != null) {
-      return Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12.r),
-            child: AspectRatio(
-              aspectRatio: _previewWidth / _previewHeight,
-              child: Video(
-                controller: controller,
-                fit: BoxFit.contain,
-                controls: (VideoState state) => const SizedBox.shrink(),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 8.h,
-            right: 8.w,
-            child: GestureDetector(
-              onTap: _clearVideo,
-              child: Container(
-                padding: EdgeInsets.all(6.r),
-                decoration: const BoxDecoration(
-                  color: Colors.black54,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.close, size: 18.r, color: Colors.white),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 8.h,
-            right: 8.w,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(6.r),
-              ),
-              child: Text(
-                '${_videoDurationMs == null ? 0 : (_videoDurationMs! / 1000).round()}s',
-                style: TextStyle(fontSize: 11.sp, color: Colors.white),
-              ),
-            ),
-          ),
-        ],
-      );
-    }
-
-    return Row(
+  /// 已选视频：滚动区（9:16 预览卡 + 表单卡）+ 底部固定操作栏
+  Widget _buildEditorBody(S loc) {
+    final theme = Theme.of(context);
+    return Column(
       children: [
         Expanded(
-          child: _PickerCard(
-            icon: Icons.photo_library_outlined,
-            label: loc.pickVideo,
-            onTap: () => _pickVideo(ImageSource.gallery),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 640),
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 20.h),
+                child: Column(
+                  children: [
+                    _buildPreviewCard(theme, loc),
+                    SizedBox(height: 14.h),
+                    _buildFieldCard(
+                      theme,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          TextField(
+                            controller: _titleController,
+                            maxLength: _titleMaxLength,
+                            style: TextStyle(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            decoration: InputDecoration.collapsed(
+                              hintText: loc.titleHint,
+                              hintStyle: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w400,
+                                color: theme.colorScheme.onSurface.withAlpha(
+                                  90,
+                                ),
+                              ),
+                            ),
+                            buildCounter: _hiddenCounter,
+                          ),
+                          SizedBox(height: 6.h),
+                          _buildCounter(_titleController, _titleMaxLength),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    _buildFieldCard(
+                      theme,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          TextField(
+                            controller: _descriptionController,
+                            maxLength: _descriptionMaxLength,
+                            maxLines: 3,
+                            minLines: 2,
+                            style: TextStyle(fontSize: 14.sp),
+                            decoration: InputDecoration.collapsed(
+                              hintText: loc.descriptionHint,
+                              hintStyle: TextStyle(
+                                fontSize: 14.sp,
+                                color: theme.colorScheme.onSurface.withAlpha(
+                                  90,
+                                ),
+                              ),
+                            ),
+                            buildCounter: _hiddenCounter,
+                          ),
+                          SizedBox(height: 6.h),
+                          _buildCounter(
+                            _descriptionController,
+                            _descriptionMaxLength,
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    _buildTagsCard(theme, loc),
+                    SizedBox(height: 10.h),
+                    _buildAdvancedCard(theme, loc),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: _PickerCard(
-            icon: Icons.videocam_outlined,
-            label: loc.recordVideo,
-            onTap: () => _pickVideo(ImageSource.camera),
-          ),
-        ),
+        // 底部固定操作栏（含底导航避让）
+        _buildBottomActionBar(theme, loc),
       ],
+    );
+  }
+
+  /// 9:16 视频预览卡：播放预览 + 时长角标 + 移除 / 重选
+  Widget _buildPreviewCard(ThemeData theme, S loc) {
+    final player = _previewPlayer!;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 卡片固定 9:16，高度不超过可视区 42%，宽度不超可用宽
+        final maxHeight = MediaQuery.of(context).size.height * 0.42;
+        final cardWidth = min(constraints.maxWidth, maxHeight * 9 / 16);
+        final cardHeight = cardWidth * 16 / 9;
+        return Center(
+          child: Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20.r),
+                child: Container(
+                  width: cardWidth,
+                  height: cardHeight,
+                  color: Colors.black,
+                  child: GestureDetector(
+                    onTap: () => unawaited(player.playOrPause()),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Video(
+                          controller: _previewController!,
+                          fit: BoxFit.contain,
+                          width: cardWidth,
+                          height: cardHeight,
+                          controls: (VideoState state) =>
+                              const SizedBox.shrink(),
+                        ),
+                        // 暂停时显示播放按钮
+                        StreamBuilder<bool>(
+                          stream: player.stream.playing,
+                          initialData: player.state.playing,
+                          builder: (context, playing) {
+                            if (playing.data ?? false) {
+                              return const SizedBox.shrink();
+                            }
+                            return Container(
+                              padding: EdgeInsets.all(14.r),
+                              decoration: BoxDecoration(
+                                color: Colors.black38,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.play_arrow_rounded,
+                                size: 40.sp,
+                                color: Colors.white,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              // 左上：移除
+              Positioned(
+                top: 10.h,
+                left: 10.w,
+                child: _PreviewPillButton(
+                  icon: Icons.close,
+                  tooltip: loc.removeVideo,
+                  onTap: _clearVideo,
+                ),
+              ),
+              // 右上：重选
+              Positioned(
+                top: 10.h,
+                right: 10.w,
+                child: _PreviewPillButton(
+                  icon: Icons.refresh,
+                  label: loc.reselectVideo,
+                  onTap: () => _pickVideo(ImageSource.gallery),
+                ),
+              ),
+              // 左下：时长角标
+              Positioned(
+                bottom: 10.h,
+                left: 10.w,
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 4.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(100.r),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.schedule, size: 12.sp, color: Colors.white),
+                      SizedBox(width: 4.w),
+                      Text(
+                        _formatDuration(_videoDurationMs),
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// 隐藏 TextField 默认计数器（改用 [_buildCounter] 自绘）
+  static Widget _hiddenCounter(
+    BuildContext _, {
+    int? currentLength,
+    int? maxLength,
+    bool? isFocused,
+  }) => const SizedBox.shrink();
+
+  /// 表单卡片容器
+  Widget _buildFieldCard(ThemeData theme, {required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 10.h),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: child,
+    );
+  }
+
+  /// 字数计数 x/N
+  Widget _buildCounter(TextEditingController controller, int maxLength) {
+    final theme = Theme.of(context);
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) {
+        final over = controller.text.length > maxLength;
+        return Text(
+          '${controller.text.length}/$maxLength',
+          style: TextStyle(
+            fontSize: 11.sp,
+            color: over
+                ? theme.colorScheme.error
+                : theme.colorScheme.onSurface.withAlpha(90),
+          ),
+        );
+      },
+    );
+  }
+
+  /// 标签卡：行内输入（回车/逗号添加）+ 已选 Chip 流式 + 联想入口
+  Widget _buildTagsCard(ThemeData theme, S loc) {
+    return _buildFieldCard(
+      theme,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.sell_outlined,
+                size: 15.sp,
+                color: theme.colorScheme.primary,
+              ),
+              SizedBox(width: 6.w),
+              Text(
+                loc.addTags,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface.withAlpha(180),
+                ),
+              ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: _showTagPicker,
+                icon: Icon(Icons.auto_awesome_outlined, size: 14.sp),
+                label: Text(
+                  loc.tagPickerTitle,
+                  style: TextStyle(fontSize: 12.sp),
+                ),
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 6.h),
+          TextField(
+            controller: _tagInputController,
+            style: TextStyle(fontSize: 13.sp),
+            decoration: InputDecoration(
+              hintText: loc.tagInlineHint,
+              hintStyle: TextStyle(
+                fontSize: 13.sp,
+                color: theme.colorScheme.onSurface.withAlpha(90),
+              ),
+              prefixIcon: Icon(
+                Icons.tag,
+                size: 16.sp,
+                color: theme.colorScheme.primary,
+              ),
+              prefixIconConstraints: BoxConstraints(
+                minWidth: 32.w,
+                minHeight: 32.h,
+              ),
+              isDense: true,
+              filled: true,
+              fillColor: theme.colorScheme.onSurface.withAlpha(12),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 12.w,
+                vertical: 10.h,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.r),
+                borderSide: BorderSide.none,
+              ),
+            ),
+            onChanged: _commitTagInput,
+            onSubmitted: _commitTagInput,
+          ),
+          if (_tags.isNotEmpty) ...[
+            SizedBox(height: 10.h),
+            Wrap(
+              spacing: 8.w,
+              runSpacing: 8.h,
+              children: _tags
+                  .map(
+                    (tag) => InputChip(
+                      visualDensity: VisualDensity.compact,
+                      backgroundColor: theme.colorScheme.secondaryContainer,
+                      label: Text(
+                        '#$tag',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: theme.colorScheme.onSecondaryContainer,
+                        ),
+                      ),
+                      onDeleted: () => setState(() => _tags.remove(tag)),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// 高级设置卡：收纳「存为草稿」开关
+  Widget _buildAdvancedCard(ThemeData theme, S loc) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Theme(
+        data: theme.copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: EdgeInsets.symmetric(horizontal: 16.w),
+          childrenPadding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 10.h),
+          collapsedShape: const Border(),
+          shape: const Border(),
+          iconColor: theme.colorScheme.onSurface.withAlpha(150),
+          collapsedIconColor: theme.colorScheme.onSurface.withAlpha(150),
+          title: Text(
+            loc.advancedSettings,
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface.withAlpha(180),
+            ),
+          ),
+          children: [
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
+              value: _asDraft,
+              onChanged: _uploading
+                  ? null
+                  : (value) => setState(() => _asDraft = value),
+              title: Text(
+                loc.asDraftOption,
+                style: TextStyle(fontSize: 13.5.sp),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 底部固定操作栏：存草稿（描边）+ 发布（实心，上传中显示进度并禁用）
+  Widget _buildBottomActionBar(ThemeData theme, S loc) {
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        border: Border(
+          top: BorderSide(
+            color: theme.colorScheme.onSurface.withAlpha((0.08 * 255).round()),
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: OutlinedButton(
+                  onPressed: _uploading ? null : () => _submit(asDraft: true),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: Size.fromHeight(46.h),
+                    side: BorderSide(
+                      color: theme.colorScheme.primary.withAlpha(140),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100.r),
+                    ),
+                  ),
+                  child: Text(
+                    loc.saveDraft,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                flex: 2,
+                child: FilledButton(
+                  onPressed: _uploading ? null : () => _submit(asDraft: false),
+                  style: FilledButton.styleFrom(
+                    minimumSize: Size.fromHeight(46.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100.r),
+                    ),
+                  ),
+                  child: _uploading
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 14.r,
+                              height: 14.r,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: theme.colorScheme.onPrimary,
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              loc.uploadingPercent(_uploadPercent),
+                              style: TextStyle(fontSize: 14.sp),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          loc.submitPublish,
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
 
-class _PickerCard extends StatelessWidget {
+/// 引导页大按钮（主操作实心 / 次操作描边）
+class _GuideButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool filled;
 
-  const _PickerCard({
+  const _GuideButton({
     required this.icon,
     required this.label,
     required this.onTap,
+    this.filled = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12.r),
-      child: Container(
-        height: 100.h,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: theme.colorScheme.outline.withAlpha(60),
-          ),
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(100.r),
+    );
+
+    Widget button;
+    if (filled) {
+      button = FilledButton.icon(
+        onPressed: onTap,
+        icon: Icon(icon, size: 20.sp),
+        label: Text(
+          label,
+          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 30.sp, color: theme.colorScheme.primary),
-            SizedBox(height: 8.h),
-            Text(label, style: TextStyle(fontSize: 13.sp)),
-          ],
+        style: FilledButton.styleFrom(
+          minimumSize: Size(240.w, 52.h),
+          shape: shape,
+        ),
+      );
+    } else {
+      button = OutlinedButton.icon(
+        onPressed: onTap,
+        icon: Icon(icon, size: 20.sp),
+        label: Text(
+          label,
+          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
+        ),
+        style: OutlinedButton.styleFrom(
+          minimumSize: Size(240.w, 52.h),
+          foregroundColor: theme.colorScheme.primary,
+          side: BorderSide(color: theme.colorScheme.primary.withAlpha(140)),
+          shape: shape,
+        ),
+      );
+    }
+    return button;
+  }
+}
+
+/// 预览卡上的胶囊小按钮（图标 + 可选文字，半透明黑底）
+class _PreviewPillButton extends StatelessWidget {
+  final IconData icon;
+  final String? label;
+  final String? tooltip;
+  final VoidCallback onTap;
+
+  const _PreviewPillButton({
+    required this.icon,
+    required this.onTap,
+    this.label,
+    this.tooltip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip ?? '',
+      child: Material(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(100.r),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(100.r),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 14.sp, color: Colors.white),
+                if (label != null) ...[
+                  SizedBox(width: 4.w),
+                  Text(
+                    label!,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -662,7 +1125,7 @@ class _DraftsSheetState extends State<_DraftsSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = '$e';
+        _error = localizedErrorText(S.of(context), e);
         _loading = false;
       });
     }
@@ -676,7 +1139,7 @@ class _DraftsSheetState extends State<_DraftsSheet> {
       Navigator.of(context).pop();
       EasyLoading.showToast(loc.publishSuccess);
     } on ApiStatusException catch (e) {
-      EasyLoading.showToast(e.status.message ?? loc.errorDefault);
+      EasyLoading.showToast(localizedErrorText(loc, e));
     } catch (_) {
       EasyLoading.showToast(loc.errorDefault);
     }
@@ -710,10 +1173,7 @@ class _DraftsSheetState extends State<_DraftsSheet> {
             SizedBox(height: 8.h),
             Text(
               loc.drafts,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 12.h),
             if (_loading)

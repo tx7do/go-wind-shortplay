@@ -4,7 +4,7 @@
 
 ## 仓库布局
 
-GoWind ShortPlay（风行短剧）：一个 Go 后端 + 一个 React 管理后台 + 一个 Flutter App 的短视频社区（开源基础版 MVP），工程规范对齐 [go-wind-cms](https://github.com/tx7do/go-wind-cms)。
+GoWind ShortPlay（风印短剧）：一个 Go 后端 + 一个 React 管理后台 + 一个 Flutter App 的短视频社区（开源基础版 MVP），工程规范对齐 [go-wind-cms](https://github.com/tx7do/go-wind-cms)。
 
 ```
 backend/                        Go 1.26 + Kratos + Ent（DI 手写装配 wiring.go）

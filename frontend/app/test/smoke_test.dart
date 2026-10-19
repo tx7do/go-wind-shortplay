@@ -135,7 +135,7 @@ void main() {
           ),
         ),
       );
-      expect(find.text('GoWind 短视频社区'), findsOneWidget);
+      expect(find.text('风印短剧'), findsOneWidget);
       expect(find.text('3 条评论'), findsOneWidget);
     });
 
@@ -155,7 +155,7 @@ void main() {
           ),
         ),
       );
-      expect(find.text('GoWind ShortPlay'), findsOneWidget);
+      expect(find.text('Fengyin ShortPlay'), findsOneWidget);
     });
   });
 }

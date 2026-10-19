@@ -88,6 +88,9 @@ class AuthenticationService extends AuthService {
 
     final result = await _doRefreshToken(token);
     if (result != null && result.accessToken.isNotEmpty) {
+      // 持久化轮换后的令牌对：core 刷新会吊销旧 refresh token，
+      // 不落盘的话下一次刷新必然失败（incorrect_refresh_token）被踢下线
+      await saveAuth(result);
       return result.accessToken;
     }
 

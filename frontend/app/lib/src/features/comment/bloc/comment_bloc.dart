@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
+import 'package:shortplay_app/generated/l10n.dart';
 import 'package:shortplay_app/src/core/services/pagination_query.dart';
 import 'package:shortplay_app/src/core/transport/http/index.dart';
 import 'package:shortplay_app/src/features/comment/models/comment.dart';
@@ -154,9 +155,15 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
         hasMore: page.items.length < page.total,
       ));
     } on ApiStatusException catch (e) {
-      emit(state.copyWith(isLoading: false, errorMessage: e.status.message));
+      emit(state.copyWith(
+        isLoading: false,
+        errorMessage: localizedErrorText(S.current, e),
+      ));
     } catch (e) {
-      emit(state.copyWith(isLoading: false, errorMessage: '$e'));
+      emit(state.copyWith(
+        isLoading: false,
+        errorMessage: localizedErrorText(S.current, e),
+      ));
     }
   }
 
