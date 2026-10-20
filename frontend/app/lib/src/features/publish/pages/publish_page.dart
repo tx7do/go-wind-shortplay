@@ -1354,9 +1354,29 @@ class _DraftsSheetState extends State<_DraftsSheet> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontSize: 14.sp),
                       ),
-                      subtitle: Text(
-                        '${draft.duration}s · ${draft.tags.map((t) => '#$t').join(' ')}',
-                        style: TextStyle(fontSize: 12.sp),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${draft.duration}s · ${draft.tags.map((t) => '#$t').join(' ')}',
+                            style: TextStyle(fontSize: 12.sp),
+                          ),
+                          // 已挂靠剧集：草稿提交发布时自动挂回该剧（服务端排集号）
+                          if (draft.seriesId > 0)
+                            Padding(
+                              padding: EdgeInsets.only(top: 2.h),
+                              child: Text(
+                                draft.episodeNumber > 0
+                                    ? loc.draftSeriesBadge(draft.episodeNumber)
+                                    : loc.draftSeriesAttached,
+                                style: TextStyle(
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,

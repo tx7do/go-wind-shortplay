@@ -1873,6 +1873,26 @@ class S {
   String get newSeries {
     return Intl.message('新建剧集', name: 'newSeries', desc: '', args: []);
   }
+
+  /// `已挂剧集 · 第{n}集`
+  String draftSeriesBadge(int n) {
+    return Intl.message(
+      '已挂剧集 · 第$n集',
+      name: 'draftSeriesBadge',
+      desc: '',
+      args: [n],
+    );
+  }
+
+  /// `已挂剧集（发布时自动排集号）`
+  String get draftSeriesAttached {
+    return Intl.message(
+      '已挂剧集（发布时自动排集号）',
+      name: 'draftSeriesAttached',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

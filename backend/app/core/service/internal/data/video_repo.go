@@ -262,8 +262,18 @@ func (r *VideoRepo) ListHot(ctx context.Context, limit int) ([]*ent.Video, error
 	return r.entClient.Client().Video.Query().
 		Where(video.StatusEQ(video.StatusPublished)).
 		Modify(func(s *sql.Selector) {
+			// UBA 完播聚合（每视频至多一行，不产生行增殖）：完播是内容质量的
+			// 强信号，计数列（view/like/collect）只反映互动量不反映看完率。
+			agg := sql.Select("video_id", "COUNT(*) AS complete_cnt").
+				From(sql.Table("sp_uba_events")).
+				Where(sql.EQ("event_type", "VIDEO_COMPLETE")).
+				GroupBy("video_id").
+				As("uba_agg")
+			s.LeftJoin(agg).On(s.C(video.FieldID), "video_id")
+			// 热度分：播放 + 点赞×3 + 收藏×5 + 完播×4，同分近发布优先。
+			// 商业版 AI 推荐服务替换本召回时接口形态不变（ROADMAP 预留）。
 			s.OrderBy(sql.Desc(
-				"view_count * 1 + like_count * 3 + collect_count * 5"),
+				"view_count * 1 + like_count * 3 + collect_count * 5 + COALESCE(complete_cnt, 0) * 4"),
 				sql.Desc(video.FieldPublishedAt),
 			)
 		}).

@@ -240,6 +240,10 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 
 	// shortplay 接缝：举报通知走基座站内信（超管收件）；封面抽帧走 asynq。
 	reportService.RegisterNotifier(internalMessageService)
+	// C 端互动通知：点赞/关注（interaction）、评论/回复（comment）、审核结果（video）
+	interactionService.RegisterNotifier(internalMessageService)
+	videoCommentService.RegisterNotifier(internalMessageService)
+	videoService.RegisterNotifier(internalMessageService)
 	reportService.RegisterSuperAdminResolver(roleService)
 	videoService.RegisterTaskEnqueuer(taskService)
 

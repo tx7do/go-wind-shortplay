@@ -29,6 +29,8 @@ type InteractionService struct {
 	interRepo *data.InteractionRepo
 	videoRepo *data.VideoRepo
 	userRepo  data.UserRepo
+
+	internalMessage InternalMessageNotifier
 }
 
 func NewInteractionService(
@@ -75,7 +77,10 @@ func (s *InteractionService) Like(ctx context.Context, req *interactionV1.LikeRe
 			return nil, interactionV1.ErrorVideoNotFound("video not found")
 		}
 		count = int64(v.LikeCount)
-		_ = liked
+		// 重复点赞幂等去重：仅新建点赞时通知作者
+		if liked {
+			s.notifyVideoLiked(ctx, uid, v)
+		}
 	}
 	return &interactionV1.LikeResponse{
 		Liked:     true,
@@ -222,8 +227,13 @@ func (s *InteractionService) Follow(ctx context.Context, req *interactionV1.Foll
 	if req.GetUserId() == uid {
 		return nil, interactionV1.ErrorCannotFollowSelf("cannot follow self")
 	}
-	if _, err := s.interRepo.CreateFollow(ctx, uid, req.GetUserId()); err != nil {
+	created, err := s.interRepo.CreateFollow(ctx, uid, req.GetUserId())
+	if err != nil {
 		return nil, err
+	}
+	// 重复关注幂等去重：仅新建关注关系时通知
+	if created {
+		s.notifyFollowed(ctx, uid, req.GetUserId())
 	}
 	return &interactionV1.FollowResponse{Following: true}, nil
 }
@@ -328,6 +338,8 @@ type VideoCommentService struct {
 	commentRepo *data.VideoCommentRepo
 	videoRepo   *data.VideoRepo
 	userRepo    data.UserRepo
+
+	internalMessage InternalMessageNotifier
 }
 
 func NewVideoCommentService(
@@ -377,7 +389,8 @@ func (s *VideoCommentService) CreateComment(ctx context.Context, req *interactio
 	if req.GetVideoId() == 0 || req.GetContent() == "" {
 		return nil, interactionV1.ErrorBadRequest("invalid parameter")
 	}
-	if _, err := s.videoRepo.GetEntityRaw(ctx, req.GetVideoId()); err != nil {
+	v, verr := s.videoRepo.GetEntityRaw(ctx, req.GetVideoId())
+	if verr != nil {
 		return nil, interactionV1.ErrorVideoNotFound("video not found")
 	}
 
@@ -385,6 +398,15 @@ func (s *VideoCommentService) CreateComment(ctx context.Context, req *interactio
 	if err != nil {
 		return nil, err
 	}
+
+	// 评论/回复通知（视频作者 + 楼中楼父评论作者，同人去重）
+	var parentAuthorID uint32
+	if req.GetParentId() > 0 {
+		if parent, perr := s.commentRepo.Get(ctx, req.GetParentId()); perr == nil && parent != nil {
+			parentAuthorID = parent.UserID
+		}
+	}
+	s.notifyCommentCreated(ctx, uid, v.AuthorID, parentAuthorID, v.ID, v.Title, e.Content)
 	dto := &interactionV1.Comment{
 		Id:        trans.Ptr(e.ID),
 		VideoId:   trans.Ptr(e.VideoID),

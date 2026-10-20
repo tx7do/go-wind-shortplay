@@ -356,5 +356,14 @@
     }
   },
   "attachSeriesRemove": "Remove",
-  "newSeries": "New Series"
+  "newSeries": "New Series",
+  "draftSeriesBadge": "In series · EP{n}",
+  "@draftSeriesBadge": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "draftSeriesAttached": "In a series (episode auto-assigned on publish)"
 }

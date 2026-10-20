@@ -70,6 +70,8 @@ type VideoService struct {
 
 	seriesSvc *SeriesService
 
+	internalMessage InternalMessageNotifier
+
 	minio *oss.MinIOClient
 
 	taskEnqueuer TaskEnqueuer
@@ -283,8 +285,26 @@ func (s *VideoService) ChangeVideoStatus(ctx context.Context, req *videoV1.Chang
 		dto.RejectReason = &reason
 	}
 
-	// 管理端操作者记录为更新者（viewer 注入由 ent middleware 负责）
-	return s.videoRepo.Update(ctx, req.GetId(), dto, nil)
+	updated, uerr := s.videoRepo.Update(ctx, req.GetId(), dto, nil)
+	if uerr != nil {
+		return nil, uerr
+	}
+
+	// 审核结果通知作者（系统口径；作者名以 updated 回带，避免二次查询）
+	outcome := reviewNone
+	reason := req.GetReason()
+	switch to {
+	case videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED:
+		outcome = reviewPassed
+	case videoV1.VideoStatus_VIDEO_STATUS_REJECTED:
+		outcome = reviewRejected
+	case videoV1.VideoStatus_VIDEO_STATUS_OFFLINE:
+		outcome = reviewOffline
+	}
+	if outcome != reviewNone {
+		s.notifyVideoReviewed(ctx, updated.GetAuthorId(), updated.GetId(), updated.GetTitle(), reason, outcome)
+	}
+	return updated, nil
 }
 
 // ── 分片上传 ──

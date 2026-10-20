@@ -42,6 +42,62 @@ func seriesEntityToDTO(e *ent.Series, episodeCount, publishedCount uint64) *seri
 	}
 }
 
+// fillEpisodeCovers 剧集展示封面回退：未设封面的剧批量取第一集（集号最小、已发布优先）的封面回填。
+// 仅回填响应 DTO，不落库；单条查询失败静默跳过（展示冗余字段）。
+func (r *SeriesRepo) fillEpisodeCovers(ctx context.Context, items ...*seriesV1.Series) {
+	ids := make([]uint32, 0, len(items))
+	for _, it := range items {
+		if it != nil && it.GetCoverUrl() == "" && it.GetId() > 0 {
+			ids = append(ids, it.GetId())
+		}
+	}
+	if len(ids) == 0 {
+		return
+	}
+	vs, err := r.entClient.Client().Video.Query().
+		Where(video.SeriesIDIn(ids...)).
+		Order(ent.Asc(video.FieldEpisodeNumber), ent.Asc(video.FieldID)).
+		Select(video.FieldSeriesID, video.FieldStatus, video.FieldCoverURL).
+		All(ctx)
+	if err != nil {
+		r.log.Errorf("fill episode covers failed: %s", err.Error())
+		return
+	}
+	// 每剧取第一集；已发布集优先于未发布（保持集号升序）
+	firstAny, firstPub := pickEpisodeCovers(vs)
+	for _, it := range items {
+		if it == nil || it.GetCoverUrl() != "" {
+			continue
+		}
+		if cover, ok := firstPub[it.GetId()]; ok {
+			it.CoverUrl = trans.Ptr(cover)
+		} else if cover, ok := firstAny[it.GetId()]; ok {
+			it.CoverUrl = trans.Ptr(cover)
+		}
+	}
+}
+
+// pickEpisodeCovers 纯选取逻辑（可单测）：按集号升序入参扫描，每剧记录
+// 首个带封面的集（firstAny）与首个已发布带封面的集（firstPub）。
+func pickEpisodeCovers(vs []*ent.Video) (firstAny, firstPub map[uint32]string) {
+	firstAny = make(map[uint32]string, len(vs))
+	firstPub = make(map[uint32]string, len(vs))
+	for _, v := range vs {
+		if v == nil || v.CoverURL == nil || *v.CoverURL == "" {
+			continue
+		}
+		if _, dup := firstAny[v.SeriesID]; !dup {
+			firstAny[v.SeriesID] = *v.CoverURL
+		}
+		if v.Status == video.StatusPublished {
+			if _, dup := firstPub[v.SeriesID]; !dup {
+				firstPub[v.SeriesID] = *v.CoverURL
+			}
+		}
+	}
+	return firstAny, firstPub
+}
+
 // spSeriesListFilter 列表过滤条件（BFF 翻译 query JSON 后的结构）
 type spSeriesListFilter struct {
 	Title    *string `json:"title___icontains"`
@@ -93,7 +149,9 @@ func (r *SeriesRepo) Get(ctx context.Context, id uint32) (*seriesV1.Series, erro
 	if err != nil {
 		return nil, seriesV1.ErrorInternalServerError("get series failed")
 	}
-	return seriesEntityToDTO(e, total[id], published[id]), nil
+	dto := seriesEntityToDTO(e, total[id], published[id])
+	r.fillEpisodeCovers(ctx, dto)
+	return dto, nil
 }
 
 // GetEntityRaw 内部取实体（服务层归属/可见性判断用）
@@ -166,6 +224,7 @@ func (r *SeriesRepo) List(ctx context.Context, req *paginationV1.PagingRequest) 
 	for _, e := range items {
 		resp.Items = append(resp.Items, seriesEntityToDTO(e, totalCount[e.ID], publishedCount[e.ID]))
 	}
+	r.fillEpisodeCovers(ctx, resp.Items...)
 	return resp, nil
 }
 
@@ -224,6 +283,7 @@ func (r *SeriesRepo) ListByFilter(ctx context.Context, query string, authorID ui
 	for _, e := range items {
 		resp.Items = append(resp.Items, seriesEntityToDTO(e, totalCount[e.ID], publishedCount[e.ID]))
 	}
+	r.fillEpisodeCovers(ctx, resp.Items...)
 	return resp, nil
 }
 

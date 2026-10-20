@@ -356,5 +356,14 @@
     }
   },
   "attachSeriesRemove": "移除挂靠",
-  "newSeries": "新建剧集"
+  "newSeries": "新建剧集",
+  "draftSeriesBadge": "已挂剧集 · 第{n}集",
+  "@draftSeriesBadge": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "draftSeriesAttached": "已挂剧集（发布时自动排集号）"
 }
