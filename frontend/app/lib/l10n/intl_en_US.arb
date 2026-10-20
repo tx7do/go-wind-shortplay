@@ -365,5 +365,9 @@
       }
     }
   },
-  "draftSeriesAttached": "In a series (episode auto-assigned on publish)"
+  "draftSeriesAttached": "In a series (episode auto-assigned on publish)",
+  "historyTab": "History",
+  "historyEmpty": "No watch history yet. Go watch some videos!",
+  "hotList": "Hot List",
+  "hotListEmpty": "Nothing on the hot list yet"
 }

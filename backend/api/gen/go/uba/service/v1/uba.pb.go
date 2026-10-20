@@ -7,6 +7,7 @@
 package ubapb
 
 import (
+	v1 "go-wind-shortplay/api/gen/go/video/service/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -227,11 +228,167 @@ func (x *ReportEventsRequest) GetEvents() []*UbaEvent {
 	return nil
 }
 
+type ListWatchHistoryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PageNum       *uint32                `protobuf:"varint,1,opt,name=page_num,json=pageNum,proto3,oneof" json:"page_num,omitempty"`    // 页码
+	PageSize      *uint32                `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3,oneof" json:"page_size,omitempty"` // 页大小（上限 50）
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListWatchHistoryRequest) Reset() {
+	*x = ListWatchHistoryRequest{}
+	mi := &file_uba_service_v1_uba_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListWatchHistoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListWatchHistoryRequest) ProtoMessage() {}
+
+func (x *ListWatchHistoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_uba_service_v1_uba_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListWatchHistoryRequest.ProtoReflect.Descriptor instead.
+func (*ListWatchHistoryRequest) Descriptor() ([]byte, []int) {
+	return file_uba_service_v1_uba_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ListWatchHistoryRequest) GetPageNum() uint32 {
+	if x != nil && x.PageNum != nil {
+		return *x.PageNum
+	}
+	return 0
+}
+
+func (x *ListWatchHistoryRequest) GetPageSize() uint32 {
+	if x != nil && x.PageSize != nil {
+		return *x.PageSize
+	}
+	return 0
+}
+
+type WatchHistoryItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Video         *v1.Video              `protobuf:"bytes,1,opt,name=video,proto3" json:"video,omitempty"`                                // 视频详情
+	WatchedAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=watched_at,json=watchedAt,proto3,oneof" json:"watched_at,omitempty"` // 最近观看时间
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WatchHistoryItem) Reset() {
+	*x = WatchHistoryItem{}
+	mi := &file_uba_service_v1_uba_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WatchHistoryItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WatchHistoryItem) ProtoMessage() {}
+
+func (x *WatchHistoryItem) ProtoReflect() protoreflect.Message {
+	mi := &file_uba_service_v1_uba_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WatchHistoryItem.ProtoReflect.Descriptor instead.
+func (*WatchHistoryItem) Descriptor() ([]byte, []int) {
+	return file_uba_service_v1_uba_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *WatchHistoryItem) GetVideo() *v1.Video {
+	if x != nil {
+		return x.Video
+	}
+	return nil
+}
+
+func (x *WatchHistoryItem) GetWatchedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.WatchedAt
+	}
+	return nil
+}
+
+type WatchHistoryResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*WatchHistoryItem    `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`        // 观看历史（最近观看倒序）
+	Total         *int64                 `protobuf:"varint,2,opt,name=total,proto3,oneof" json:"total,omitempty"` // 看过的视频总数
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WatchHistoryResponse) Reset() {
+	*x = WatchHistoryResponse{}
+	mi := &file_uba_service_v1_uba_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WatchHistoryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WatchHistoryResponse) ProtoMessage() {}
+
+func (x *WatchHistoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_uba_service_v1_uba_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WatchHistoryResponse.ProtoReflect.Descriptor instead.
+func (*WatchHistoryResponse) Descriptor() ([]byte, []int) {
+	return file_uba_service_v1_uba_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *WatchHistoryResponse) GetItems() []*WatchHistoryItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *WatchHistoryResponse) GetTotal() int64 {
+	if x != nil && x.Total != nil {
+		return *x.Total
+	}
+	return 0
+}
+
 var File_uba_service_v1_uba_proto protoreflect.FileDescriptor
 
 const file_uba_service_v1_uba_proto_rawDesc = "" +
 	"\n" +
-	"\x18uba/service/v1/uba.proto\x12\x0euba.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x86\x03\n" +
+	"\x18uba/service/v1/uba.proto\x12\x0euba.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cvideo/service/v1/video.proto\"\x86\x03\n" +
 	"\bUbaEvent\x128\n" +
 	"\n" +
 	"event_type\x18\x01 \x01(\x0e2\x19.uba.service.v1.EventTypeR\teventType\x12\x19\n" +
@@ -249,7 +406,22 @@ const file_uba_service_v1_uba_proto_rawDesc = "" +
 	"\x06_extraB\x0e\n" +
 	"\f_occurred_at\"G\n" +
 	"\x13ReportEventsRequest\x120\n" +
-	"\x06events\x18\x01 \x03(\v2\x18.uba.service.v1.UbaEventR\x06events*\x98\x02\n" +
+	"\x06events\x18\x01 \x03(\v2\x18.uba.service.v1.UbaEventR\x06events\"v\n" +
+	"\x17ListWatchHistoryRequest\x12\x1e\n" +
+	"\bpage_num\x18\x01 \x01(\rH\x00R\apageNum\x88\x01\x01\x12 \n" +
+	"\tpage_size\x18\x02 \x01(\rH\x01R\bpageSize\x88\x01\x01B\v\n" +
+	"\t_page_numB\f\n" +
+	"\n" +
+	"_page_size\"\x90\x01\n" +
+	"\x10WatchHistoryItem\x12-\n" +
+	"\x05video\x18\x01 \x01(\v2\x17.video.service.v1.VideoR\x05video\x12>\n" +
+	"\n" +
+	"watched_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\twatchedAt\x88\x01\x01B\r\n" +
+	"\v_watched_at\"s\n" +
+	"\x14WatchHistoryResponse\x126\n" +
+	"\x05items\x18\x01 \x03(\v2 .uba.service.v1.WatchHistoryItemR\x05items\x12\x19\n" +
+	"\x05total\x18\x02 \x01(\x03H\x00R\x05total\x88\x01\x01B\b\n" +
+	"\x06_total*\x98\x02\n" +
 	"\tEventType\x12\x1a\n" +
 	"\x16EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15EVENT_TYPE_VIDEO_PLAY\x10\x01\x12\x1e\n" +
@@ -259,10 +431,11 @@ const file_uba_service_v1_uba_proto_rawDesc = "" +
 	"\x15EVENT_TYPE_VIDEO_LIKE\x10\x05\x12\x1c\n" +
 	"\x18EVENT_TYPE_VIDEO_COLLECT\x10\x06\x12\x1d\n" +
 	"\x19EVENT_TYPE_COMMENT_CREATE\x10\a\x12\x1c\n" +
-	"\x18EVENT_TYPE_FOLLOW_AUTHOR\x10\b2[\n" +
+	"\x18EVENT_TYPE_FOLLOW_AUTHOR\x10\b2\xc0\x01\n" +
 	"\n" +
 	"UbaService\x12M\n" +
-	"\fReportEvents\x12#.uba.service.v1.ReportEventsRequest\x1a\x16.google.protobuf.Empty\"\x00B\xab\x01\n" +
+	"\fReportEvents\x12#.uba.service.v1.ReportEventsRequest\x1a\x16.google.protobuf.Empty\"\x00\x12c\n" +
+	"\x10ListWatchHistory\x12'.uba.service.v1.ListWatchHistoryRequest\x1a$.uba.service.v1.WatchHistoryResponse\"\x00B\xab\x01\n" +
 	"\x12com.uba.service.v1B\bUbaProtoP\x01Z1go-wind-shortplay/api/gen/go/uba/service/v1;ubapb\xa2\x02\x03USX\xaa\x02\x0eUba.Service.V1\xca\x02\x0eUba\\Service\\V1\xe2\x02\x1aUba\\Service\\V1\\GPBMetadata\xea\x02\x10Uba::Service::V1b\x06proto3"
 
 var (
@@ -278,25 +451,34 @@ func file_uba_service_v1_uba_proto_rawDescGZIP() []byte {
 }
 
 var file_uba_service_v1_uba_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_uba_service_v1_uba_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_uba_service_v1_uba_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_uba_service_v1_uba_proto_goTypes = []any{
-	(EventType)(0),                // 0: uba.service.v1.EventType
-	(*UbaEvent)(nil),              // 1: uba.service.v1.UbaEvent
-	(*ReportEventsRequest)(nil),   // 2: uba.service.v1.ReportEventsRequest
-	(*timestamppb.Timestamp)(nil), // 3: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),         // 4: google.protobuf.Empty
+	(EventType)(0),                  // 0: uba.service.v1.EventType
+	(*UbaEvent)(nil),                // 1: uba.service.v1.UbaEvent
+	(*ReportEventsRequest)(nil),     // 2: uba.service.v1.ReportEventsRequest
+	(*ListWatchHistoryRequest)(nil), // 3: uba.service.v1.ListWatchHistoryRequest
+	(*WatchHistoryItem)(nil),        // 4: uba.service.v1.WatchHistoryItem
+	(*WatchHistoryResponse)(nil),    // 5: uba.service.v1.WatchHistoryResponse
+	(*timestamppb.Timestamp)(nil),   // 6: google.protobuf.Timestamp
+	(*v1.Video)(nil),                // 7: video.service.v1.Video
+	(*emptypb.Empty)(nil),           // 8: google.protobuf.Empty
 }
 var file_uba_service_v1_uba_proto_depIdxs = []int32{
 	0, // 0: uba.service.v1.UbaEvent.event_type:type_name -> uba.service.v1.EventType
-	3, // 1: uba.service.v1.UbaEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	6, // 1: uba.service.v1.UbaEvent.occurred_at:type_name -> google.protobuf.Timestamp
 	1, // 2: uba.service.v1.ReportEventsRequest.events:type_name -> uba.service.v1.UbaEvent
-	2, // 3: uba.service.v1.UbaService.ReportEvents:input_type -> uba.service.v1.ReportEventsRequest
-	4, // 4: uba.service.v1.UbaService.ReportEvents:output_type -> google.protobuf.Empty
-	4, // [4:5] is the sub-list for method output_type
-	3, // [3:4] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	7, // 3: uba.service.v1.WatchHistoryItem.video:type_name -> video.service.v1.Video
+	6, // 4: uba.service.v1.WatchHistoryItem.watched_at:type_name -> google.protobuf.Timestamp
+	4, // 5: uba.service.v1.WatchHistoryResponse.items:type_name -> uba.service.v1.WatchHistoryItem
+	2, // 6: uba.service.v1.UbaService.ReportEvents:input_type -> uba.service.v1.ReportEventsRequest
+	3, // 7: uba.service.v1.UbaService.ListWatchHistory:input_type -> uba.service.v1.ListWatchHistoryRequest
+	8, // 8: uba.service.v1.UbaService.ReportEvents:output_type -> google.protobuf.Empty
+	5, // 9: uba.service.v1.UbaService.ListWatchHistory:output_type -> uba.service.v1.WatchHistoryResponse
+	8, // [8:10] is the sub-list for method output_type
+	6, // [6:8] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_uba_service_v1_uba_proto_init() }
@@ -305,13 +487,16 @@ func file_uba_service_v1_uba_proto_init() {
 		return
 	}
 	file_uba_service_v1_uba_proto_msgTypes[0].OneofWrappers = []any{}
+	file_uba_service_v1_uba_proto_msgTypes[2].OneofWrappers = []any{}
+	file_uba_service_v1_uba_proto_msgTypes[3].OneofWrappers = []any{}
+	file_uba_service_v1_uba_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_uba_service_v1_uba_proto_rawDesc), len(file_uba_service_v1_uba_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   2,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

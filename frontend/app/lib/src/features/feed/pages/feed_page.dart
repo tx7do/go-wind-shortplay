@@ -251,12 +251,29 @@ class _FeedPageState extends State<FeedPage>
                 alignment: Alignment.centerRight,
                 child: Padding(
                   padding: EdgeInsets.only(right: 12.w),
-                  child: IconButton(
-                    icon: const Icon(Icons.search, size: 22),
-                    onPressed: () => context.push(AppRoutePath.search),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.white.withAlpha(28),
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.local_fire_department,
+                          size: 22,
+                        ),
+                        tooltip: loc.hotList,
+                        onPressed: () => context.push(AppRoutePath.hotList),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.white.withAlpha(28),
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      IconButton(
+                        icon: const Icon(Icons.search, size: 22),
+                        onPressed: () => context.push(AppRoutePath.search),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.white.withAlpha(28),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

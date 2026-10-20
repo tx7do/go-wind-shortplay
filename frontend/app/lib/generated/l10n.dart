@@ -1893,6 +1893,31 @@ class S {
       args: [],
     );
   }
+
+  /// `历史`
+  String get historyTab {
+    return Intl.message('历史', name: 'historyTab', desc: '', args: []);
+  }
+
+  /// `还没有观看记录，去刷刷视频吧`
+  String get historyEmpty {
+    return Intl.message(
+      '还没有观看记录，去刷刷视频吧',
+      name: 'historyEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `热榜`
+  String get hotList {
+    return Intl.message('热榜', name: 'hotList', desc: '', args: []);
+  }
+
+  /// `热榜暂时还没有内容`
+  String get hotListEmpty {
+    return Intl.message('热榜暂时还没有内容', name: 'hotListEmpty', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

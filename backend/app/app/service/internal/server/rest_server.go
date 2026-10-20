@@ -84,6 +84,7 @@ func NewRestMiddleware(
 		appV1.OperationCommentServiceListReply,
 		appV1.OperationInteractionServiceGetInteractionStatus,
 		appV1.OperationVideoServiceListTag,
+		appV1.OperationVideoServiceListHotVideos,
 		appV1.OperationSeriesServiceGetSeries,
 		appV1.OperationSeriesServiceListSeries,
 		appV1.OperationUbaServiceReportEvents,
@@ -102,6 +103,12 @@ func NewRestMiddleware(
 			return nil
 		}),
 	))
+
+	// 白名单路径的尽力身份注入（UBA 上报：带 token 时归因到用户，游客静默放行）；
+	// 必须先于白名单鉴权短路 selector 执行。
+	ms = append(ms, selector.Server(
+		UbaIdentityInjector(accessTokenChecker),
+	).Path(appV1.OperationUbaServiceReportEvents).Build())
 
 	// 鉴权必须在 ent.Server() 之前执行：auth.Server 对非白名单请求注入
 	// OperatorMetadata，随后 ent.Server() 才能据此构建带租户作用域的 UserViewer。

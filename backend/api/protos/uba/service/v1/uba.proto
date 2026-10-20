@@ -4,6 +4,7 @@ package uba.service.v1;
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
+import "video/service/v1/video.proto";
 
 // UBA 埋点服务（用户行为分析，开源版仅服务 Feed 排序与基础报表）
 //
@@ -11,6 +12,9 @@ import "google/protobuf/timestamp.proto";
 service UbaService {
   // 批量上报行为事件（观看时长 / 完播 / 划走 / 点赞等）
   rpc ReportEvents (ReportEventsRequest) returns (google.protobuf.Empty) {}
+
+  // 观看历史（本人视角，按最近观看倒序；派生自 VIDEO_PLAY 事件聚合）
+  rpc ListWatchHistory (ListWatchHistoryRequest) returns (WatchHistoryResponse) {}
 }
 
 // 行为事件类型
@@ -38,4 +42,19 @@ message UbaEvent {
 
 message ReportEventsRequest {
   repeated UbaEvent events = 1 [json_name = "events"]; // 事件列表
+}
+
+message ListWatchHistoryRequest {
+  optional uint32 page_num = 1 [json_name = "pageNum"];   // 页码
+  optional uint32 page_size = 2 [json_name = "pageSize"]; // 页大小（上限 50）
+}
+
+message WatchHistoryItem {
+  video.service.v1.Video video = 1 [json_name = "video"];              // 视频详情
+  optional google.protobuf.Timestamp watched_at = 2 [json_name = "watchedAt"]; // 最近观看时间
+}
+
+message WatchHistoryResponse {
+  repeated WatchHistoryItem items = 1 [json_name = "items"]; // 观看历史（最近观看倒序）
+  optional int64 total = 2 [json_name = "total"];            // 看过的视频总数
 }

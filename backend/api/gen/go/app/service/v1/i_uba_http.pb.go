@@ -21,9 +21,12 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationUbaServiceListWatchHistory = "/app.service.v1.UbaService/ListWatchHistory"
 const OperationUbaServiceReportEvents = "/app.service.v1.UbaService/ReportEvents"
 
 type UbaServiceHTTPServer interface {
+	// ListWatchHistory 观看历史（需登录）
+	ListWatchHistory(context.Context, *v1.ListWatchHistoryRequest) (*v1.WatchHistoryResponse, error)
 	// ReportEvents 批量上报行为事件（尽力而为，失败静默重试）
 	ReportEvents(context.Context, *v1.ReportEventsRequest) (*emptypb.Empty, error)
 }
@@ -31,6 +34,7 @@ type UbaServiceHTTPServer interface {
 func RegisterUbaServiceHTTPServer(s *http.Server, srv UbaServiceHTTPServer) {
 	r := s.Route("/")
 	r.POST("/app/v1/uba/events", _UbaService_ReportEvents0_HTTP_Handler(srv))
+	r.GET("/app/v1/watch-history", _UbaService_ListWatchHistory0_HTTP_Handler(srv))
 }
 
 func _UbaService_ReportEvents0_HTTP_Handler(srv UbaServiceHTTPServer) func(ctx http.Context) error {
@@ -55,7 +59,28 @@ func _UbaService_ReportEvents0_HTTP_Handler(srv UbaServiceHTTPServer) func(ctx h
 	}
 }
 
+func _UbaService_ListWatchHistory0_HTTP_Handler(srv UbaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ListWatchHistoryRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUbaServiceListWatchHistory)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListWatchHistory(ctx, req.(*v1.ListWatchHistoryRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.WatchHistoryResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type UbaServiceHTTPClient interface {
+	// ListWatchHistory 观看历史（需登录）
+	ListWatchHistory(ctx context.Context, req *v1.ListWatchHistoryRequest, opts ...http.CallOption) (rsp *v1.WatchHistoryResponse, err error)
 	// ReportEvents 批量上报行为事件（尽力而为，失败静默重试）
 	ReportEvents(ctx context.Context, req *v1.ReportEventsRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
 }
@@ -66,6 +91,20 @@ type UbaServiceHTTPClientImpl struct {
 
 func NewUbaServiceHTTPClient(client *http.Client) UbaServiceHTTPClient {
 	return &UbaServiceHTTPClientImpl{client}
+}
+
+// ListWatchHistory 观看历史（需登录）
+func (c *UbaServiceHTTPClientImpl) ListWatchHistory(ctx context.Context, in *v1.ListWatchHistoryRequest, opts ...http.CallOption) (*v1.WatchHistoryResponse, error) {
+	var out v1.WatchHistoryResponse
+	pattern := "/app/v1/watch-history"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUbaServiceListWatchHistory))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // ReportEvents 批量上报行为事件（尽力而为，失败静默重试）

@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/tx7do/kratos-bootstrap/bootstrap"
 
@@ -158,4 +159,54 @@ func timePtrOfUba(t time.Time, ok bool) *time.Time {
 		return nil
 	}
 	return &t
+}
+
+// WatchedVideo 观看历史条目（派生自播放事件聚合）
+type WatchedVideo struct {
+	VideoID   uint32
+	WatchedAt time.Time
+}
+
+// ListWatchHistoryPage 观看历史分页：用户 VIDEO_PLAY 事件按视频聚合，
+// 最近观看时间倒序（occurred_at 优先、created_at 兜底）。返回当页 + 去重视频总数。
+func (r *UbaRepo) ListWatchHistoryPage(ctx context.Context, userID uint32, offset, limit int) ([]WatchedVideo, int, error) {
+	base := r.entClient.Client().UbaEvent.Query().
+		Where(
+			ubaevent.UserIDEQ(userID),
+			ubaevent.EventTypeEQ(ubaevent.EventTypeVideoPlay),
+			ubaevent.VideoIDGT(0),
+		)
+
+	// 单用户看过的视频量级小，一次聚合全量取回后内存分页
+	var rows []struct {
+		VideoID   uint32     `json:"video_id"`
+		WatchedAt *time.Time `json:"watched_at"`
+	}
+	err := base.Modify(func(s *sql.Selector) {
+		s.Select(
+			"video_id",
+			"MAX(COALESCE(occurred_at, created_at)) AS watched_at",
+		).GroupBy("video_id").OrderBy(sql.Desc("watched_at"))
+	}).Scan(ctx, &rows)
+	if err != nil {
+		r.log.Errorf("list watch history failed: %s", err.Error())
+		return nil, 0, err
+	}
+	total := len(rows)
+	if offset >= total {
+		return nil, total, nil
+	}
+	end := offset + limit
+	if end > total {
+		end = total
+	}
+	out := make([]WatchedVideo, 0, end-offset)
+	for _, row := range rows[offset:end] {
+		watched := time.Time{}
+		if row.WatchedAt != nil {
+			watched = *row.WatchedAt
+		}
+		out = append(out, WatchedVideo{VideoID: row.VideoID, WatchedAt: watched})
+	}
+	return out, total, nil
 }

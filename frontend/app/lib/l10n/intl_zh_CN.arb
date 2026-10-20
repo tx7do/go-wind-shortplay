@@ -365,5 +365,9 @@
       }
     }
   },
-  "draftSeriesAttached": "已挂剧集（发布时自动排集号）"
+  "draftSeriesAttached": "已挂剧集（发布时自动排集号）",
+  "historyTab": "历史",
+  "historyEmpty": "还没有观看记录，去刷刷视频吧",
+  "hotList": "热榜",
+  "hotListEmpty": "热榜暂时还没有内容"
 }

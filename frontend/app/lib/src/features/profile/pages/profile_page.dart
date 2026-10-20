@@ -15,6 +15,7 @@ import 'package:shortplay_app/src/features/common/widgets/login_guard.dart';
 import 'package:shortplay_app/src/features/common/widgets/paged_video_list.dart';
 import 'package:shortplay_app/src/features/series/services/series_service.dart';
 import 'package:shortplay_app/src/features/series/widgets/paged_series_list.dart';
+import 'package:shortplay_app/src/features/history/widgets/paged_history_list.dart';
 import 'package:shortplay_app/src/features/common/widgets/user_avatar.dart';
 import 'package:shortplay_app/src/features/profile/services/user_service.dart';
 
@@ -288,9 +289,9 @@ class _ProfilePageState extends State<ProfilePage>
               // 创作者中心（品牌渐变卡）
               _CreatorCenterCard(overview: _overview, onDark: isDark),
               SizedBox(height: 16.h),
-              // 作品 / 剧集 / 收藏 Tab
+              // 作品 / 剧集 / 收藏 / 历史 Tab
               DefaultTabController(
-                length: 3,
+                length: 4,
                 child: SizedBox(
                   height: 480.h,
                   child: Column(
@@ -300,6 +301,7 @@ class _ProfilePageState extends State<ProfilePage>
                           Tab(text: loc.works),
                           Tab(text: loc.seriesTab),
                           Tab(text: loc.collects),
+                          Tab(text: loc.historyTab),
                         ],
                       ),
                       Expanded(
@@ -322,6 +324,9 @@ class _ProfilePageState extends State<ProfilePage>
                             PagedVideoList(
                               loader: _userService.collects,
                               emptyText: loc.noCollectedVideos,
+                            ),
+                            PagedHistoryList(
+                              emptyText: loc.historyEmpty,
                             ),
                           ],
                         ),

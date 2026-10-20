@@ -22,6 +22,7 @@ import 'package:shortplay_app/src/features/profile/pages/profile_page.dart';
 import 'package:shortplay_app/src/features/profile/pages/user_profile_page.dart';
 import 'package:shortplay_app/src/features/publish/pages/publish_page.dart';
 import 'package:shortplay_app/src/features/search/pages/search_page.dart';
+import 'package:shortplay_app/src/features/hot/pages/hot_page.dart';
 import 'package:shortplay_app/src/features/series/pages/series_detail_page.dart';
 import 'package:shortplay_app/src/features/settings/pages/settings_page.dart';
 import 'package:shortplay_app/src/features/video_detail/pages/video_detail_page.dart';
@@ -113,6 +114,12 @@ class AppRouter {
               int.tryParse(state.pathParameters['videoId'] ?? '') ?? 0;
           return VideoDetailPage(videoId: videoId);
         },
+      ),
+      // 热榜（全屏，游客可看）
+      GoRoute(
+        path: constants.AppRoutePath.hotList,
+        name: RouteNames.hotList,
+        builder: (context, state) => const HotPage(),
       ),
       // 剧集详情（全屏）
       GoRoute(

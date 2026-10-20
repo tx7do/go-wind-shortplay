@@ -51,6 +51,12 @@
 | DELETE | `/videos/{id}` | 删除本人视频 |
 | GET | `/creator/overview` | 创作者中心：`{videoCount,totalViews,totalLikes,totalCollects,totalComments,followerCount}` |
 
+### 观看历史 / 热榜
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/watch-history?pageNum=` | **本人观看历史**（需登录）：派生自 VIDEO_PLAY 事件聚合，`items[]{video, watchedAt}` 按最近观看倒序；`total`=看过的视频数 |
+| GET | `/hot-videos?limit=` | **热榜**（游客可访问）：热度分（播放 + 点赞×3 + 收藏×5 + 完播×4，近发布优先）倒序，缺省 20 上限 50；Feed 的 HOT 召回同源 |
+
 ### 剧集（详情/列表游客可访问）
 | 方法 | 路径 | 说明 |
 |---|---|---|
@@ -116,7 +122,7 @@
 | DELETE | `/videos/{id}` | 删除 |
 | GET | `/comments?page=` / DELETE `/comments/{id}` | 评论管理 |
 | GET | `/reports?page=&pageSize=&filter=1待处理/2已通过/3已驳回` / GET `/reports/{id}` | 举报工单 |
-| PUT | `/reports/{id}/handle` | `{action:1通过处置/2驳回, note?}` |
+| PUT | `/reports/{id}/handle` | `{action:1通过处置/2驳回, note?}`；视频类工单**通过处置时联动下架**被举报视频（走状态机白名单、reason 落驳回原因=「举报处置：」+note/举报理由，并通知作者），非已发布状态跳过 |
 | GET | `/users?page=&query=` / POST·PUT·DELETE `/users...` / PUT `/users/{id}/status` | 用户管理 |
 | GET | `/dashboard/overview` | `{totalVideos,publishedVideos,totalViews,totalLikes,totalComments,totalUsers,todayPublished}` |
 | GET | `/dashboard/top-videos?metric=METRIC_VIEW/METRIC_LIKE/METRIC_COLLECT/METRIC_COMMENT&limit=10`（注意：枚举字段用全名） | 排行 |

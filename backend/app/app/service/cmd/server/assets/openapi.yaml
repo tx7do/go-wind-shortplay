@@ -669,6 +669,25 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/interaction.service.v1.ListFollowResponse'
+    /app/v1/hot-videos:
+        get:
+            tags:
+                - VideoService
+            description: 热榜（游客可访问）
+            operationId: VideoService_ListHotVideos
+            parameters:
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.ListVideoResponse'
     /app/v1/interactions/status:
         post:
             tags:
@@ -1647,6 +1666,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/interaction.service.v1.Comment'
+    /app/v1/watch-history:
+        get:
+            tags:
+                - UbaService
+            description: 观看历史（需登录）
+            operationId: UbaService_ListWatchHistory
+            parameters:
+                - name: pageNum
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/uba.service.v1.WatchHistoryResponse'
 components:
     schemas:
         KratosStatus:
@@ -2831,6 +2874,23 @@ components:
                 occurredAt:
                     type: string
                     format: date-time
+        uba.service.v1.WatchHistoryItem:
+            type: object
+            properties:
+                video:
+                    $ref: '#/components/schemas/video.service.v1.Video'
+                watchedAt:
+                    type: string
+                    format: date-time
+        uba.service.v1.WatchHistoryResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/uba.service.v1.WatchHistoryItem'
+                total:
+                    type: string
         video.service.v1.CompleteUploadRequest:
             type: object
             properties:

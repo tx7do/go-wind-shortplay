@@ -323,7 +323,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "guestInteractionTitle": MessageLookupByLibrary.simpleMessage(
       "Log in to interact",
     ),
+    "historyEmpty": MessageLookupByLibrary.simpleMessage(
+      "No watch history yet. Go watch some videos!",
+    ),
+    "historyTab": MessageLookupByLibrary.simpleMessage("History"),
     "home": MessageLookupByLibrary.simpleMessage("Home"),
+    "hotList": MessageLookupByLibrary.simpleMessage("Hot List"),
+    "hotListEmpty": MessageLookupByLibrary.simpleMessage(
+      "Nothing on the hot list yet",
+    ),
     "hotTags": MessageLookupByLibrary.simpleMessage("Hot tags"),
     "language": MessageLookupByLibrary.simpleMessage("Language"),
     "light": MessageLookupByLibrary.simpleMessage("Light"),

@@ -220,6 +220,11 @@ func NewUbaService(ctx *bootstrap.Context, ubaClient ubaV1.UbaServiceClient) *Ub
 	}
 }
 
+// ListWatchHistory 观看历史（需登录，转发 core）。
+func (s *UbaService) ListWatchHistory(ctx context.Context, req *ubaV1.ListWatchHistoryRequest) (*ubaV1.WatchHistoryResponse, error) {
+	return s.ubaClient.ListWatchHistory(ctx, req)
+}
+
 func (s *UbaService) ReportEvents(ctx context.Context, req *ubaV1.ReportEventsRequest) (*emptypb.Empty, error) {
 	return s.ubaClient.ReportEvents(ctx, req)
 }
@@ -291,6 +296,11 @@ func (s *VideoService) UpdateVideo(ctx context.Context, req *videoV1.UpdateVideo
 
 func (s *VideoService) DeleteVideo(ctx context.Context, req *videoV1.DeleteVideoRequest) (*emptypb.Empty, error) {
 	return s.videoClient.DeleteVideo(ctx, req)
+}
+
+// ListHotVideos 热榜（游客可访问，直接转发 core 热度分召回）。
+func (s *VideoService) ListHotVideos(ctx context.Context, req *videoV1.ListHotVideosRequest) (*videoV1.ListVideoResponse, error) {
+	return s.videoClient.ListHotVideos(ctx, req)
 }
 
 func (s *VideoService) ListTag(ctx context.Context, req *paginationV1.PagingRequest) (*videoV1.ListTagResponse, error) {

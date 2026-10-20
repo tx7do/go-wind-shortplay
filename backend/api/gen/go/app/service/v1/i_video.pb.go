@@ -96,7 +96,7 @@ const file_app_service_v1_i_video_proto_rawDesc = "" +
 	"\atask_id\x18\x01 \x01(\tR\x06taskId\x12\x1f\n" +
 	"\vchunk_index\x18\x02 \x01(\rR\n" +
 	"chunkIndex\x12\x12\n" +
-	"\x04data\x18\x03 \x01(\fR\x04data2\xfb\v\n" +
+	"\x04data\x18\x03 \x01(\fR\x04data2\xf5\f\n" +
 	"\fVideoService\x12w\n" +
 	"\x10CreateUploadTask\x12).video.service.v1.CreateUploadTaskRequest\x1a\x1c.video.service.v1.UploadTask\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/app/v1/uploads\x12\x96\x01\n" +
 	"\vUploadChunk\x12\".app.service.v1.UploadChunkRequest\x1a%.video.service.v1.UploadChunkResponse\"<\x82\xd3\xe4\x93\x026:\x04data\x1a./app/v1/uploads/{task_id}/chunks/{chunk_index}\x12\x86\x01\n" +
@@ -110,7 +110,8 @@ const file_app_service_v1_i_video_proto_rawDesc = "" +
 	"\vUpdateVideo\x12$.video.service.v1.UpdateVideoRequest\x1a\x17.video.service.v1.Video\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\x1a\x13/app/v1/videos/{id}\x12h\n" +
 	"\vDeleteVideo\x12$.video.service.v1.DeleteVideoRequest\x1a\x16.google.protobuf.Empty\"\x1b\x82\xd3\xe4\x93\x02\x15*\x13/app/v1/videos/{id}\x12]\n" +
 	"\aListTag\x12\x19.pagination.PagingRequest\x1a!.video.service.v1.ListTagResponse\"\x14\x82\xd3\xe4\x93\x02\x0e\x12\f/app/v1/tags\x12\x86\x01\n" +
-	"\x12GetCreatorOverview\x12+.stats.service.v1.GetCreatorOverviewRequest\x1a!.stats.service.v1.CreatorOverview\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/app/v1/creator/overviewB\xb2\x01\n" +
+	"\x12GetCreatorOverview\x12+.stats.service.v1.GetCreatorOverviewRequest\x1a!.stats.service.v1.CreatorOverview\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/app/v1/creator/overview\x12x\n" +
+	"\rListHotVideos\x12&.video.service.v1.ListHotVideosRequest\x1a#.video.service.v1.ListVideoResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/app/v1/hot-videosB\xb2\x01\n" +
 	"\x12com.app.service.v1B\vIVideoProtoP\x01Z5go-wind-shortplay/api/gen/go/app/service/v1;servicev1\xa2\x02\x03ASX\xaa\x02\x0eApp.Service.V1\xca\x02\x0eApp\\Service\\V1\xe2\x02\x1aApp\\Service\\V1\\GPBMetadata\xea\x02\x10App::Service::V1b\x06proto3"
 
 var (
@@ -139,14 +140,16 @@ var file_app_service_v1_i_video_proto_goTypes = []any{
 	(*v1.UpdateVideoRequest)(nil),         // 9: video.service.v1.UpdateVideoRequest
 	(*v1.DeleteVideoRequest)(nil),         // 10: video.service.v1.DeleteVideoRequest
 	(*v12.GetCreatorOverviewRequest)(nil), // 11: stats.service.v1.GetCreatorOverviewRequest
-	(*v1.UploadTask)(nil),                 // 12: video.service.v1.UploadTask
-	(*v1.UploadChunkResponse)(nil),        // 13: video.service.v1.UploadChunkResponse
-	(*v1.VideoDraft)(nil),                 // 14: video.service.v1.VideoDraft
-	(*v1.ListDraftResponse)(nil),          // 15: video.service.v1.ListDraftResponse
-	(*emptypb.Empty)(nil),                 // 16: google.protobuf.Empty
-	(*v1.Video)(nil),                      // 17: video.service.v1.Video
-	(*v1.ListTagResponse)(nil),            // 18: video.service.v1.ListTagResponse
-	(*v12.CreatorOverview)(nil),           // 19: stats.service.v1.CreatorOverview
+	(*v1.ListHotVideosRequest)(nil),       // 12: video.service.v1.ListHotVideosRequest
+	(*v1.UploadTask)(nil),                 // 13: video.service.v1.UploadTask
+	(*v1.UploadChunkResponse)(nil),        // 14: video.service.v1.UploadChunkResponse
+	(*v1.VideoDraft)(nil),                 // 15: video.service.v1.VideoDraft
+	(*v1.ListDraftResponse)(nil),          // 16: video.service.v1.ListDraftResponse
+	(*emptypb.Empty)(nil),                 // 17: google.protobuf.Empty
+	(*v1.Video)(nil),                      // 18: video.service.v1.Video
+	(*v1.ListTagResponse)(nil),            // 19: video.service.v1.ListTagResponse
+	(*v12.CreatorOverview)(nil),           // 20: stats.service.v1.CreatorOverview
+	(*v1.ListVideoResponse)(nil),          // 21: video.service.v1.ListVideoResponse
 }
 var file_app_service_v1_i_video_proto_depIdxs = []int32{
 	1,  // 0: app.service.v1.VideoService.CreateUploadTask:input_type -> video.service.v1.CreateUploadTaskRequest
@@ -162,21 +165,23 @@ var file_app_service_v1_i_video_proto_depIdxs = []int32{
 	10, // 10: app.service.v1.VideoService.DeleteVideo:input_type -> video.service.v1.DeleteVideoRequest
 	5,  // 11: app.service.v1.VideoService.ListTag:input_type -> pagination.PagingRequest
 	11, // 12: app.service.v1.VideoService.GetCreatorOverview:input_type -> stats.service.v1.GetCreatorOverviewRequest
-	12, // 13: app.service.v1.VideoService.CreateUploadTask:output_type -> video.service.v1.UploadTask
-	13, // 14: app.service.v1.VideoService.UploadChunk:output_type -> video.service.v1.UploadChunkResponse
-	12, // 15: app.service.v1.VideoService.CompleteUpload:output_type -> video.service.v1.UploadTask
-	12, // 16: app.service.v1.VideoService.GetUploadTask:output_type -> video.service.v1.UploadTask
-	14, // 17: app.service.v1.VideoService.SaveDraft:output_type -> video.service.v1.VideoDraft
-	15, // 18: app.service.v1.VideoService.ListDraft:output_type -> video.service.v1.ListDraftResponse
-	14, // 19: app.service.v1.VideoService.GetDraft:output_type -> video.service.v1.VideoDraft
-	16, // 20: app.service.v1.VideoService.DeleteDraft:output_type -> google.protobuf.Empty
-	17, // 21: app.service.v1.VideoService.SubmitDraft:output_type -> video.service.v1.Video
-	17, // 22: app.service.v1.VideoService.UpdateVideo:output_type -> video.service.v1.Video
-	16, // 23: app.service.v1.VideoService.DeleteVideo:output_type -> google.protobuf.Empty
-	18, // 24: app.service.v1.VideoService.ListTag:output_type -> video.service.v1.ListTagResponse
-	19, // 25: app.service.v1.VideoService.GetCreatorOverview:output_type -> stats.service.v1.CreatorOverview
-	13, // [13:26] is the sub-list for method output_type
-	0,  // [0:13] is the sub-list for method input_type
+	12, // 13: app.service.v1.VideoService.ListHotVideos:input_type -> video.service.v1.ListHotVideosRequest
+	13, // 14: app.service.v1.VideoService.CreateUploadTask:output_type -> video.service.v1.UploadTask
+	14, // 15: app.service.v1.VideoService.UploadChunk:output_type -> video.service.v1.UploadChunkResponse
+	13, // 16: app.service.v1.VideoService.CompleteUpload:output_type -> video.service.v1.UploadTask
+	13, // 17: app.service.v1.VideoService.GetUploadTask:output_type -> video.service.v1.UploadTask
+	15, // 18: app.service.v1.VideoService.SaveDraft:output_type -> video.service.v1.VideoDraft
+	16, // 19: app.service.v1.VideoService.ListDraft:output_type -> video.service.v1.ListDraftResponse
+	15, // 20: app.service.v1.VideoService.GetDraft:output_type -> video.service.v1.VideoDraft
+	17, // 21: app.service.v1.VideoService.DeleteDraft:output_type -> google.protobuf.Empty
+	18, // 22: app.service.v1.VideoService.SubmitDraft:output_type -> video.service.v1.Video
+	18, // 23: app.service.v1.VideoService.UpdateVideo:output_type -> video.service.v1.Video
+	17, // 24: app.service.v1.VideoService.DeleteVideo:output_type -> google.protobuf.Empty
+	19, // 25: app.service.v1.VideoService.ListTag:output_type -> video.service.v1.ListTagResponse
+	20, // 26: app.service.v1.VideoService.GetCreatorOverview:output_type -> stats.service.v1.CreatorOverview
+	21, // 27: app.service.v1.VideoService.ListHotVideos:output_type -> video.service.v1.ListVideoResponse
+	14, // [14:28] is the sub-list for method output_type
+	0,  // [0:14] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name

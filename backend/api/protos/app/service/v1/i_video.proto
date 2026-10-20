@@ -112,6 +112,13 @@ service VideoService {
       get: "/app/v1/creator/overview"
     };
   }
+
+  // 热榜（游客可访问）
+  rpc ListHotVideos (video.service.v1.ListHotVideosRequest) returns (video.service.v1.ListVideoResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/hot-videos"
+    };
+  }
 }
 
 // 分片上传请求（task_id / chunk_index 取自路径，data 为二进制 body）

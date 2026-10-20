@@ -844,3 +844,49 @@ func (s *VideoService) SubmitDraft(ctx context.Context, req *videoV1.SubmitDraft
 func (s *VideoService) ListTag(ctx context.Context, req *paginationV1.PagingRequest) (*videoV1.ListTagResponse, error) {
 	return s.videoRepo.ListTags(ctx, req)
 }
+
+// ListHotVideos 热榜（热度分召回，App 端游客可访问）。
+func (s *VideoService) ListHotVideos(ctx context.Context, req *videoV1.ListHotVideosRequest) (*videoV1.ListVideoResponse, error) {
+	limit := int(req.GetLimit())
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 50 {
+		limit = 50
+	}
+	videos, err := s.videoRepo.ListHot(ctx, limit)
+	if err != nil {
+		return nil, err
+	}
+	resp := &videoV1.ListVideoResponse{Total: trans.Ptr(int64(len(videos)))}
+	for _, v := range videos {
+		dto, derr := s.videoRepo.ToDTO(ctx, v)
+		if derr != nil {
+			continue
+		}
+		resp.Items = append(resp.Items, dto)
+	}
+	return resp, nil
+}
+
+// ModerateOffline 管理处置下架（举报处置联动入口）：走状态机白名单 + 落驳回原因 +
+// 通知作者（reviewOffline 口径）。非已发布状态返回明确错误，由调用方尽力而为消化。
+func (s *VideoService) ModerateOffline(ctx context.Context, videoID uint32, reason string) error {
+	cur, err := s.videoRepo.Get(ctx, videoID)
+	if err != nil {
+		return err
+	}
+	from := cur.GetStatus()
+	if !validateVideoStatusTransition(from, videoV1.VideoStatus_VIDEO_STATUS_OFFLINE) {
+		return videoV1.ErrorInvalidStatusTransition("invalid status transition %s -> %s", from, videoV1.VideoStatus_VIDEO_STATUS_OFFLINE)
+	}
+	updated, uerr := s.videoRepo.Update(ctx, videoID, &videoV1.Video{
+		Status:       videoV1.VideoStatus_VIDEO_STATUS_OFFLINE.Enum(),
+		RejectReason: &reason,
+	}, nil)
+	if uerr != nil {
+		return uerr
+	}
+	s.notifyVideoReviewed(ctx, updated.GetAuthorId(), updated.GetId(), updated.GetTitle(), reason, reviewOffline)
+	return nil
+}

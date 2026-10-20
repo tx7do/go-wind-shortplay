@@ -235,7 +235,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 	videoCommentService := service.NewVideoCommentService(ctx, videoCommentRepo, videoRepo, userRepo)
 	reportService := service.NewReportService(ctx, reportRepo, userRepo, videoRepo, videoCommentRepo)
 	sysConfService := service.NewSysConfService(ctx, sysConfRepo)
-	ubaService := service.NewUbaService(ctx, ubaRepo)
+	ubaService := service.NewUbaService(ctx, ubaRepo, videoRepo)
 	dashboardService := service.NewDashboardService(ctx, statsRepo, videoRepo, interactionRepo, userRepo)
 
 	// shortplay 接缝：举报通知走基座站内信（超管收件）；封面抽帧走 asynq。
@@ -245,6 +245,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 	videoCommentService.RegisterNotifier(internalMessageService)
 	videoService.RegisterNotifier(internalMessageService)
 	reportService.RegisterSuperAdminResolver(roleService)
+	reportService.RegisterVideoModerator(videoService)
 	videoService.RegisterTaskEnqueuer(taskService)
 
 	// ── register:service ── 新模块服务在此行后注册(make register 工具锚点,勿删)

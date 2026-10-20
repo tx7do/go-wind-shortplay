@@ -36,6 +36,7 @@ const (
 	VideoService_DeleteVideo_FullMethodName        = "/app.service.v1.VideoService/DeleteVideo"
 	VideoService_ListTag_FullMethodName            = "/app.service.v1.VideoService/ListTag"
 	VideoService_GetCreatorOverview_FullMethodName = "/app.service.v1.VideoService/GetCreatorOverview"
+	VideoService_ListHotVideos_FullMethodName      = "/app.service.v1.VideoService/ListHotVideos"
 )
 
 // VideoServiceClient is the client API for VideoService service.
@@ -70,6 +71,8 @@ type VideoServiceClient interface {
 	ListTag(ctx context.Context, in *v11.PagingRequest, opts ...grpc.CallOption) (*v1.ListTagResponse, error)
 	// 创作者中心总览（我的作品聚合数据）
 	GetCreatorOverview(ctx context.Context, in *v12.GetCreatorOverviewRequest, opts ...grpc.CallOption) (*v12.CreatorOverview, error)
+	// 热榜（游客可访问）
+	ListHotVideos(ctx context.Context, in *v1.ListHotVideosRequest, opts ...grpc.CallOption) (*v1.ListVideoResponse, error)
 }
 
 type videoServiceClient struct {
@@ -210,6 +213,16 @@ func (c *videoServiceClient) GetCreatorOverview(ctx context.Context, in *v12.Get
 	return out, nil
 }
 
+func (c *videoServiceClient) ListHotVideos(ctx context.Context, in *v1.ListHotVideosRequest, opts ...grpc.CallOption) (*v1.ListVideoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.ListVideoResponse)
+	err := c.cc.Invoke(ctx, VideoService_ListHotVideos_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // VideoServiceServer is the server API for VideoService service.
 // All implementations must embed UnimplementedVideoServiceServer
 // for forward compatibility.
@@ -242,6 +255,8 @@ type VideoServiceServer interface {
 	ListTag(context.Context, *v11.PagingRequest) (*v1.ListTagResponse, error)
 	// 创作者中心总览（我的作品聚合数据）
 	GetCreatorOverview(context.Context, *v12.GetCreatorOverviewRequest) (*v12.CreatorOverview, error)
+	// 热榜（游客可访问）
+	ListHotVideos(context.Context, *v1.ListHotVideosRequest) (*v1.ListVideoResponse, error)
 	mustEmbedUnimplementedVideoServiceServer()
 }
 
@@ -290,6 +305,9 @@ func (UnimplementedVideoServiceServer) ListTag(context.Context, *v11.PagingReque
 }
 func (UnimplementedVideoServiceServer) GetCreatorOverview(context.Context, *v12.GetCreatorOverviewRequest) (*v12.CreatorOverview, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCreatorOverview not implemented")
+}
+func (UnimplementedVideoServiceServer) ListHotVideos(context.Context, *v1.ListHotVideosRequest) (*v1.ListVideoResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListHotVideos not implemented")
 }
 func (UnimplementedVideoServiceServer) mustEmbedUnimplementedVideoServiceServer() {}
 func (UnimplementedVideoServiceServer) testEmbeddedByValue()                      {}
@@ -546,6 +564,24 @@ func _VideoService_GetCreatorOverview_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VideoService_ListHotVideos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ListHotVideosRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoServiceServer).ListHotVideos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoService_ListHotVideos_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoServiceServer).ListHotVideos(ctx, req.(*v1.ListHotVideosRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // VideoService_ServiceDesc is the grpc.ServiceDesc for VideoService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -604,6 +640,10 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCreatorOverview",
 			Handler:    _VideoService_GetCreatorOverview_Handler,
+		},
+		{
+			MethodName: "ListHotVideos",
+			Handler:    _VideoService_ListHotVideos_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -27,21 +27,26 @@ var File_app_service_v1_i_uba_proto protoreflect.FileDescriptor
 
 const file_app_service_v1_i_uba_proto_rawDesc = "" +
 	"\n" +
-	"\x1aapp/service/v1/i_uba.proto\x12\x0eapp.service.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x18uba/service/v1/uba.proto2x\n" +
+	"\x1aapp/service/v1/i_uba.proto\x12\x0eapp.service.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x18uba/service/v1/uba.proto2\xfb\x01\n" +
 	"\n" +
 	"UbaService\x12j\n" +
-	"\fReportEvents\x12#.uba.service.v1.ReportEventsRequest\x1a\x16.google.protobuf.Empty\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/app/v1/uba/eventsB\xb0\x01\n" +
+	"\fReportEvents\x12#.uba.service.v1.ReportEventsRequest\x1a\x16.google.protobuf.Empty\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/app/v1/uba/events\x12\x80\x01\n" +
+	"\x10ListWatchHistory\x12'.uba.service.v1.ListWatchHistoryRequest\x1a$.uba.service.v1.WatchHistoryResponse\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/app/v1/watch-historyB\xb0\x01\n" +
 	"\x12com.app.service.v1B\tIUbaProtoP\x01Z5go-wind-shortplay/api/gen/go/app/service/v1;servicev1\xa2\x02\x03ASX\xaa\x02\x0eApp.Service.V1\xca\x02\x0eApp\\Service\\V1\xe2\x02\x1aApp\\Service\\V1\\GPBMetadata\xea\x02\x10App::Service::V1b\x06proto3"
 
 var file_app_service_v1_i_uba_proto_goTypes = []any{
-	(*v1.ReportEventsRequest)(nil), // 0: uba.service.v1.ReportEventsRequest
-	(*emptypb.Empty)(nil),          // 1: google.protobuf.Empty
+	(*v1.ReportEventsRequest)(nil),     // 0: uba.service.v1.ReportEventsRequest
+	(*v1.ListWatchHistoryRequest)(nil), // 1: uba.service.v1.ListWatchHistoryRequest
+	(*emptypb.Empty)(nil),              // 2: google.protobuf.Empty
+	(*v1.WatchHistoryResponse)(nil),    // 3: uba.service.v1.WatchHistoryResponse
 }
 var file_app_service_v1_i_uba_proto_depIdxs = []int32{
 	0, // 0: app.service.v1.UbaService.ReportEvents:input_type -> uba.service.v1.ReportEventsRequest
-	1, // 1: app.service.v1.UbaService.ReportEvents:output_type -> google.protobuf.Empty
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	1, // 1: app.service.v1.UbaService.ListWatchHistory:input_type -> uba.service.v1.ListWatchHistoryRequest
+	2, // 2: app.service.v1.UbaService.ReportEvents:output_type -> google.protobuf.Empty
+	3, // 3: app.service.v1.UbaService.ListWatchHistory:output_type -> uba.service.v1.WatchHistoryResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name

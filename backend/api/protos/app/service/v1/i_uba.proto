@@ -15,4 +15,11 @@ service UbaService {
       body: "*"
     };
   }
+
+  // 观看历史（需登录）
+  rpc ListWatchHistory (uba.service.v1.ListWatchHistoryRequest) returns (uba.service.v1.WatchHistoryResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/watch-history"
+    };
+  }
 }

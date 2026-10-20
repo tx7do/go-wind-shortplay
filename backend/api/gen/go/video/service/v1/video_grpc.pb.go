@@ -37,6 +37,7 @@ const (
 	VideoService_DeleteDraft_FullMethodName       = "/video.service.v1.VideoService/DeleteDraft"
 	VideoService_SubmitDraft_FullMethodName       = "/video.service.v1.VideoService/SubmitDraft"
 	VideoService_ListTag_FullMethodName           = "/video.service.v1.VideoService/ListTag"
+	VideoService_ListHotVideos_FullMethodName     = "/video.service.v1.VideoService/ListHotVideos"
 )
 
 // VideoServiceClient is the client API for VideoService service.
@@ -83,6 +84,8 @@ type VideoServiceClient interface {
 	SubmitDraft(ctx context.Context, in *SubmitDraftRequest, opts ...grpc.CallOption) (*Video, error)
 	// 标签列表（按引用数排序，供搜索页 / 发布页选择）
 	ListTag(ctx context.Context, in *v1.PagingRequest, opts ...grpc.CallOption) (*ListTagResponse, error)
+	// 热榜（热度分 = 播放 + 点赞×3 + 收藏×5 + 完播×4，近发布优先；App 端游客可访问）
+	ListHotVideos(ctx context.Context, in *ListHotVideosRequest, opts ...grpc.CallOption) (*ListVideoResponse, error)
 }
 
 type videoServiceClient struct {
@@ -253,6 +256,16 @@ func (c *videoServiceClient) ListTag(ctx context.Context, in *v1.PagingRequest, 
 	return out, nil
 }
 
+func (c *videoServiceClient) ListHotVideos(ctx context.Context, in *ListHotVideosRequest, opts ...grpc.CallOption) (*ListVideoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListVideoResponse)
+	err := c.cc.Invoke(ctx, VideoService_ListHotVideos_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // VideoServiceServer is the server API for VideoService service.
 // All implementations must embed UnimplementedVideoServiceServer
 // for forward compatibility.
@@ -297,6 +310,8 @@ type VideoServiceServer interface {
 	SubmitDraft(context.Context, *SubmitDraftRequest) (*Video, error)
 	// 标签列表（按引用数排序，供搜索页 / 发布页选择）
 	ListTag(context.Context, *v1.PagingRequest) (*ListTagResponse, error)
+	// 热榜（热度分 = 播放 + 点赞×3 + 收藏×5 + 完播×4，近发布优先；App 端游客可访问）
+	ListHotVideos(context.Context, *ListHotVideosRequest) (*ListVideoResponse, error)
 	mustEmbedUnimplementedVideoServiceServer()
 }
 
@@ -354,6 +369,9 @@ func (UnimplementedVideoServiceServer) SubmitDraft(context.Context, *SubmitDraft
 }
 func (UnimplementedVideoServiceServer) ListTag(context.Context, *v1.PagingRequest) (*ListTagResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListTag not implemented")
+}
+func (UnimplementedVideoServiceServer) ListHotVideos(context.Context, *ListHotVideosRequest) (*ListVideoResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListHotVideos not implemented")
 }
 func (UnimplementedVideoServiceServer) mustEmbedUnimplementedVideoServiceServer() {}
 func (UnimplementedVideoServiceServer) testEmbeddedByValue()                      {}
@@ -664,6 +682,24 @@ func _VideoService_ListTag_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VideoService_ListHotVideos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListHotVideosRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoServiceServer).ListHotVideos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoService_ListHotVideos_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoServiceServer).ListHotVideos(ctx, req.(*ListHotVideosRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // VideoService_ServiceDesc is the grpc.ServiceDesc for VideoService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -734,6 +770,10 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListTag",
 			Handler:    _VideoService_ListTag_Handler,
+		},
+		{
+			MethodName: "ListHotVideos",
+			Handler:    _VideoService_ListHotVideos_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

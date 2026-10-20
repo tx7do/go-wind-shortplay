@@ -21,7 +21,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UbaService_ReportEvents_FullMethodName = "/app.service.v1.UbaService/ReportEvents"
+	UbaService_ReportEvents_FullMethodName     = "/app.service.v1.UbaService/ReportEvents"
+	UbaService_ListWatchHistory_FullMethodName = "/app.service.v1.UbaService/ListWatchHistory"
 )
 
 // UbaServiceClient is the client API for UbaService service.
@@ -32,6 +33,8 @@ const (
 type UbaServiceClient interface {
 	// 批量上报行为事件（尽力而为，失败静默重试）
 	ReportEvents(ctx context.Context, in *v1.ReportEventsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// 观看历史（需登录）
+	ListWatchHistory(ctx context.Context, in *v1.ListWatchHistoryRequest, opts ...grpc.CallOption) (*v1.WatchHistoryResponse, error)
 }
 
 type ubaServiceClient struct {
@@ -52,6 +55,16 @@ func (c *ubaServiceClient) ReportEvents(ctx context.Context, in *v1.ReportEvents
 	return out, nil
 }
 
+func (c *ubaServiceClient) ListWatchHistory(ctx context.Context, in *v1.ListWatchHistoryRequest, opts ...grpc.CallOption) (*v1.WatchHistoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.WatchHistoryResponse)
+	err := c.cc.Invoke(ctx, UbaService_ListWatchHistory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UbaServiceServer is the server API for UbaService service.
 // All implementations must embed UnimplementedUbaServiceServer
 // for forward compatibility.
@@ -60,6 +73,8 @@ func (c *ubaServiceClient) ReportEvents(ctx context.Context, in *v1.ReportEvents
 type UbaServiceServer interface {
 	// 批量上报行为事件（尽力而为，失败静默重试）
 	ReportEvents(context.Context, *v1.ReportEventsRequest) (*emptypb.Empty, error)
+	// 观看历史（需登录）
+	ListWatchHistory(context.Context, *v1.ListWatchHistoryRequest) (*v1.WatchHistoryResponse, error)
 	mustEmbedUnimplementedUbaServiceServer()
 }
 
@@ -72,6 +87,9 @@ type UnimplementedUbaServiceServer struct{}
 
 func (UnimplementedUbaServiceServer) ReportEvents(context.Context, *v1.ReportEventsRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method ReportEvents not implemented")
+}
+func (UnimplementedUbaServiceServer) ListWatchHistory(context.Context, *v1.ListWatchHistoryRequest) (*v1.WatchHistoryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListWatchHistory not implemented")
 }
 func (UnimplementedUbaServiceServer) mustEmbedUnimplementedUbaServiceServer() {}
 func (UnimplementedUbaServiceServer) testEmbeddedByValue()                    {}
@@ -112,6 +130,24 @@ func _UbaService_ReportEvents_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UbaService_ListWatchHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ListWatchHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UbaServiceServer).ListWatchHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UbaService_ListWatchHistory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UbaServiceServer).ListWatchHistory(ctx, req.(*v1.ListWatchHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UbaService_ServiceDesc is the grpc.ServiceDesc for UbaService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -122,6 +158,10 @@ var UbaService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReportEvents",
 			Handler:    _UbaService_ReportEvents_Handler,
+		},
+		{
+			MethodName: "ListWatchHistory",
+			Handler:    _UbaService_ListWatchHistory_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

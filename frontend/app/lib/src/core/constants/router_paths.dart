@@ -29,6 +29,9 @@ class AppRoutePath {
   /// 剧集详情
   static const seriesDetail = '/series/:seriesId';
 
+  /// 热榜
+  static const hotList = '/hot';
+
   /// 视频详情路径模板（跳转用：`AppRoutePath.videoPath(1)`）
   static String videoPath(int videoId) => '/video/$videoId';
 

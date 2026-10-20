@@ -31,6 +31,7 @@ const OperationVideoServiceGetCreatorOverview = "/app.service.v1.VideoService/Ge
 const OperationVideoServiceGetDraft = "/app.service.v1.VideoService/GetDraft"
 const OperationVideoServiceGetUploadTask = "/app.service.v1.VideoService/GetUploadTask"
 const OperationVideoServiceListDraft = "/app.service.v1.VideoService/ListDraft"
+const OperationVideoServiceListHotVideos = "/app.service.v1.VideoService/ListHotVideos"
 const OperationVideoServiceListTag = "/app.service.v1.VideoService/ListTag"
 const OperationVideoServiceSaveDraft = "/app.service.v1.VideoService/SaveDraft"
 const OperationVideoServiceSubmitDraft = "/app.service.v1.VideoService/SubmitDraft"
@@ -54,6 +55,8 @@ type VideoServiceHTTPServer interface {
 	GetUploadTask(context.Context, *v1.GetUploadTaskRequest) (*v1.UploadTask, error)
 	// ListDraft 草稿列表
 	ListDraft(context.Context, *v11.PagingRequest) (*v1.ListDraftResponse, error)
+	// ListHotVideos 热榜（游客可访问）
+	ListHotVideos(context.Context, *v1.ListHotVideosRequest) (*v1.ListVideoResponse, error)
 	// ListTag 标签列表（发布页选择 / 搜索联想）
 	ListTag(context.Context, *v11.PagingRequest) (*v1.ListTagResponse, error)
 	// SaveDraft 保存草稿（upsert）
@@ -81,6 +84,7 @@ func RegisterVideoServiceHTTPServer(s *http.Server, srv VideoServiceHTTPServer) 
 	r.DELETE("/app/v1/videos/{id}", _VideoService_DeleteVideo0_HTTP_Handler(srv))
 	r.GET("/app/v1/tags", _VideoService_ListTag0_HTTP_Handler(srv))
 	r.GET("/app/v1/creator/overview", _VideoService_GetCreatorOverview0_HTTP_Handler(srv))
+	r.GET("/app/v1/hot-videos", _VideoService_ListHotVideos0_HTTP_Handler(srv))
 }
 
 func _VideoService_CreateUploadTask0_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
@@ -372,6 +376,25 @@ func _VideoService_GetCreatorOverview0_HTTP_Handler(srv VideoServiceHTTPServer) 
 	}
 }
 
+func _VideoService_ListHotVideos0_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ListHotVideosRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationVideoServiceListHotVideos)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListHotVideos(ctx, req.(*v1.ListHotVideosRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ListVideoResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type VideoServiceHTTPClient interface {
 	// CompleteUpload 完成上传（合并 / 入库 / 抽帧封面）
 	CompleteUpload(ctx context.Context, req *v1.CompleteUploadRequest, opts ...http.CallOption) (rsp *v1.UploadTask, err error)
@@ -389,6 +412,8 @@ type VideoServiceHTTPClient interface {
 	GetUploadTask(ctx context.Context, req *v1.GetUploadTaskRequest, opts ...http.CallOption) (rsp *v1.UploadTask, err error)
 	// ListDraft 草稿列表
 	ListDraft(ctx context.Context, req *v11.PagingRequest, opts ...http.CallOption) (rsp *v1.ListDraftResponse, err error)
+	// ListHotVideos 热榜（游客可访问）
+	ListHotVideos(ctx context.Context, req *v1.ListHotVideosRequest, opts ...http.CallOption) (rsp *v1.ListVideoResponse, err error)
 	// ListTag 标签列表（发布页选择 / 搜索联想）
 	ListTag(ctx context.Context, req *v11.PagingRequest, opts ...http.CallOption) (rsp *v1.ListTagResponse, err error)
 	// SaveDraft 保存草稿（upsert）
@@ -513,6 +538,20 @@ func (c *VideoServiceHTTPClientImpl) ListDraft(ctx context.Context, in *v11.Pagi
 	pattern := "/app/v1/drafts"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationVideoServiceListDraft))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListHotVideos 热榜（游客可访问）
+func (c *VideoServiceHTTPClientImpl) ListHotVideos(ctx context.Context, in *v1.ListHotVideosRequest, opts ...http.CallOption) (*v1.ListVideoResponse, error) {
+	var out v1.ListVideoResponse
+	pattern := "/app/v1/hot-videos"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationVideoServiceListHotVideos))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

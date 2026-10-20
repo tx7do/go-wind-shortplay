@@ -66,6 +66,13 @@ service VideoService {
 
   // 标签列表（按引用数排序，供搜索页 / 发布页选择）
   rpc ListTag (pagination.PagingRequest) returns (ListTagResponse) {}
+
+  // 热榜（热度分 = 播放 + 点赞×3 + 收藏×5 + 完播×4，近发布优先；App 端游客可访问）
+  rpc ListHotVideos (ListHotVideosRequest) returns (ListVideoResponse) {}
+}
+
+message ListHotVideosRequest {
+  optional uint32 limit = 1 [json_name = "limit"]; // 条数（缺省 20，上限 50）
 }
 
 // 视频状态

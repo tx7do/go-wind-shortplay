@@ -28,6 +28,9 @@ class RouteNames {
   /// 剧集详情（剧信息 + 选集）
   static const String seriesDetail = 'series_detail';
 
+  /// 热榜
+  static const String hotList = 'hot_list';
+
   /// 他人主页
   static const String userProfile = 'user_profile';
 

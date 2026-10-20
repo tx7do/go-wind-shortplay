@@ -322,3 +322,415 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ReportEventsRequestValidationError{}
+
+// Validate checks the field values on ListWatchHistoryRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ListWatchHistoryRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListWatchHistoryRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ListWatchHistoryRequestMultiError, or nil if none found.
+func (m *ListWatchHistoryRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListWatchHistoryRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.PageNum != nil {
+		// no validation rules for PageNum
+	}
+
+	if m.PageSize != nil {
+		// no validation rules for PageSize
+	}
+
+	if len(errors) > 0 {
+		return ListWatchHistoryRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListWatchHistoryRequestMultiError is an error wrapping multiple validation
+// errors returned by ListWatchHistoryRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ListWatchHistoryRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListWatchHistoryRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListWatchHistoryRequestMultiError) AllErrors() []error { return m }
+
+// ListWatchHistoryRequestValidationError is the validation error returned by
+// ListWatchHistoryRequest.Validate if the designated constraints aren't met.
+type ListWatchHistoryRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListWatchHistoryRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListWatchHistoryRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListWatchHistoryRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListWatchHistoryRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListWatchHistoryRequestValidationError) ErrorName() string {
+	return "ListWatchHistoryRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListWatchHistoryRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListWatchHistoryRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListWatchHistoryRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListWatchHistoryRequestValidationError{}
+
+// Validate checks the field values on WatchHistoryItem with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *WatchHistoryItem) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on WatchHistoryItem with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// WatchHistoryItemMultiError, or nil if none found.
+func (m *WatchHistoryItem) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *WatchHistoryItem) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetVideo()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, WatchHistoryItemValidationError{
+					field:  "Video",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, WatchHistoryItemValidationError{
+					field:  "Video",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetVideo()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return WatchHistoryItemValidationError{
+				field:  "Video",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if m.WatchedAt != nil {
+
+		if all {
+			switch v := interface{}(m.GetWatchedAt()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, WatchHistoryItemValidationError{
+						field:  "WatchedAt",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, WatchHistoryItemValidationError{
+						field:  "WatchedAt",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetWatchedAt()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return WatchHistoryItemValidationError{
+					field:  "WatchedAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return WatchHistoryItemMultiError(errors)
+	}
+
+	return nil
+}
+
+// WatchHistoryItemMultiError is an error wrapping multiple validation errors
+// returned by WatchHistoryItem.ValidateAll() if the designated constraints
+// aren't met.
+type WatchHistoryItemMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m WatchHistoryItemMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m WatchHistoryItemMultiError) AllErrors() []error { return m }
+
+// WatchHistoryItemValidationError is the validation error returned by
+// WatchHistoryItem.Validate if the designated constraints aren't met.
+type WatchHistoryItemValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e WatchHistoryItemValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e WatchHistoryItemValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e WatchHistoryItemValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e WatchHistoryItemValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e WatchHistoryItemValidationError) ErrorName() string { return "WatchHistoryItemValidationError" }
+
+// Error satisfies the builtin error interface
+func (e WatchHistoryItemValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sWatchHistoryItem.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = WatchHistoryItemValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = WatchHistoryItemValidationError{}
+
+// Validate checks the field values on WatchHistoryResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *WatchHistoryResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on WatchHistoryResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// WatchHistoryResponseMultiError, or nil if none found.
+func (m *WatchHistoryResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *WatchHistoryResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, WatchHistoryResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, WatchHistoryResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return WatchHistoryResponseValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if m.Total != nil {
+		// no validation rules for Total
+	}
+
+	if len(errors) > 0 {
+		return WatchHistoryResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// WatchHistoryResponseMultiError is an error wrapping multiple validation
+// errors returned by WatchHistoryResponse.ValidateAll() if the designated
+// constraints aren't met.
+type WatchHistoryResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m WatchHistoryResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m WatchHistoryResponseMultiError) AllErrors() []error { return m }
+
+// WatchHistoryResponseValidationError is the validation error returned by
+// WatchHistoryResponse.Validate if the designated constraints aren't met.
+type WatchHistoryResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e WatchHistoryResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e WatchHistoryResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e WatchHistoryResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e WatchHistoryResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e WatchHistoryResponseValidationError) ErrorName() string {
+	return "WatchHistoryResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e WatchHistoryResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sWatchHistoryResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = WatchHistoryResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = WatchHistoryResponseValidationError{}

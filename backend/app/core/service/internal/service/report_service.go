@@ -35,6 +35,12 @@ type SuperAdminResolver interface {
 	ListSuperAdminUserIDs(ctx context.Context) ([]uint32, error)
 }
 
+// VideoModerator 视频处置能力（由 VideoService 实现）：举报处置通过时
+// 联动下架被举报视频——走状态机白名单 + 落驳回原因 + 通知作者。
+type VideoModerator interface {
+	ModerateOffline(ctx context.Context, videoID uint32, reason string) error
+}
+
 type ReportService struct {
 	reportV1.UnimplementedReportServiceServer
 
@@ -47,6 +53,7 @@ type ReportService struct {
 
 	internalMessage InternalMessageNotifier
 	superAdmins     SuperAdminResolver
+	videoModerator  VideoModerator
 }
 
 func NewReportService(
@@ -73,6 +80,11 @@ func (s *ReportService) RegisterNotifier(n InternalMessageNotifier) {
 // RegisterSuperAdminResolver 注入超管解析。
 func (s *ReportService) RegisterSuperAdminResolver(r SuperAdminResolver) {
 	s.superAdmins = r
+}
+
+// RegisterVideoModerator 注入视频处置能力（举报处置联动下架）。
+func (s *ReportService) RegisterVideoModerator(m VideoModerator) {
+	s.videoModerator = m
 }
 
 func (s *ReportService) CreateReport(ctx context.Context, req *reportV1.CreateReportRequest) (*reportV1.Report, error) {
@@ -200,7 +212,14 @@ func (s *ReportService) HandleReport(ctx context.Context, req *reportV1.HandleRe
 	if req.GetAction() == reportV1.HandleAction_HANDLE_ACTION_RESOLVE {
 		status = reportV1.ReportStatus_REPORT_STATUS_RESOLVED
 		// 联动处置目标（尽力而为，失败不阻塞工单关闭）
-		s.disposeTarget(ctx, e)
+		reason := strings.TrimSpace(req.GetNote())
+		if reason == "" {
+			reason = strings.TrimSpace(e.Reason)
+		}
+		if reason == "" {
+			reason = "举报处置"
+		}
+		s.disposeTarget(ctx, e, "举报处置："+reason)
 	}
 
 	e2, err := s.reportRepo.UpdateHandle(ctx, req.GetId(), status, handlerID, req.GetNote())
@@ -220,10 +239,20 @@ func (s *ReportService) HandleReport(ctx context.Context, req *reportV1.HandleRe
 	return dto, nil
 }
 
-// disposeTarget 处置举报目标：视频下架、评论删除；用户类目标交由管理员人工处理。
-func (s *ReportService) disposeTarget(ctx context.Context, e *ent.VideoReport) {
+// disposeTarget 处置举报目标：视频联动下架（状态机 + 通知作者）、评论删除；
+// 用户类目标交由管理员人工处理。
+func (s *ReportService) disposeTarget(ctx context.Context, e *ent.VideoReport, reason string) {
 	switch e.TargetType {
 	case videoreport.TargetTypeVideo:
+		if s.videoModerator != nil {
+			// 联动下架走状态机白名单并通知作者；目标非已发布（如已下架）报错按日志消化
+			if err := s.videoModerator.ModerateOffline(ctx, e.TargetID, reason); err != nil {
+				s.log.Warnf("dispose report target video %d skipped: %s", e.TargetID, err.Error())
+				return
+			}
+			return
+		}
+		// seam 未接线兜底（不应发生）：裸下架，不通知
 		offline := videoV1.VideoStatus_VIDEO_STATUS_OFFLINE
 		if _, err := s.videoRepo.Update(ctx, e.TargetID, &videoV1.Video{Status: offline.Enum()}, nil); err != nil {
 			s.log.Errorf("dispose report target video failed: %s", err.Error())
