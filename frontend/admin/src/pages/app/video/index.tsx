@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, type Key } from 'react';
 import type { ProColumns, ActionType } from '@ant-design/pro-components';
 import ListTable from '@/components/common/ListTable';
 import { Button, Image, Popconfirm, Space, Tabs, Tag, App } from 'antd';
@@ -23,7 +23,7 @@ import {
   useDeleteVideo,
 } from '@/api/hooks';
 import { VIDEO_STATUS } from '@/api/types';
-import type { Video } from '@/api/types';
+import type { Video, VideoStatus } from '@/api/types';
 import { formatDuration, getVideoStatusConfig, VIDEO_STATUS_LIST } from './constants';
 import VideoDetailDrawer from './VideoDetailDrawer';
 import VideoEditDrawer from './VideoEditDrawer';
@@ -57,6 +57,32 @@ const VideoList = () => {
   // 必填原因弹窗（驳回/下架）
   const [reasonAction, setReasonAction] = useState<PendingAction | null>(null);
   const [pendingRow, setPendingRow] = useState<Video | null>(null);
+
+  // 批量审核（前端循环单条端点：每条完整走状态机白名单 + 作者通知）
+  const [selectedIds, setSelectedIds] = useState<Key[]>([]);
+  const [batchReasonOpen, setBatchReasonOpen] = useState(false);
+  const batchStatusMutation = useChangeVideoStatus();
+
+  const runBatch = async (ids: Key[], status: VideoStatus, reason?: string) => {
+    let ok = 0;
+    let fail = 0;
+    for (const id of ids) {
+      try {
+        await batchStatusMutation.mutateAsync({ id: Number(id), status, reason });
+        ok += 1;
+      } catch {
+        // 非法流转（如对已发布条目批量驳回）计失败并继续
+        fail += 1;
+      }
+    }
+    if (fail === 0) {
+      message.success(t('batchDone', { ok, fail: 0 }));
+    } else {
+      message.warning(t('batchDone', { ok, fail }));
+    }
+    setSelectedIds([]);
+    refresh();
+  };
 
   const refresh = () => {
     actionRef.current?.reload();
@@ -349,6 +375,40 @@ const VideoList = () => {
         className="page-container-content"
         style={{ padding: '0 8px', height: '100%' }}
       >
+        {selectedIds.length > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: '8px 12px',
+              marginBottom: 8,
+              borderRadius: 6,
+              background: 'var(--ant-color-primary-bg)',
+            }}
+          >
+            <span>{t('batchSelected', { count: selectedIds.length })}</span>
+            <Popconfirm
+              title={t('batchApproveConfirm', { count: selectedIds.length })}
+              onConfirm={() => runBatch(selectedIds, VIDEO_STATUS.PUBLISHED)}
+              okText={t('common:button.ok')}
+              cancelText={t('common:button.cancel')}
+            >
+              <Button type="primary" size="small" loading={batchStatusMutation.isPending}>
+                {t('batchApprove')}
+              </Button>
+            </Popconfirm>
+            <Button
+              size="small"
+              danger
+              onClick={() => setBatchReasonOpen(true)}
+              disabled={batchStatusMutation.isPending}
+            >
+              {t('batchReject')}
+            </Button>
+            <a onClick={() => setSelectedIds([])}>{t('batchClearSelection')}</a>
+          </div>
+        )}
         <Tabs
           activeKey={activeFilter}
           onChange={(key) => setActiveFilter(key)}
@@ -375,6 +435,10 @@ const VideoList = () => {
             };
           }}
           rowKey="id"
+          rowSelection={{
+            selectedRowKeys: selectedIds,
+            onChange: (keys) => setSelectedIds(keys),
+          }}
           search={{
             labelWidth: 'auto',
             defaultCollapsed: false,
@@ -476,6 +540,19 @@ const VideoList = () => {
           setEditRow(null);
         }}
         onSuccess={refresh}
+      />
+
+      {/* 批量驳回：必填原因（同 reason 应用到全部选中） */}
+      <ReasonModal
+        open={batchReasonOpen}
+        title={t('batchRejectTitle')}
+        confirmLoading={batchStatusMutation.isPending}
+        onOk={(reason) => {
+          void runBatch(selectedIds, VIDEO_STATUS.REJECTED, reason).then(() =>
+            setBatchReasonOpen(false),
+          );
+        }}
+        onCancel={() => setBatchReasonOpen(false)}
       />
 
       {/* 驳回 / 下架：必填原因 */}

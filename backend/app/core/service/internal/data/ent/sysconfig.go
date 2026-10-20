@@ -41,7 +41,11 @@ type SysConfig struct {
 	RegisterEnabled bool `json:"register_enabled,omitempty"`
 	// 允许的视频扩展名（小写带点）
 	AllowedVideoTypes []string `json:"allowed_video_types,omitempty"`
-	selectValues      sql.SelectValues
+	// 敏感词过滤开关（命中：发布转审核中 / 评论拒绝）
+	SensitiveFilterEnabled bool `json:"sensitive_filter_enabled,omitempty"`
+	// 敏感词表
+	SensitiveWords []string `json:"sensitive_words,omitempty"`
+	selectValues   sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -49,9 +53,9 @@ func (*SysConfig) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case sysconfig.FieldAllowedVideoTypes:
+		case sysconfig.FieldAllowedVideoTypes, sysconfig.FieldSensitiveWords:
 			values[i] = new([]byte)
-		case sysconfig.FieldManualReviewEnabled, sysconfig.FieldRegisterEnabled:
+		case sysconfig.FieldManualReviewEnabled, sysconfig.FieldRegisterEnabled, sysconfig.FieldSensitiveFilterEnabled:
 			values[i] = new(sql.NullBool)
 		case sysconfig.FieldID, sysconfig.FieldCreatedBy, sysconfig.FieldUpdatedBy, sysconfig.FieldDeletedBy, sysconfig.FieldMaxUploadSizeMB, sysconfig.FieldMaxDurationSeconds:
 			values[i] = new(sql.NullInt64)
@@ -152,6 +156,20 @@ func (_m *SysConfig) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field allowed_video_types: %w", err)
 				}
 			}
+		case sysconfig.FieldSensitiveFilterEnabled:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field sensitive_filter_enabled", values[i])
+			} else if value.Valid {
+				_m.SensitiveFilterEnabled = value.Bool
+			}
+		case sysconfig.FieldSensitiveWords:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field sensitive_words", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.SensitiveWords); err != nil {
+					return fmt.Errorf("unmarshal field sensitive_words: %w", err)
+				}
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -232,6 +250,12 @@ func (_m *SysConfig) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("allowed_video_types=")
 	builder.WriteString(fmt.Sprintf("%v", _m.AllowedVideoTypes))
+	builder.WriteString(", ")
+	builder.WriteString("sensitive_filter_enabled=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SensitiveFilterEnabled))
+	builder.WriteString(", ")
+	builder.WriteString("sensitive_words=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SensitiveWords))
 	builder.WriteByte(')')
 	return builder.String()
 }

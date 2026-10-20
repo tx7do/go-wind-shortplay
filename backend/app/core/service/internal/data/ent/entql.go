@@ -1237,17 +1237,19 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "SysConfig",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			sysconfig.FieldCreatedAt:           {Type: field.TypeTime, Column: sysconfig.FieldCreatedAt},
-			sysconfig.FieldUpdatedAt:           {Type: field.TypeTime, Column: sysconfig.FieldUpdatedAt},
-			sysconfig.FieldDeletedAt:           {Type: field.TypeTime, Column: sysconfig.FieldDeletedAt},
-			sysconfig.FieldCreatedBy:           {Type: field.TypeUint32, Column: sysconfig.FieldCreatedBy},
-			sysconfig.FieldUpdatedBy:           {Type: field.TypeUint32, Column: sysconfig.FieldUpdatedBy},
-			sysconfig.FieldDeletedBy:           {Type: field.TypeUint32, Column: sysconfig.FieldDeletedBy},
-			sysconfig.FieldMaxUploadSizeMB:     {Type: field.TypeUint32, Column: sysconfig.FieldMaxUploadSizeMB},
-			sysconfig.FieldMaxDurationSeconds:  {Type: field.TypeUint32, Column: sysconfig.FieldMaxDurationSeconds},
-			sysconfig.FieldManualReviewEnabled: {Type: field.TypeBool, Column: sysconfig.FieldManualReviewEnabled},
-			sysconfig.FieldRegisterEnabled:     {Type: field.TypeBool, Column: sysconfig.FieldRegisterEnabled},
-			sysconfig.FieldAllowedVideoTypes:   {Type: field.TypeJSON, Column: sysconfig.FieldAllowedVideoTypes},
+			sysconfig.FieldCreatedAt:              {Type: field.TypeTime, Column: sysconfig.FieldCreatedAt},
+			sysconfig.FieldUpdatedAt:              {Type: field.TypeTime, Column: sysconfig.FieldUpdatedAt},
+			sysconfig.FieldDeletedAt:              {Type: field.TypeTime, Column: sysconfig.FieldDeletedAt},
+			sysconfig.FieldCreatedBy:              {Type: field.TypeUint32, Column: sysconfig.FieldCreatedBy},
+			sysconfig.FieldUpdatedBy:              {Type: field.TypeUint32, Column: sysconfig.FieldUpdatedBy},
+			sysconfig.FieldDeletedBy:              {Type: field.TypeUint32, Column: sysconfig.FieldDeletedBy},
+			sysconfig.FieldMaxUploadSizeMB:        {Type: field.TypeUint32, Column: sysconfig.FieldMaxUploadSizeMB},
+			sysconfig.FieldMaxDurationSeconds:     {Type: field.TypeUint32, Column: sysconfig.FieldMaxDurationSeconds},
+			sysconfig.FieldManualReviewEnabled:    {Type: field.TypeBool, Column: sysconfig.FieldManualReviewEnabled},
+			sysconfig.FieldRegisterEnabled:        {Type: field.TypeBool, Column: sysconfig.FieldRegisterEnabled},
+			sysconfig.FieldAllowedVideoTypes:      {Type: field.TypeJSON, Column: sysconfig.FieldAllowedVideoTypes},
+			sysconfig.FieldSensitiveFilterEnabled: {Type: field.TypeBool, Column: sysconfig.FieldSensitiveFilterEnabled},
+			sysconfig.FieldSensitiveWords:         {Type: field.TypeJSON, Column: sysconfig.FieldSensitiveWords},
 		},
 	}
 	graph.Nodes[41] = &sqlgraph.Node{
@@ -6972,6 +6974,16 @@ func (f *SysConfigFilter) WhereRegisterEnabled(p entql.BoolP) {
 // WhereAllowedVideoTypes applies the entql json.RawMessage predicate on the allowed_video_types field.
 func (f *SysConfigFilter) WhereAllowedVideoTypes(p entql.BytesP) {
 	f.Where(p.Field(sysconfig.FieldAllowedVideoTypes))
+}
+
+// WhereSensitiveFilterEnabled applies the entql bool predicate on the sensitive_filter_enabled field.
+func (f *SysConfigFilter) WhereSensitiveFilterEnabled(p entql.BoolP) {
+	f.Where(p.Field(sysconfig.FieldSensitiveFilterEnabled))
+}
+
+// WhereSensitiveWords applies the entql json.RawMessage predicate on the sensitive_words field.
+func (f *SysConfigFilter) WhereSensitiveWords(p entql.BytesP) {
+	f.Where(p.Field(sysconfig.FieldSensitiveWords))
 }
 
 // addPredicate implements the predicateAdder interface.

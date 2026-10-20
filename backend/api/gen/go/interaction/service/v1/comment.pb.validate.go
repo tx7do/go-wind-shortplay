@@ -469,6 +469,10 @@ func (m *ListCommentRequest) validate(all bool) error {
 		// no validation rules for PageSize
 	}
 
+	if m.Sort != nil {
+		// no validation rules for Sort
+	}
+
 	if len(errors) > 0 {
 		return ListCommentRequestMultiError(errors)
 	}

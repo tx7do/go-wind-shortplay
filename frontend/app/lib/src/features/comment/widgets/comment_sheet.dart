@@ -175,13 +175,26 @@ class _CommentSheetState extends State<CommentSheet> {
                 ),
               ),
               SizedBox(height: 10.h),
-              // 标题
-              Text(
-                loc.commentsCount(state.total),
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.onSurface,
+              // 标题 + 排序切换（最热/最新）
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                child: Row(
+                  children: [
+                    Text(
+                      loc.commentsCount(state.total),
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w700,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const Spacer(),
+                    _SortToggle(
+                      current: state.sort,
+                      onChanged: (mode) =>
+                          context.read<CommentBloc>().add(CommentSortChanged(mode)),
+                    ),
+                  ],
                 ),
               ),
               SizedBox(height: 8.h),
@@ -655,7 +668,81 @@ String? localizedCommentError(BuildContext context, ApiStatusException e) {
   switch (e.status.getReason) {
     case 'NOT_OWNER':
       return loc.onlyOwnerCanDelete;
+      case 'SENSITIVE_WORD_HIT':
+        return loc.errorSensitiveWordHit;
     default:
       return null;
+  }
+}
+
+/// 排序切换（最热/最新）双段控件
+class _SortToggle extends StatelessWidget {
+  final CommentSortMode current;
+  final ValueChanged<CommentSortMode> onChanged;
+
+  const _SortToggle({
+    required this.current,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = S.of(context);
+    final theme = Theme.of(context);
+
+    Widget seg(String label, CommentSortMode mode, IconData icon) {
+      final selected = current == mode;
+      return InkWell(
+        onTap: () => onChanged(mode),
+        borderRadius: BorderRadius.circular(100),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+          decoration: BoxDecoration(
+            color: selected
+                ? theme.colorScheme.primary.withAlpha(26)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 13.sp,
+                color: selected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface.withAlpha(120),
+              ),
+              SizedBox(width: 3.w),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+                  color: selected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface.withAlpha(130),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: EdgeInsets.all(2.w),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.onSurface.withAlpha(10),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          seg(loc.sortHot, CommentSortMode.hot, Icons.local_fire_department),
+          seg(loc.sortLatest, CommentSortMode.latest, Icons.schedule),
+        ],
+      ),
+    );
   }
 }

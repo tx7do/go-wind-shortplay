@@ -16,5 +16,10 @@
   "saveFailed": "Save failed",
   "maxUploadSizeMbRequired": "Please enter max size",
   "maxDurationSecondsRequired": "Please enter max duration",
-  "allowedVideoTypesRequired": "At least one video type is required"
+  "allowedVideoTypesRequired": "At least one video type is required",
+  "sensitiveFilterEnabled": "Sensitive Word Filter",
+  "sensitiveFilterEnabledHint": "When on: publishes hitting words go to review, comments are rejected",
+  "sensitiveWords": "Sensitive Words",
+  "sensitiveWordsHint": "One word per line (or comma-separated), effective on save",
+  "sensitiveWordsPlaceholder": "One word per line"
 }

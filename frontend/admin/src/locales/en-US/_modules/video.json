@@ -57,5 +57,17 @@
   "operationFailed": "Operation failed",
   "basicInfo": "Basic Info",
   "statsInfo": "Engagement",
-  "action": "Actions"
+  "action": "Actions",
+  "tpl1": "Content violates community guidelines",
+  "tpl2": "Quality below standard",
+  "tpl3": "Inappropriate cover or title",
+  "tpl4": "Clickbait / misleading title",
+  "tpl5": "Suspected copyright infringement",
+  "batchSelected": "{{count}} selected",
+  "batchApprove": "Approve",
+  "batchReject": "Reject",
+  "batchClearSelection": "Clear selection",
+  "batchApproveConfirm": "Approve {{count}} selected videos?",
+  "batchRejectTitle": "Batch Reject",
+  "batchDone": "Batch done: {{ok}} succeeded, {{fail}} failed"
 }

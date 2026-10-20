@@ -391,6 +391,30 @@ class SeriesDetail {
   }
 }
 
+/// 单日趋势点（stats.service.v1.TrendItem）
+class TrendPoint {
+  final String date;
+  final int published;
+  final int plays;
+  final int likes;
+
+  const TrendPoint({
+    this.date = '',
+    this.published = 0,
+    this.plays = 0,
+    this.likes = 0,
+  });
+
+  factory TrendPoint.fromJson(Map<String, dynamic> json) {
+    return TrendPoint(
+      date: jsonString(json['date']),
+      published: jsonInt(json['published']),
+      plays: jsonInt(json['plays']),
+      likes: jsonInt(json['likes']),
+    );
+  }
+}
+
 /// 解析 protojson 时间戳（RFC3339 字符串）
 DateTime? parseTime(dynamic value) {
   if (value is! String || value.isEmpty) return null;

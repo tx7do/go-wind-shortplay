@@ -36,6 +36,7 @@ const (
 	VideoService_DeleteVideo_FullMethodName        = "/app.service.v1.VideoService/DeleteVideo"
 	VideoService_ListTag_FullMethodName            = "/app.service.v1.VideoService/ListTag"
 	VideoService_GetCreatorOverview_FullMethodName = "/app.service.v1.VideoService/GetCreatorOverview"
+	VideoService_ListCreatorTrends_FullMethodName  = "/app.service.v1.VideoService/ListCreatorTrends"
 	VideoService_ListHotVideos_FullMethodName      = "/app.service.v1.VideoService/ListHotVideos"
 )
 
@@ -71,6 +72,8 @@ type VideoServiceClient interface {
 	ListTag(ctx context.Context, in *v11.PagingRequest, opts ...grpc.CallOption) (*v1.ListTagResponse, error)
 	// 创作者中心总览（我的作品聚合数据）
 	GetCreatorOverview(ctx context.Context, in *v12.GetCreatorOverviewRequest, opts ...grpc.CallOption) (*v12.CreatorOverview, error)
+	// 创作者近 N 日趋势（本人口径，需登录）
+	ListCreatorTrends(ctx context.Context, in *v12.ListCreatorTrendsRequest, opts ...grpc.CallOption) (*v12.ListTrendsResponse, error)
 	// 热榜（游客可访问）
 	ListHotVideos(ctx context.Context, in *v1.ListHotVideosRequest, opts ...grpc.CallOption) (*v1.ListVideoResponse, error)
 }
@@ -213,6 +216,16 @@ func (c *videoServiceClient) GetCreatorOverview(ctx context.Context, in *v12.Get
 	return out, nil
 }
 
+func (c *videoServiceClient) ListCreatorTrends(ctx context.Context, in *v12.ListCreatorTrendsRequest, opts ...grpc.CallOption) (*v12.ListTrendsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v12.ListTrendsResponse)
+	err := c.cc.Invoke(ctx, VideoService_ListCreatorTrends_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *videoServiceClient) ListHotVideos(ctx context.Context, in *v1.ListHotVideosRequest, opts ...grpc.CallOption) (*v1.ListVideoResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.ListVideoResponse)
@@ -255,6 +268,8 @@ type VideoServiceServer interface {
 	ListTag(context.Context, *v11.PagingRequest) (*v1.ListTagResponse, error)
 	// 创作者中心总览（我的作品聚合数据）
 	GetCreatorOverview(context.Context, *v12.GetCreatorOverviewRequest) (*v12.CreatorOverview, error)
+	// 创作者近 N 日趋势（本人口径，需登录）
+	ListCreatorTrends(context.Context, *v12.ListCreatorTrendsRequest) (*v12.ListTrendsResponse, error)
 	// 热榜（游客可访问）
 	ListHotVideos(context.Context, *v1.ListHotVideosRequest) (*v1.ListVideoResponse, error)
 	mustEmbedUnimplementedVideoServiceServer()
@@ -305,6 +320,9 @@ func (UnimplementedVideoServiceServer) ListTag(context.Context, *v11.PagingReque
 }
 func (UnimplementedVideoServiceServer) GetCreatorOverview(context.Context, *v12.GetCreatorOverviewRequest) (*v12.CreatorOverview, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCreatorOverview not implemented")
+}
+func (UnimplementedVideoServiceServer) ListCreatorTrends(context.Context, *v12.ListCreatorTrendsRequest) (*v12.ListTrendsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListCreatorTrends not implemented")
 }
 func (UnimplementedVideoServiceServer) ListHotVideos(context.Context, *v1.ListHotVideosRequest) (*v1.ListVideoResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListHotVideos not implemented")
@@ -564,6 +582,24 @@ func _VideoService_GetCreatorOverview_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VideoService_ListCreatorTrends_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v12.ListCreatorTrendsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoServiceServer).ListCreatorTrends(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoService_ListCreatorTrends_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoServiceServer).ListCreatorTrends(ctx, req.(*v12.ListCreatorTrendsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _VideoService_ListHotVideos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v1.ListHotVideosRequest)
 	if err := dec(in); err != nil {
@@ -640,6 +676,10 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCreatorOverview",
 			Handler:    _VideoService_GetCreatorOverview_Handler,
+		},
+		{
+			MethodName: "ListCreatorTrends",
+			Handler:    _VideoService_ListCreatorTrends_Handler,
 		},
 		{
 			MethodName: "ListHotVideos",

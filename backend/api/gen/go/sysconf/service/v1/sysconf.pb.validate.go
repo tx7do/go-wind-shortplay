@@ -72,6 +72,10 @@ func (m *SysConf) validate(all bool) error {
 		// no validation rules for RegisterEnabled
 	}
 
+	if m.SensitiveFilterEnabled != nil {
+		// no validation rules for SensitiveFilterEnabled
+	}
+
 	if m.UpdatedAt != nil {
 
 		if all {
@@ -218,6 +222,10 @@ func (m *UpdateSysConfRequest) validate(all bool) error {
 
 	if m.RegisterEnabled != nil {
 		// no validation rules for RegisterEnabled
+	}
+
+	if m.SensitiveFilterEnabled != nil {
+		// no validation rules for SensitiveFilterEnabled
 	}
 
 	if len(errors) > 0 {

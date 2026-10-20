@@ -104,6 +104,11 @@ func RegisterEnabled(v bool) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldEQ(FieldRegisterEnabled, v))
 }
 
+// SensitiveFilterEnabled applies equality check predicate on the "sensitive_filter_enabled" field. It's identical to SensitiveFilterEnabledEQ.
+func SensitiveFilterEnabled(v bool) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldSensitiveFilterEnabled, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldEQ(FieldCreatedAt, v))
@@ -512,6 +517,26 @@ func AllowedVideoTypesIsNil() predicate.SysConfig {
 // AllowedVideoTypesNotNil applies the NotNil predicate on the "allowed_video_types" field.
 func AllowedVideoTypesNotNil() predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldNotNull(FieldAllowedVideoTypes))
+}
+
+// SensitiveFilterEnabledEQ applies the EQ predicate on the "sensitive_filter_enabled" field.
+func SensitiveFilterEnabledEQ(v bool) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldSensitiveFilterEnabled, v))
+}
+
+// SensitiveFilterEnabledNEQ applies the NEQ predicate on the "sensitive_filter_enabled" field.
+func SensitiveFilterEnabledNEQ(v bool) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNEQ(FieldSensitiveFilterEnabled, v))
+}
+
+// SensitiveWordsIsNil applies the IsNil predicate on the "sensitive_words" field.
+func SensitiveWordsIsNil() predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldIsNull(FieldSensitiveWords))
+}
+
+// SensitiveWordsNotNil applies the NotNil predicate on the "sensitive_words" field.
+func SensitiveWordsNotNil() predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNotNull(FieldSensitiveWords))
 }
 
 // And groups predicates with the AND operator between them.

@@ -34,6 +34,8 @@ const SysConfPage = () => {
         manualReviewEnabled: !!data.manualReviewEnabled,
         registerEnabled: !!data.registerEnabled,
         allowedVideoTypesText: (data.allowedVideoTypes ?? []).join(', '),
+        sensitiveFilterEnabled: !!data.sensitiveFilterEnabled,
+        sensitiveWordsText: (data.sensitiveWords ?? []).join('\n'),
       });
     }
   }, [data]);
@@ -57,6 +59,11 @@ const SysConfPage = () => {
       .map((s) => s.trim())
       .filter(Boolean)
       .map((s) => (s.startsWith('.') ? s : `.${s}`));
+    // 敏感词：换行/逗号分隔 → string[]（空串剔除）
+    const sensitiveWords = String(values.sensitiveWordsText ?? '')
+      .split(/[\n,，]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
     try {
       await updateMutation.mutateAsync({
         maxUploadSizeMb: Number(values.maxUploadSizeMb),
@@ -64,6 +71,8 @@ const SysConfPage = () => {
         manualReviewEnabled: !!values.manualReviewEnabled,
         registerEnabled: !!values.registerEnabled,
         allowedVideoTypes: types,
+        sensitiveFilterEnabled: !!values.sensitiveFilterEnabled,
+        sensitiveWords,
       });
       return true;
     } catch {
@@ -131,6 +140,17 @@ const SysConfPage = () => {
             name="registerEnabled"
             label={t('registerEnabled')}
             extra={t('registerEnabledHint')}
+          />
+          <ProFormSwitch
+            name="sensitiveFilterEnabled"
+            label={t('sensitiveFilterEnabled')}
+            extra={t('sensitiveFilterEnabledHint')}
+          />
+          <ProFormTextArea
+            name="sensitiveWordsText"
+            label={t('sensitiveWords')}
+            extra={t('sensitiveWordsHint')}
+            fieldProps={{ rows: 4, placeholder: t('sensitiveWordsPlaceholder') }}
           />
         </ProForm>
 

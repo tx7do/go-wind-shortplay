@@ -82,6 +82,12 @@ const COMPONENT_ALIAS_KEYS: Record<string, string> = {
   '/comments': '/comment',
   '/reports': '/report',
   '/users': '/user',
+  // 审计日志（基座菜单 51-55 的 Vue component 全路径 → React 审计页）
+  '/app/log/login_audit_log/index.vue': '/audit/login',
+  '/app/log/api_audit_log/index.vue': '/audit/api',
+  '/app/log/operation_audit_log/index.vue': '/audit/operation',
+  '/app/log/data_access_audit_log/index.vue': '/audit/data-access',
+  '/app/log/permission_audit_log/index.vue': '/audit/permission',
 };
 for (const [aliasKey, targetKey] of Object.entries(COMPONENT_ALIAS_KEYS)) {
   const Target = pageMap[targetKey];

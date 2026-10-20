@@ -33,6 +33,10 @@ const (
 	FieldRegisterEnabled = "register_enabled"
 	// FieldAllowedVideoTypes holds the string denoting the allowed_video_types field in the database.
 	FieldAllowedVideoTypes = "allowed_video_types"
+	// FieldSensitiveFilterEnabled holds the string denoting the sensitive_filter_enabled field in the database.
+	FieldSensitiveFilterEnabled = "sensitive_filter_enabled"
+	// FieldSensitiveWords holds the string denoting the sensitive_words field in the database.
+	FieldSensitiveWords = "sensitive_words"
 	// Table holds the table name of the sysconfig in the database.
 	Table = "sp_sys_configs"
 )
@@ -51,6 +55,8 @@ var Columns = []string{
 	FieldManualReviewEnabled,
 	FieldRegisterEnabled,
 	FieldAllowedVideoTypes,
+	FieldSensitiveFilterEnabled,
+	FieldSensitiveWords,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -72,6 +78,8 @@ var (
 	DefaultManualReviewEnabled bool
 	// DefaultRegisterEnabled holds the default value on creation for the "register_enabled" field.
 	DefaultRegisterEnabled bool
+	// DefaultSensitiveFilterEnabled holds the default value on creation for the "sensitive_filter_enabled" field.
+	DefaultSensitiveFilterEnabled bool
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
@@ -132,4 +140,9 @@ func ByManualReviewEnabled(opts ...sql.OrderTermOption) OrderOption {
 // ByRegisterEnabled orders the results by the register_enabled field.
 func ByRegisterEnabled(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRegisterEnabled, opts...).ToFunc()
+}
+
+// BySensitiveFilterEnabled orders the results by the sensitive_filter_enabled field.
+func BySensitiveFilterEnabled(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSensitiveFilterEnabled, opts...).ToFunc()
 }

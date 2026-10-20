@@ -399,6 +399,8 @@ class _PublishPageState extends State<PublishPage>
         return loc.errorPayloadTooLarge;
       case 'FILE_TYPE_NOT_ALLOWED':
         return loc.errorUnsupportedMediaType;
+      case 'SENSITIVE_WORD_HIT':
+        return loc.errorSensitiveWordHit;
       default:
         return loc.publishFailed;
     }

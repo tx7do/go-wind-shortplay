@@ -338,6 +338,7 @@ type VideoCommentService struct {
 	commentRepo *data.VideoCommentRepo
 	videoRepo   *data.VideoRepo
 	userRepo    data.UserRepo
+	sysConfRepo *data.SysConfRepo
 
 	internalMessage InternalMessageNotifier
 }
@@ -347,12 +348,14 @@ func NewVideoCommentService(
 	commentRepo *data.VideoCommentRepo,
 	videoRepo *data.VideoRepo,
 	userRepo data.UserRepo,
+	sysConfRepo *data.SysConfRepo,
 ) *VideoCommentService {
 	return &VideoCommentService{
 		log:         ctx.NewLoggerHelper("video-comment/service/core-service"),
 		commentRepo: commentRepo,
 		videoRepo:   videoRepo,
 		userRepo:    userRepo,
+		sysConfRepo: sysConfRepo,
 	}
 }
 
@@ -392,6 +395,10 @@ func (s *VideoCommentService) CreateComment(ctx context.Context, req *interactio
 	v, verr := s.videoRepo.GetEntityRaw(ctx, req.GetVideoId())
 	if verr != nil {
 		return nil, interactionV1.ErrorVideoNotFound("video not found")
+	}
+	// 敏感词过滤：评论命中直接拒绝
+	if spHitSensitiveWords(ctx, s.sysConfRepo, req.GetContent()) {
+		return nil, interactionV1.ErrorSensitiveWordHit("comment rejected by content filter")
 	}
 
 	e, err := s.commentRepo.CreateWithCounter(ctx, uid, req.GetVideoId(), req.GetContent(), req.GetParentId())
@@ -442,7 +449,8 @@ func (s *VideoCommentService) ListComment(ctx context.Context, req *interactionV
 	if req.GetVideoId() == 0 {
 		return nil, interactionV1.ErrorBadRequest("invalid parameter")
 	}
-	items, total, err := s.commentRepo.ListByVideo(ctx, req.GetVideoId(), nil, req.GetPageNum(), req.GetPageSize())
+	hotSort := req.GetSort() == interactionV1.CommentSort_COMMENT_SORT_HOT
+	items, total, err := s.commentRepo.ListByVideo(ctx, req.GetVideoId(), nil, req.GetPageNum(), req.GetPageSize(), hotSort)
 	if err != nil {
 		return nil, err
 	}

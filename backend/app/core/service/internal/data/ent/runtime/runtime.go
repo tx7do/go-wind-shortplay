@@ -1333,6 +1333,10 @@ func init() {
 	sysconfigDescRegisterEnabled := sysconfigFields[3].Descriptor()
 	// sysconfig.DefaultRegisterEnabled holds the default value on creation for the register_enabled field.
 	sysconfig.DefaultRegisterEnabled = sysconfigDescRegisterEnabled.Default.(bool)
+	// sysconfigDescSensitiveFilterEnabled is the schema descriptor for sensitive_filter_enabled field.
+	sysconfigDescSensitiveFilterEnabled := sysconfigFields[5].Descriptor()
+	// sysconfig.DefaultSensitiveFilterEnabled holds the default value on creation for the sensitive_filter_enabled field.
+	sysconfig.DefaultSensitiveFilterEnabled = sysconfigDescSensitiveFilterEnabled.Default.(bool)
 	// sysconfigDescID is the schema descriptor for id field.
 	sysconfigDescID := sysconfigMixinFields0[0].Descriptor()
 	// sysconfig.IDValidator is a validator for the "id" field. It is called by the builders before save.

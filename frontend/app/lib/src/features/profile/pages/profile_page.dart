@@ -287,7 +287,11 @@ class _ProfilePageState extends State<ProfilePage>
               ),
               SizedBox(height: 16.h),
               // 创作者中心（品牌渐变卡）
-              _CreatorCenterCard(overview: _overview, onDark: isDark),
+              InkWell(
+                onTap: () => context.push(AppRoutePath.creatorStats),
+                borderRadius: BorderRadius.circular(16.r),
+                child: _CreatorCenterCard(overview: _overview, onDark: isDark),
+              ),
               SizedBox(height: 16.h),
               // 作品 / 剧集 / 收藏 / 历史 Tab
               DefaultTabController(

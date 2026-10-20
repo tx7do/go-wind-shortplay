@@ -113,6 +113,13 @@ service VideoService {
     };
   }
 
+  // 创作者近 N 日趋势（本人口径，需登录）
+  rpc ListCreatorTrends (stats.service.v1.ListCreatorTrendsRequest) returns (stats.service.v1.ListTrendsResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/creator/trends"
+    };
+  }
+
   // 热榜（游客可访问）
   rpc ListHotVideos (video.service.v1.ListHotVideosRequest) returns (video.service.v1.ListVideoResponse) {
     option (google.api.http) = {

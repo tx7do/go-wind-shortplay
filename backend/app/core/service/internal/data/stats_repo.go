@@ -145,6 +145,61 @@ ORDER BY s.day`, days)
 	return out, rows.Err()
 }
 
+// CreatorTrendRows 创作者近 N 日趋势（本人口径）：published 按本人视频
+// published_at 落日；plays/likes 按本人视频的 uba_events 当日计数。
+func (r *StatsRepo) CreatorTrendRows(ctx context.Context, authorID uint32, days int) ([]*TrendRow, error) {
+	if days <= 0 {
+		days = 7
+	}
+	if days > 30 {
+		days = 30
+	}
+	rows, err := r.entClient.DB().QueryContext(ctx, `
+WITH series AS (
+	SELECT TO_CHAR(generate_series(date_trunc('day', NOW()::timestamp - ($1::int - 1) * INTERVAL '1 day'), date_trunc('day', NOW()::timestamp), INTERVAL '1 day'), 'YYYY-MM-DD') AS day
+),
+pub AS (
+	SELECT TO_CHAR(published_at, 'YYYY-MM-DD') AS day, COUNT(*)::bigint AS published
+	FROM sp_videos
+	WHERE author_id = $2 AND status = 'PUBLISHED' AND published_at IS NOT NULL
+	  AND published_at >= date_trunc('day', NOW()::timestamp - ($1::int - 1) * INTERVAL '1 day')
+	GROUP BY 1
+),
+ev AS (
+	SELECT TO_CHAR(e.created_at, 'YYYY-MM-DD') AS day,
+	       COUNT(*) FILTER (WHERE e.event_type = 'VIDEO_PLAY')::bigint AS plays,
+	       COUNT(*) FILTER (WHERE e.event_type = 'VIDEO_LIKE')::bigint AS likes
+	FROM sp_uba_events e
+	JOIN sp_videos v ON v.id = e.video_id
+	WHERE v.author_id = $2
+	  AND e.created_at >= date_trunc('day', NOW()::timestamp - ($1::int - 1) * INTERVAL '1 day')
+	GROUP BY 1
+)
+SELECT s.day,
+       COALESCE(p.published, 0) AS published,
+       COALESCE(e.plays, 0)     AS plays,
+       COALESCE(e.likes, 0)     AS likes
+FROM series s
+LEFT JOIN pub p ON p.day = s.day
+LEFT JOIN ev  e ON e.day = s.day
+ORDER BY s.day`, days, authorID)
+	if err != nil {
+		r.log.Errorf("creator trends aggregate failed: %s", err.Error())
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+
+	out := make([]*TrendRow, 0, days)
+	for rows.Next() {
+		var t TrendRow
+		if err := rows.Scan(&t.Day, &t.Published, &t.Plays, &t.Likes); err != nil {
+			return nil, err
+		}
+		out = append(out, &t)
+	}
+	return out, rows.Err()
+}
+
 // AuthorAggregates 作者作品聚合（publishedOnly=true 仅统计已发布）
 func (r *StatsRepo) AuthorAggregates(ctx context.Context, authorID uint32, publishedOnly bool) (*AuthorAggRow, error) {
 	cond := ""

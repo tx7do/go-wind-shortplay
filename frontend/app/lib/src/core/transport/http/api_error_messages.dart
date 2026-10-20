@@ -88,4 +88,5 @@ final Map<String, String Function(S)> _kApiErrorReasonText = {
   'ROLE_NOT_FOUND': (s) => s.errorRoleNotFound,
   'TENANT_NOT_FOUND': (s) => s.errorTenantNotFound,
   'UPLOAD_FAILED': (s) => s.errorUploadFailed,
+  'SENSITIVE_WORD_HIT': (s) => s.errorSensitiveWordHit,
 };

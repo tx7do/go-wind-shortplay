@@ -16,5 +16,10 @@
   "saveFailed": "保存失败",
   "maxUploadSizeMbRequired": "请输入大小上限",
   "maxDurationSecondsRequired": "请输入时长上限",
-  "allowedVideoTypesRequired": "请至少填写一种视频格式"
+  "allowedVideoTypesRequired": "请至少填写一种视频格式",
+  "sensitiveFilterEnabled": "敏感词过滤",
+  "sensitiveFilterEnabledHint": "开启后：发布命中敏感词转审核中，评论命中直接拒绝",
+  "sensitiveWords": "敏感词表",
+  "sensitiveWordsHint": "每行一个词（也可逗号分隔），保存后即时生效",
+  "sensitiveWordsPlaceholder": "每行一个敏感词"
 }

@@ -36,4 +36,5 @@ enum InteractionErrorReason {
   ALREADY_FOLLOWING = 901 [(errors.code) = 409]; // 已关注
   NOT_FOLLOWING = 902 [(errors.code) = 409]; // 未关注
   CANNOT_FOLLOW_SELF = 903 [(errors.code) = 409]; // 不能关注自己
+  SENSITIVE_WORD_HIT = 304 [(errors.code) = 403]; // 命中敏感词（评论被拒绝）
 }

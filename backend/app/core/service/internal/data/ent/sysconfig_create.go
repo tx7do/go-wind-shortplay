@@ -168,6 +168,26 @@ func (_c *SysConfigCreate) SetAllowedVideoTypes(v []string) *SysConfigCreate {
 	return _c
 }
 
+// SetSensitiveFilterEnabled sets the "sensitive_filter_enabled" field.
+func (_c *SysConfigCreate) SetSensitiveFilterEnabled(v bool) *SysConfigCreate {
+	_c.mutation.SetSensitiveFilterEnabled(v)
+	return _c
+}
+
+// SetNillableSensitiveFilterEnabled sets the "sensitive_filter_enabled" field if the given value is not nil.
+func (_c *SysConfigCreate) SetNillableSensitiveFilterEnabled(v *bool) *SysConfigCreate {
+	if v != nil {
+		_c.SetSensitiveFilterEnabled(*v)
+	}
+	return _c
+}
+
+// SetSensitiveWords sets the "sensitive_words" field.
+func (_c *SysConfigCreate) SetSensitiveWords(v []string) *SysConfigCreate {
+	_c.mutation.SetSensitiveWords(v)
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *SysConfigCreate) SetID(v uint32) *SysConfigCreate {
 	_c.mutation.SetID(v)
@@ -225,6 +245,10 @@ func (_c *SysConfigCreate) defaults() {
 		v := sysconfig.DefaultRegisterEnabled
 		_c.mutation.SetRegisterEnabled(v)
 	}
+	if _, ok := _c.mutation.SensitiveFilterEnabled(); !ok {
+		v := sysconfig.DefaultSensitiveFilterEnabled
+		_c.mutation.SetSensitiveFilterEnabled(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -240,6 +264,9 @@ func (_c *SysConfigCreate) check() error {
 	}
 	if _, ok := _c.mutation.RegisterEnabled(); !ok {
 		return &ValidationError{Name: "register_enabled", err: errors.New(`ent: missing required field "SysConfig.register_enabled"`)}
+	}
+	if _, ok := _c.mutation.SensitiveFilterEnabled(); !ok {
+		return &ValidationError{Name: "sensitive_filter_enabled", err: errors.New(`ent: missing required field "SysConfig.sensitive_filter_enabled"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := sysconfig.IDValidator(v); err != nil {
@@ -322,6 +349,14 @@ func (_c *SysConfigCreate) createSpec() (*SysConfig, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.AllowedVideoTypes(); ok {
 		_spec.SetField(sysconfig.FieldAllowedVideoTypes, field.TypeJSON, value)
 		_node.AllowedVideoTypes = value
+	}
+	if value, ok := _c.mutation.SensitiveFilterEnabled(); ok {
+		_spec.SetField(sysconfig.FieldSensitiveFilterEnabled, field.TypeBool, value)
+		_node.SensitiveFilterEnabled = value
+	}
+	if value, ok := _c.mutation.SensitiveWords(); ok {
+		_spec.SetField(sysconfig.FieldSensitiveWords, field.TypeJSON, value)
+		_node.SensitiveWords = value
 	}
 	return _node, _spec
 }
@@ -558,6 +593,36 @@ func (u *SysConfigUpsert) UpdateAllowedVideoTypes() *SysConfigUpsert {
 // ClearAllowedVideoTypes clears the value of the "allowed_video_types" field.
 func (u *SysConfigUpsert) ClearAllowedVideoTypes() *SysConfigUpsert {
 	u.SetNull(sysconfig.FieldAllowedVideoTypes)
+	return u
+}
+
+// SetSensitiveFilterEnabled sets the "sensitive_filter_enabled" field.
+func (u *SysConfigUpsert) SetSensitiveFilterEnabled(v bool) *SysConfigUpsert {
+	u.Set(sysconfig.FieldSensitiveFilterEnabled, v)
+	return u
+}
+
+// UpdateSensitiveFilterEnabled sets the "sensitive_filter_enabled" field to the value that was provided on create.
+func (u *SysConfigUpsert) UpdateSensitiveFilterEnabled() *SysConfigUpsert {
+	u.SetExcluded(sysconfig.FieldSensitiveFilterEnabled)
+	return u
+}
+
+// SetSensitiveWords sets the "sensitive_words" field.
+func (u *SysConfigUpsert) SetSensitiveWords(v []string) *SysConfigUpsert {
+	u.Set(sysconfig.FieldSensitiveWords, v)
+	return u
+}
+
+// UpdateSensitiveWords sets the "sensitive_words" field to the value that was provided on create.
+func (u *SysConfigUpsert) UpdateSensitiveWords() *SysConfigUpsert {
+	u.SetExcluded(sysconfig.FieldSensitiveWords)
+	return u
+}
+
+// ClearSensitiveWords clears the value of the "sensitive_words" field.
+func (u *SysConfigUpsert) ClearSensitiveWords() *SysConfigUpsert {
+	u.SetNull(sysconfig.FieldSensitiveWords)
 	return u
 }
 
@@ -826,6 +891,41 @@ func (u *SysConfigUpsertOne) UpdateAllowedVideoTypes() *SysConfigUpsertOne {
 func (u *SysConfigUpsertOne) ClearAllowedVideoTypes() *SysConfigUpsertOne {
 	return u.Update(func(s *SysConfigUpsert) {
 		s.ClearAllowedVideoTypes()
+	})
+}
+
+// SetSensitiveFilterEnabled sets the "sensitive_filter_enabled" field.
+func (u *SysConfigUpsertOne) SetSensitiveFilterEnabled(v bool) *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetSensitiveFilterEnabled(v)
+	})
+}
+
+// UpdateSensitiveFilterEnabled sets the "sensitive_filter_enabled" field to the value that was provided on create.
+func (u *SysConfigUpsertOne) UpdateSensitiveFilterEnabled() *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateSensitiveFilterEnabled()
+	})
+}
+
+// SetSensitiveWords sets the "sensitive_words" field.
+func (u *SysConfigUpsertOne) SetSensitiveWords(v []string) *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetSensitiveWords(v)
+	})
+}
+
+// UpdateSensitiveWords sets the "sensitive_words" field to the value that was provided on create.
+func (u *SysConfigUpsertOne) UpdateSensitiveWords() *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateSensitiveWords()
+	})
+}
+
+// ClearSensitiveWords clears the value of the "sensitive_words" field.
+func (u *SysConfigUpsertOne) ClearSensitiveWords() *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.ClearSensitiveWords()
 	})
 }
 
@@ -1260,6 +1360,41 @@ func (u *SysConfigUpsertBulk) UpdateAllowedVideoTypes() *SysConfigUpsertBulk {
 func (u *SysConfigUpsertBulk) ClearAllowedVideoTypes() *SysConfigUpsertBulk {
 	return u.Update(func(s *SysConfigUpsert) {
 		s.ClearAllowedVideoTypes()
+	})
+}
+
+// SetSensitiveFilterEnabled sets the "sensitive_filter_enabled" field.
+func (u *SysConfigUpsertBulk) SetSensitiveFilterEnabled(v bool) *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetSensitiveFilterEnabled(v)
+	})
+}
+
+// UpdateSensitiveFilterEnabled sets the "sensitive_filter_enabled" field to the value that was provided on create.
+func (u *SysConfigUpsertBulk) UpdateSensitiveFilterEnabled() *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateSensitiveFilterEnabled()
+	})
+}
+
+// SetSensitiveWords sets the "sensitive_words" field.
+func (u *SysConfigUpsertBulk) SetSensitiveWords(v []string) *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetSensitiveWords(v)
+	})
+}
+
+// UpdateSensitiveWords sets the "sensitive_words" field to the value that was provided on create.
+func (u *SysConfigUpsertBulk) UpdateSensitiveWords() *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateSensitiveWords()
+	})
+}
+
+// ClearSensitiveWords clears the value of the "sensitive_words" field.
+func (u *SysConfigUpsertBulk) ClearSensitiveWords() *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.ClearSensitiveWords()
 	})
 }
 

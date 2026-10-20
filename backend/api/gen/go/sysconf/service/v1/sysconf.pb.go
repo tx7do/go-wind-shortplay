@@ -24,15 +24,17 @@ const (
 )
 
 type SysConf struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	MaxUploadSizeMb     *uint32                `protobuf:"varint,1,opt,name=max_upload_size_mb,json=maxUploadSizeMb,proto3,oneof" json:"max_upload_size_mb,omitempty"`           // 单视频大小上限（MB）
-	MaxDurationSeconds  *uint32                `protobuf:"varint,2,opt,name=max_duration_seconds,json=maxDurationSeconds,proto3,oneof" json:"max_duration_seconds,omitempty"`    // 单视频时长上限（秒）
-	ManualReviewEnabled *bool                  `protobuf:"varint,3,opt,name=manual_review_enabled,json=manualReviewEnabled,proto3,oneof" json:"manual_review_enabled,omitempty"` // 人工审核开关（false 则发布直接可见）
-	RegisterEnabled     *bool                  `protobuf:"varint,4,opt,name=register_enabled,json=registerEnabled,proto3,oneof" json:"register_enabled,omitempty"`               // 开放注册开关
-	AllowedVideoTypes   []string               `protobuf:"bytes,5,rep,name=allowed_video_types,json=allowedVideoTypes,proto3" json:"allowed_video_types,omitempty"`              // 允许的视频类型（扩展名）
-	UpdatedAt           *timestamppb.Timestamp `protobuf:"bytes,20,opt,name=updated_at,json=updatedAt,proto3,oneof" json:"updated_at,omitempty"`                                 // 更新时间
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"open.v1"`
+	MaxUploadSizeMb        *uint32                `protobuf:"varint,1,opt,name=max_upload_size_mb,json=maxUploadSizeMb,proto3,oneof" json:"max_upload_size_mb,omitempty"`                    // 单视频大小上限（MB）
+	MaxDurationSeconds     *uint32                `protobuf:"varint,2,opt,name=max_duration_seconds,json=maxDurationSeconds,proto3,oneof" json:"max_duration_seconds,omitempty"`             // 单视频时长上限（秒）
+	ManualReviewEnabled    *bool                  `protobuf:"varint,3,opt,name=manual_review_enabled,json=manualReviewEnabled,proto3,oneof" json:"manual_review_enabled,omitempty"`          // 人工审核开关（false 则发布直接可见）
+	RegisterEnabled        *bool                  `protobuf:"varint,4,opt,name=register_enabled,json=registerEnabled,proto3,oneof" json:"register_enabled,omitempty"`                        // 开放注册开关
+	AllowedVideoTypes      []string               `protobuf:"bytes,5,rep,name=allowed_video_types,json=allowedVideoTypes,proto3" json:"allowed_video_types,omitempty"`                       // 允许的视频类型（扩展名）
+	SensitiveFilterEnabled *bool                  `protobuf:"varint,6,opt,name=sensitive_filter_enabled,json=sensitiveFilterEnabled,proto3,oneof" json:"sensitive_filter_enabled,omitempty"` // 敏感词过滤开关（命中：发布转审核中 / 评论拒绝）
+	SensitiveWords         []string               `protobuf:"bytes,7,rep,name=sensitive_words,json=sensitiveWords,proto3" json:"sensitive_words,omitempty"`                                  // 敏感词表
+	UpdatedAt              *timestamppb.Timestamp `protobuf:"bytes,20,opt,name=updated_at,json=updatedAt,proto3,oneof" json:"updated_at,omitempty"`                                          // 更新时间
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *SysConf) Reset() {
@@ -100,6 +102,20 @@ func (x *SysConf) GetAllowedVideoTypes() []string {
 	return nil
 }
 
+func (x *SysConf) GetSensitiveFilterEnabled() bool {
+	if x != nil && x.SensitiveFilterEnabled != nil {
+		return *x.SensitiveFilterEnabled
+	}
+	return false
+}
+
+func (x *SysConf) GetSensitiveWords() []string {
+	if x != nil {
+		return x.SensitiveWords
+	}
+	return nil
+}
+
 func (x *SysConf) GetUpdatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.UpdatedAt
@@ -108,14 +124,16 @@ func (x *SysConf) GetUpdatedAt() *timestamppb.Timestamp {
 }
 
 type UpdateSysConfRequest struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	MaxUploadSizeMb     *uint32                `protobuf:"varint,1,opt,name=max_upload_size_mb,json=maxUploadSizeMb,proto3,oneof" json:"max_upload_size_mb,omitempty"`
-	MaxDurationSeconds  *uint32                `protobuf:"varint,2,opt,name=max_duration_seconds,json=maxDurationSeconds,proto3,oneof" json:"max_duration_seconds,omitempty"`
-	ManualReviewEnabled *bool                  `protobuf:"varint,3,opt,name=manual_review_enabled,json=manualReviewEnabled,proto3,oneof" json:"manual_review_enabled,omitempty"`
-	RegisterEnabled     *bool                  `protobuf:"varint,4,opt,name=register_enabled,json=registerEnabled,proto3,oneof" json:"register_enabled,omitempty"`
-	AllowedVideoTypes   []string               `protobuf:"bytes,5,rep,name=allowed_video_types,json=allowedVideoTypes,proto3" json:"allowed_video_types,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"open.v1"`
+	MaxUploadSizeMb        *uint32                `protobuf:"varint,1,opt,name=max_upload_size_mb,json=maxUploadSizeMb,proto3,oneof" json:"max_upload_size_mb,omitempty"`
+	MaxDurationSeconds     *uint32                `protobuf:"varint,2,opt,name=max_duration_seconds,json=maxDurationSeconds,proto3,oneof" json:"max_duration_seconds,omitempty"`
+	ManualReviewEnabled    *bool                  `protobuf:"varint,3,opt,name=manual_review_enabled,json=manualReviewEnabled,proto3,oneof" json:"manual_review_enabled,omitempty"`
+	RegisterEnabled        *bool                  `protobuf:"varint,4,opt,name=register_enabled,json=registerEnabled,proto3,oneof" json:"register_enabled,omitempty"`
+	AllowedVideoTypes      []string               `protobuf:"bytes,5,rep,name=allowed_video_types,json=allowedVideoTypes,proto3" json:"allowed_video_types,omitempty"`
+	SensitiveFilterEnabled *bool                  `protobuf:"varint,6,opt,name=sensitive_filter_enabled,json=sensitiveFilterEnabled,proto3,oneof" json:"sensitive_filter_enabled,omitempty"`
+	SensitiveWords         []string               `protobuf:"bytes,7,rep,name=sensitive_words,json=sensitiveWords,proto3" json:"sensitive_words,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *UpdateSysConfRequest) Reset() {
@@ -183,34 +201,54 @@ func (x *UpdateSysConfRequest) GetAllowedVideoTypes() []string {
 	return nil
 }
 
+func (x *UpdateSysConfRequest) GetSensitiveFilterEnabled() bool {
+	if x != nil && x.SensitiveFilterEnabled != nil {
+		return *x.SensitiveFilterEnabled
+	}
+	return false
+}
+
+func (x *UpdateSysConfRequest) GetSensitiveWords() []string {
+	if x != nil {
+		return x.SensitiveWords
+	}
+	return nil
+}
+
 var File_sysconf_service_v1_sysconf_proto protoreflect.FileDescriptor
 
 const file_sysconf_service_v1_sysconf_proto_rawDesc = "" +
 	"\n" +
-	" sysconf/service/v1/sysconf.proto\x12\x12sysconf.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb9\x03\n" +
+	" sysconf/service/v1/sysconf.proto\x12\x12sysconf.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xbe\x04\n" +
 	"\aSysConf\x120\n" +
 	"\x12max_upload_size_mb\x18\x01 \x01(\rH\x00R\x0fmaxUploadSizeMb\x88\x01\x01\x125\n" +
 	"\x14max_duration_seconds\x18\x02 \x01(\rH\x01R\x12maxDurationSeconds\x88\x01\x01\x127\n" +
 	"\x15manual_review_enabled\x18\x03 \x01(\bH\x02R\x13manualReviewEnabled\x88\x01\x01\x12.\n" +
 	"\x10register_enabled\x18\x04 \x01(\bH\x03R\x0fregisterEnabled\x88\x01\x01\x12.\n" +
-	"\x13allowed_video_types\x18\x05 \x03(\tR\x11allowedVideoTypes\x12>\n" +
+	"\x13allowed_video_types\x18\x05 \x03(\tR\x11allowedVideoTypes\x12=\n" +
+	"\x18sensitive_filter_enabled\x18\x06 \x01(\bH\x04R\x16sensitiveFilterEnabled\x88\x01\x01\x12'\n" +
+	"\x0fsensitive_words\x18\a \x03(\tR\x0esensitiveWords\x12>\n" +
 	"\n" +
-	"updated_at\x18\x14 \x01(\v2\x1a.google.protobuf.TimestampH\x04R\tupdatedAt\x88\x01\x01B\x15\n" +
+	"updated_at\x18\x14 \x01(\v2\x1a.google.protobuf.TimestampH\x05R\tupdatedAt\x88\x01\x01B\x15\n" +
 	"\x13_max_upload_size_mbB\x17\n" +
 	"\x15_max_duration_secondsB\x18\n" +
 	"\x16_manual_review_enabledB\x13\n" +
-	"\x11_register_enabledB\r\n" +
-	"\v_updated_at\"\xf7\x02\n" +
+	"\x11_register_enabledB\x1b\n" +
+	"\x19_sensitive_filter_enabledB\r\n" +
+	"\v_updated_at\"\xfc\x03\n" +
 	"\x14UpdateSysConfRequest\x120\n" +
 	"\x12max_upload_size_mb\x18\x01 \x01(\rH\x00R\x0fmaxUploadSizeMb\x88\x01\x01\x125\n" +
 	"\x14max_duration_seconds\x18\x02 \x01(\rH\x01R\x12maxDurationSeconds\x88\x01\x01\x127\n" +
 	"\x15manual_review_enabled\x18\x03 \x01(\bH\x02R\x13manualReviewEnabled\x88\x01\x01\x12.\n" +
 	"\x10register_enabled\x18\x04 \x01(\bH\x03R\x0fregisterEnabled\x88\x01\x01\x12.\n" +
-	"\x13allowed_video_types\x18\x05 \x03(\tR\x11allowedVideoTypesB\x15\n" +
+	"\x13allowed_video_types\x18\x05 \x03(\tR\x11allowedVideoTypes\x12=\n" +
+	"\x18sensitive_filter_enabled\x18\x06 \x01(\bH\x04R\x16sensitiveFilterEnabled\x88\x01\x01\x12'\n" +
+	"\x0fsensitive_words\x18\a \x03(\tR\x0esensitiveWordsB\x15\n" +
 	"\x13_max_upload_size_mbB\x17\n" +
 	"\x15_max_duration_secondsB\x18\n" +
 	"\x16_manual_review_enabledB\x13\n" +
-	"\x11_register_enabled2\xaf\x01\n" +
+	"\x11_register_enabledB\x1b\n" +
+	"\x19_sensitive_filter_enabled2\xaf\x01\n" +
 	"\x0eSysConfService\x12C\n" +
 	"\n" +
 	"GetSysConf\x12\x16.google.protobuf.Empty\x1a\x1b.sysconf.service.v1.SysConf\"\x00\x12X\n" +

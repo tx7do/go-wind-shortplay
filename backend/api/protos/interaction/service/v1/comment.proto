@@ -17,7 +17,7 @@ service CommentService {
   // 删除评论（本人或管理员）
   rpc DeleteComment (DeleteCommentRequest) returns (google.protobuf.Empty) {}
 
-  // 视频评论列表（分页，按时间倒序）
+  // 视频评论列表（分页；sort 缺省按时间倒序，HOT 按点赞/回复数加权）
   rpc ListComment (ListCommentRequest) returns (ListCommentResponse) {}
 
   // 评论的回复列表（楼中楼，Phase 2）
@@ -49,10 +49,17 @@ message DeleteCommentRequest {
   uint32 id = 1 [json_name = "id"]; // 评论ID
 }
 
+// 评论排序方式
+enum CommentSort {
+  COMMENT_SORT_LATEST = 0; // 最新（创建时间倒序，缺省）
+  COMMENT_SORT_HOT = 1;    // 最热（点赞数、回复数加权倒序）
+}
+
 message ListCommentRequest {
   uint32 video_id = 1 [json_name = "videoId"];           // 视频ID
   optional uint32 page_num = 2 [json_name = "pageNum"];  // 页码
   optional uint32 page_size = 3 [json_name = "pageSize"]; // 页大小
+  optional CommentSort sort = 4 [json_name = "sort"];     // 排序方式（缺省最新）
 }
 
 message ListReplyRequest {

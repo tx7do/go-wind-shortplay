@@ -66,8 +66,9 @@ func (r *VideoCommentRepo) Get(ctx context.Context, id uint32) (*ent.VideoCommen
 	return e, nil
 }
 
-// ListByVideo 视频评论列表（分页，时间倒序；level=0 仅一级 / 1 仅回复 / 其他全部）
-func (r *VideoCommentRepo) ListByVideo(ctx context.Context, videoID uint32, parentID *uint32, page, pageSize uint32) ([]*ent.VideoComment, int, error) {
+// ListByVideo 视频评论列表（分页；sort：HOT 按点赞/回复数加权倒序，否则时间倒序。
+// parentID=nil 一级 / 非 nil 仅该父级回复 / sentinel 全部）
+func (r *VideoCommentRepo) ListByVideo(ctx context.Context, videoID uint32, parentID *uint32, page, pageSize uint32, hotSort bool) ([]*ent.VideoComment, int, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -87,7 +88,13 @@ func (r *VideoCommentRepo) ListByVideo(ctx context.Context, videoID uint32, pare
 		r.log.Errorf("count comments failed: %s", err.Error())
 		return nil, 0, interactionV1.ErrorInternalServerError("count comments failed")
 	}
-	items, err := q.Order(ent.Desc(videocomment.FieldCreatedAt), ent.Desc(videocomment.FieldID)).
+	if hotSort {
+		// 最热：点赞为主、回复数加权，id 兜底稳定序
+		q.Order(ent.Desc(videocomment.FieldLikeCount), ent.Desc(videocomment.FieldReplyCount), ent.Desc(videocomment.FieldID))
+	} else {
+		q.Order(ent.Desc(videocomment.FieldCreatedAt), ent.Desc(videocomment.FieldID))
+	}
+	items, err := q.
 		Offset(int(page-1) * int(pageSize)).Limit(int(pageSize)).All(ctx)
 	if err != nil {
 		r.log.Errorf("list comments failed: %s", err.Error())

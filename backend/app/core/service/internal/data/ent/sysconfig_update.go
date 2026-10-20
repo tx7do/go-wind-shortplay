@@ -239,6 +239,38 @@ func (_u *SysConfigUpdate) ClearAllowedVideoTypes() *SysConfigUpdate {
 	return _u
 }
 
+// SetSensitiveFilterEnabled sets the "sensitive_filter_enabled" field.
+func (_u *SysConfigUpdate) SetSensitiveFilterEnabled(v bool) *SysConfigUpdate {
+	_u.mutation.SetSensitiveFilterEnabled(v)
+	return _u
+}
+
+// SetNillableSensitiveFilterEnabled sets the "sensitive_filter_enabled" field if the given value is not nil.
+func (_u *SysConfigUpdate) SetNillableSensitiveFilterEnabled(v *bool) *SysConfigUpdate {
+	if v != nil {
+		_u.SetSensitiveFilterEnabled(*v)
+	}
+	return _u
+}
+
+// SetSensitiveWords sets the "sensitive_words" field.
+func (_u *SysConfigUpdate) SetSensitiveWords(v []string) *SysConfigUpdate {
+	_u.mutation.SetSensitiveWords(v)
+	return _u
+}
+
+// AppendSensitiveWords appends value to the "sensitive_words" field.
+func (_u *SysConfigUpdate) AppendSensitiveWords(v []string) *SysConfigUpdate {
+	_u.mutation.AppendSensitiveWords(v)
+	return _u
+}
+
+// ClearSensitiveWords clears the value of the "sensitive_words" field.
+func (_u *SysConfigUpdate) ClearSensitiveWords() *SysConfigUpdate {
+	_u.mutation.ClearSensitiveWords()
+	return _u
+}
+
 // Mutation returns the SysConfigMutation object of the builder.
 func (_u *SysConfigUpdate) Mutation() *SysConfigMutation {
 	return _u.mutation
@@ -356,6 +388,20 @@ func (_u *SysConfigUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.AllowedVideoTypesCleared() {
 		_spec.ClearField(sysconfig.FieldAllowedVideoTypes, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.SensitiveFilterEnabled(); ok {
+		_spec.SetField(sysconfig.FieldSensitiveFilterEnabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.SensitiveWords(); ok {
+		_spec.SetField(sysconfig.FieldSensitiveWords, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedSensitiveWords(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, sysconfig.FieldSensitiveWords, value)
+		})
+	}
+	if _u.mutation.SensitiveWordsCleared() {
+		_spec.ClearField(sysconfig.FieldSensitiveWords, field.TypeJSON)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -588,6 +634,38 @@ func (_u *SysConfigUpdateOne) ClearAllowedVideoTypes() *SysConfigUpdateOne {
 	return _u
 }
 
+// SetSensitiveFilterEnabled sets the "sensitive_filter_enabled" field.
+func (_u *SysConfigUpdateOne) SetSensitiveFilterEnabled(v bool) *SysConfigUpdateOne {
+	_u.mutation.SetSensitiveFilterEnabled(v)
+	return _u
+}
+
+// SetNillableSensitiveFilterEnabled sets the "sensitive_filter_enabled" field if the given value is not nil.
+func (_u *SysConfigUpdateOne) SetNillableSensitiveFilterEnabled(v *bool) *SysConfigUpdateOne {
+	if v != nil {
+		_u.SetSensitiveFilterEnabled(*v)
+	}
+	return _u
+}
+
+// SetSensitiveWords sets the "sensitive_words" field.
+func (_u *SysConfigUpdateOne) SetSensitiveWords(v []string) *SysConfigUpdateOne {
+	_u.mutation.SetSensitiveWords(v)
+	return _u
+}
+
+// AppendSensitiveWords appends value to the "sensitive_words" field.
+func (_u *SysConfigUpdateOne) AppendSensitiveWords(v []string) *SysConfigUpdateOne {
+	_u.mutation.AppendSensitiveWords(v)
+	return _u
+}
+
+// ClearSensitiveWords clears the value of the "sensitive_words" field.
+func (_u *SysConfigUpdateOne) ClearSensitiveWords() *SysConfigUpdateOne {
+	_u.mutation.ClearSensitiveWords()
+	return _u
+}
+
 // Mutation returns the SysConfigMutation object of the builder.
 func (_u *SysConfigUpdateOne) Mutation() *SysConfigMutation {
 	return _u.mutation
@@ -735,6 +813,20 @@ func (_u *SysConfigUpdateOne) sqlSave(ctx context.Context) (_node *SysConfig, er
 	}
 	if _u.mutation.AllowedVideoTypesCleared() {
 		_spec.ClearField(sysconfig.FieldAllowedVideoTypes, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.SensitiveFilterEnabled(); ok {
+		_spec.SetField(sysconfig.FieldSensitiveFilterEnabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.SensitiveWords(); ok {
+		_spec.SetField(sysconfig.FieldSensitiveWords, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedSensitiveWords(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, sysconfig.FieldSensitiveWords, value)
+		})
+	}
+	if _u.mutation.SensitiveWordsCleared() {
+		_spec.ClearField(sysconfig.FieldSensitiveWords, field.TypeJSON)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &SysConfig{config: _u.config}

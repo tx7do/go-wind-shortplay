@@ -65131,6 +65131,9 @@ type SysConfigMutation struct {
 	register_enabled          *bool
 	allowed_video_types       *[]string
 	appendallowed_video_types []string
+	sensitive_filter_enabled  *bool
+	sensitive_words           *[]string
+	appendsensitive_words     []string
 	clearedFields             map[string]struct{}
 	done                      bool
 	oldValue                  func(context.Context) (*SysConfig, error)
@@ -65847,6 +65850,107 @@ func (m *SysConfigMutation) ResetAllowedVideoTypes() {
 	delete(m.clearedFields, sysconfig.FieldAllowedVideoTypes)
 }
 
+// SetSensitiveFilterEnabled sets the "sensitive_filter_enabled" field.
+func (m *SysConfigMutation) SetSensitiveFilterEnabled(b bool) {
+	m.sensitive_filter_enabled = &b
+}
+
+// SensitiveFilterEnabled returns the value of the "sensitive_filter_enabled" field in the mutation.
+func (m *SysConfigMutation) SensitiveFilterEnabled() (r bool, exists bool) {
+	v := m.sensitive_filter_enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSensitiveFilterEnabled returns the old "sensitive_filter_enabled" field's value of the SysConfig entity.
+// If the SysConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SysConfigMutation) OldSensitiveFilterEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSensitiveFilterEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSensitiveFilterEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSensitiveFilterEnabled: %w", err)
+	}
+	return oldValue.SensitiveFilterEnabled, nil
+}
+
+// ResetSensitiveFilterEnabled resets all changes to the "sensitive_filter_enabled" field.
+func (m *SysConfigMutation) ResetSensitiveFilterEnabled() {
+	m.sensitive_filter_enabled = nil
+}
+
+// SetSensitiveWords sets the "sensitive_words" field.
+func (m *SysConfigMutation) SetSensitiveWords(s []string) {
+	m.sensitive_words = &s
+	m.appendsensitive_words = nil
+}
+
+// SensitiveWords returns the value of the "sensitive_words" field in the mutation.
+func (m *SysConfigMutation) SensitiveWords() (r []string, exists bool) {
+	v := m.sensitive_words
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSensitiveWords returns the old "sensitive_words" field's value of the SysConfig entity.
+// If the SysConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SysConfigMutation) OldSensitiveWords(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSensitiveWords is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSensitiveWords requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSensitiveWords: %w", err)
+	}
+	return oldValue.SensitiveWords, nil
+}
+
+// AppendSensitiveWords adds s to the "sensitive_words" field.
+func (m *SysConfigMutation) AppendSensitiveWords(s []string) {
+	m.appendsensitive_words = append(m.appendsensitive_words, s...)
+}
+
+// AppendedSensitiveWords returns the list of values that were appended to the "sensitive_words" field in this mutation.
+func (m *SysConfigMutation) AppendedSensitiveWords() ([]string, bool) {
+	if len(m.appendsensitive_words) == 0 {
+		return nil, false
+	}
+	return m.appendsensitive_words, true
+}
+
+// ClearSensitiveWords clears the value of the "sensitive_words" field.
+func (m *SysConfigMutation) ClearSensitiveWords() {
+	m.sensitive_words = nil
+	m.appendsensitive_words = nil
+	m.clearedFields[sysconfig.FieldSensitiveWords] = struct{}{}
+}
+
+// SensitiveWordsCleared returns if the "sensitive_words" field was cleared in this mutation.
+func (m *SysConfigMutation) SensitiveWordsCleared() bool {
+	_, ok := m.clearedFields[sysconfig.FieldSensitiveWords]
+	return ok
+}
+
+// ResetSensitiveWords resets all changes to the "sensitive_words" field.
+func (m *SysConfigMutation) ResetSensitiveWords() {
+	m.sensitive_words = nil
+	m.appendsensitive_words = nil
+	delete(m.clearedFields, sysconfig.FieldSensitiveWords)
+}
+
 // Where appends a list predicates to the SysConfigMutation builder.
 func (m *SysConfigMutation) Where(ps ...predicate.SysConfig) {
 	m.predicates = append(m.predicates, ps...)
@@ -65881,7 +65985,7 @@ func (m *SysConfigMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SysConfigMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
 		fields = append(fields, sysconfig.FieldCreatedAt)
 	}
@@ -65915,6 +66019,12 @@ func (m *SysConfigMutation) Fields() []string {
 	if m.allowed_video_types != nil {
 		fields = append(fields, sysconfig.FieldAllowedVideoTypes)
 	}
+	if m.sensitive_filter_enabled != nil {
+		fields = append(fields, sysconfig.FieldSensitiveFilterEnabled)
+	}
+	if m.sensitive_words != nil {
+		fields = append(fields, sysconfig.FieldSensitiveWords)
+	}
 	return fields
 }
 
@@ -65945,6 +66055,10 @@ func (m *SysConfigMutation) Field(name string) (ent.Value, bool) {
 		return m.RegisterEnabled()
 	case sysconfig.FieldAllowedVideoTypes:
 		return m.AllowedVideoTypes()
+	case sysconfig.FieldSensitiveFilterEnabled:
+		return m.SensitiveFilterEnabled()
+	case sysconfig.FieldSensitiveWords:
+		return m.SensitiveWords()
 	}
 	return nil, false
 }
@@ -65976,6 +66090,10 @@ func (m *SysConfigMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldRegisterEnabled(ctx)
 	case sysconfig.FieldAllowedVideoTypes:
 		return m.OldAllowedVideoTypes(ctx)
+	case sysconfig.FieldSensitiveFilterEnabled:
+		return m.OldSensitiveFilterEnabled(ctx)
+	case sysconfig.FieldSensitiveWords:
+		return m.OldSensitiveWords(ctx)
 	}
 	return nil, fmt.Errorf("unknown SysConfig field %s", name)
 }
@@ -66061,6 +66179,20 @@ func (m *SysConfigMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAllowedVideoTypes(v)
+		return nil
+	case sysconfig.FieldSensitiveFilterEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSensitiveFilterEnabled(v)
+		return nil
+	case sysconfig.FieldSensitiveWords:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSensitiveWords(v)
 		return nil
 	}
 	return fmt.Errorf("unknown SysConfig field %s", name)
@@ -66176,6 +66308,9 @@ func (m *SysConfigMutation) ClearedFields() []string {
 	if m.FieldCleared(sysconfig.FieldAllowedVideoTypes) {
 		fields = append(fields, sysconfig.FieldAllowedVideoTypes)
 	}
+	if m.FieldCleared(sysconfig.FieldSensitiveWords) {
+		fields = append(fields, sysconfig.FieldSensitiveWords)
+	}
 	return fields
 }
 
@@ -66210,6 +66345,9 @@ func (m *SysConfigMutation) ClearField(name string) error {
 		return nil
 	case sysconfig.FieldAllowedVideoTypes:
 		m.ClearAllowedVideoTypes()
+		return nil
+	case sysconfig.FieldSensitiveWords:
+		m.ClearSensitiveWords()
 		return nil
 	}
 	return fmt.Errorf("unknown SysConfig nullable field %s", name)
@@ -66251,6 +66389,12 @@ func (m *SysConfigMutation) ResetField(name string) error {
 		return nil
 	case sysconfig.FieldAllowedVideoTypes:
 		m.ResetAllowedVideoTypes()
+		return nil
+	case sysconfig.FieldSensitiveFilterEnabled:
+		m.ResetSensitiveFilterEnabled()
+		return nil
+	case sysconfig.FieldSensitiveWords:
+		m.ResetSensitiveWords()
 		return nil
 	}
 	return fmt.Errorf("unknown SysConfig field %s", name)

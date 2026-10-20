@@ -369,5 +369,13 @@
   "historyTab": "历史",
   "historyEmpty": "还没有观看记录，去刷刷视频吧",
   "hotList": "热榜",
-  "hotListEmpty": "热榜暂时还没有内容"
+  "hotListEmpty": "热榜暂时还没有内容",
+  "sortHot": "最热",
+  "sortLatest": "最新",
+  "creatorStatsTitle": "创作数据",
+  "creatorStatsHint": "数据按日聚合（播放/点赞来自行为埋点，发布按过审时间）",
+  "creatorPlays": "播放",
+  "creatorLikes": "点赞",
+  "creatorPublished": "发布",
+  "errorSensitiveWordHit": "内容包含违规词汇，请修改后再试"
 }

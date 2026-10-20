@@ -20,12 +20,19 @@ service DashboardService {
   // 创作者中心总览（viewer 本人作品聚合：播放 / 点赞 / 收藏 / 评论）
   rpc GetCreatorOverview (GetCreatorOverviewRequest) returns (CreatorOverview) {}
 
+  // 创作者近 N 日趋势（viewer 本人口径：发布 / 播放 / 点赞按日落桶）
+  rpc ListCreatorTrends (ListCreatorTrendsRequest) returns (ListTrendsResponse) {}
+
   // 用户统计（作品 / 粉丝 / 关注 / 获赞；用户主页用）
   rpc GetUserStats (identity.service.v1.GetUserStatsRequest) returns (identity.service.v1.UserStats) {}
 }
 
 message GetCreatorOverviewRequest {
   // viewer 取鉴权上下文，无入参
+}
+
+message ListCreatorTrendsRequest {
+  optional uint32 days = 1 [json_name = "days"]; // 天数（1-30，缺省 7）
 }
 
 // 创作者中心总览

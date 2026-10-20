@@ -2682,6 +2682,8 @@ var (
 		{Name: "manual_review_enabled", Type: field.TypeBool, Comment: "人工审核开关（false 则发布直接可见）", Default: false},
 		{Name: "register_enabled", Type: field.TypeBool, Comment: "开放注册开关", Default: true},
 		{Name: "allowed_video_types", Type: field.TypeJSON, Nullable: true, Comment: "允许的视频扩展名（小写带点）"},
+		{Name: "sensitive_filter_enabled", Type: field.TypeBool, Comment: "敏感词过滤开关（命中：发布转审核中 / 评论拒绝）", Default: false},
+		{Name: "sensitive_words", Type: field.TypeJSON, Nullable: true, Comment: "敏感词表"},
 	}
 	// SpSysConfigsTable holds the schema information for the "sp_sys_configs" table.
 	SpSysConfigsTable = &schema.Table{

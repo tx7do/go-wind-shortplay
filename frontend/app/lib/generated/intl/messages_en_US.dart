@@ -97,7 +97,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmSend": MessageLookupByLibrary.simpleMessage("Send"),
     "copyLink": MessageLookupByLibrary.simpleMessage("Copy link"),
     "creatorCenter": MessageLookupByLibrary.simpleMessage("Creator center"),
+    "creatorLikes": MessageLookupByLibrary.simpleMessage("Likes"),
     "creatorOverview": MessageLookupByLibrary.simpleMessage("Overview"),
+    "creatorPlays": MessageLookupByLibrary.simpleMessage("Plays"),
+    "creatorPublished": MessageLookupByLibrary.simpleMessage("Published"),
+    "creatorStatsHint": MessageLookupByLibrary.simpleMessage(
+      "Aggregated daily (plays/likes from UBA events, publishes by approval time)",
+    ),
+    "creatorStatsTitle": MessageLookupByLibrary.simpleMessage("Creator Stats"),
     "dark": MessageLookupByLibrary.simpleMessage("Dark"),
     "darkMode": MessageLookupByLibrary.simpleMessage("Dark Mode"),
     "delete": MessageLookupByLibrary.simpleMessage("Delete"),
@@ -258,6 +265,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Request timeout",
     ),
     "errorRoleNotFound": MessageLookupByLibrary.simpleMessage("Role not found"),
+    "errorSensitiveWordHit": MessageLookupByLibrary.simpleMessage(
+      "Contains prohibited words. Please revise and try again",
+    ),
     "errorServiceUnavailable": MessageLookupByLibrary.simpleMessage(
       "Service unavailable",
     ),
@@ -478,6 +488,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "shareCopied": MessageLookupByLibrary.simpleMessage(
       "Link copied, go share it",
     ),
+    "sortHot": MessageLookupByLibrary.simpleMessage("Hot"),
+    "sortLatest": MessageLookupByLibrary.simpleMessage("Latest"),
     "statusDraft": MessageLookupByLibrary.simpleMessage("Draft"),
     "statusOffline": MessageLookupByLibrary.simpleMessage("Offline"),
     "statusRejected": MessageLookupByLibrary.simpleMessage("Rejected"),

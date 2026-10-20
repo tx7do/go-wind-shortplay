@@ -34,13 +34,21 @@ func sysconfEntityToDTO(e *ent.SysConfig) *sysconfV1.SysConf {
 	if e == nil {
 		return nil
 	}
+	if e.AllowedVideoTypes == nil {
+		e.AllowedVideoTypes = []string{}
+	}
+	if e.SensitiveWords == nil {
+		e.SensitiveWords = []string{}
+	}
 	return &sysconfV1.SysConf{
-		MaxUploadSizeMb:     trans.Ptr(e.MaxUploadSizeMB),
-		MaxDurationSeconds:  trans.Ptr(e.MaxDurationSeconds),
-		ManualReviewEnabled: trans.Ptr(e.ManualReviewEnabled),
-		RegisterEnabled:     trans.Ptr(e.RegisterEnabled),
-		AllowedVideoTypes:   e.AllowedVideoTypes,
-		UpdatedAt:           timeutil.TimeToTimestamppb(e.UpdatedAt),
+		MaxUploadSizeMb:        trans.Ptr(e.MaxUploadSizeMB),
+		MaxDurationSeconds:     trans.Ptr(e.MaxDurationSeconds),
+		ManualReviewEnabled:    trans.Ptr(e.ManualReviewEnabled),
+		RegisterEnabled:        trans.Ptr(e.RegisterEnabled),
+		AllowedVideoTypes:      e.AllowedVideoTypes,
+		SensitiveFilterEnabled: trans.Ptr(e.SensitiveFilterEnabled),
+		SensitiveWords:         e.SensitiveWords,
+		UpdatedAt:              timeutil.TimeToTimestamppb(e.UpdatedAt),
 	}
 }
 
@@ -58,7 +66,7 @@ func (s *SysConfService) UpdateSysConf(ctx context.Context, req *sysconfV1.Updat
 	if req == nil {
 		return nil, sysconfV1.ErrorBadRequest("invalid parameter")
 	}
-	e, err := s.sysConfRepo.Update(ctx, req.MaxUploadSizeMb, req.MaxDurationSeconds, req.ManualReviewEnabled, req.RegisterEnabled, req.AllowedVideoTypes)
+	e, err := s.sysConfRepo.Update(ctx, req.MaxUploadSizeMb, req.MaxDurationSeconds, req.ManualReviewEnabled, req.RegisterEnabled, req.AllowedVideoTypes, req.SensitiveFilterEnabled, req.SensitiveWords)
 	if err != nil {
 		return nil, err
 	}

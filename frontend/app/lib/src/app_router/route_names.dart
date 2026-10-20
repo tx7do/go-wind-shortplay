@@ -31,6 +31,9 @@ class RouteNames {
   /// 热榜
   static const String hotList = 'hot_list';
 
+  /// 创作者数据
+  static const String creatorStats = 'creator_stats';
+
   /// 他人主页
   static const String userProfile = 'user_profile';
 

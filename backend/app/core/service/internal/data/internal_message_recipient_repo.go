@@ -116,7 +116,13 @@ func (r *InternalMessageRecipientRepo) List(ctx context.Context, req *pagination
 	}
 
 	builder := r.entClient.Client().InternalMessageRecipient.Query().
-		Where(internalmessagerecipient.RecipientUserIDEQ(callerUserID))
+		Where(internalmessagerecipient.RecipientUserIDEQ(callerUserID)).
+		// 收件箱缺省最新在前（go-crud 无 sorting/orderBy 时不追加 ORDER BY，
+		// 此预设生效；客户端传 orderBy 仍可覆盖）
+		Order(
+			ent.Desc(internalmessagerecipient.FieldCreatedAt),
+			ent.Desc(internalmessagerecipient.FieldID),
+		)
 
 	ret, err := r.repository.ListWithPaging(ctx, builder, builder.Clone(), req)
 	if err != nil {

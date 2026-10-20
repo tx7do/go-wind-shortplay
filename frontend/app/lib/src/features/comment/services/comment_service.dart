@@ -14,15 +14,20 @@ class CommentService extends BaseService {
   Dio get _dio => GetIt.instance<Dio>();
   final InteractionService _interaction = InteractionService();
 
-  /// 视频评论列表（游客可访问，`pageNum/pageSize`）
+  /// 视频评论列表（游客可访问，`pageNum/pageSize`；sort 传枚举全名，如
+  /// `COMMENT_SORT_HOT`——缺省时间倒序）
   Future<CommentPage> list({
     required int videoId,
     required PaginationQuery query,
+    String? sort,
   }) async {
     try {
       final res = await _dio.get<Map<String, dynamic>>(
         '/videos/$videoId/comments',
-        queryParameters: query.toQueryMap(),
+        queryParameters: {
+          ...query.toQueryMap(),
+          if (sort != null && sort.isNotEmpty) 'sort': sort,
+        },
       );
       final data = res.data ?? const {};
       return _toPage(data);

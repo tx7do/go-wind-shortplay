@@ -40,7 +40,7 @@ type CommentServiceClient interface {
 	CreateComment(ctx context.Context, in *CreateCommentRequest, opts ...grpc.CallOption) (*Comment, error)
 	// 删除评论（本人或管理员）
 	DeleteComment(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 视频评论列表（分页，按时间倒序）
+	// 视频评论列表（分页；sort 缺省按时间倒序，HOT 按点赞/回复数加权）
 	ListComment(ctx context.Context, in *ListCommentRequest, opts ...grpc.CallOption) (*ListCommentResponse, error)
 	// 评论的回复列表（楼中楼，Phase 2）
 	ListReply(ctx context.Context, in *ListReplyRequest, opts ...grpc.CallOption) (*ListCommentResponse, error)
@@ -118,7 +118,7 @@ type CommentServiceServer interface {
 	CreateComment(context.Context, *CreateCommentRequest) (*Comment, error)
 	// 删除评论（本人或管理员）
 	DeleteComment(context.Context, *DeleteCommentRequest) (*emptypb.Empty, error)
-	// 视频评论列表（分页，按时间倒序）
+	// 视频评论列表（分页；sort 缺省按时间倒序，HOT 按点赞/回复数加权）
 	ListComment(context.Context, *ListCommentRequest) (*ListCommentResponse, error)
 	// 评论的回复列表（楼中楼，Phase 2）
 	ListReply(context.Context, *ListReplyRequest) (*ListCommentResponse, error)

@@ -298,6 +298,11 @@ func (s *VideoService) DeleteVideo(ctx context.Context, req *videoV1.DeleteVideo
 	return s.videoClient.DeleteVideo(ctx, req)
 }
 
+// ListCreatorTrends 创作者近 N 日趋势（本人，转发 core）。
+func (s *VideoService) ListCreatorTrends(ctx context.Context, req *statsV1.ListCreatorTrendsRequest) (*statsV1.ListTrendsResponse, error) {
+	return s.dashboardClient.ListCreatorTrends(ctx, req)
+}
+
 // ListHotVideos 热榜（游客可访问，直接转发 core 热度分召回）。
 func (s *VideoService) ListHotVideos(ctx context.Context, req *videoV1.ListHotVideosRequest) (*videoV1.ListVideoResponse, error) {
 	return s.videoClient.ListHotVideos(ctx, req)

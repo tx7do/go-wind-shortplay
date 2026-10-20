@@ -32,6 +32,9 @@ class AppRoutePath {
   /// 热榜
   static const hotList = '/hot';
 
+  /// 创作者数据（近 N 日趋势）
+  static const creatorStats = '/creator/stats';
+
   /// 视频详情路径模板（跳转用：`AppRoutePath.videoPath(1)`）
   static String videoPath(int videoId) => '/video/$videoId';
 

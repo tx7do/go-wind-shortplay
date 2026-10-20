@@ -62,7 +62,7 @@ func (r *SysConfRepo) GetEnsure(ctx context.Context) (*ent.SysConfig, error) {
 	return e, nil
 }
 
-func (r *SysConfRepo) Update(ctx context.Context, maxUploadMB, maxDuration *uint32, manualReview, register *bool, types []string) (*ent.SysConfig, error) {
+func (r *SysConfRepo) Update(ctx context.Context, maxUploadMB, maxDuration *uint32, manualReview, register *bool, types []string, sensitiveEnabled *bool, sensitiveWords []string) (*ent.SysConfig, error) {
 	if _, err := r.GetEnsure(ctx); err != nil {
 		return nil, err
 	}
@@ -81,6 +81,12 @@ func (r *SysConfRepo) Update(ctx context.Context, maxUploadMB, maxDuration *uint
 	}
 	if types != nil {
 		builder.SetAllowedVideoTypes(types)
+	}
+	if sensitiveEnabled != nil {
+		builder.SetSensitiveFilterEnabled(*sensitiveEnabled)
+	}
+	if sensitiveWords != nil {
+		builder.SetSensitiveWords(sensitiveWords)
 	}
 	e, err := builder.Save(ctx)
 	if err != nil {

@@ -1918,6 +1918,56 @@ class S {
   String get hotListEmpty {
     return Intl.message('热榜暂时还没有内容', name: 'hotListEmpty', desc: '', args: []);
   }
+
+  /// `最热`
+  String get sortHot {
+    return Intl.message('最热', name: 'sortHot', desc: '', args: []);
+  }
+
+  /// `最新`
+  String get sortLatest {
+    return Intl.message('最新', name: 'sortLatest', desc: '', args: []);
+  }
+
+  /// `创作数据`
+  String get creatorStatsTitle {
+    return Intl.message('创作数据', name: 'creatorStatsTitle', desc: '', args: []);
+  }
+
+  /// `数据按日聚合（播放/点赞来自行为埋点，发布按过审时间）`
+  String get creatorStatsHint {
+    return Intl.message(
+      '数据按日聚合（播放/点赞来自行为埋点，发布按过审时间）',
+      name: 'creatorStatsHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `播放`
+  String get creatorPlays {
+    return Intl.message('播放', name: 'creatorPlays', desc: '', args: []);
+  }
+
+  /// `点赞`
+  String get creatorLikes {
+    return Intl.message('点赞', name: 'creatorLikes', desc: '', args: []);
+  }
+
+  /// `发布`
+  String get creatorPublished {
+    return Intl.message('发布', name: 'creatorPublished', desc: '', args: []);
+  }
+
+  /// `内容包含违规词汇，请修改后再试`
+  String get errorSensitiveWordHit {
+    return Intl.message(
+      '内容包含违规词汇，请修改后再试',
+      name: 'errorSensitiveWordHit',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

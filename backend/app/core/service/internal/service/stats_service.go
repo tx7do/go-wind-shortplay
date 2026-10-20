@@ -74,6 +74,28 @@ func (s *DashboardService) ListTrends(ctx context.Context, req *statsV1.ListTren
 	return resp, nil
 }
 
+// ListCreatorTrends 创作者近 N 日趋势（viewer 本人口径）。
+func (s *DashboardService) ListCreatorTrends(ctx context.Context, req *statsV1.ListCreatorTrendsRequest) (*statsV1.ListTrendsResponse, error) {
+	uid := spViewerUserID(ctx)
+	if uid == 0 {
+		return nil, statsV1.ErrorUnauthorized("login required")
+	}
+	rows, err := s.statsRepo.CreatorTrendRows(ctx, uid, int(req.GetDays()))
+	if err != nil {
+		return nil, statsV1.ErrorInternalServerError("creator trends aggregate failed")
+	}
+	resp := &statsV1.ListTrendsResponse{}
+	for _, row := range rows {
+		resp.Items = append(resp.Items, &statsV1.TrendItem{
+			Date:      trans.Ptr(row.Day),
+			Published: trans.Ptr(row.Published),
+			Plays:     trans.Ptr(row.Plays),
+			Likes:     trans.Ptr(row.Likes),
+		})
+	}
+	return resp, nil
+}
+
 // ListTopVideos 视频 TOP 排行。
 func (s *DashboardService) ListTopVideos(ctx context.Context, req *statsV1.ListTopVideosRequest) (*videoV1.ListVideoResponse, error) {
 	metric := data.TopMetricView

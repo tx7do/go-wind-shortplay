@@ -49,6 +49,14 @@ func (SysConfig) Fields() []ent.Field {
 		field.JSON("allowed_video_types", []string{}).
 			Comment("允许的视频扩展名（小写带点）").
 			Optional(),
+
+		field.Bool("sensitive_filter_enabled").
+			Comment("敏感词过滤开关（命中：发布转审核中 / 评论拒绝）").
+			Default(false),
+
+		field.JSON("sensitive_words", []string{}).
+			Comment("敏感词表").
+			Optional(),
 	}
 }
 

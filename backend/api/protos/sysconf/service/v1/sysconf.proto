@@ -20,6 +20,8 @@ message SysConf {
   optional bool manual_review_enabled = 3 [json_name = "manualReviewEnabled"];  // 人工审核开关（false 则发布直接可见）
   optional bool register_enabled = 4 [json_name = "registerEnabled"];           // 开放注册开关
   repeated string allowed_video_types = 5 [json_name = "allowedVideoTypes"];    // 允许的视频类型（扩展名）
+  optional bool sensitive_filter_enabled = 6 [json_name = "sensitiveFilterEnabled"]; // 敏感词过滤开关（命中：发布转审核中 / 评论拒绝）
+  repeated string sensitive_words = 7 [json_name = "sensitiveWords"];           // 敏感词表
   optional google.protobuf.Timestamp updated_at = 20 [json_name = "updatedAt"]; // 更新时间
 }
 
@@ -29,4 +31,6 @@ message UpdateSysConfRequest {
   optional bool manual_review_enabled = 3 [json_name = "manualReviewEnabled"];
   optional bool register_enabled = 4 [json_name = "registerEnabled"];
   repeated string allowed_video_types = 5 [json_name = "allowedVideoTypes"];
+  optional bool sensitive_filter_enabled = 6 [json_name = "sensitiveFilterEnabled"];
+  repeated string sensitive_words = 7 [json_name = "sensitiveWords"];
 }

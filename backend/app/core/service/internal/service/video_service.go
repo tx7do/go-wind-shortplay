@@ -492,6 +492,14 @@ func (s *VideoService) CompleteUpload(ctx context.Context, req *videoV1.Complete
 		dto.EpisodeNumber = trans.Ptr(episodeNo)
 	}
 
+	// 敏感词过滤：非草稿命中（标题/简介）强制转审核中，即使人工审核关
+	if videoStatus == videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED &&
+		spHitSensitiveWords(ctx, s.sysConfRepo, dto.GetTitle(), dto.GetDescription()) {
+		videoStatus = videoV1.VideoStatus_VIDEO_STATUS_REVIEWING
+		dto.Status = videoStatus.Enum()
+		dto.PublishedAt = nil
+	}
+
 	video, err := s.videoRepo.Create(ctx, dto, req.GetTags())
 	if err != nil {
 		_ = s.uploadTaskRepo.UpdateStatus(ctx, e.ID, videoV1.UploadTaskStatus_UPLOAD_TASK_STATUS_FAILED, nil)
@@ -803,6 +811,16 @@ func (s *VideoService) SubmitDraft(ctx context.Context, req *videoV1.SubmitDraft
 	status := videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED
 	if conf.ManualReviewEnabled {
 		status = videoV1.VideoStatus_VIDEO_STATUS_REVIEWING
+	}
+	// 敏感词过滤：命中（标题/简介）强制转审核中，即使人工审核关
+	if status == videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED {
+		var draftDesc string
+		if e.Description != nil {
+			draftDesc = *e.Description
+		}
+		if spHitSensitiveWords(ctx, s.sysConfRepo, e.Title, draftDesc) {
+			status = videoV1.VideoStatus_VIDEO_STATUS_REVIEWING
+		}
 	}
 
 	// 草稿 → 视频正式行

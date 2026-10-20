@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	paginationV1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
-	"github.com/tx7do/kratos-bootstrap/bootstrap"
 	"github.com/tx7do/go-utils/trans"
+	"github.com/tx7do/kratos-bootstrap/bootstrap"
 
 	permissionV1 "go-wind-shortplay/api/gen/go/permission/service/v1"
 
@@ -45,6 +45,14 @@ var resolvableComponents = map[string]bool{
 	"permission/apis":        true,
 	"permission/departments": true,
 	"permission/groups":      true,
+
+	// 审计日志组（基座菜单 51-55 的 Vue component 全路径；React 端页面在
+	// pages/app/audit/，经 COMPONENT_ALIAS_KEYS 映射解析）
+	"app/log/login_audit_log/index.vue":       true,
+	"app/log/api_audit_log/index.vue":         true,
+	"app/log/operation_audit_log/index.vue":   true,
+	"app/log/data_access_audit_log/index.vue": true,
+	"app/log/permission_audit_log/index.vue":  true,
 }
 
 // NavigationService 动态菜单服务（admin BFF）：读基座菜单域，映射为前端
@@ -52,7 +60,7 @@ var resolvableComponents = map[string]bool{
 type NavigationService struct {
 	log *log.Helper
 
-	menuServiceClient permissionV1.MenuServiceClient
+	menuServiceClient  permissionV1.MenuServiceClient
 	accessTokenChecker auth.AccessTokenChecker
 }
 

@@ -300,6 +300,8 @@ export interface SysConf {
   manualReviewEnabled?: boolean;
   registerEnabled?: boolean;
   allowedVideoTypes?: string[];
+  sensitiveFilterEnabled?: boolean;
+  sensitiveWords?: string[];
   updatedAt?: ProtoTimestamp;
 }
 
@@ -309,6 +311,8 @@ export interface UpdateSysConfRequest {
   manualReviewEnabled?: boolean;
   registerEnabled?: boolean;
   allowedVideoTypes?: string[];
+  sensitiveFilterEnabled?: boolean;
+  sensitiveWords?: string[];
 }
 
 // ========== 组织与权限（基座 RBAC 契约：cms i_role/i_menu/i_api/i_department） ==========
@@ -558,4 +562,69 @@ export interface UpdateSeriesRequest {
   title?: string;
   description?: string;
   coverUrl?: string;
+}
+
+// ========== 审计日志（基座 audit 域，字段为 proto 子集展示口径） ==========
+
+/** GET /admin/v1/login-audit-logs 条目 */
+export interface LoginAuditLog {
+  id?: number;
+  username?: string;
+  ipAddress?: string;
+  actionType?: ProtoEnum;
+  status?: ProtoEnum;
+  failureReason?: string;
+  loginMethod?: ProtoEnum;
+  createdAt?: ProtoTimestamp;
+}
+
+/** GET /admin/v1/operation-audit-logs 条目 */
+export interface OperationAuditLog {
+  id?: number;
+  username?: string;
+  resourceType?: string;
+  resourceId?: string;
+  action?: ProtoEnum;
+  success?: boolean;
+  failureReason?: string;
+  ipAddress?: string;
+  createdAt?: ProtoTimestamp;
+}
+
+/** GET /admin/v1/api-audit-logs 条目 */
+export interface ApiAuditLog {
+  id?: number;
+  username?: string;
+  httpMethod?: string;
+  path?: string;
+  apiOperation?: string;
+  latencyMs?: number;
+  ipAddress?: string;
+  createdAt?: ProtoTimestamp;
+}
+
+/** GET /admin/v1/data-access-audit-logs 条目 */
+export interface DataAccessAuditLog {
+  id?: number;
+  username?: string;
+  dataSource?: string;
+  tableName?: string;
+  dataId?: string;
+  accessType?: ProtoEnum;
+  affectedRows?: number;
+  latencyMs?: number;
+  success?: boolean;
+  createdAt?: ProtoTimestamp;
+}
+
+/** GET /admin/v1/permission-audit-logs 条目 */
+export interface PermissionAuditLog {
+  id?: number;
+  username?: string;
+  resourceType?: string;
+  resourceId?: string;
+  action?: ProtoEnum;
+  success?: boolean;
+  ipAddress?: string;
+  createdAt?: ProtoTimestamp;
 }

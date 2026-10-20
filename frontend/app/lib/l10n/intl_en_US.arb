@@ -369,5 +369,13 @@
   "historyTab": "History",
   "historyEmpty": "No watch history yet. Go watch some videos!",
   "hotList": "Hot List",
-  "hotListEmpty": "Nothing on the hot list yet"
+  "hotListEmpty": "Nothing on the hot list yet",
+  "sortHot": "Hot",
+  "sortLatest": "Latest",
+  "creatorStatsTitle": "Creator Stats",
+  "creatorStatsHint": "Aggregated daily (plays/likes from UBA events, publishes by approval time)",
+  "creatorPlays": "Plays",
+  "creatorLikes": "Likes",
+  "creatorPublished": "Published",
+  "errorSensitiveWordHit": "Contains prohibited words. Please revise and try again"
 }

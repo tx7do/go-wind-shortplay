@@ -192,3 +192,17 @@ func IsCannotFollowSelf(err error) bool {
 func ErrorCannotFollowSelf(format string, args ...interface{}) *errors.Error {
 	return errors.New(409, InteractionErrorReason_CANNOT_FOLLOW_SELF.String(), fmt.Sprintf(format, args...))
 }
+
+// 命中敏感词（评论被拒绝）
+func IsSensitiveWordHit(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == InteractionErrorReason_SENSITIVE_WORD_HIT.String() && e.Code == 403
+}
+
+// 命中敏感词（评论被拒绝）
+func ErrorSensitiveWordHit(format string, args ...interface{}) *errors.Error {
+	return errors.New(403, InteractionErrorReason_SENSITIVE_WORD_HIT.String(), fmt.Sprintf(format, args...))
+}

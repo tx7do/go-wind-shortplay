@@ -16,14 +16,38 @@ sealed class CommentEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+/// 评论排序方式（与后端 CommentSort 枚举全名对齐）
+class CommentSortMode extends Equatable {
+  final String value;
+
+  const CommentSortMode(this.value);
+
+  static const latest = CommentSortMode('COMMENT_SORT_LATEST');
+  static const hot = CommentSortMode('COMMENT_SORT_HOT');
+
+  @override
+  List<Object?> get props => [value];
+}
+
 /// 加载评论列表（重置）
 class CommentListRequested extends CommentEvent {
   final int videoId;
+  final CommentSortMode sort;
 
-  const CommentListRequested(this.videoId);
+  const CommentListRequested(this.videoId, {this.sort = CommentSortMode.latest});
 
   @override
-  List<Object?> get props => [videoId];
+  List<Object?> get props => [videoId, sort];
+}
+
+/// 切换排序（重置分页重新加载）
+class CommentSortChanged extends CommentEvent {
+  final CommentSortMode sort;
+
+  const CommentSortChanged(this.sort);
+
+  @override
+  List<Object?> get props => [sort];
 }
 
 /// 加载更多
@@ -79,6 +103,7 @@ class CommentState extends Equatable {
   final int total;
   final bool isLoading;
   final bool hasMore;
+  final CommentSortMode sort;
   final String? errorMessage;
 
   const CommentState({
@@ -87,6 +112,7 @@ class CommentState extends Equatable {
     this.total = 0,
     this.isLoading = false,
     this.hasMore = true,
+    this.sort = CommentSortMode.latest,
     this.errorMessage,
   });
 
@@ -96,6 +122,7 @@ class CommentState extends Equatable {
     int? total,
     bool? isLoading,
     bool? hasMore,
+    CommentSortMode? sort,
     String? errorMessage,
   }) {
     return CommentState(
@@ -104,13 +131,14 @@ class CommentState extends Equatable {
       total: total ?? this.total,
       isLoading: isLoading ?? this.isLoading,
       hasMore: hasMore ?? this.hasMore,
+      sort: sort ?? this.sort,
       errorMessage: errorMessage,
     );
   }
 
   @override
   List<Object?> get props =>
-      [videoId, comments, total, isLoading, hasMore, errorMessage];
+      [videoId, comments, total, isLoading, hasMore, sort, errorMessage];
 }
 
 /// 评论业务
@@ -120,6 +148,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
         _uba = ubaService ?? UbaService(),
         super(const CommentState()) {
     on<CommentListRequested>(_onList);
+    on<CommentSortChanged>(_onSortChanged);
     on<CommentNextPageRequested>(_onNextPage);
     on<CommentLocallyInserted>(_onLocallyInserted);
     on<CommentDeleted>(_onDeleted);
@@ -139,6 +168,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
   ) async {
     emit(state.copyWith(
       videoId: event.videoId,
+      sort: event.sort,
       isLoading: true,
       errorMessage: null,
     ));
@@ -147,6 +177,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       final page = await _service.list(
         videoId: event.videoId,
         query: const PaginationQuery(pageNum: 1, pageSize: _pageSize),
+        sort: event.sort.value,
       );
       emit(state.copyWith(
         comments: page.items,
@@ -167,6 +198,15 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     }
   }
 
+  /// 切换排序：重置分页按新排序重拉
+  Future<void> _onSortChanged(
+    CommentSortChanged event,
+    Emitter<CommentState> emit,
+  ) async {
+    if (state.videoId <= 0 || state.sort == event.sort) return;
+    await _onList(CommentListRequested(state.videoId, sort: event.sort), emit);
+  }
+
   Future<void> _onNextPage(
     CommentNextPageRequested event,
     Emitter<CommentState> emit,
@@ -178,6 +218,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       final page = await _service.list(
         videoId: state.videoId,
         query: PaginationQuery(pageNum: _pageNum, pageSize: _pageSize),
+        sort: state.sort.value,
       );
       emit(state.copyWith(
         comments: [...state.comments, ...page.items],

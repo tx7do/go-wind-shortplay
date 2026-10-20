@@ -13,7 +13,12 @@ import {
 
 import { adminHttp } from '@/api/client';
 import type {
+  ApiAuditLog,
   AppUser,
+  DataAccessAuditLog,
+  LoginAuditLog,
+  OperationAuditLog,
+  PermissionAuditLog,
   ChangeVideoStatusRequest,
   Comment,
   CreateUserRequest,
@@ -187,6 +192,50 @@ export function useDeleteSeries(
   return useMutation<void, Error, number>({
     mutationFn: (id) => adminHttp.delete<void>(`series/${id}`),
     ...options,
+  });
+}
+
+// ==============================
+// 审计日志（基座 audit 域，只读列表）
+// ==============================
+
+export async function fetchListLoginAuditLogs(params: ListParams) {
+  return queryClient.fetchQuery({
+    queryKey: ['listLoginAuditLogs', params],
+    queryFn: () => adminHttp.get<ListResponse<LoginAuditLog>>('login-audit-logs', cleanParams(params)),
+    retry: 0,
+  });
+}
+
+export async function fetchListApiAuditLogs(params: ListParams) {
+  return queryClient.fetchQuery({
+    queryKey: ['listApiAuditLogs', params],
+    queryFn: () => adminHttp.get<ListResponse<ApiAuditLog>>('api-audit-logs', cleanParams(params)),
+    retry: 0,
+  });
+}
+
+export async function fetchListOperationAuditLogs(params: ListParams) {
+  return queryClient.fetchQuery({
+    queryKey: ['listOperationAuditLogs', params],
+    queryFn: () => adminHttp.get<ListResponse<OperationAuditLog>>('operation-audit-logs', cleanParams(params)),
+    retry: 0,
+  });
+}
+
+export async function fetchDataAccessAuditLogs(params: ListParams) {
+  return queryClient.fetchQuery({
+    queryKey: ['listDataAccessAuditLogs', params],
+    queryFn: () => adminHttp.get<ListResponse<DataAccessAuditLog>>('data-access-audit-logs', cleanParams(params)),
+    retry: 0,
+  });
+}
+
+export async function fetchListPermissionAuditLogs(params: ListParams) {
+  return queryClient.fetchQuery({
+    queryKey: ['listPermissionAuditLogs', params],
+    queryFn: () => adminHttp.get<ListResponse<PermissionAuditLog>>('permission-audit-logs', cleanParams(params)),
+    retry: 0,
   });
 }
 

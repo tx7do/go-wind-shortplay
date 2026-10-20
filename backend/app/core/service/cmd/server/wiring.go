@@ -232,7 +232,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 	videoService := service.NewVideoService(ctx, videoRepo, seriesService, videoDraftRepo, uploadTaskRepo, sysConfRepo, minIOClient)
 	feedService := service.NewFeedService(ctx, videoRepo, userRepo, interactionRepo, statsRepo, redisClient)
 	interactionService := service.NewInteractionService(ctx, interactionRepo, videoRepo, userRepo)
-	videoCommentService := service.NewVideoCommentService(ctx, videoCommentRepo, videoRepo, userRepo)
+	videoCommentService := service.NewVideoCommentService(ctx, videoCommentRepo, videoRepo, userRepo, sysConfRepo)
 	reportService := service.NewReportService(ctx, reportRepo, userRepo, videoRepo, videoCommentRepo)
 	sysConfService := service.NewSysConfService(ctx, sysConfRepo)
 	ubaService := service.NewUbaService(ctx, ubaRepo, videoRepo)

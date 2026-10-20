@@ -47,6 +47,7 @@ const (
 	InteractionErrorReason_ALREADY_FOLLOWING  InteractionErrorReason = 901 // 已关注
 	InteractionErrorReason_NOT_FOLLOWING      InteractionErrorReason = 902 // 未关注
 	InteractionErrorReason_CANNOT_FOLLOW_SELF InteractionErrorReason = 903 // 不能关注自己
+	InteractionErrorReason_SENSITIVE_WORD_HIT InteractionErrorReason = 304 // 命中敏感词（评论被拒绝）
 )
 
 // Enum value maps for InteractionErrorReason.
@@ -65,6 +66,7 @@ var (
 		901:  "ALREADY_FOLLOWING",
 		902:  "NOT_FOLLOWING",
 		903:  "CANNOT_FOLLOW_SELF",
+		304:  "SENSITIVE_WORD_HIT",
 	}
 	InteractionErrorReason_value = map[string]int32{
 		"BAD_REQUEST":           0,
@@ -80,6 +82,7 @@ var (
 		"ALREADY_FOLLOWING":     901,
 		"NOT_FOLLOWING":         902,
 		"CANNOT_FOLLOW_SELF":    903,
+		"SENSITIVE_WORD_HIT":    304,
 	}
 )
 
@@ -114,7 +117,7 @@ var File_interaction_service_v1_interaction_error_proto protoreflect.FileDescrip
 
 const file_interaction_service_v1_interaction_error_proto_rawDesc = "" +
 	"\n" +
-	".interaction/service/v1/interaction_error.proto\x12\x16interaction.service.v1\x1a\x13errors/errors.proto*\xfd\x02\n" +
+	".interaction/service/v1/interaction_error.proto\x12\x16interaction.service.v1\x1a\x13errors/errors.proto*\x9c\x03\n" +
 	"\x16InteractionErrorReason\x12\x15\n" +
 	"\vBAD_REQUEST\x10\x00\x1a\x04\xa8E\x90\x03\x12\x16\n" +
 	"\fUNAUTHORIZED\x10d\x1a\x04\xa8E\x91\x03\x12\x14\n" +
@@ -128,7 +131,8 @@ const file_interaction_service_v1_interaction_error_proto_rawDesc = "" +
 	"\x11NOT_COMMENT_OWNER\x10\xae\x02\x1a\x04\xa8E\x93\x03\x12\x1c\n" +
 	"\x11ALREADY_FOLLOWING\x10\x85\a\x1a\x04\xa8E\x99\x03\x12\x18\n" +
 	"\rNOT_FOLLOWING\x10\x86\a\x1a\x04\xa8E\x99\x03\x12\x1d\n" +
-	"\x12CANNOT_FOLLOW_SELF\x10\x87\a\x1a\x04\xa8E\x99\x03\x1a\x04\xa0E\xf4\x03B\xf0\x01\n" +
+	"\x12CANNOT_FOLLOW_SELF\x10\x87\a\x1a\x04\xa8E\x99\x03\x12\x1d\n" +
+	"\x12SENSITIVE_WORD_HIT\x10\xb0\x02\x1a\x04\xa8E\x93\x03\x1a\x04\xa0E\xf4\x03B\xf0\x01\n" +
 	"\x1acom.interaction.service.v1B\x15InteractionErrorProtoP\x01ZAgo-wind-shortplay/api/gen/go/interaction/service/v1;interactionpb\xa2\x02\x03ISX\xaa\x02\x16Interaction.Service.V1\xca\x02\x16Interaction\\Service\\V1\xe2\x02\"Interaction\\Service\\V1\\GPBMetadata\xea\x02\x18Interaction::Service::V1b\x06proto3"
 
 var (

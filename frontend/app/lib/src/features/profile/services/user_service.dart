@@ -66,6 +66,22 @@ class UserService extends BaseService {
   }
 
   /// 创作者中心总览（需登录）
+  /// 创作者近 N 日趋势（本人口径；days 7/14/30）
+  Future<List<TrendPoint>> creatorTrends({int days = 7}) async {
+    try {
+      final res = await _dio.get<Map<String, dynamic>>(
+        '/creator/trends',
+        queryParameters: {'days': days},
+      );
+      return ((res.data ?? const {})['items'] as List<dynamic>? ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(TrendPoint.fromJson)
+          .toList();
+    } on DioException catch (e) {
+      throw ApiStatusException(handleDioError(e));
+    }
+  }
+
   Future<CreatorOverview> creatorOverview() async {
     try {
       final res =
