@@ -40,6 +40,26 @@ func (s *MenuService) init() {
 	if count, _ := s.menuRepo.Count(ctx, nil); count == 0 {
 		_ = s.createDefaultMenus(ctx)
 	}
+	// 既有库升级补种：缺省菜单按 Id 幂等补齐。空表播种受 count 门控，
+	// 老库感知不到新增条目（如剧集管理 76）；存在即跳过，已有行不动。
+	_ = s.ensureDefaultMenus(ctx)
+}
+
+// ensureDefaultMenus 按 Id 幂等补种缺省菜单（不受 count 门控）。
+func (s *MenuService) ensureDefaultMenus(ctx context.Context) error {
+	for _, m := range constants.DefaultMenus {
+		exist, err := s.menuRepo.Get(ctx, &permissionV1.GetMenuRequest{
+			QueryBy: &permissionV1.GetMenuRequest_Id{Id: m.GetId()},
+		})
+		if err == nil && exist != nil && exist.GetId() > 0 {
+			continue
+		}
+		if err := s.menuRepo.Create(ctx, &permissionV1.CreateMenuRequest{Data: m}); err != nil {
+			s.log.Errorf("ensure default menu %s failed: %v", m.GetPath(), err)
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *MenuService) List(ctx context.Context, req *paginationV1.PagingRequest) (*permissionV1.ListMenuResponse, error) {

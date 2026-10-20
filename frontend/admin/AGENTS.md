@@ -16,6 +16,7 @@ GoWind 短视频社区管理后台（shortplay），从 go-wind-cms/frontend/adm
   **navigation 拉取失败 / 为空时整树回退静态路由**（前端模式，`src/router/modules/*.tsx`
   + `src/router/config/static.ts`），登录不闪断。页面放 `src/pages/app/<module>/`，
   菜单名走 `routes:`/`menu:` 命名空间词条。
+- **页面清单**：`src/pages/app/{video,series,comment,report,user,sysconf,dashboard,inbox,permission,profile}`；剧集管理（`pages/app/series`）对齐 video 模块形态（列表/编辑抽屉/详情抽屉含选集表）。
 - **页面写法**：列表用 `ListTable`（底座封装的 ProTable）+ `ContentContainer`；
   表单用 pro-components（DrawerForm/ProForm）；状态枚举映射集中在各模块
   `constants.ts`；文案全部走 i18n（`src/locales/{zh-CN,en-US}/_modules/*.json`）。

@@ -2639,6 +2639,35 @@ var (
 			},
 		},
 	}
+	// SpSeriesColumns holds the columns for the "sp_series" table.
+	SpSeriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id"},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "created_by", Type: field.TypeUint32, Nullable: true, Comment: "创建者ID"},
+		{Name: "updated_by", Type: field.TypeUint32, Nullable: true, Comment: "更新者ID"},
+		{Name: "deleted_by", Type: field.TypeUint32, Nullable: true, Comment: "删除者ID"},
+		{Name: "tenant_id", Type: field.TypeUint32, Nullable: true, Comment: "租户ID", Default: 0},
+		{Name: "title", Type: field.TypeString, Comment: "剧名"},
+		{Name: "description", Type: field.TypeString, Nullable: true, Comment: "剧简介"},
+		{Name: "cover_url", Type: field.TypeString, Nullable: true, Comment: "封面图（可空，展示侧回退第一集封面）"},
+		{Name: "author_id", Type: field.TypeUint32, Comment: "作者用户ID", Default: 0},
+	}
+	// SpSeriesTable holds the schema information for the "sp_series" table.
+	SpSeriesTable = &schema.Table{
+		Name:       "sp_series",
+		Comment:    "剧集表（短剧多集容器，可见性跟随其视频审核状态）",
+		Columns:    SpSeriesColumns,
+		PrimaryKey: []*schema.Column{SpSeriesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "idx_sp_series_author",
+				Unique:  false,
+				Columns: []*schema.Column{SpSeriesColumns[11]},
+			},
+		},
+	}
 	// SpSysConfigsColumns holds the columns for the "sp_sys_configs" table.
 	SpSysConfigsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id"},
@@ -3337,6 +3366,8 @@ var (
 		{Name: "height", Type: field.TypeUint32, Comment: "分辨率高", Default: 0},
 		{Name: "status", Type: field.TypeEnum, Comment: "状态：DRAFT草稿 REVIEWING审核中 PUBLISHED已发布 REJECTED驳回 OFFLINE下架", Enums: []string{"DRAFT", "REVIEWING", "PUBLISHED", "REJECTED", "OFFLINE"}, Default: "DRAFT"},
 		{Name: "author_id", Type: field.TypeUint32, Comment: "作者用户ID", Default: 0},
+		{Name: "series_id", Type: field.TypeUint32, Comment: "挂靠剧集ID（0=未挂靠）", Default: 0},
+		{Name: "episode_number", Type: field.TypeUint32, Comment: "剧内集号（未挂靠时为 0）", Default: 0},
 		{Name: "reject_reason", Type: field.TypeString, Nullable: true, Comment: "驳回原因"},
 		{Name: "like_count", Type: field.TypeUint64, Comment: "点赞数（ledger 事务内增减，禁止直接 Set 覆盖）", Default: 0},
 		{Name: "collect_count", Type: field.TypeUint64, Comment: "收藏数（ledger 事务内增减）", Default: 0},
@@ -3354,12 +3385,17 @@ var (
 			{
 				Name:    "idx_sp_video_status_published_at",
 				Unique:  false,
-				Columns: []*schema.Column{SpVideosColumns[15], SpVideosColumns[22]},
+				Columns: []*schema.Column{SpVideosColumns[15], SpVideosColumns[24]},
 			},
 			{
 				Name:    "idx_sp_video_author_status",
 				Unique:  false,
 				Columns: []*schema.Column{SpVideosColumns[16], SpVideosColumns[15]},
+			},
+			{
+				Name:    "idx_sp_video_series",
+				Unique:  false,
+				Columns: []*schema.Column{SpVideosColumns[17], SpVideosColumns[18]},
 			},
 			{
 				Name:    "idx_sp_video_tenant_status",
@@ -3458,6 +3494,8 @@ var (
 		{Name: "height", Type: field.TypeUint32, Comment: "分辨率高", Default: 0},
 		{Name: "upload_task_id", Type: field.TypeString, Nullable: true, Comment: "关联上传任务号"},
 		{Name: "author_id", Type: field.TypeUint32, Comment: "作者用户ID", Default: 0},
+		{Name: "series_id", Type: field.TypeUint32, Comment: "挂靠剧集ID（提交发布时挂靠，0=不挂靠）", Default: 0},
+		{Name: "episode_number", Type: field.TypeUint32, Comment: "剧内集号（0=提交发布时自动排号）", Default: 0},
 	}
 	// SpVideoDraftsTable holds the schema information for the "sp_video_drafts" table.
 	SpVideoDraftsTable = &schema.Table{
@@ -3644,6 +3682,7 @@ var (
 		SysRolesTable,
 		SysRoleMetadataTable,
 		SysRolePermissionsTable,
+		SpSeriesTable,
 		SpSysConfigsTable,
 		SysTasksTable,
 		SysTenantsTable,
@@ -3866,6 +3905,11 @@ func init() {
 	}
 	SysRolePermissionsTable.Annotation = &entsql.Annotation{
 		Table:     "sys_role_permissions",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	SpSeriesTable.Annotation = &entsql.Annotation{
+		Table:     "sp_series",
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}

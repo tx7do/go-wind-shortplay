@@ -9,7 +9,7 @@ GoWind ShortPlay（风印短剧）：一个 Go 后端 + 一个 React 管理后�
 ```
 backend/                        Go 1.26 + Kratos + Ent（DI 手写装配 wiring.go）
 ├── api/
-│   ├── protos/                 .proto 源文件（identity/permission/authentication/audit/dict/media/storage/task/notify/internal_message/comment/interaction/stats/conf 基座域 + video/feed/report/sysconf/uba 业务域 + admin/app BFF 面）
+│   ├── protos/                 .proto 源文件（identity/permission/authentication/audit/dict/media/storage/task/notify/internal_message/comment/interaction/stats/conf 基座域 + video/series/feed/report/sysconf/uba 业务域 + admin/app BFF 面）
 │   └── gen/go/                 生成代码（HTTP/gRPC/校验），不手改
 ├── app/
 │   ├── admin/service/          管理后台服务（BFF，REST :7600 / SSE :7601）

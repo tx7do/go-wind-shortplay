@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package app.service.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "series/service/v1/series.proto";
+
+// 剧集服务（App 端：建剧 / 编辑 / 选集浏览；详情与列表对游客开放）
+service SeriesService {
+  // 创建剧集（需登录）
+  rpc CreateSeries (series.service.v1.CreateSeriesRequest) returns (series.service.v1.Series) {
+    option (google.api.http) = {
+      post: "/app/v1/series"
+      body: "*"
+    };
+  }
+
+  // 剧集详情（剧信息 + 选集；游客仅见已发布集）
+  rpc GetSeries (series.service.v1.GetSeriesRequest) returns (series.service.v1.SeriesDetail) {
+    option (google.api.http) = {
+      get: "/app/v1/series/{id}"
+    };
+  }
+
+  // 编辑自己的剧集（标题 / 简介 / 封面）
+  rpc UpdateSeries (series.service.v1.UpdateSeriesRequest) returns (series.service.v1.Series) {
+    option (google.api.http) = {
+      put: "/app/v1/series/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除自己的剧集（剧内视频解挂不删除）
+  rpc DeleteSeries (series.service.v1.DeleteSeriesRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/app/v1/series/{id}"
+    };
+  }
+
+  // 剧集列表（query 剧名模糊 / authorId 按作者过滤；游客仅见有已发布集的剧）
+  rpc ListSeries (series.service.v1.QuerySeriesRequest) returns (series.service.v1.ListSeriesResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/series"
+    };
+  }
+}

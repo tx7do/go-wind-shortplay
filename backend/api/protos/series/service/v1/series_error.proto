@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package series.service.v1;
+
+import "errors/errors.proto";
+
+// series 域错误定义
+enum SeriesErrorReason {
+  option (errors.default_code) = 500;
+
+  // 400
+  BAD_REQUEST = 0 [(errors.code) = 400]; // 错误请求
+
+  // 401
+  UNAUTHORIZED = 100 [(errors.code) = 401]; // 未授权
+
+  // 403
+  FORBIDDEN = 300 [(errors.code) = 403]; // 禁止访问
+
+  // 404
+  NOT_FOUND = 400 [(errors.code) = 404]; // 找不到资源
+
+  // 409
+  CONFLICT = 900 [(errors.code) = 409]; // 冲突
+
+  // 500
+  INTERNAL_SERVER_ERROR = 2000 [(errors.code) = 500]; // 内部服务器错误
+
+  // ── 域内特有错误 ──
+  SERIES_NOT_FOUND = 401 [(errors.code) = 404]; // 剧集不存在（含无可见集的不可见剧）
+  NOT_SERIES_OWNER = 302 [(errors.code) = 403]; // 非剧集所有者（含跨作者挂剧）
+}

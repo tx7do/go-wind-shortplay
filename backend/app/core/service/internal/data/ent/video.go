@@ -50,6 +50,10 @@ type Video struct {
 	Status video.Status `json:"status,omitempty"`
 	// 作者用户ID
 	AuthorID uint32 `json:"author_id,omitempty"`
+	// 挂靠剧集ID（0=未挂靠）
+	SeriesID uint32 `json:"series_id,omitempty"`
+	// 剧内集号（未挂靠时为 0）
+	EpisodeNumber uint32 `json:"episode_number,omitempty"`
 	// 驳回原因
 	RejectReason *string `json:"reject_reason,omitempty"`
 	// 点赞数（ledger 事务内增减，禁止直接 Set 覆盖）
@@ -70,7 +74,7 @@ func (*Video) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case video.FieldID, video.FieldCreatedBy, video.FieldUpdatedBy, video.FieldDeletedBy, video.FieldTenantID, video.FieldDuration, video.FieldWidth, video.FieldHeight, video.FieldAuthorID, video.FieldLikeCount, video.FieldCollectCount, video.FieldCommentCount, video.FieldViewCount:
+		case video.FieldID, video.FieldCreatedBy, video.FieldUpdatedBy, video.FieldDeletedBy, video.FieldTenantID, video.FieldDuration, video.FieldWidth, video.FieldHeight, video.FieldAuthorID, video.FieldSeriesID, video.FieldEpisodeNumber, video.FieldLikeCount, video.FieldCollectCount, video.FieldCommentCount, video.FieldViewCount:
 			values[i] = new(sql.NullInt64)
 		case video.FieldTitle, video.FieldDescription, video.FieldCoverURL, video.FieldVideoURL, video.FieldStatus, video.FieldRejectReason:
 			values[i] = new(sql.NullString)
@@ -202,6 +206,18 @@ func (_m *Video) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field author_id", values[i])
 			} else if value.Valid {
 				_m.AuthorID = uint32(value.Int64)
+			}
+		case video.FieldSeriesID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field series_id", values[i])
+			} else if value.Valid {
+				_m.SeriesID = uint32(value.Int64)
+			}
+		case video.FieldEpisodeNumber:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field episode_number", values[i])
+			} else if value.Valid {
+				_m.EpisodeNumber = uint32(value.Int64)
 			}
 		case video.FieldRejectReason:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -344,6 +360,12 @@ func (_m *Video) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("author_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.AuthorID))
+	builder.WriteString(", ")
+	builder.WriteString("series_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SeriesID))
+	builder.WriteString(", ")
+	builder.WriteString("episode_number=")
+	builder.WriteString(fmt.Sprintf("%v", _m.EpisodeNumber))
 	builder.WriteString(", ")
 	if v := _m.RejectReason; v != nil {
 		builder.WriteString("reject_reason=")

@@ -178,6 +178,8 @@ func (r *VideoDraftRepo) Create(ctx context.Context, dto *videoV1.VideoDraft) (*
 		SetHeight(dto.GetHeight()).
 		SetUploadTaskID(dto.GetUploadTaskId()).
 		SetAuthorID(dto.GetAuthorId()).
+		SetSeriesID(dto.GetSeriesId()).
+		SetEpisodeNumber(dto.GetEpisodeNumber()).
 		SetCreatedAt(time.Now()).
 		SetUpdatedAt(time.Now())
 	if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
@@ -202,6 +204,8 @@ func (r *VideoDraftRepo) Update(ctx context.Context, id uint32, dto *videoV1.Vid
 		SetWidth(dto.GetWidth()).
 		SetHeight(dto.GetHeight()).
 		SetUploadTaskID(dto.GetUploadTaskId()).
+		SetSeriesID(dto.GetSeriesId()).
+		SetEpisodeNumber(dto.GetEpisodeNumber()).
 		SetUpdatedAt(time.Now())
 	e, err := builder.Save(ctx)
 	if err != nil {

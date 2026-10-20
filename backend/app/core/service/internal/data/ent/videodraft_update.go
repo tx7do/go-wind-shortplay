@@ -353,6 +353,48 @@ func (_u *VideoDraftUpdate) AddAuthorID(v int32) *VideoDraftUpdate {
 	return _u
 }
 
+// SetSeriesID sets the "series_id" field.
+func (_u *VideoDraftUpdate) SetSeriesID(v uint32) *VideoDraftUpdate {
+	_u.mutation.ResetSeriesID()
+	_u.mutation.SetSeriesID(v)
+	return _u
+}
+
+// SetNillableSeriesID sets the "series_id" field if the given value is not nil.
+func (_u *VideoDraftUpdate) SetNillableSeriesID(v *uint32) *VideoDraftUpdate {
+	if v != nil {
+		_u.SetSeriesID(*v)
+	}
+	return _u
+}
+
+// AddSeriesID adds value to the "series_id" field.
+func (_u *VideoDraftUpdate) AddSeriesID(v int32) *VideoDraftUpdate {
+	_u.mutation.AddSeriesID(v)
+	return _u
+}
+
+// SetEpisodeNumber sets the "episode_number" field.
+func (_u *VideoDraftUpdate) SetEpisodeNumber(v uint32) *VideoDraftUpdate {
+	_u.mutation.ResetEpisodeNumber()
+	_u.mutation.SetEpisodeNumber(v)
+	return _u
+}
+
+// SetNillableEpisodeNumber sets the "episode_number" field if the given value is not nil.
+func (_u *VideoDraftUpdate) SetNillableEpisodeNumber(v *uint32) *VideoDraftUpdate {
+	if v != nil {
+		_u.SetEpisodeNumber(*v)
+	}
+	return _u
+}
+
+// AddEpisodeNumber adds value to the "episode_number" field.
+func (_u *VideoDraftUpdate) AddEpisodeNumber(v int32) *VideoDraftUpdate {
+	_u.mutation.AddEpisodeNumber(v)
+	return _u
+}
+
 // Mutation returns the VideoDraftMutation object of the builder.
 func (_u *VideoDraftUpdate) Mutation() *VideoDraftMutation {
 	return _u.mutation
@@ -509,6 +551,18 @@ func (_u *VideoDraftUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if value, ok := _u.mutation.AddedAuthorID(); ok {
 		_spec.AddField(videodraft.FieldAuthorID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.SeriesID(); ok {
+		_spec.SetField(videodraft.FieldSeriesID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedSeriesID(); ok {
+		_spec.AddField(videodraft.FieldSeriesID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.EpisodeNumber(); ok {
+		_spec.SetField(videodraft.FieldEpisodeNumber, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedEpisodeNumber(); ok {
+		_spec.AddField(videodraft.FieldEpisodeNumber, field.TypeUint32, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -855,6 +909,48 @@ func (_u *VideoDraftUpdateOne) AddAuthorID(v int32) *VideoDraftUpdateOne {
 	return _u
 }
 
+// SetSeriesID sets the "series_id" field.
+func (_u *VideoDraftUpdateOne) SetSeriesID(v uint32) *VideoDraftUpdateOne {
+	_u.mutation.ResetSeriesID()
+	_u.mutation.SetSeriesID(v)
+	return _u
+}
+
+// SetNillableSeriesID sets the "series_id" field if the given value is not nil.
+func (_u *VideoDraftUpdateOne) SetNillableSeriesID(v *uint32) *VideoDraftUpdateOne {
+	if v != nil {
+		_u.SetSeriesID(*v)
+	}
+	return _u
+}
+
+// AddSeriesID adds value to the "series_id" field.
+func (_u *VideoDraftUpdateOne) AddSeriesID(v int32) *VideoDraftUpdateOne {
+	_u.mutation.AddSeriesID(v)
+	return _u
+}
+
+// SetEpisodeNumber sets the "episode_number" field.
+func (_u *VideoDraftUpdateOne) SetEpisodeNumber(v uint32) *VideoDraftUpdateOne {
+	_u.mutation.ResetEpisodeNumber()
+	_u.mutation.SetEpisodeNumber(v)
+	return _u
+}
+
+// SetNillableEpisodeNumber sets the "episode_number" field if the given value is not nil.
+func (_u *VideoDraftUpdateOne) SetNillableEpisodeNumber(v *uint32) *VideoDraftUpdateOne {
+	if v != nil {
+		_u.SetEpisodeNumber(*v)
+	}
+	return _u
+}
+
+// AddEpisodeNumber adds value to the "episode_number" field.
+func (_u *VideoDraftUpdateOne) AddEpisodeNumber(v int32) *VideoDraftUpdateOne {
+	_u.mutation.AddEpisodeNumber(v)
+	return _u
+}
+
 // Mutation returns the VideoDraftMutation object of the builder.
 func (_u *VideoDraftUpdateOne) Mutation() *VideoDraftMutation {
 	return _u.mutation
@@ -1041,6 +1137,18 @@ func (_u *VideoDraftUpdateOne) sqlSave(ctx context.Context) (_node *VideoDraft, 
 	}
 	if value, ok := _u.mutation.AddedAuthorID(); ok {
 		_spec.AddField(videodraft.FieldAuthorID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.SeriesID(); ok {
+		_spec.SetField(videodraft.FieldSeriesID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedSeriesID(); ok {
+		_spec.AddField(videodraft.FieldSeriesID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.EpisodeNumber(); ok {
+		_spec.SetField(videodraft.FieldEpisodeNumber, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedEpisodeNumber(); ok {
+		_spec.AddField(videodraft.FieldEpisodeNumber, field.TypeUint32, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &VideoDraft{config: _u.config}

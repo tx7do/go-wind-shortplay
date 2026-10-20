@@ -123,6 +123,9 @@ type RoleMetadata func(*sql.Selector)
 // RolePermission is the predicate function for rolepermission builders.
 type RolePermission func(*sql.Selector)
 
+// Series is the predicate function for series builders.
+type Series func(*sql.Selector)
+
 // SysConfig is the predicate function for sysconfig builders.
 type SysConfig func(*sql.Selector)
 

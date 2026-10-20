@@ -134,6 +134,16 @@ func AuthorID(v uint32) predicate.VideoDraft {
 	return predicate.VideoDraft(sql.FieldEQ(FieldAuthorID, v))
 }
 
+// SeriesID applies equality check predicate on the "series_id" field. It's identical to SeriesIDEQ.
+func SeriesID(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldEQ(FieldSeriesID, v))
+}
+
+// EpisodeNumber applies equality check predicate on the "episode_number" field. It's identical to EpisodeNumberEQ.
+func EpisodeNumber(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldEQ(FieldEpisodeNumber, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.VideoDraft {
 	return predicate.VideoDraft(sql.FieldEQ(FieldCreatedAt, v))
@@ -1027,6 +1037,86 @@ func AuthorIDLT(v uint32) predicate.VideoDraft {
 // AuthorIDLTE applies the LTE predicate on the "author_id" field.
 func AuthorIDLTE(v uint32) predicate.VideoDraft {
 	return predicate.VideoDraft(sql.FieldLTE(FieldAuthorID, v))
+}
+
+// SeriesIDEQ applies the EQ predicate on the "series_id" field.
+func SeriesIDEQ(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldEQ(FieldSeriesID, v))
+}
+
+// SeriesIDNEQ applies the NEQ predicate on the "series_id" field.
+func SeriesIDNEQ(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNEQ(FieldSeriesID, v))
+}
+
+// SeriesIDIn applies the In predicate on the "series_id" field.
+func SeriesIDIn(vs ...uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldIn(FieldSeriesID, vs...))
+}
+
+// SeriesIDNotIn applies the NotIn predicate on the "series_id" field.
+func SeriesIDNotIn(vs ...uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNotIn(FieldSeriesID, vs...))
+}
+
+// SeriesIDGT applies the GT predicate on the "series_id" field.
+func SeriesIDGT(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldGT(FieldSeriesID, v))
+}
+
+// SeriesIDGTE applies the GTE predicate on the "series_id" field.
+func SeriesIDGTE(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldGTE(FieldSeriesID, v))
+}
+
+// SeriesIDLT applies the LT predicate on the "series_id" field.
+func SeriesIDLT(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldLT(FieldSeriesID, v))
+}
+
+// SeriesIDLTE applies the LTE predicate on the "series_id" field.
+func SeriesIDLTE(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldLTE(FieldSeriesID, v))
+}
+
+// EpisodeNumberEQ applies the EQ predicate on the "episode_number" field.
+func EpisodeNumberEQ(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldEQ(FieldEpisodeNumber, v))
+}
+
+// EpisodeNumberNEQ applies the NEQ predicate on the "episode_number" field.
+func EpisodeNumberNEQ(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNEQ(FieldEpisodeNumber, v))
+}
+
+// EpisodeNumberIn applies the In predicate on the "episode_number" field.
+func EpisodeNumberIn(vs ...uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldIn(FieldEpisodeNumber, vs...))
+}
+
+// EpisodeNumberNotIn applies the NotIn predicate on the "episode_number" field.
+func EpisodeNumberNotIn(vs ...uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldNotIn(FieldEpisodeNumber, vs...))
+}
+
+// EpisodeNumberGT applies the GT predicate on the "episode_number" field.
+func EpisodeNumberGT(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldGT(FieldEpisodeNumber, v))
+}
+
+// EpisodeNumberGTE applies the GTE predicate on the "episode_number" field.
+func EpisodeNumberGTE(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldGTE(FieldEpisodeNumber, v))
+}
+
+// EpisodeNumberLT applies the LT predicate on the "episode_number" field.
+func EpisodeNumberLT(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldLT(FieldEpisodeNumber, v))
+}
+
+// EpisodeNumberLTE applies the LTE predicate on the "episode_number" field.
+func EpisodeNumberLTE(v uint32) predicate.VideoDraft {
+	return predicate.VideoDraft(sql.FieldLTE(FieldEpisodeNumber, v))
 }
 
 // And groups predicates with the AND operator between them.

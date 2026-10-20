@@ -45,6 +45,7 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent/role"
 	"go-wind-shortplay/app/core/service/internal/data/ent/rolemetadata"
 	"go-wind-shortplay/app/core/service/internal/data/ent/rolepermission"
+	"go-wind-shortplay/app/core/service/internal/data/ent/series"
 	"go-wind-shortplay/app/core/service/internal/data/ent/sysconfig"
 	"go-wind-shortplay/app/core/service/internal/data/ent/task"
 	"go-wind-shortplay/app/core/service/internal/data/ent/tenant"
@@ -169,6 +170,7 @@ func checkColumn(t, c string) error {
 			role.Table:                     role.ValidColumn,
 			rolemetadata.Table:             rolemetadata.ValidColumn,
 			rolepermission.Table:           rolepermission.ValidColumn,
+			series.Table:                   series.ValidColumn,
 			sysconfig.Table:                sysconfig.ValidColumn,
 			task.Table:                     task.ValidColumn,
 			tenant.Table:                   tenant.ValidColumn,

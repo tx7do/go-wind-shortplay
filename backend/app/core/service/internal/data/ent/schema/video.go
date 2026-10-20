@@ -76,6 +76,14 @@ func (Video) Fields() []ent.Field {
 			Comment("作者用户ID").
 			Default(0),
 
+		field.Uint32("series_id").
+			Comment("挂靠剧集ID（0=未挂靠）").
+			Default(0),
+
+		field.Uint32("episode_number").
+			Comment("剧内集号（未挂靠时为 0）").
+			Default(0),
+
 		field.String("reject_reason").
 			Comment("驳回原因").
 			Optional().
@@ -121,6 +129,9 @@ func (Video) Indexes() []ent.Index {
 
 		index.Fields("author_id", "status").
 			StorageKey("idx_sp_video_author_status"),
+
+		index.Fields("series_id", "episode_number").
+			StorageKey("idx_sp_video_series"),
 
 		index.Fields("tenant_id", "status").
 			StorageKey("idx_sp_video_tenant_status"),

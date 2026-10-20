@@ -43,6 +43,7 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent/role"
 	"go-wind-shortplay/app/core/service/internal/data/ent/rolemetadata"
 	"go-wind-shortplay/app/core/service/internal/data/ent/rolepermission"
+	"go-wind-shortplay/app/core/service/internal/data/ent/series"
 	"go-wind-shortplay/app/core/service/internal/data/ent/sysconfig"
 	"go-wind-shortplay/app/core/service/internal/data/ent/task"
 	"go-wind-shortplay/app/core/service/internal/data/ent/tenant"
@@ -71,7 +72,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 58)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 59)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   api.Table,
@@ -1203,6 +1204,30 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[39] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   series.Table,
+			Columns: series.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUint32,
+				Column: series.FieldID,
+			},
+		},
+		Type: "Series",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			series.FieldCreatedAt:   {Type: field.TypeTime, Column: series.FieldCreatedAt},
+			series.FieldUpdatedAt:   {Type: field.TypeTime, Column: series.FieldUpdatedAt},
+			series.FieldDeletedAt:   {Type: field.TypeTime, Column: series.FieldDeletedAt},
+			series.FieldCreatedBy:   {Type: field.TypeUint32, Column: series.FieldCreatedBy},
+			series.FieldUpdatedBy:   {Type: field.TypeUint32, Column: series.FieldUpdatedBy},
+			series.FieldDeletedBy:   {Type: field.TypeUint32, Column: series.FieldDeletedBy},
+			series.FieldTenantID:    {Type: field.TypeUint32, Column: series.FieldTenantID},
+			series.FieldTitle:       {Type: field.TypeString, Column: series.FieldTitle},
+			series.FieldDescription: {Type: field.TypeString, Column: series.FieldDescription},
+			series.FieldCoverURL:    {Type: field.TypeString, Column: series.FieldCoverURL},
+			series.FieldAuthorID:    {Type: field.TypeUint32, Column: series.FieldAuthorID},
+		},
+	}
+	graph.Nodes[40] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   sysconfig.Table,
 			Columns: sysconfig.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -1225,7 +1250,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			sysconfig.FieldAllowedVideoTypes:   {Type: field.TypeJSON, Column: sysconfig.FieldAllowedVideoTypes},
 		},
 	}
-	graph.Nodes[40] = &sqlgraph.Node{
+	graph.Nodes[41] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   task.Table,
 			Columns: task.Columns,
@@ -1252,7 +1277,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			task.FieldEnable:      {Type: field.TypeBool, Column: task.FieldEnable},
 		},
 	}
-	graph.Nodes[41] = &sqlgraph.Node{
+	graph.Nodes[42] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   tenant.Table,
 			Columns: tenant.Columns,
@@ -1285,7 +1310,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			tenant.FieldExpiredAt:        {Type: field.TypeTime, Column: tenant.FieldExpiredAt},
 		},
 	}
-	graph.Nodes[42] = &sqlgraph.Node{
+	graph.Nodes[43] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   ubaevent.Table,
 			Columns: ubaevent.Columns,
@@ -1310,7 +1335,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			ubaevent.FieldOccurredAt:   {Type: field.TypeTime, Column: ubaevent.FieldOccurredAt},
 		},
 	}
-	graph.Nodes[43] = &sqlgraph.Node{
+	graph.Nodes[44] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   uploadtask.Table,
 			Columns: uploadtask.Columns,
@@ -1337,7 +1362,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			uploadtask.FieldAuthorID:       {Type: field.TypeUint32, Column: uploadtask.FieldAuthorID},
 		},
 	}
-	graph.Nodes[44] = &sqlgraph.Node{
+	graph.Nodes[45] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -1373,7 +1398,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			user.FieldStatus:      {Type: field.TypeEnum, Column: user.FieldStatus},
 		},
 	}
-	graph.Nodes[45] = &sqlgraph.Node{
+	graph.Nodes[46] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   usercredential.Table,
 			Columns: usercredential.Columns,
@@ -1406,7 +1431,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			usercredential.FieldResetTokenUsedAt:       {Type: field.TypeTime, Column: usercredential.FieldResetTokenUsedAt},
 		},
 	}
-	graph.Nodes[46] = &sqlgraph.Node{
+	graph.Nodes[47] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   userfollow.Table,
 			Columns: userfollow.Columns,
@@ -1425,7 +1450,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			userfollow.FieldFolloweeID: {Type: field.TypeUint32, Column: userfollow.FieldFolloweeID},
 		},
 	}
-	graph.Nodes[47] = &sqlgraph.Node{
+	graph.Nodes[48] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   userorgunit.Table,
 			Columns: userorgunit.Columns,
@@ -1455,7 +1480,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			userorgunit.FieldStatus:     {Type: field.TypeEnum, Column: userorgunit.FieldStatus},
 		},
 	}
-	graph.Nodes[48] = &sqlgraph.Node{
+	graph.Nodes[49] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   userposition.Table,
 			Columns: userposition.Columns,
@@ -1484,7 +1509,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			userposition.FieldStatus:     {Type: field.TypeEnum, Column: userposition.FieldStatus},
 		},
 	}
-	graph.Nodes[49] = &sqlgraph.Node{
+	graph.Nodes[50] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   userrole.Table,
 			Columns: userrole.Columns,
@@ -1512,7 +1537,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			userrole.FieldStatus:     {Type: field.TypeEnum, Column: userrole.FieldStatus},
 		},
 	}
-	graph.Nodes[50] = &sqlgraph.Node{
+	graph.Nodes[51] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   video.Table,
 			Columns: video.Columns,
@@ -1523,31 +1548,33 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Video",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			video.FieldCreatedAt:    {Type: field.TypeTime, Column: video.FieldCreatedAt},
-			video.FieldUpdatedAt:    {Type: field.TypeTime, Column: video.FieldUpdatedAt},
-			video.FieldDeletedAt:    {Type: field.TypeTime, Column: video.FieldDeletedAt},
-			video.FieldCreatedBy:    {Type: field.TypeUint32, Column: video.FieldCreatedBy},
-			video.FieldUpdatedBy:    {Type: field.TypeUint32, Column: video.FieldUpdatedBy},
-			video.FieldDeletedBy:    {Type: field.TypeUint32, Column: video.FieldDeletedBy},
-			video.FieldTenantID:     {Type: field.TypeUint32, Column: video.FieldTenantID},
-			video.FieldTitle:        {Type: field.TypeString, Column: video.FieldTitle},
-			video.FieldDescription:  {Type: field.TypeString, Column: video.FieldDescription},
-			video.FieldCoverURL:     {Type: field.TypeString, Column: video.FieldCoverURL},
-			video.FieldVideoURL:     {Type: field.TypeString, Column: video.FieldVideoURL},
-			video.FieldDuration:     {Type: field.TypeUint32, Column: video.FieldDuration},
-			video.FieldWidth:        {Type: field.TypeUint32, Column: video.FieldWidth},
-			video.FieldHeight:       {Type: field.TypeUint32, Column: video.FieldHeight},
-			video.FieldStatus:       {Type: field.TypeEnum, Column: video.FieldStatus},
-			video.FieldAuthorID:     {Type: field.TypeUint32, Column: video.FieldAuthorID},
-			video.FieldRejectReason: {Type: field.TypeString, Column: video.FieldRejectReason},
-			video.FieldLikeCount:    {Type: field.TypeUint64, Column: video.FieldLikeCount},
-			video.FieldCollectCount: {Type: field.TypeUint64, Column: video.FieldCollectCount},
-			video.FieldCommentCount: {Type: field.TypeUint64, Column: video.FieldCommentCount},
-			video.FieldViewCount:    {Type: field.TypeUint64, Column: video.FieldViewCount},
-			video.FieldPublishedAt:  {Type: field.TypeTime, Column: video.FieldPublishedAt},
+			video.FieldCreatedAt:     {Type: field.TypeTime, Column: video.FieldCreatedAt},
+			video.FieldUpdatedAt:     {Type: field.TypeTime, Column: video.FieldUpdatedAt},
+			video.FieldDeletedAt:     {Type: field.TypeTime, Column: video.FieldDeletedAt},
+			video.FieldCreatedBy:     {Type: field.TypeUint32, Column: video.FieldCreatedBy},
+			video.FieldUpdatedBy:     {Type: field.TypeUint32, Column: video.FieldUpdatedBy},
+			video.FieldDeletedBy:     {Type: field.TypeUint32, Column: video.FieldDeletedBy},
+			video.FieldTenantID:      {Type: field.TypeUint32, Column: video.FieldTenantID},
+			video.FieldTitle:         {Type: field.TypeString, Column: video.FieldTitle},
+			video.FieldDescription:   {Type: field.TypeString, Column: video.FieldDescription},
+			video.FieldCoverURL:      {Type: field.TypeString, Column: video.FieldCoverURL},
+			video.FieldVideoURL:      {Type: field.TypeString, Column: video.FieldVideoURL},
+			video.FieldDuration:      {Type: field.TypeUint32, Column: video.FieldDuration},
+			video.FieldWidth:         {Type: field.TypeUint32, Column: video.FieldWidth},
+			video.FieldHeight:        {Type: field.TypeUint32, Column: video.FieldHeight},
+			video.FieldStatus:        {Type: field.TypeEnum, Column: video.FieldStatus},
+			video.FieldAuthorID:      {Type: field.TypeUint32, Column: video.FieldAuthorID},
+			video.FieldSeriesID:      {Type: field.TypeUint32, Column: video.FieldSeriesID},
+			video.FieldEpisodeNumber: {Type: field.TypeUint32, Column: video.FieldEpisodeNumber},
+			video.FieldRejectReason:  {Type: field.TypeString, Column: video.FieldRejectReason},
+			video.FieldLikeCount:     {Type: field.TypeUint64, Column: video.FieldLikeCount},
+			video.FieldCollectCount:  {Type: field.TypeUint64, Column: video.FieldCollectCount},
+			video.FieldCommentCount:  {Type: field.TypeUint64, Column: video.FieldCommentCount},
+			video.FieldViewCount:     {Type: field.TypeUint64, Column: video.FieldViewCount},
+			video.FieldPublishedAt:   {Type: field.TypeTime, Column: video.FieldPublishedAt},
 		},
 	}
-	graph.Nodes[51] = &sqlgraph.Node{
+	graph.Nodes[52] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   videocollect.Table,
 			Columns: videocollect.Columns,
@@ -1566,7 +1593,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			videocollect.FieldVideoID:   {Type: field.TypeUint32, Column: videocollect.FieldVideoID},
 		},
 	}
-	graph.Nodes[52] = &sqlgraph.Node{
+	graph.Nodes[53] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   videocomment.Table,
 			Columns: videocomment.Columns,
@@ -1592,7 +1619,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			videocomment.FieldReplyCount: {Type: field.TypeUint64, Column: videocomment.FieldReplyCount},
 		},
 	}
-	graph.Nodes[53] = &sqlgraph.Node{
+	graph.Nodes[54] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   videodraft.Table,
 			Columns: videodraft.Columns,
@@ -1603,26 +1630,28 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "VideoDraft",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			videodraft.FieldCreatedAt:    {Type: field.TypeTime, Column: videodraft.FieldCreatedAt},
-			videodraft.FieldUpdatedAt:    {Type: field.TypeTime, Column: videodraft.FieldUpdatedAt},
-			videodraft.FieldDeletedAt:    {Type: field.TypeTime, Column: videodraft.FieldDeletedAt},
-			videodraft.FieldCreatedBy:    {Type: field.TypeUint32, Column: videodraft.FieldCreatedBy},
-			videodraft.FieldUpdatedBy:    {Type: field.TypeUint32, Column: videodraft.FieldUpdatedBy},
-			videodraft.FieldDeletedBy:    {Type: field.TypeUint32, Column: videodraft.FieldDeletedBy},
-			videodraft.FieldTenantID:     {Type: field.TypeUint32, Column: videodraft.FieldTenantID},
-			videodraft.FieldTitle:        {Type: field.TypeString, Column: videodraft.FieldTitle},
-			videodraft.FieldDescription:  {Type: field.TypeString, Column: videodraft.FieldDescription},
-			videodraft.FieldTags:         {Type: field.TypeJSON, Column: videodraft.FieldTags},
-			videodraft.FieldCoverURL:     {Type: field.TypeString, Column: videodraft.FieldCoverURL},
-			videodraft.FieldVideoURL:     {Type: field.TypeString, Column: videodraft.FieldVideoURL},
-			videodraft.FieldDuration:     {Type: field.TypeUint32, Column: videodraft.FieldDuration},
-			videodraft.FieldWidth:        {Type: field.TypeUint32, Column: videodraft.FieldWidth},
-			videodraft.FieldHeight:       {Type: field.TypeUint32, Column: videodraft.FieldHeight},
-			videodraft.FieldUploadTaskID: {Type: field.TypeString, Column: videodraft.FieldUploadTaskID},
-			videodraft.FieldAuthorID:     {Type: field.TypeUint32, Column: videodraft.FieldAuthorID},
+			videodraft.FieldCreatedAt:     {Type: field.TypeTime, Column: videodraft.FieldCreatedAt},
+			videodraft.FieldUpdatedAt:     {Type: field.TypeTime, Column: videodraft.FieldUpdatedAt},
+			videodraft.FieldDeletedAt:     {Type: field.TypeTime, Column: videodraft.FieldDeletedAt},
+			videodraft.FieldCreatedBy:     {Type: field.TypeUint32, Column: videodraft.FieldCreatedBy},
+			videodraft.FieldUpdatedBy:     {Type: field.TypeUint32, Column: videodraft.FieldUpdatedBy},
+			videodraft.FieldDeletedBy:     {Type: field.TypeUint32, Column: videodraft.FieldDeletedBy},
+			videodraft.FieldTenantID:      {Type: field.TypeUint32, Column: videodraft.FieldTenantID},
+			videodraft.FieldTitle:         {Type: field.TypeString, Column: videodraft.FieldTitle},
+			videodraft.FieldDescription:   {Type: field.TypeString, Column: videodraft.FieldDescription},
+			videodraft.FieldTags:          {Type: field.TypeJSON, Column: videodraft.FieldTags},
+			videodraft.FieldCoverURL:      {Type: field.TypeString, Column: videodraft.FieldCoverURL},
+			videodraft.FieldVideoURL:      {Type: field.TypeString, Column: videodraft.FieldVideoURL},
+			videodraft.FieldDuration:      {Type: field.TypeUint32, Column: videodraft.FieldDuration},
+			videodraft.FieldWidth:         {Type: field.TypeUint32, Column: videodraft.FieldWidth},
+			videodraft.FieldHeight:        {Type: field.TypeUint32, Column: videodraft.FieldHeight},
+			videodraft.FieldUploadTaskID:  {Type: field.TypeString, Column: videodraft.FieldUploadTaskID},
+			videodraft.FieldAuthorID:      {Type: field.TypeUint32, Column: videodraft.FieldAuthorID},
+			videodraft.FieldSeriesID:      {Type: field.TypeUint32, Column: videodraft.FieldSeriesID},
+			videodraft.FieldEpisodeNumber: {Type: field.TypeUint32, Column: videodraft.FieldEpisodeNumber},
 		},
 	}
-	graph.Nodes[54] = &sqlgraph.Node{
+	graph.Nodes[55] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   videolike.Table,
 			Columns: videolike.Columns,
@@ -1642,7 +1671,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			videolike.FieldTargetID:   {Type: field.TypeUint32, Column: videolike.FieldTargetID},
 		},
 	}
-	graph.Nodes[55] = &sqlgraph.Node{
+	graph.Nodes[56] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   videoreport.Table,
 			Columns: videoreport.Columns,
@@ -1671,7 +1700,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			videoreport.FieldHandledAt:   {Type: field.TypeTime, Column: videoreport.FieldHandledAt},
 		},
 	}
-	graph.Nodes[56] = &sqlgraph.Node{
+	graph.Nodes[57] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   videotag.Table,
 			Columns: videotag.Columns,
@@ -1693,7 +1722,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			videotag.FieldVideoCount: {Type: field.TypeUint64, Column: videotag.FieldVideoCount},
 		},
 	}
-	graph.Nodes[57] = &sqlgraph.Node{
+	graph.Nodes[58] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   videotagrel.Table,
 			Columns: videotagrel.Columns,
@@ -6756,6 +6785,101 @@ func (f *RolePermissionFilter) WherePriority(p entql.Int32P) {
 }
 
 // addPredicate implements the predicateAdder interface.
+func (_q *SeriesQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the SeriesQuery builder.
+func (_q *SeriesQuery) Filter() *SeriesFilter {
+	return &SeriesFilter{config: _q.config, predicateAdder: _q}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *SeriesMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the SeriesMutation builder.
+func (m *SeriesMutation) Filter() *SeriesFilter {
+	return &SeriesFilter{config: m.config, predicateAdder: m}
+}
+
+// SeriesFilter provides a generic filtering capability at runtime for SeriesQuery.
+type SeriesFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *SeriesFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[39].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *SeriesFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(series.FieldID))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *SeriesFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(series.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *SeriesFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(series.FieldUpdatedAt))
+}
+
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *SeriesFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(series.FieldDeletedAt))
+}
+
+// WhereCreatedBy applies the entql uint32 predicate on the created_by field.
+func (f *SeriesFilter) WhereCreatedBy(p entql.Uint32P) {
+	f.Where(p.Field(series.FieldCreatedBy))
+}
+
+// WhereUpdatedBy applies the entql uint32 predicate on the updated_by field.
+func (f *SeriesFilter) WhereUpdatedBy(p entql.Uint32P) {
+	f.Where(p.Field(series.FieldUpdatedBy))
+}
+
+// WhereDeletedBy applies the entql uint32 predicate on the deleted_by field.
+func (f *SeriesFilter) WhereDeletedBy(p entql.Uint32P) {
+	f.Where(p.Field(series.FieldDeletedBy))
+}
+
+// WhereTenantID applies the entql uint32 predicate on the tenant_id field.
+func (f *SeriesFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(series.FieldTenantID))
+}
+
+// WhereTitle applies the entql string predicate on the title field.
+func (f *SeriesFilter) WhereTitle(p entql.StringP) {
+	f.Where(p.Field(series.FieldTitle))
+}
+
+// WhereDescription applies the entql string predicate on the description field.
+func (f *SeriesFilter) WhereDescription(p entql.StringP) {
+	f.Where(p.Field(series.FieldDescription))
+}
+
+// WhereCoverURL applies the entql string predicate on the cover_url field.
+func (f *SeriesFilter) WhereCoverURL(p entql.StringP) {
+	f.Where(p.Field(series.FieldCoverURL))
+}
+
+// WhereAuthorID applies the entql uint32 predicate on the author_id field.
+func (f *SeriesFilter) WhereAuthorID(p entql.Uint32P) {
+	f.Where(p.Field(series.FieldAuthorID))
+}
+
+// addPredicate implements the predicateAdder interface.
 func (_q *SysConfigQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
 }
@@ -6784,7 +6908,7 @@ type SysConfigFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *SysConfigFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[39].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[40].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -6879,7 +7003,7 @@ type TaskFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TaskFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[40].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[41].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -6989,7 +7113,7 @@ type TenantFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TenantFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[41].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[42].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -7129,7 +7253,7 @@ type UbaEventFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UbaEventFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[42].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[43].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -7229,7 +7353,7 @@ type UploadTaskFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UploadTaskFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[43].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[44].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -7339,7 +7463,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[44].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[45].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -7494,7 +7618,7 @@ type UserCredentialFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserCredentialFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[45].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[46].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -7634,7 +7758,7 @@ type UserFollowFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFollowFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[46].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[47].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -7704,7 +7828,7 @@ type UserOrgUnitFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserOrgUnitFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[47].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[48].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -7829,7 +7953,7 @@ type UserPositionFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserPositionFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[48].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[49].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -7949,7 +8073,7 @@ type UserRoleFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserRoleFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[49].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[50].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8064,7 +8188,7 @@ type VideoFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *VideoFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[50].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[51].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8155,6 +8279,16 @@ func (f *VideoFilter) WhereAuthorID(p entql.Uint32P) {
 	f.Where(p.Field(video.FieldAuthorID))
 }
 
+// WhereSeriesID applies the entql uint32 predicate on the series_id field.
+func (f *VideoFilter) WhereSeriesID(p entql.Uint32P) {
+	f.Where(p.Field(video.FieldSeriesID))
+}
+
+// WhereEpisodeNumber applies the entql uint32 predicate on the episode_number field.
+func (f *VideoFilter) WhereEpisodeNumber(p entql.Uint32P) {
+	f.Where(p.Field(video.FieldEpisodeNumber))
+}
+
 // WhereRejectReason applies the entql string predicate on the reject_reason field.
 func (f *VideoFilter) WhereRejectReason(p entql.StringP) {
 	f.Where(p.Field(video.FieldRejectReason))
@@ -8214,7 +8348,7 @@ type VideoCollectFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *VideoCollectFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[51].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[52].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8284,7 +8418,7 @@ type VideoCommentFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *VideoCommentFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[52].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[53].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8389,7 +8523,7 @@ type VideoDraftFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *VideoDraftFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[53].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[54].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8485,6 +8619,16 @@ func (f *VideoDraftFilter) WhereAuthorID(p entql.Uint32P) {
 	f.Where(p.Field(videodraft.FieldAuthorID))
 }
 
+// WhereSeriesID applies the entql uint32 predicate on the series_id field.
+func (f *VideoDraftFilter) WhereSeriesID(p entql.Uint32P) {
+	f.Where(p.Field(videodraft.FieldSeriesID))
+}
+
+// WhereEpisodeNumber applies the entql uint32 predicate on the episode_number field.
+func (f *VideoDraftFilter) WhereEpisodeNumber(p entql.Uint32P) {
+	f.Where(p.Field(videodraft.FieldEpisodeNumber))
+}
+
 // addPredicate implements the predicateAdder interface.
 func (_q *VideoLikeQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
@@ -8514,7 +8658,7 @@ type VideoLikeFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *VideoLikeFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[54].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[55].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8589,7 +8733,7 @@ type VideoReportFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *VideoReportFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[55].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[56].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8709,7 +8853,7 @@ type VideoTagFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *VideoTagFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[56].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[57].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8794,7 +8938,7 @@ type VideoTagRelFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *VideoTagRelFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[57].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[58].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})

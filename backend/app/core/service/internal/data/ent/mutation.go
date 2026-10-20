@@ -49,6 +49,7 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent/role"
 	"go-wind-shortplay/app/core/service/internal/data/ent/rolemetadata"
 	"go-wind-shortplay/app/core/service/internal/data/ent/rolepermission"
+	"go-wind-shortplay/app/core/service/internal/data/ent/series"
 	"go-wind-shortplay/app/core/service/internal/data/ent/sysconfig"
 	"go-wind-shortplay/app/core/service/internal/data/ent/task"
 	"go-wind-shortplay/app/core/service/internal/data/ent/tenant"
@@ -123,6 +124,7 @@ const (
 	TypeRole                     = "Role"
 	TypeRoleMetadata             = "RoleMetadata"
 	TypeRolePermission           = "RolePermission"
+	TypeSeries                   = "Series"
 	TypeSysConfig                = "SysConfig"
 	TypeTask                     = "Task"
 	TypeTenant                   = "Tenant"
@@ -63888,6 +63890,1224 @@ func (m *RolePermissionMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown RolePermission edge %s", name)
 }
 
+// SeriesMutation represents an operation that mutates the Series nodes in the graph.
+type SeriesMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uint32
+	created_at    *time.Time
+	updated_at    *time.Time
+	deleted_at    *time.Time
+	created_by    *uint32
+	addcreated_by *int32
+	updated_by    *uint32
+	addupdated_by *int32
+	deleted_by    *uint32
+	adddeleted_by *int32
+	tenant_id     *uint32
+	addtenant_id  *int32
+	title         *string
+	description   *string
+	cover_url     *string
+	author_id     *uint32
+	addauthor_id  *int32
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Series, error)
+	predicates    []predicate.Series
+}
+
+var _ ent.Mutation = (*SeriesMutation)(nil)
+
+// seriesOption allows management of the mutation configuration using functional options.
+type seriesOption func(*SeriesMutation)
+
+// newSeriesMutation creates new mutation for the Series entity.
+func newSeriesMutation(c config, op Op, opts ...seriesOption) *SeriesMutation {
+	m := &SeriesMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSeries,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSeriesID sets the ID field of the mutation.
+func withSeriesID(id uint32) seriesOption {
+	return func(m *SeriesMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Series
+		)
+		m.oldValue = func(ctx context.Context) (*Series, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Series.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSeries sets the old Series of the mutation.
+func withSeries(node *Series) seriesOption {
+	return func(m *SeriesMutation) {
+		m.oldValue = func(context.Context) (*Series, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SeriesMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SeriesMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Series entities.
+func (m *SeriesMutation) SetID(id uint32) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SeriesMutation) ID() (id uint32, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SeriesMutation) IDs(ctx context.Context) ([]uint32, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uint32{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Series.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *SeriesMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *SeriesMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Series entity.
+// If the Series object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesMutation) OldCreatedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ClearCreatedAt clears the value of the "created_at" field.
+func (m *SeriesMutation) ClearCreatedAt() {
+	m.created_at = nil
+	m.clearedFields[series.FieldCreatedAt] = struct{}{}
+}
+
+// CreatedAtCleared returns if the "created_at" field was cleared in this mutation.
+func (m *SeriesMutation) CreatedAtCleared() bool {
+	_, ok := m.clearedFields[series.FieldCreatedAt]
+	return ok
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *SeriesMutation) ResetCreatedAt() {
+	m.created_at = nil
+	delete(m.clearedFields, series.FieldCreatedAt)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *SeriesMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *SeriesMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Series entity.
+// If the Series object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesMutation) OldUpdatedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (m *SeriesMutation) ClearUpdatedAt() {
+	m.updated_at = nil
+	m.clearedFields[series.FieldUpdatedAt] = struct{}{}
+}
+
+// UpdatedAtCleared returns if the "updated_at" field was cleared in this mutation.
+func (m *SeriesMutation) UpdatedAtCleared() bool {
+	_, ok := m.clearedFields[series.FieldUpdatedAt]
+	return ok
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *SeriesMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+	delete(m.clearedFields, series.FieldUpdatedAt)
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *SeriesMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *SeriesMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the Series entity.
+// If the Series object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *SeriesMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[series.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *SeriesMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[series.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *SeriesMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, series.FieldDeletedAt)
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (m *SeriesMutation) SetCreatedBy(u uint32) {
+	m.created_by = &u
+	m.addcreated_by = nil
+}
+
+// CreatedBy returns the value of the "created_by" field in the mutation.
+func (m *SeriesMutation) CreatedBy() (r uint32, exists bool) {
+	v := m.created_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedBy returns the old "created_by" field's value of the Series entity.
+// If the Series object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesMutation) OldCreatedBy(ctx context.Context) (v *uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
+	}
+	return oldValue.CreatedBy, nil
+}
+
+// AddCreatedBy adds u to the "created_by" field.
+func (m *SeriesMutation) AddCreatedBy(u int32) {
+	if m.addcreated_by != nil {
+		*m.addcreated_by += u
+	} else {
+		m.addcreated_by = &u
+	}
+}
+
+// AddedCreatedBy returns the value that was added to the "created_by" field in this mutation.
+func (m *SeriesMutation) AddedCreatedBy() (r int32, exists bool) {
+	v := m.addcreated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (m *SeriesMutation) ClearCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+	m.clearedFields[series.FieldCreatedBy] = struct{}{}
+}
+
+// CreatedByCleared returns if the "created_by" field was cleared in this mutation.
+func (m *SeriesMutation) CreatedByCleared() bool {
+	_, ok := m.clearedFields[series.FieldCreatedBy]
+	return ok
+}
+
+// ResetCreatedBy resets all changes to the "created_by" field.
+func (m *SeriesMutation) ResetCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+	delete(m.clearedFields, series.FieldCreatedBy)
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (m *SeriesMutation) SetUpdatedBy(u uint32) {
+	m.updated_by = &u
+	m.addupdated_by = nil
+}
+
+// UpdatedBy returns the value of the "updated_by" field in the mutation.
+func (m *SeriesMutation) UpdatedBy() (r uint32, exists bool) {
+	v := m.updated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedBy returns the old "updated_by" field's value of the Series entity.
+// If the Series object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesMutation) OldUpdatedBy(ctx context.Context) (v *uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedBy: %w", err)
+	}
+	return oldValue.UpdatedBy, nil
+}
+
+// AddUpdatedBy adds u to the "updated_by" field.
+func (m *SeriesMutation) AddUpdatedBy(u int32) {
+	if m.addupdated_by != nil {
+		*m.addupdated_by += u
+	} else {
+		m.addupdated_by = &u
+	}
+}
+
+// AddedUpdatedBy returns the value that was added to the "updated_by" field in this mutation.
+func (m *SeriesMutation) AddedUpdatedBy() (r int32, exists bool) {
+	v := m.addupdated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (m *SeriesMutation) ClearUpdatedBy() {
+	m.updated_by = nil
+	m.addupdated_by = nil
+	m.clearedFields[series.FieldUpdatedBy] = struct{}{}
+}
+
+// UpdatedByCleared returns if the "updated_by" field was cleared in this mutation.
+func (m *SeriesMutation) UpdatedByCleared() bool {
+	_, ok := m.clearedFields[series.FieldUpdatedBy]
+	return ok
+}
+
+// ResetUpdatedBy resets all changes to the "updated_by" field.
+func (m *SeriesMutation) ResetUpdatedBy() {
+	m.updated_by = nil
+	m.addupdated_by = nil
+	delete(m.clearedFields, series.FieldUpdatedBy)
+}
+
+// SetDeletedBy sets the "deleted_by" field.
+func (m *SeriesMutation) SetDeletedBy(u uint32) {
+	m.deleted_by = &u
+	m.adddeleted_by = nil
+}
+
+// DeletedBy returns the value of the "deleted_by" field in the mutation.
+func (m *SeriesMutation) DeletedBy() (r uint32, exists bool) {
+	v := m.deleted_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedBy returns the old "deleted_by" field's value of the Series entity.
+// If the Series object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesMutation) OldDeletedBy(ctx context.Context) (v *uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedBy: %w", err)
+	}
+	return oldValue.DeletedBy, nil
+}
+
+// AddDeletedBy adds u to the "deleted_by" field.
+func (m *SeriesMutation) AddDeletedBy(u int32) {
+	if m.adddeleted_by != nil {
+		*m.adddeleted_by += u
+	} else {
+		m.adddeleted_by = &u
+	}
+}
+
+// AddedDeletedBy returns the value that was added to the "deleted_by" field in this mutation.
+func (m *SeriesMutation) AddedDeletedBy() (r int32, exists bool) {
+	v := m.adddeleted_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDeletedBy clears the value of the "deleted_by" field.
+func (m *SeriesMutation) ClearDeletedBy() {
+	m.deleted_by = nil
+	m.adddeleted_by = nil
+	m.clearedFields[series.FieldDeletedBy] = struct{}{}
+}
+
+// DeletedByCleared returns if the "deleted_by" field was cleared in this mutation.
+func (m *SeriesMutation) DeletedByCleared() bool {
+	_, ok := m.clearedFields[series.FieldDeletedBy]
+	return ok
+}
+
+// ResetDeletedBy resets all changes to the "deleted_by" field.
+func (m *SeriesMutation) ResetDeletedBy() {
+	m.deleted_by = nil
+	m.adddeleted_by = nil
+	delete(m.clearedFields, series.FieldDeletedBy)
+}
+
+// SetTenantID sets the "tenant_id" field.
+func (m *SeriesMutation) SetTenantID(u uint32) {
+	m.tenant_id = &u
+	m.addtenant_id = nil
+}
+
+// TenantID returns the value of the "tenant_id" field in the mutation.
+func (m *SeriesMutation) TenantID() (r uint32, exists bool) {
+	v := m.tenant_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTenantID returns the old "tenant_id" field's value of the Series entity.
+// If the Series object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesMutation) OldTenantID(ctx context.Context) (v *uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTenantID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTenantID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTenantID: %w", err)
+	}
+	return oldValue.TenantID, nil
+}
+
+// AddTenantID adds u to the "tenant_id" field.
+func (m *SeriesMutation) AddTenantID(u int32) {
+	if m.addtenant_id != nil {
+		*m.addtenant_id += u
+	} else {
+		m.addtenant_id = &u
+	}
+}
+
+// AddedTenantID returns the value that was added to the "tenant_id" field in this mutation.
+func (m *SeriesMutation) AddedTenantID() (r int32, exists bool) {
+	v := m.addtenant_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearTenantID clears the value of the "tenant_id" field.
+func (m *SeriesMutation) ClearTenantID() {
+	m.tenant_id = nil
+	m.addtenant_id = nil
+	m.clearedFields[series.FieldTenantID] = struct{}{}
+}
+
+// TenantIDCleared returns if the "tenant_id" field was cleared in this mutation.
+func (m *SeriesMutation) TenantIDCleared() bool {
+	_, ok := m.clearedFields[series.FieldTenantID]
+	return ok
+}
+
+// ResetTenantID resets all changes to the "tenant_id" field.
+func (m *SeriesMutation) ResetTenantID() {
+	m.tenant_id = nil
+	m.addtenant_id = nil
+	delete(m.clearedFields, series.FieldTenantID)
+}
+
+// SetTitle sets the "title" field.
+func (m *SeriesMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *SeriesMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the Series entity.
+// If the Series object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *SeriesMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *SeriesMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *SeriesMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the Series entity.
+// If the Series object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesMutation) OldDescription(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *SeriesMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[series.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *SeriesMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[series.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *SeriesMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, series.FieldDescription)
+}
+
+// SetCoverURL sets the "cover_url" field.
+func (m *SeriesMutation) SetCoverURL(s string) {
+	m.cover_url = &s
+}
+
+// CoverURL returns the value of the "cover_url" field in the mutation.
+func (m *SeriesMutation) CoverURL() (r string, exists bool) {
+	v := m.cover_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCoverURL returns the old "cover_url" field's value of the Series entity.
+// If the Series object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesMutation) OldCoverURL(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCoverURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCoverURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCoverURL: %w", err)
+	}
+	return oldValue.CoverURL, nil
+}
+
+// ClearCoverURL clears the value of the "cover_url" field.
+func (m *SeriesMutation) ClearCoverURL() {
+	m.cover_url = nil
+	m.clearedFields[series.FieldCoverURL] = struct{}{}
+}
+
+// CoverURLCleared returns if the "cover_url" field was cleared in this mutation.
+func (m *SeriesMutation) CoverURLCleared() bool {
+	_, ok := m.clearedFields[series.FieldCoverURL]
+	return ok
+}
+
+// ResetCoverURL resets all changes to the "cover_url" field.
+func (m *SeriesMutation) ResetCoverURL() {
+	m.cover_url = nil
+	delete(m.clearedFields, series.FieldCoverURL)
+}
+
+// SetAuthorID sets the "author_id" field.
+func (m *SeriesMutation) SetAuthorID(u uint32) {
+	m.author_id = &u
+	m.addauthor_id = nil
+}
+
+// AuthorID returns the value of the "author_id" field in the mutation.
+func (m *SeriesMutation) AuthorID() (r uint32, exists bool) {
+	v := m.author_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAuthorID returns the old "author_id" field's value of the Series entity.
+// If the Series object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesMutation) OldAuthorID(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAuthorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAuthorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAuthorID: %w", err)
+	}
+	return oldValue.AuthorID, nil
+}
+
+// AddAuthorID adds u to the "author_id" field.
+func (m *SeriesMutation) AddAuthorID(u int32) {
+	if m.addauthor_id != nil {
+		*m.addauthor_id += u
+	} else {
+		m.addauthor_id = &u
+	}
+}
+
+// AddedAuthorID returns the value that was added to the "author_id" field in this mutation.
+func (m *SeriesMutation) AddedAuthorID() (r int32, exists bool) {
+	v := m.addauthor_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAuthorID resets all changes to the "author_id" field.
+func (m *SeriesMutation) ResetAuthorID() {
+	m.author_id = nil
+	m.addauthor_id = nil
+}
+
+// Where appends a list predicates to the SeriesMutation builder.
+func (m *SeriesMutation) Where(ps ...predicate.Series) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SeriesMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SeriesMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Series, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SeriesMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SeriesMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Series).
+func (m *SeriesMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SeriesMutation) Fields() []string {
+	fields := make([]string, 0, 11)
+	if m.created_at != nil {
+		fields = append(fields, series.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, series.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, series.FieldDeletedAt)
+	}
+	if m.created_by != nil {
+		fields = append(fields, series.FieldCreatedBy)
+	}
+	if m.updated_by != nil {
+		fields = append(fields, series.FieldUpdatedBy)
+	}
+	if m.deleted_by != nil {
+		fields = append(fields, series.FieldDeletedBy)
+	}
+	if m.tenant_id != nil {
+		fields = append(fields, series.FieldTenantID)
+	}
+	if m.title != nil {
+		fields = append(fields, series.FieldTitle)
+	}
+	if m.description != nil {
+		fields = append(fields, series.FieldDescription)
+	}
+	if m.cover_url != nil {
+		fields = append(fields, series.FieldCoverURL)
+	}
+	if m.author_id != nil {
+		fields = append(fields, series.FieldAuthorID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SeriesMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case series.FieldCreatedAt:
+		return m.CreatedAt()
+	case series.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case series.FieldDeletedAt:
+		return m.DeletedAt()
+	case series.FieldCreatedBy:
+		return m.CreatedBy()
+	case series.FieldUpdatedBy:
+		return m.UpdatedBy()
+	case series.FieldDeletedBy:
+		return m.DeletedBy()
+	case series.FieldTenantID:
+		return m.TenantID()
+	case series.FieldTitle:
+		return m.Title()
+	case series.FieldDescription:
+		return m.Description()
+	case series.FieldCoverURL:
+		return m.CoverURL()
+	case series.FieldAuthorID:
+		return m.AuthorID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SeriesMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case series.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case series.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case series.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case series.FieldCreatedBy:
+		return m.OldCreatedBy(ctx)
+	case series.FieldUpdatedBy:
+		return m.OldUpdatedBy(ctx)
+	case series.FieldDeletedBy:
+		return m.OldDeletedBy(ctx)
+	case series.FieldTenantID:
+		return m.OldTenantID(ctx)
+	case series.FieldTitle:
+		return m.OldTitle(ctx)
+	case series.FieldDescription:
+		return m.OldDescription(ctx)
+	case series.FieldCoverURL:
+		return m.OldCoverURL(ctx)
+	case series.FieldAuthorID:
+		return m.OldAuthorID(ctx)
+	}
+	return nil, fmt.Errorf("unknown Series field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SeriesMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case series.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case series.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case series.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case series.FieldCreatedBy:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedBy(v)
+		return nil
+	case series.FieldUpdatedBy:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedBy(v)
+		return nil
+	case series.FieldDeletedBy:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedBy(v)
+		return nil
+	case series.FieldTenantID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTenantID(v)
+		return nil
+	case series.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case series.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case series.FieldCoverURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCoverURL(v)
+		return nil
+	case series.FieldAuthorID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAuthorID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Series field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SeriesMutation) AddedFields() []string {
+	var fields []string
+	if m.addcreated_by != nil {
+		fields = append(fields, series.FieldCreatedBy)
+	}
+	if m.addupdated_by != nil {
+		fields = append(fields, series.FieldUpdatedBy)
+	}
+	if m.adddeleted_by != nil {
+		fields = append(fields, series.FieldDeletedBy)
+	}
+	if m.addtenant_id != nil {
+		fields = append(fields, series.FieldTenantID)
+	}
+	if m.addauthor_id != nil {
+		fields = append(fields, series.FieldAuthorID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SeriesMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case series.FieldCreatedBy:
+		return m.AddedCreatedBy()
+	case series.FieldUpdatedBy:
+		return m.AddedUpdatedBy()
+	case series.FieldDeletedBy:
+		return m.AddedDeletedBy()
+	case series.FieldTenantID:
+		return m.AddedTenantID()
+	case series.FieldAuthorID:
+		return m.AddedAuthorID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SeriesMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case series.FieldCreatedBy:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatedBy(v)
+		return nil
+	case series.FieldUpdatedBy:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUpdatedBy(v)
+		return nil
+	case series.FieldDeletedBy:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDeletedBy(v)
+		return nil
+	case series.FieldTenantID:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTenantID(v)
+		return nil
+	case series.FieldAuthorID:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAuthorID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Series numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SeriesMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(series.FieldCreatedAt) {
+		fields = append(fields, series.FieldCreatedAt)
+	}
+	if m.FieldCleared(series.FieldUpdatedAt) {
+		fields = append(fields, series.FieldUpdatedAt)
+	}
+	if m.FieldCleared(series.FieldDeletedAt) {
+		fields = append(fields, series.FieldDeletedAt)
+	}
+	if m.FieldCleared(series.FieldCreatedBy) {
+		fields = append(fields, series.FieldCreatedBy)
+	}
+	if m.FieldCleared(series.FieldUpdatedBy) {
+		fields = append(fields, series.FieldUpdatedBy)
+	}
+	if m.FieldCleared(series.FieldDeletedBy) {
+		fields = append(fields, series.FieldDeletedBy)
+	}
+	if m.FieldCleared(series.FieldTenantID) {
+		fields = append(fields, series.FieldTenantID)
+	}
+	if m.FieldCleared(series.FieldDescription) {
+		fields = append(fields, series.FieldDescription)
+	}
+	if m.FieldCleared(series.FieldCoverURL) {
+		fields = append(fields, series.FieldCoverURL)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SeriesMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SeriesMutation) ClearField(name string) error {
+	switch name {
+	case series.FieldCreatedAt:
+		m.ClearCreatedAt()
+		return nil
+	case series.FieldUpdatedAt:
+		m.ClearUpdatedAt()
+		return nil
+	case series.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case series.FieldCreatedBy:
+		m.ClearCreatedBy()
+		return nil
+	case series.FieldUpdatedBy:
+		m.ClearUpdatedBy()
+		return nil
+	case series.FieldDeletedBy:
+		m.ClearDeletedBy()
+		return nil
+	case series.FieldTenantID:
+		m.ClearTenantID()
+		return nil
+	case series.FieldDescription:
+		m.ClearDescription()
+		return nil
+	case series.FieldCoverURL:
+		m.ClearCoverURL()
+		return nil
+	}
+	return fmt.Errorf("unknown Series nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SeriesMutation) ResetField(name string) error {
+	switch name {
+	case series.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case series.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case series.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case series.FieldCreatedBy:
+		m.ResetCreatedBy()
+		return nil
+	case series.FieldUpdatedBy:
+		m.ResetUpdatedBy()
+		return nil
+	case series.FieldDeletedBy:
+		m.ResetDeletedBy()
+		return nil
+	case series.FieldTenantID:
+		m.ResetTenantID()
+		return nil
+	case series.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case series.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case series.FieldCoverURL:
+		m.ResetCoverURL()
+		return nil
+	case series.FieldAuthorID:
+		m.ResetAuthorID()
+		return nil
+	}
+	return fmt.Errorf("unknown Series field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SeriesMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SeriesMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SeriesMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SeriesMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SeriesMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SeriesMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SeriesMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Series unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SeriesMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Series edge %s", name)
+}
+
 // SysConfigMutation represents an operation that mutates the SysConfig nodes in the graph.
 type SysConfigMutation struct {
 	config
@@ -80627,47 +81847,51 @@ func (m *UserRoleMutation) ResetEdge(name string) error {
 // VideoMutation represents an operation that mutates the Video nodes in the graph.
 type VideoMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *uint32
-	created_at       *time.Time
-	updated_at       *time.Time
-	deleted_at       *time.Time
-	created_by       *uint32
-	addcreated_by    *int32
-	updated_by       *uint32
-	addupdated_by    *int32
-	deleted_by       *uint32
-	adddeleted_by    *int32
-	tenant_id        *uint32
-	addtenant_id     *int32
-	title            *string
-	description      *string
-	cover_url        *string
-	video_url        *string
-	duration         *uint32
-	addduration      *int32
-	width            *uint32
-	addwidth         *int32
-	height           *uint32
-	addheight        *int32
-	status           *video.Status
-	author_id        *uint32
-	addauthor_id     *int32
-	reject_reason    *string
-	like_count       *uint64
-	addlike_count    *int64
-	collect_count    *uint64
-	addcollect_count *int64
-	comment_count    *uint64
-	addcomment_count *int64
-	view_count       *uint64
-	addview_count    *int64
-	published_at     *time.Time
-	clearedFields    map[string]struct{}
-	done             bool
-	oldValue         func(context.Context) (*Video, error)
-	predicates       []predicate.Video
+	op                Op
+	typ               string
+	id                *uint32
+	created_at        *time.Time
+	updated_at        *time.Time
+	deleted_at        *time.Time
+	created_by        *uint32
+	addcreated_by     *int32
+	updated_by        *uint32
+	addupdated_by     *int32
+	deleted_by        *uint32
+	adddeleted_by     *int32
+	tenant_id         *uint32
+	addtenant_id      *int32
+	title             *string
+	description       *string
+	cover_url         *string
+	video_url         *string
+	duration          *uint32
+	addduration       *int32
+	width             *uint32
+	addwidth          *int32
+	height            *uint32
+	addheight         *int32
+	status            *video.Status
+	author_id         *uint32
+	addauthor_id      *int32
+	series_id         *uint32
+	addseries_id      *int32
+	episode_number    *uint32
+	addepisode_number *int32
+	reject_reason     *string
+	like_count        *uint64
+	addlike_count     *int64
+	collect_count     *uint64
+	addcollect_count  *int64
+	comment_count     *uint64
+	addcomment_count  *int64
+	view_count        *uint64
+	addview_count     *int64
+	published_at      *time.Time
+	clearedFields     map[string]struct{}
+	done              bool
+	oldValue          func(context.Context) (*Video, error)
+	predicates        []predicate.Video
 }
 
 var _ ent.Mutation = (*VideoMutation)(nil)
@@ -81644,6 +82868,118 @@ func (m *VideoMutation) ResetAuthorID() {
 	m.addauthor_id = nil
 }
 
+// SetSeriesID sets the "series_id" field.
+func (m *VideoMutation) SetSeriesID(u uint32) {
+	m.series_id = &u
+	m.addseries_id = nil
+}
+
+// SeriesID returns the value of the "series_id" field in the mutation.
+func (m *VideoMutation) SeriesID() (r uint32, exists bool) {
+	v := m.series_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSeriesID returns the old "series_id" field's value of the Video entity.
+// If the Video object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VideoMutation) OldSeriesID(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSeriesID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSeriesID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSeriesID: %w", err)
+	}
+	return oldValue.SeriesID, nil
+}
+
+// AddSeriesID adds u to the "series_id" field.
+func (m *VideoMutation) AddSeriesID(u int32) {
+	if m.addseries_id != nil {
+		*m.addseries_id += u
+	} else {
+		m.addseries_id = &u
+	}
+}
+
+// AddedSeriesID returns the value that was added to the "series_id" field in this mutation.
+func (m *VideoMutation) AddedSeriesID() (r int32, exists bool) {
+	v := m.addseries_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSeriesID resets all changes to the "series_id" field.
+func (m *VideoMutation) ResetSeriesID() {
+	m.series_id = nil
+	m.addseries_id = nil
+}
+
+// SetEpisodeNumber sets the "episode_number" field.
+func (m *VideoMutation) SetEpisodeNumber(u uint32) {
+	m.episode_number = &u
+	m.addepisode_number = nil
+}
+
+// EpisodeNumber returns the value of the "episode_number" field in the mutation.
+func (m *VideoMutation) EpisodeNumber() (r uint32, exists bool) {
+	v := m.episode_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEpisodeNumber returns the old "episode_number" field's value of the Video entity.
+// If the Video object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VideoMutation) OldEpisodeNumber(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEpisodeNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEpisodeNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEpisodeNumber: %w", err)
+	}
+	return oldValue.EpisodeNumber, nil
+}
+
+// AddEpisodeNumber adds u to the "episode_number" field.
+func (m *VideoMutation) AddEpisodeNumber(u int32) {
+	if m.addepisode_number != nil {
+		*m.addepisode_number += u
+	} else {
+		m.addepisode_number = &u
+	}
+}
+
+// AddedEpisodeNumber returns the value that was added to the "episode_number" field in this mutation.
+func (m *VideoMutation) AddedEpisodeNumber() (r int32, exists bool) {
+	v := m.addepisode_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetEpisodeNumber resets all changes to the "episode_number" field.
+func (m *VideoMutation) ResetEpisodeNumber() {
+	m.episode_number = nil
+	m.addepisode_number = nil
+}
+
 // SetRejectReason sets the "reject_reason" field.
 func (m *VideoMutation) SetRejectReason(s string) {
 	m.reject_reason = &s
@@ -82000,7 +83336,7 @@ func (m *VideoMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *VideoMutation) Fields() []string {
-	fields := make([]string, 0, 22)
+	fields := make([]string, 0, 24)
 	if m.created_at != nil {
 		fields = append(fields, video.FieldCreatedAt)
 	}
@@ -82048,6 +83384,12 @@ func (m *VideoMutation) Fields() []string {
 	}
 	if m.author_id != nil {
 		fields = append(fields, video.FieldAuthorID)
+	}
+	if m.series_id != nil {
+		fields = append(fields, video.FieldSeriesID)
+	}
+	if m.episode_number != nil {
+		fields = append(fields, video.FieldEpisodeNumber)
 	}
 	if m.reject_reason != nil {
 		fields = append(fields, video.FieldRejectReason)
@@ -82107,6 +83449,10 @@ func (m *VideoMutation) Field(name string) (ent.Value, bool) {
 		return m.Status()
 	case video.FieldAuthorID:
 		return m.AuthorID()
+	case video.FieldSeriesID:
+		return m.SeriesID()
+	case video.FieldEpisodeNumber:
+		return m.EpisodeNumber()
 	case video.FieldRejectReason:
 		return m.RejectReason()
 	case video.FieldLikeCount:
@@ -82160,6 +83506,10 @@ func (m *VideoMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldStatus(ctx)
 	case video.FieldAuthorID:
 		return m.OldAuthorID(ctx)
+	case video.FieldSeriesID:
+		return m.OldSeriesID(ctx)
+	case video.FieldEpisodeNumber:
+		return m.OldEpisodeNumber(ctx)
 	case video.FieldRejectReason:
 		return m.OldRejectReason(ctx)
 	case video.FieldLikeCount:
@@ -82293,6 +83643,20 @@ func (m *VideoMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAuthorID(v)
 		return nil
+	case video.FieldSeriesID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSeriesID(v)
+		return nil
+	case video.FieldEpisodeNumber:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEpisodeNumber(v)
+		return nil
 	case video.FieldRejectReason:
 		v, ok := value.(string)
 		if !ok {
@@ -82367,6 +83731,12 @@ func (m *VideoMutation) AddedFields() []string {
 	if m.addauthor_id != nil {
 		fields = append(fields, video.FieldAuthorID)
 	}
+	if m.addseries_id != nil {
+		fields = append(fields, video.FieldSeriesID)
+	}
+	if m.addepisode_number != nil {
+		fields = append(fields, video.FieldEpisodeNumber)
+	}
 	if m.addlike_count != nil {
 		fields = append(fields, video.FieldLikeCount)
 	}
@@ -82403,6 +83773,10 @@ func (m *VideoMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedHeight()
 	case video.FieldAuthorID:
 		return m.AddedAuthorID()
+	case video.FieldSeriesID:
+		return m.AddedSeriesID()
+	case video.FieldEpisodeNumber:
+		return m.AddedEpisodeNumber()
 	case video.FieldLikeCount:
 		return m.AddedLikeCount()
 	case video.FieldCollectCount:
@@ -82475,6 +83849,20 @@ func (m *VideoMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddAuthorID(v)
+		return nil
+	case video.FieldSeriesID:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSeriesID(v)
+		return nil
+	case video.FieldEpisodeNumber:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddEpisodeNumber(v)
 		return nil
 	case video.FieldLikeCount:
 		v, ok := value.(int64)
@@ -82653,6 +84041,12 @@ func (m *VideoMutation) ResetField(name string) error {
 		return nil
 	case video.FieldAuthorID:
 		m.ResetAuthorID()
+		return nil
+	case video.FieldSeriesID:
+		m.ResetSeriesID()
+		return nil
+	case video.FieldEpisodeNumber:
+		m.ResetEpisodeNumber()
 		return nil
 	case video.FieldRejectReason:
 		m.ResetRejectReason()
@@ -84931,39 +86325,43 @@ func (m *VideoCommentMutation) ResetEdge(name string) error {
 // VideoDraftMutation represents an operation that mutates the VideoDraft nodes in the graph.
 type VideoDraftMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *uint32
-	created_at     *time.Time
-	updated_at     *time.Time
-	deleted_at     *time.Time
-	created_by     *uint32
-	addcreated_by  *int32
-	updated_by     *uint32
-	addupdated_by  *int32
-	deleted_by     *uint32
-	adddeleted_by  *int32
-	tenant_id      *uint32
-	addtenant_id   *int32
-	title          *string
-	description    *string
-	tags           *[]string
-	appendtags     []string
-	cover_url      *string
-	video_url      *string
-	duration       *uint32
-	addduration    *int32
-	width          *uint32
-	addwidth       *int32
-	height         *uint32
-	addheight      *int32
-	upload_task_id *string
-	author_id      *uint32
-	addauthor_id   *int32
-	clearedFields  map[string]struct{}
-	done           bool
-	oldValue       func(context.Context) (*VideoDraft, error)
-	predicates     []predicate.VideoDraft
+	op                Op
+	typ               string
+	id                *uint32
+	created_at        *time.Time
+	updated_at        *time.Time
+	deleted_at        *time.Time
+	created_by        *uint32
+	addcreated_by     *int32
+	updated_by        *uint32
+	addupdated_by     *int32
+	deleted_by        *uint32
+	adddeleted_by     *int32
+	tenant_id         *uint32
+	addtenant_id      *int32
+	title             *string
+	description       *string
+	tags              *[]string
+	appendtags        []string
+	cover_url         *string
+	video_url         *string
+	duration          *uint32
+	addduration       *int32
+	width             *uint32
+	addwidth          *int32
+	height            *uint32
+	addheight         *int32
+	upload_task_id    *string
+	author_id         *uint32
+	addauthor_id      *int32
+	series_id         *uint32
+	addseries_id      *int32
+	episode_number    *uint32
+	addepisode_number *int32
+	clearedFields     map[string]struct{}
+	done              bool
+	oldValue          func(context.Context) (*VideoDraft, error)
+	predicates        []predicate.VideoDraft
 }
 
 var _ ent.Mutation = (*VideoDraftMutation)(nil)
@@ -86031,6 +87429,118 @@ func (m *VideoDraftMutation) ResetAuthorID() {
 	m.addauthor_id = nil
 }
 
+// SetSeriesID sets the "series_id" field.
+func (m *VideoDraftMutation) SetSeriesID(u uint32) {
+	m.series_id = &u
+	m.addseries_id = nil
+}
+
+// SeriesID returns the value of the "series_id" field in the mutation.
+func (m *VideoDraftMutation) SeriesID() (r uint32, exists bool) {
+	v := m.series_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSeriesID returns the old "series_id" field's value of the VideoDraft entity.
+// If the VideoDraft object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VideoDraftMutation) OldSeriesID(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSeriesID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSeriesID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSeriesID: %w", err)
+	}
+	return oldValue.SeriesID, nil
+}
+
+// AddSeriesID adds u to the "series_id" field.
+func (m *VideoDraftMutation) AddSeriesID(u int32) {
+	if m.addseries_id != nil {
+		*m.addseries_id += u
+	} else {
+		m.addseries_id = &u
+	}
+}
+
+// AddedSeriesID returns the value that was added to the "series_id" field in this mutation.
+func (m *VideoDraftMutation) AddedSeriesID() (r int32, exists bool) {
+	v := m.addseries_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSeriesID resets all changes to the "series_id" field.
+func (m *VideoDraftMutation) ResetSeriesID() {
+	m.series_id = nil
+	m.addseries_id = nil
+}
+
+// SetEpisodeNumber sets the "episode_number" field.
+func (m *VideoDraftMutation) SetEpisodeNumber(u uint32) {
+	m.episode_number = &u
+	m.addepisode_number = nil
+}
+
+// EpisodeNumber returns the value of the "episode_number" field in the mutation.
+func (m *VideoDraftMutation) EpisodeNumber() (r uint32, exists bool) {
+	v := m.episode_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEpisodeNumber returns the old "episode_number" field's value of the VideoDraft entity.
+// If the VideoDraft object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VideoDraftMutation) OldEpisodeNumber(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEpisodeNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEpisodeNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEpisodeNumber: %w", err)
+	}
+	return oldValue.EpisodeNumber, nil
+}
+
+// AddEpisodeNumber adds u to the "episode_number" field.
+func (m *VideoDraftMutation) AddEpisodeNumber(u int32) {
+	if m.addepisode_number != nil {
+		*m.addepisode_number += u
+	} else {
+		m.addepisode_number = &u
+	}
+}
+
+// AddedEpisodeNumber returns the value that was added to the "episode_number" field in this mutation.
+func (m *VideoDraftMutation) AddedEpisodeNumber() (r int32, exists bool) {
+	v := m.addepisode_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetEpisodeNumber resets all changes to the "episode_number" field.
+func (m *VideoDraftMutation) ResetEpisodeNumber() {
+	m.episode_number = nil
+	m.addepisode_number = nil
+}
+
 // Where appends a list predicates to the VideoDraftMutation builder.
 func (m *VideoDraftMutation) Where(ps ...predicate.VideoDraft) {
 	m.predicates = append(m.predicates, ps...)
@@ -86065,7 +87575,7 @@ func (m *VideoDraftMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *VideoDraftMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 19)
 	if m.created_at != nil {
 		fields = append(fields, videodraft.FieldCreatedAt)
 	}
@@ -86117,6 +87627,12 @@ func (m *VideoDraftMutation) Fields() []string {
 	if m.author_id != nil {
 		fields = append(fields, videodraft.FieldAuthorID)
 	}
+	if m.series_id != nil {
+		fields = append(fields, videodraft.FieldSeriesID)
+	}
+	if m.episode_number != nil {
+		fields = append(fields, videodraft.FieldEpisodeNumber)
+	}
 	return fields
 }
 
@@ -86159,6 +87675,10 @@ func (m *VideoDraftMutation) Field(name string) (ent.Value, bool) {
 		return m.UploadTaskID()
 	case videodraft.FieldAuthorID:
 		return m.AuthorID()
+	case videodraft.FieldSeriesID:
+		return m.SeriesID()
+	case videodraft.FieldEpisodeNumber:
+		return m.EpisodeNumber()
 	}
 	return nil, false
 }
@@ -86202,6 +87722,10 @@ func (m *VideoDraftMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldUploadTaskID(ctx)
 	case videodraft.FieldAuthorID:
 		return m.OldAuthorID(ctx)
+	case videodraft.FieldSeriesID:
+		return m.OldSeriesID(ctx)
+	case videodraft.FieldEpisodeNumber:
+		return m.OldEpisodeNumber(ctx)
 	}
 	return nil, fmt.Errorf("unknown VideoDraft field %s", name)
 }
@@ -86330,6 +87854,20 @@ func (m *VideoDraftMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAuthorID(v)
 		return nil
+	case videodraft.FieldSeriesID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSeriesID(v)
+		return nil
+	case videodraft.FieldEpisodeNumber:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEpisodeNumber(v)
+		return nil
 	}
 	return fmt.Errorf("unknown VideoDraft field %s", name)
 }
@@ -86362,6 +87900,12 @@ func (m *VideoDraftMutation) AddedFields() []string {
 	if m.addauthor_id != nil {
 		fields = append(fields, videodraft.FieldAuthorID)
 	}
+	if m.addseries_id != nil {
+		fields = append(fields, videodraft.FieldSeriesID)
+	}
+	if m.addepisode_number != nil {
+		fields = append(fields, videodraft.FieldEpisodeNumber)
+	}
 	return fields
 }
 
@@ -86386,6 +87930,10 @@ func (m *VideoDraftMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedHeight()
 	case videodraft.FieldAuthorID:
 		return m.AddedAuthorID()
+	case videodraft.FieldSeriesID:
+		return m.AddedSeriesID()
+	case videodraft.FieldEpisodeNumber:
+		return m.AddedEpisodeNumber()
 	}
 	return nil, false
 }
@@ -86450,6 +87998,20 @@ func (m *VideoDraftMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddAuthorID(v)
+		return nil
+	case videodraft.FieldSeriesID:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSeriesID(v)
+		return nil
+	case videodraft.FieldEpisodeNumber:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddEpisodeNumber(v)
 		return nil
 	}
 	return fmt.Errorf("unknown VideoDraft numeric field %s", name)
@@ -86609,6 +88171,12 @@ func (m *VideoDraftMutation) ResetField(name string) error {
 		return nil
 	case videodraft.FieldAuthorID:
 		m.ResetAuthorID()
+		return nil
+	case videodraft.FieldSeriesID:
+		m.ResetSeriesID()
+		return nil
+	case videodraft.FieldEpisodeNumber:
+		m.ResetEpisodeNumber()
 		return nil
 	}
 	return fmt.Errorf("unknown VideoDraft field %s", name)

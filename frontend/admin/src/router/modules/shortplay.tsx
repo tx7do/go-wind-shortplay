@@ -71,6 +71,16 @@ export const shortplayRoutes: AppRouteObject[] = [
           order: 4,
         },
       },
+      {
+        name: 'series',
+        path: 'series',
+        element: createLazyRoute(() => import('@/pages/app/series')),
+        meta: {
+          title: 'menu.shortPlay.series',
+          icon: 'VideoCameraOutlined',
+          order: 5,
+        },
+      },
     ],
   },
 ];

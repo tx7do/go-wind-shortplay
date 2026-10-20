@@ -71,6 +71,26 @@ func (s *PermissionService) init() {
 	if resp, _ := s.permissionRepo.Count(ctx, nil); resp != nil && resp.Count == 0 {
 		_ = s.createDefaultPermissions(ctx)
 	}
+	// 既有库升级补种：缺省权限点按 Id 幂等补齐（count 门控感知不到增量条目），
+	// 角色绑定由 RoleService.ensureDefaultRolePermissions 依 DefaultRoles 追平。
+	_ = s.ensureDefaultPermissions(ctx)
+}
+
+// ensureDefaultPermissions 按 Id 幂等补种缺省权限点（不受 count 门控）。
+func (s *PermissionService) ensureDefaultPermissions(ctx context.Context) error {
+	for _, d := range constants.DefaultPermissions {
+		exist, err := s.permissionRepo.Get(ctx, &permissionV1.GetPermissionRequest{
+			QueryBy: &permissionV1.GetPermissionRequest_Id{Id: d.GetId()},
+		})
+		if err == nil && exist != nil && exist.GetId() > 0 {
+			continue
+		}
+		if err := s.permissionRepo.Create(ctx, &permissionV1.CreatePermissionRequest{Data: d}); err != nil {
+			s.log.Errorf("ensure default permission %s failed: %v", d.GetCode(), err)
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *PermissionService) extractRelationIDs(

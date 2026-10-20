@@ -110,7 +110,7 @@ var DefaultPermissions = []*permissionV1.Permission{
 			50, 51, 52, 53, 54, 55,
 			60, 62, 63, 64, 65, 66, 67,
 			// shortplay 业务菜单（75=短剧管理目录；73 已删除，用户管理复用基座 id23）
-			75, 70, 71, 72, 74,
+			75, 70, 71, 72, 74, 76,
 		},
 		ApiIds: []uint32{
 			1, 2, 3, 4, 5, 6, 7, 8, 9,
@@ -144,7 +144,7 @@ var DefaultPermissions = []*permissionV1.Permission{
 			50, 51,
 			60, 62, 63, 64,
 			// shortplay 业务菜单（不含平台专属的系统配置）
-			75, 70, 71, 72,
+			75, 70, 71, 72, 76,
 		},
 		ApiIds: []uint32{
 			1, 2, 3, 4, 5, 6, 7, 8, 9,
@@ -227,6 +227,15 @@ var DefaultPermissions = []*permissionV1.Permission{
 		Status:      trans.Ptr(permissionV1.Permission_ON),
 		MenuIds:     []uint32{74},
 	},
+	{
+		Id:          trans.Ptr(uint32(12)),
+		GroupId:     trans.Ptr(uint32(1)),
+		Name:        trans.Ptr("剧集管理"),
+		Description: trans.Ptr("剧集查看/编辑/删除（/admin/v1/series*）"),
+		Code:        trans.Ptr(BizSeriesManagePermissionCode),
+		Status:      trans.Ptr(permissionV1.Permission_ON),
+		MenuIds:     []uint32{76},
+	},
 }
 
 // DefaultRoles 系统初始化默认角色数据。
@@ -242,7 +251,7 @@ var DefaultRoles = []*permissionV1.Role{
 		IsProtected: trans.Ptr(true),
 		Type:        trans.Ptr(permissionV1.Role_SYSTEM),
 		SortOrder:   trans.Ptr(uint32(1)),
-		Permissions: []uint32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
+		Permissions: []uint32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
 	},
 	{
 		Id:          trans.Ptr(uint32(2)),
@@ -997,6 +1006,21 @@ var DefaultMenus = []*permissionV1.Menu{
 			Title:     trans.Ptr("menu.shortPlay.sysconf"),
 			Icon:      trans.Ptr("lucide:settings-2"),
 			Authority: []string{"sys:platform_admin"},
+		},
+	},
+	{
+		Id:        trans.Ptr(uint32(76)),
+		ParentId:  trans.Ptr(uint32(75)),
+		Type:      permissionV1.Menu_MENU.Enum(),
+		Name:      trans.Ptr("SeriesManagement"),
+		Path:      trans.Ptr("series"),
+		Component: trans.Ptr("series"),
+		CreatedAt: timeutil.TimeToTimestamppb(trans.Ptr(time.Now())),
+		Meta: &permissionV1.MenuMeta{
+			Order:     trans.Ptr(int32(5)),
+			Title:     trans.Ptr("menu.shortPlay.series"),
+			Icon:      trans.Ptr("lucide:film"),
+			Authority: []string{"sys:platform_admin", "sys:tenant_manager"},
 		},
 	},
 }

@@ -5,6 +5,7 @@
   "reports": "Report Management",
   "users": "User Management",
   "sysconf": "System Settings",
+      "series": "Series Management",
   "permission": "Organization & Permission",
   "permission-roles": "Role Management",
   "permission-menus": "Menu Management",

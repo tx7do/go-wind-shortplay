@@ -35,6 +35,7 @@ type NavigationNode struct {
 var resolvableComponents = map[string]bool{
 	"dashboard":              true,
 	"videos":                 true,
+	"series":                 true,
 	"comments":               true,
 	"reports":                true,
 	"users":                  true,

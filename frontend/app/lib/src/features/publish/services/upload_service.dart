@@ -145,6 +145,7 @@ class PublishService extends BaseService {
     String description = '',
     List<String> tags = const [],
     bool asDraft = false,
+    int? seriesId,
     void Function(UploadProgress progress)? onProgress,
     CancelToken? cancelToken,
   }) async {
@@ -182,6 +183,7 @@ class PublishService extends BaseService {
       description: description,
       tags: tags,
       asDraft: asDraft,
+      seriesId: seriesId,
       cancelToken: cancelToken,
     );
   }
@@ -193,6 +195,7 @@ class PublishService extends BaseService {
     String description = '',
     List<String> tags = const [],
     bool asDraft = false,
+    int? seriesId,
     CancelToken? cancelToken,
   }) async {
     try {
@@ -203,6 +206,8 @@ class PublishService extends BaseService {
           if (description.isNotEmpty) 'description': description,
           'tags': tags,
           'asDraft': asDraft,
+          // 挂靠剧集（服务端校验归属并自动排集号）
+          if (seriesId != null && seriesId > 0) 'seriesId': seriesId,
         },
         cancelToken: cancelToken,
       );

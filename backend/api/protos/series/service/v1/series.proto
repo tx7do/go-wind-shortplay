@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package series.service.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "pagination/v1/pagination.proto";
+import "video/service/v1/video.proto";
+
+// 剧集服务（短剧多集容器：剧信息 / 选集浏览）
+//
+// 剧集不设独立审核状态机，可见性跟随其视频：
+//   - 存在任一已发布集才对公众可见（否则非作者视角 SERIES_NOT_FOUND）
+//   - 作者本人与管理员可见全部集（含草稿/审核中/驳回/下架）
+// 视频经 video.series_id / video.episode_number 挂靠，删除剧集只解挂不删视频。
+service SeriesService {
+  // 创建剧集（创作者，需登录）
+  rpc CreateSeries (CreateSeriesRequest) returns (Series) {}
+
+  // 剧集详情（剧信息 + 选集列表，按集号升序；集数超出上限时分页取前 N）
+  rpc GetSeries (GetSeriesRequest) returns (SeriesDetail) {}
+
+  // 更新剧集（作者编辑自己的剧集 / 管理端编辑）
+  rpc UpdateSeries (UpdateSeriesRequest) returns (Series) {}
+
+  // 删除剧集（作者删自己的 / 管理端强制删除；剧内视频解挂不删除）
+  rpc DeleteSeries (DeleteSeriesRequest) returns (google.protobuf.Empty) {}
+
+  // 剧集列表（管理端全量 / App 按 authorId 或 query 关键词过滤）
+  rpc ListSeries (pagination.PagingRequest) returns (ListSeriesResponse) {}
+
+  // App 剧集列表（query 剧名模糊 / authorId 按作者过滤；非本人视角仅含有已发布集的剧）
+  rpc QuerySeries (QuerySeriesRequest) returns (ListSeriesResponse) {}
+}
+
+message Series {
+  optional uint32 id = 1 [json_name = "id"];                    // 剧集ID
+  optional string title = 2 [json_name = "title"];              // 剧名
+  optional string description = 3 [json_name = "description"];  // 剧简介
+  optional string cover_url = 4 [json_name = "coverUrl"];       // 封面图（可空，展示侧回退第一集封面）
+  optional uint32 author_id = 5 [json_name = "authorId"];       // 作者ID
+
+  // 计数
+  optional uint64 episode_count = 20 [json_name = "episodeCount"];     // 集总数（挂靠视频数）
+  optional uint64 published_count = 21 [json_name = "publishedCount"]; // 已发布集数
+
+  optional google.protobuf.Timestamp created_at = 41 [json_name = "createdAt"]; // 创建时间
+  optional google.protobuf.Timestamp updated_at = 42 [json_name = "updatedAt"]; // 更新时间
+}
+
+message SeriesDetail {
+  optional Series series = 1 [json_name = "series"];                // 剧信息
+  repeated video.service.v1.Video items = 2 [json_name = "items"];  // 选集列表（episode_number 升序，含 seriesId/episodeNumber/seriesTitle）
+}
+
+message ListSeriesResponse {
+  repeated Series items = 1 [json_name = "items"]; // 剧集列表
+  optional int64 total = 2 [json_name = "total"];  // 总数
+}
+
+message CreateSeriesRequest {
+  string title = 1 [json_name = "title"];                      // 剧名（必填）
+  optional string description = 2 [json_name = "description"]; // 剧简介
+  optional string cover_url = 3 [json_name = "coverUrl"];      // 封面（可空）
+}
+
+message GetSeriesRequest {
+  uint32 id = 1 [json_name = "id"]; // 剧集ID
+}
+
+message UpdateSeriesRequest {
+  uint32 id = 1 [json_name = "id"];                            // 剧集ID
+  optional string title = 2 [json_name = "title"];             // 剧名
+  optional string description = 3 [json_name = "description"]; // 剧简介
+  optional string cover_url = 4 [json_name = "coverUrl"];      // 封面
+}
+
+message DeleteSeriesRequest {
+  uint32 id = 1 [json_name = "id"]; // 剧集ID
+}
+
+message QuerySeriesRequest {
+  optional uint32 page_num = 1 [json_name = "pageNum"];    // 页码
+  optional uint32 page_size = 2 [json_name = "pageSize"];  // 页大小
+  optional string query = 3 [json_name = "query"];         // 剧名模糊
+  optional uint32 author_id = 4 [json_name = "authorId"];  // 按作者过滤（0=不过滤）
+}

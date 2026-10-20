@@ -46,6 +46,10 @@ const (
 	FieldUploadTaskID = "upload_task_id"
 	// FieldAuthorID holds the string denoting the author_id field in the database.
 	FieldAuthorID = "author_id"
+	// FieldSeriesID holds the string denoting the series_id field in the database.
+	FieldSeriesID = "series_id"
+	// FieldEpisodeNumber holds the string denoting the episode_number field in the database.
+	FieldEpisodeNumber = "episode_number"
 	// Table holds the table name of the videodraft in the database.
 	Table = "sp_video_drafts"
 )
@@ -70,6 +74,8 @@ var Columns = []string{
 	FieldHeight,
 	FieldUploadTaskID,
 	FieldAuthorID,
+	FieldSeriesID,
+	FieldEpisodeNumber,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -100,6 +106,10 @@ var (
 	DefaultHeight uint32
 	// DefaultAuthorID holds the default value on creation for the "author_id" field.
 	DefaultAuthorID uint32
+	// DefaultSeriesID holds the default value on creation for the "series_id" field.
+	DefaultSeriesID uint32
+	// DefaultEpisodeNumber holds the default value on creation for the "episode_number" field.
+	DefaultEpisodeNumber uint32
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
@@ -190,4 +200,14 @@ func ByUploadTaskID(opts ...sql.OrderTermOption) OrderOption {
 // ByAuthorID orders the results by the author_id field.
 func ByAuthorID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAuthorID, opts...).ToFunc()
+}
+
+// BySeriesID orders the results by the series_id field.
+func BySeriesID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSeriesID, opts...).ToFunc()
+}
+
+// ByEpisodeNumber orders the results by the episode_number field.
+func ByEpisodeNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEpisodeNumber, opts...).ToFunc()
 }

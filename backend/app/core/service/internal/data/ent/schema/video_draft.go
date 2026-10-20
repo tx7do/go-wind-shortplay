@@ -64,6 +64,12 @@ func (VideoDraft) Fields() []ent.Field {
 		field.Uint32("author_id").
 			Comment("作者用户ID").
 			Default(0),
+		field.Uint32("series_id").
+			Comment("挂靠剧集ID（提交发布时挂靠，0=不挂靠）").
+			Default(0),
+		field.Uint32("episode_number").
+			Comment("剧内集号（0=提交发布时自动排号）").
+			Default(0),
 	}
 }
 

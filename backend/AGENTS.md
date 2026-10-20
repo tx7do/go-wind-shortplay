@@ -24,12 +24,12 @@
 
 ## 域清单
 
-proto 域共 **21 个**（`api/protos/<domain>/service/v1/`）：
+proto 域共 **22 个**（`api/protos/<domain>/service/v1/`）：
 
 | 类别 | 域 |
 |---|---|
 | 基座基建域（14，与基座同构） | identity · permission · authentication · audit · dict · media · storage · task · notify · internal_message · conf · comment(target 泛型表承载) · admin(BFF) · app(BFF) |
-| shortplay 业务域（7，基座没有或按 shortplay 重写） | video · feed · report · sysconf · uba · interaction(点赞/收藏/关注 ledger，视频/评论 target) · stats(DashboardService：总览/趋势/TOP10/创作者与用户统计) |
+| shortplay 业务域（8，基座没有或按 shortplay 重写） | video · series(剧集：剧 CRUD/选集浏览/挂靠，可见性跟随视频) · feed · report · sysconf · uba · interaction(点赞/收藏/关注 ledger，视频/评论 target) · stats(DashboardService：总览/趋势/TOP10/创作者与用户统计) |
 
 - **identity**：user（shortplay 裁剪版字段）+ 基座租户/组织（tenant / org_unit / position / membership 4 表 / user_credential / login_policy）；shortplay 用户管理与 C 端用户由 identity 域承载。
 - **comment**：基座 target 泛型评论表（`comments`，object_id 承载 videoId）+ shortplay `sp_video_comments`；admin 评论管理、app 视频评论均经 comment 域。

@@ -96,6 +96,14 @@ func (m *Video) validate(all bool) error {
 		// no validation rules for AuthorId
 	}
 
+	if m.SeriesId != nil {
+		// no validation rules for SeriesId
+	}
+
+	if m.EpisodeNumber != nil {
+		// no validation rules for EpisodeNumber
+	}
+
 	if m.LikeCount != nil {
 		// no validation rules for LikeCount
 	}
@@ -114,6 +122,10 @@ func (m *Video) validate(all bool) error {
 
 	if m.RejectReason != nil {
 		// no validation rules for RejectReason
+	}
+
+	if m.SeriesTitle != nil {
+		// no validation rules for SeriesTitle
 	}
 
 	if m.PublishedAt != nil {
@@ -626,6 +638,14 @@ func (m *VideoDraft) validate(all bool) error {
 
 	if m.AuthorId != nil {
 		// no validation rules for AuthorId
+	}
+
+	if m.SeriesId != nil {
+		// no validation rules for SeriesId
+	}
+
+	if m.EpisodeNumber != nil {
+		// no validation rules for EpisodeNumber
 	}
 
 	if m.CreatedAt != nil {
@@ -1159,6 +1179,14 @@ func (m *UpdateVideoRequest) validate(all bool) error {
 
 	if m.CoverUrl != nil {
 		// no validation rules for CoverUrl
+	}
+
+	if m.SeriesId != nil {
+		// no validation rules for SeriesId
+	}
+
+	if m.EpisodeNumber != nil {
+		// no validation rules for EpisodeNumber
 	}
 
 	if len(errors) > 0 {
@@ -1827,6 +1855,14 @@ func (m *CompleteUploadRequest) validate(all bool) error {
 		// no validation rules for AsDraft
 	}
 
+	if m.SeriesId != nil {
+		// no validation rules for SeriesId
+	}
+
+	if m.EpisodeNumber != nil {
+		// no validation rules for EpisodeNumber
+	}
+
 	if len(errors) > 0 {
 		return CompleteUploadRequestMultiError(errors)
 	}
@@ -2067,6 +2103,14 @@ func (m *SaveDraftRequest) validate(all bool) error {
 
 	if m.UploadTaskId != nil {
 		// no validation rules for UploadTaskId
+	}
+
+	if m.SeriesId != nil {
+		// no validation rules for SeriesId
+	}
+
+	if m.EpisodeNumber != nil {
+		// no validation rules for EpisodeNumber
 	}
 
 	if len(errors) > 0 {

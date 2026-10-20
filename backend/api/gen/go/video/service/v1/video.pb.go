@@ -140,24 +140,27 @@ func (UploadTaskStatus) EnumDescriptor() ([]byte, []int) {
 }
 
 type Video struct {
-	state       protoimpl.MessageState `protogen:"open.v1"`
-	Id          *uint32                `protobuf:"varint,1,opt,name=id,proto3,oneof" json:"id,omitempty"`                                           // 视频ID
-	Title       *string                `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`                                      // 标题
-	Description *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`                          // 简介
-	CoverUrl    *string                `protobuf:"bytes,4,opt,name=cover_url,json=coverUrl,proto3,oneof" json:"cover_url,omitempty"`                // 封面图
-	VideoUrl    *string                `protobuf:"bytes,5,opt,name=video_url,json=videoUrl,proto3,oneof" json:"video_url,omitempty"`                // 视频播放地址
-	Duration    *uint32                `protobuf:"varint,6,opt,name=duration,proto3,oneof" json:"duration,omitempty"`                               // 时长（秒）
-	Width       *uint32                `protobuf:"varint,7,opt,name=width,proto3,oneof" json:"width,omitempty"`                                     // 分辨率宽
-	Height      *uint32                `protobuf:"varint,8,opt,name=height,proto3,oneof" json:"height,omitempty"`                                   // 分辨率高
-	Status      *VideoStatus           `protobuf:"varint,9,opt,name=status,proto3,enum=video.service.v1.VideoStatus,oneof" json:"status,omitempty"` // 状态
-	AuthorId    *uint32                `protobuf:"varint,10,opt,name=author_id,json=authorId,proto3,oneof" json:"author_id,omitempty"`              // 作者ID
-	Tags        []string               `protobuf:"bytes,11,rep,name=tags,proto3" json:"tags,omitempty"`                                             // 标签名列表
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            *uint32                `protobuf:"varint,1,opt,name=id,proto3,oneof" json:"id,omitempty"`                                             // 视频ID
+	Title         *string                `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`                                        // 标题
+	Description   *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`                            // 简介
+	CoverUrl      *string                `protobuf:"bytes,4,opt,name=cover_url,json=coverUrl,proto3,oneof" json:"cover_url,omitempty"`                  // 封面图
+	VideoUrl      *string                `protobuf:"bytes,5,opt,name=video_url,json=videoUrl,proto3,oneof" json:"video_url,omitempty"`                  // 视频播放地址
+	Duration      *uint32                `protobuf:"varint,6,opt,name=duration,proto3,oneof" json:"duration,omitempty"`                                 // 时长（秒）
+	Width         *uint32                `protobuf:"varint,7,opt,name=width,proto3,oneof" json:"width,omitempty"`                                       // 分辨率宽
+	Height        *uint32                `protobuf:"varint,8,opt,name=height,proto3,oneof" json:"height,omitempty"`                                     // 分辨率高
+	Status        *VideoStatus           `protobuf:"varint,9,opt,name=status,proto3,enum=video.service.v1.VideoStatus,oneof" json:"status,omitempty"`   // 状态
+	AuthorId      *uint32                `protobuf:"varint,10,opt,name=author_id,json=authorId,proto3,oneof" json:"author_id,omitempty"`                // 作者ID
+	Tags          []string               `protobuf:"bytes,11,rep,name=tags,proto3" json:"tags,omitempty"`                                               // 标签名列表
+	SeriesId      *uint32                `protobuf:"varint,12,opt,name=series_id,json=seriesId,proto3,oneof" json:"series_id,omitempty"`                // 挂靠剧集ID（0/缺省=未挂靠）
+	EpisodeNumber *uint32                `protobuf:"varint,13,opt,name=episode_number,json=episodeNumber,proto3,oneof" json:"episode_number,omitempty"` // 剧内集号（挂靠时由服务端排号或指定）
 	// 计数（Redis 缓存 + 异步落库）
 	LikeCount     *uint64                `protobuf:"varint,20,opt,name=like_count,json=likeCount,proto3,oneof" json:"like_count,omitempty"`          // 点赞数
 	CollectCount  *uint64                `protobuf:"varint,21,opt,name=collect_count,json=collectCount,proto3,oneof" json:"collect_count,omitempty"` // 收藏数
 	CommentCount  *uint64                `protobuf:"varint,22,opt,name=comment_count,json=commentCount,proto3,oneof" json:"comment_count,omitempty"` // 评论数
 	ViewCount     *uint64                `protobuf:"varint,23,opt,name=view_count,json=viewCount,proto3,oneof" json:"view_count,omitempty"`          // 播放量
 	RejectReason  *string                `protobuf:"bytes,30,opt,name=reject_reason,json=rejectReason,proto3,oneof" json:"reject_reason,omitempty"`  // 驳回原因
+	SeriesTitle   *string                `protobuf:"bytes,31,opt,name=series_title,json=seriesTitle,proto3,oneof" json:"series_title,omitempty"`     // 所属剧名（展示冗余，服务端回填）
 	PublishedAt   *timestamppb.Timestamp `protobuf:"bytes,40,opt,name=published_at,json=publishedAt,proto3,oneof" json:"published_at,omitempty"`     // 发布时间
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,41,opt,name=created_at,json=createdAt,proto3,oneof" json:"created_at,omitempty"`           // 创建时间
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,42,opt,name=updated_at,json=updatedAt,proto3,oneof" json:"updated_at,omitempty"`           // 更新时间
@@ -272,6 +275,20 @@ func (x *Video) GetTags() []string {
 	return nil
 }
 
+func (x *Video) GetSeriesId() uint32 {
+	if x != nil && x.SeriesId != nil {
+		return *x.SeriesId
+	}
+	return 0
+}
+
+func (x *Video) GetEpisodeNumber() uint32 {
+	if x != nil && x.EpisodeNumber != nil {
+		return *x.EpisodeNumber
+	}
+	return 0
+}
+
 func (x *Video) GetLikeCount() uint64 {
 	if x != nil && x.LikeCount != nil {
 		return *x.LikeCount
@@ -303,6 +320,13 @@ func (x *Video) GetViewCount() uint64 {
 func (x *Video) GetRejectReason() string {
 	if x != nil && x.RejectReason != nil {
 		return *x.RejectReason
+	}
+	return ""
+}
+
+func (x *Video) GetSeriesTitle() string {
+	if x != nil && x.SeriesTitle != nil {
+		return *x.SeriesTitle
 	}
 	return ""
 }
@@ -506,19 +530,21 @@ func (x *UploadTask) GetCreatedAt() *timestamppb.Timestamp {
 
 type VideoDraft struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *uint32                `protobuf:"varint,1,opt,name=id,proto3,oneof" json:"id,omitempty"`                                           // 草稿ID
-	Title         *string                `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`                                      // 标题
-	Description   *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`                          // 简介
-	Tags          []string               `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags,omitempty"`                                              // 标签名列表
-	CoverUrl      *string                `protobuf:"bytes,5,opt,name=cover_url,json=coverUrl,proto3,oneof" json:"cover_url,omitempty"`                // 封面图（可空，提交时生成）
-	VideoUrl      *string                `protobuf:"bytes,6,opt,name=video_url,json=videoUrl,proto3,oneof" json:"video_url,omitempty"`                // 视频地址（上传完成后回填）
-	Duration      *uint32                `protobuf:"varint,7,opt,name=duration,proto3,oneof" json:"duration,omitempty"`                               // 时长（秒）
-	Width         *uint32                `protobuf:"varint,8,opt,name=width,proto3,oneof" json:"width,omitempty"`                                     // 分辨率宽
-	Height        *uint32                `protobuf:"varint,9,opt,name=height,proto3,oneof" json:"height,omitempty"`                                   // 分辨率高
-	UploadTaskId  *string                `protobuf:"bytes,10,opt,name=upload_task_id,json=uploadTaskId,proto3,oneof" json:"upload_task_id,omitempty"` // 关联上传任务号
-	AuthorId      *uint32                `protobuf:"varint,11,opt,name=author_id,json=authorId,proto3,oneof" json:"author_id,omitempty"`              // 作者ID
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,20,opt,name=created_at,json=createdAt,proto3,oneof" json:"created_at,omitempty"`            // 创建时间
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,21,opt,name=updated_at,json=updatedAt,proto3,oneof" json:"updated_at,omitempty"`            // 更新时间
+	Id            *uint32                `protobuf:"varint,1,opt,name=id,proto3,oneof" json:"id,omitempty"`                                             // 草稿ID
+	Title         *string                `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`                                        // 标题
+	Description   *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`                            // 简介
+	Tags          []string               `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags,omitempty"`                                                // 标签名列表
+	CoverUrl      *string                `protobuf:"bytes,5,opt,name=cover_url,json=coverUrl,proto3,oneof" json:"cover_url,omitempty"`                  // 封面图（可空，提交时生成）
+	VideoUrl      *string                `protobuf:"bytes,6,opt,name=video_url,json=videoUrl,proto3,oneof" json:"video_url,omitempty"`                  // 视频地址（上传完成后回填）
+	Duration      *uint32                `protobuf:"varint,7,opt,name=duration,proto3,oneof" json:"duration,omitempty"`                                 // 时长（秒）
+	Width         *uint32                `protobuf:"varint,8,opt,name=width,proto3,oneof" json:"width,omitempty"`                                       // 分辨率宽
+	Height        *uint32                `protobuf:"varint,9,opt,name=height,proto3,oneof" json:"height,omitempty"`                                     // 分辨率高
+	UploadTaskId  *string                `protobuf:"bytes,10,opt,name=upload_task_id,json=uploadTaskId,proto3,oneof" json:"upload_task_id,omitempty"`   // 关联上传任务号
+	AuthorId      *uint32                `protobuf:"varint,11,opt,name=author_id,json=authorId,proto3,oneof" json:"author_id,omitempty"`                // 作者ID
+	SeriesId      *uint32                `protobuf:"varint,12,opt,name=series_id,json=seriesId,proto3,oneof" json:"series_id,omitempty"`                // 挂靠剧集ID（提交发布时挂靠）
+	EpisodeNumber *uint32                `protobuf:"varint,13,opt,name=episode_number,json=episodeNumber,proto3,oneof" json:"episode_number,omitempty"` // 剧内集号（0=服务端自动排号）
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,20,opt,name=created_at,json=createdAt,proto3,oneof" json:"created_at,omitempty"`              // 创建时间
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,21,opt,name=updated_at,json=updatedAt,proto3,oneof" json:"updated_at,omitempty"`              // 更新时间
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -626,6 +652,20 @@ func (x *VideoDraft) GetUploadTaskId() string {
 func (x *VideoDraft) GetAuthorId() uint32 {
 	if x != nil && x.AuthorId != nil {
 		return *x.AuthorId
+	}
+	return 0
+}
+
+func (x *VideoDraft) GetSeriesId() uint32 {
+	if x != nil && x.SeriesId != nil {
+		return *x.SeriesId
+	}
+	return 0
+}
+
+func (x *VideoDraft) GetEpisodeNumber() uint32 {
+	if x != nil && x.EpisodeNumber != nil {
+		return *x.EpisodeNumber
 	}
 	return 0
 }
@@ -801,12 +841,16 @@ func (x *ListVideoResponse) GetTotal() int64 {
 }
 
 type UpdateVideoRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                  // 视频ID
-	Title         *string                `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`                       // 标题
-	Description   *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`           // 简介
-	CoverUrl      *string                `protobuf:"bytes,4,opt,name=cover_url,json=coverUrl,proto3,oneof" json:"cover_url,omitempty"` // 封面
-	Tags          []string               `protobuf:"bytes,5,rep,name=tags,proto3" json:"tags,omitempty"`                               // 标签
+	state       protoimpl.MessageState `protogen:"open.v1"`
+	Id          uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                  // 视频ID
+	Title       *string                `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`                       // 标题
+	Description *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`           // 简介
+	CoverUrl    *string                `protobuf:"bytes,4,opt,name=cover_url,json=coverUrl,proto3,oneof" json:"cover_url,omitempty"` // 封面
+	Tags        []string               `protobuf:"bytes,5,rep,name=tags,proto3" json:"tags,omitempty"`                               // 标签
+	// 挂靠剧集：字段出现且>0=挂靠（剧须为本人所有），出现且=0=解挂，缺省=不变
+	SeriesId *uint32 `protobuf:"varint,6,opt,name=series_id,json=seriesId,proto3,oneof" json:"series_id,omitempty"`
+	// 剧内集号：仅挂靠时生效，缺省=服务端排到当前最大集号+1
+	EpisodeNumber *uint32 `protobuf:"varint,7,opt,name=episode_number,json=episodeNumber,proto3,oneof" json:"episode_number,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -874,6 +918,20 @@ func (x *UpdateVideoRequest) GetTags() []string {
 		return x.Tags
 	}
 	return nil
+}
+
+func (x *UpdateVideoRequest) GetSeriesId() uint32 {
+	if x != nil && x.SeriesId != nil {
+		return *x.SeriesId
+	}
+	return 0
+}
+
+func (x *UpdateVideoRequest) GetEpisodeNumber() uint32 {
+	if x != nil && x.EpisodeNumber != nil {
+		return *x.EpisodeNumber
+	}
+	return 0
 }
 
 type DeleteVideoRequest struct {
@@ -1155,7 +1213,11 @@ type CompleteUploadRequest struct {
 	Width       *uint32                `protobuf:"varint,7,opt,name=width,proto3,oneof" json:"width,omitempty"`                      // 分辨率宽
 	Height      *uint32                `protobuf:"varint,8,opt,name=height,proto3,oneof" json:"height,omitempty"`                    // 分辨率高
 	// 提交去向：true 存草稿；false 直接提交发布（默认）
-	AsDraft       *bool `protobuf:"varint,9,opt,name=as_draft,json=asDraft,proto3,oneof" json:"as_draft,omitempty"`
+	AsDraft *bool `protobuf:"varint,9,opt,name=as_draft,json=asDraft,proto3,oneof" json:"as_draft,omitempty"`
+	// 挂靠剧集（剧须为本人所有；>0 生效）
+	SeriesId *uint32 `protobuf:"varint,10,opt,name=series_id,json=seriesId,proto3,oneof" json:"series_id,omitempty"`
+	// 剧内集号（缺省=服务端排到当前最大集号+1）
+	EpisodeNumber *uint32 `protobuf:"varint,11,opt,name=episode_number,json=episodeNumber,proto3,oneof" json:"episode_number,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1253,6 +1315,20 @@ func (x *CompleteUploadRequest) GetAsDraft() bool {
 	return false
 }
 
+func (x *CompleteUploadRequest) GetSeriesId() uint32 {
+	if x != nil && x.SeriesId != nil {
+		return *x.SeriesId
+	}
+	return 0
+}
+
+func (x *CompleteUploadRequest) GetEpisodeNumber() uint32 {
+	if x != nil && x.EpisodeNumber != nil {
+		return *x.EpisodeNumber
+	}
+	return 0
+}
+
 type GetUploadTaskRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TaskId        string                 `protobuf:"bytes,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"` // 任务号
@@ -1299,16 +1375,18 @@ func (x *GetUploadTaskRequest) GetTaskId() string {
 
 type SaveDraftRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *uint32                `protobuf:"varint,1,opt,name=id,proto3,oneof" json:"id,omitempty"`                                           // 草稿ID（更新时传）
-	Title         *string                `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`                                      // 标题
-	Description   *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`                          // 简介
-	Tags          []string               `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags,omitempty"`                                              // 标签
-	CoverUrl      *string                `protobuf:"bytes,5,opt,name=cover_url,json=coverUrl,proto3,oneof" json:"cover_url,omitempty"`                // 封面
-	VideoUrl      *string                `protobuf:"bytes,6,opt,name=video_url,json=videoUrl,proto3,oneof" json:"video_url,omitempty"`                // 视频地址
-	Duration      *uint32                `protobuf:"varint,7,opt,name=duration,proto3,oneof" json:"duration,omitempty"`                               // 时长
-	Width         *uint32                `protobuf:"varint,8,opt,name=width,proto3,oneof" json:"width,omitempty"`                                     // 分辨率宽
-	Height        *uint32                `protobuf:"varint,9,opt,name=height,proto3,oneof" json:"height,omitempty"`                                   // 分辨率高
-	UploadTaskId  *string                `protobuf:"bytes,10,opt,name=upload_task_id,json=uploadTaskId,proto3,oneof" json:"upload_task_id,omitempty"` // 上传任务号
+	Id            *uint32                `protobuf:"varint,1,opt,name=id,proto3,oneof" json:"id,omitempty"`                                             // 草稿ID（更新时传）
+	Title         *string                `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`                                        // 标题
+	Description   *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`                            // 简介
+	Tags          []string               `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags,omitempty"`                                                // 标签
+	CoverUrl      *string                `protobuf:"bytes,5,opt,name=cover_url,json=coverUrl,proto3,oneof" json:"cover_url,omitempty"`                  // 封面
+	VideoUrl      *string                `protobuf:"bytes,6,opt,name=video_url,json=videoUrl,proto3,oneof" json:"video_url,omitempty"`                  // 视频地址
+	Duration      *uint32                `protobuf:"varint,7,opt,name=duration,proto3,oneof" json:"duration,omitempty"`                                 // 时长
+	Width         *uint32                `protobuf:"varint,8,opt,name=width,proto3,oneof" json:"width,omitempty"`                                       // 分辨率宽
+	Height        *uint32                `protobuf:"varint,9,opt,name=height,proto3,oneof" json:"height,omitempty"`                                     // 分辨率高
+	UploadTaskId  *string                `protobuf:"bytes,10,opt,name=upload_task_id,json=uploadTaskId,proto3,oneof" json:"upload_task_id,omitempty"`   // 上传任务号
+	SeriesId      *uint32                `protobuf:"varint,11,opt,name=series_id,json=seriesId,proto3,oneof" json:"series_id,omitempty"`                // 挂靠剧集ID（>0 生效）
+	EpisodeNumber *uint32                `protobuf:"varint,12,opt,name=episode_number,json=episodeNumber,proto3,oneof" json:"episode_number,omitempty"` // 剧内集号（0=提交发布时自动排号）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1411,6 +1489,20 @@ func (x *SaveDraftRequest) GetUploadTaskId() string {
 		return *x.UploadTaskId
 	}
 	return ""
+}
+
+func (x *SaveDraftRequest) GetSeriesId() uint32 {
+	if x != nil && x.SeriesId != nil {
+		return *x.SeriesId
+	}
+	return 0
+}
+
+func (x *SaveDraftRequest) GetEpisodeNumber() uint32 {
+	if x != nil && x.EpisodeNumber != nil {
+		return *x.EpisodeNumber
+	}
+	return 0
 }
 
 type GetDraftRequest struct {
@@ -1653,7 +1745,7 @@ var File_video_service_v1_video_proto protoreflect.FileDescriptor
 
 const file_video_service_v1_video_proto_rawDesc = "" +
 	"\n" +
-	"\x1cvideo/service/v1/video.proto\x12\x10video.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1epagination/v1/pagination.proto\"\xf2\a\n" +
+	"\x1cvideo/service/v1/video.proto\x12\x10video.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1epagination/v1/pagination.proto\"\x9a\t\n" +
 	"\x05Video\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\rH\x00R\x02id\x88\x01\x01\x12\x19\n" +
 	"\x05title\x18\x02 \x01(\tH\x01R\x05title\x88\x01\x01\x12%\n" +
@@ -1666,20 +1758,23 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"\x06status\x18\t \x01(\x0e2\x1d.video.service.v1.VideoStatusH\bR\x06status\x88\x01\x01\x12 \n" +
 	"\tauthor_id\x18\n" +
 	" \x01(\rH\tR\bauthorId\x88\x01\x01\x12\x12\n" +
-	"\x04tags\x18\v \x03(\tR\x04tags\x12\"\n" +
+	"\x04tags\x18\v \x03(\tR\x04tags\x12 \n" +
+	"\tseries_id\x18\f \x01(\rH\n" +
+	"R\bseriesId\x88\x01\x01\x12*\n" +
+	"\x0eepisode_number\x18\r \x01(\rH\vR\repisodeNumber\x88\x01\x01\x12\"\n" +
 	"\n" +
-	"like_count\x18\x14 \x01(\x04H\n" +
-	"R\tlikeCount\x88\x01\x01\x12(\n" +
-	"\rcollect_count\x18\x15 \x01(\x04H\vR\fcollectCount\x88\x01\x01\x12(\n" +
-	"\rcomment_count\x18\x16 \x01(\x04H\fR\fcommentCount\x88\x01\x01\x12\"\n" +
+	"like_count\x18\x14 \x01(\x04H\fR\tlikeCount\x88\x01\x01\x12(\n" +
+	"\rcollect_count\x18\x15 \x01(\x04H\rR\fcollectCount\x88\x01\x01\x12(\n" +
+	"\rcomment_count\x18\x16 \x01(\x04H\x0eR\fcommentCount\x88\x01\x01\x12\"\n" +
 	"\n" +
-	"view_count\x18\x17 \x01(\x04H\rR\tviewCount\x88\x01\x01\x12(\n" +
-	"\rreject_reason\x18\x1e \x01(\tH\x0eR\frejectReason\x88\x01\x01\x12B\n" +
-	"\fpublished_at\x18( \x01(\v2\x1a.google.protobuf.TimestampH\x0fR\vpublishedAt\x88\x01\x01\x12>\n" +
+	"view_count\x18\x17 \x01(\x04H\x0fR\tviewCount\x88\x01\x01\x12(\n" +
+	"\rreject_reason\x18\x1e \x01(\tH\x10R\frejectReason\x88\x01\x01\x12&\n" +
+	"\fseries_title\x18\x1f \x01(\tH\x11R\vseriesTitle\x88\x01\x01\x12B\n" +
+	"\fpublished_at\x18( \x01(\v2\x1a.google.protobuf.TimestampH\x12R\vpublishedAt\x88\x01\x01\x12>\n" +
 	"\n" +
-	"created_at\x18) \x01(\v2\x1a.google.protobuf.TimestampH\x10R\tcreatedAt\x88\x01\x01\x12>\n" +
+	"created_at\x18) \x01(\v2\x1a.google.protobuf.TimestampH\x13R\tcreatedAt\x88\x01\x01\x12>\n" +
 	"\n" +
-	"updated_at\x18* \x01(\v2\x1a.google.protobuf.TimestampH\x11R\tupdatedAt\x88\x01\x01B\x05\n" +
+	"updated_at\x18* \x01(\v2\x1a.google.protobuf.TimestampH\x14R\tupdatedAt\x88\x01\x01B\x05\n" +
 	"\x03_idB\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\f\n" +
@@ -1692,12 +1787,16 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"\a_heightB\t\n" +
 	"\a_statusB\f\n" +
 	"\n" +
-	"_author_idB\r\n" +
+	"_author_idB\f\n" +
+	"\n" +
+	"_series_idB\x11\n" +
+	"\x0f_episode_numberB\r\n" +
 	"\v_like_countB\x10\n" +
 	"\x0e_collect_countB\x10\n" +
 	"\x0e_comment_countB\r\n" +
 	"\v_view_countB\x10\n" +
 	"\x0e_reject_reasonB\x0f\n" +
+	"\r_series_titleB\x0f\n" +
 	"\r_published_atB\r\n" +
 	"\v_created_atB\r\n" +
 	"\v_updated_at\"y\n" +
@@ -1734,7 +1833,7 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"\a_statusB\v\n" +
 	"\t_file_keyB\v\n" +
 	"\t_video_idB\r\n" +
-	"\v_created_at\"\xff\x04\n" +
+	"\v_created_at\"\xee\x05\n" +
 	"\n" +
 	"VideoDraft\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\rH\x00R\x02id\x88\x01\x01\x12\x19\n" +
@@ -1748,12 +1847,14 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"\x06height\x18\t \x01(\rH\aR\x06height\x88\x01\x01\x12)\n" +
 	"\x0eupload_task_id\x18\n" +
 	" \x01(\tH\bR\fuploadTaskId\x88\x01\x01\x12 \n" +
-	"\tauthor_id\x18\v \x01(\rH\tR\bauthorId\x88\x01\x01\x12>\n" +
+	"\tauthor_id\x18\v \x01(\rH\tR\bauthorId\x88\x01\x01\x12 \n" +
+	"\tseries_id\x18\f \x01(\rH\n" +
+	"R\bseriesId\x88\x01\x01\x12*\n" +
+	"\x0eepisode_number\x18\r \x01(\rH\vR\repisodeNumber\x88\x01\x01\x12>\n" +
 	"\n" +
-	"created_at\x18\x14 \x01(\v2\x1a.google.protobuf.TimestampH\n" +
-	"R\tcreatedAt\x88\x01\x01\x12>\n" +
+	"created_at\x18\x14 \x01(\v2\x1a.google.protobuf.TimestampH\fR\tcreatedAt\x88\x01\x01\x12>\n" +
 	"\n" +
-	"updated_at\x18\x15 \x01(\v2\x1a.google.protobuf.TimestampH\vR\tupdatedAt\x88\x01\x01B\x05\n" +
+	"updated_at\x18\x15 \x01(\v2\x1a.google.protobuf.TimestampH\rR\tupdatedAt\x88\x01\x01B\x05\n" +
 	"\x03_idB\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\f\n" +
@@ -1766,7 +1867,10 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"\a_heightB\x11\n" +
 	"\x0f_upload_task_idB\f\n" +
 	"\n" +
-	"_author_idB\r\n" +
+	"_author_idB\f\n" +
+	"\n" +
+	"_series_idB\x11\n" +
+	"\x0f_episode_numberB\r\n" +
 	"\v_created_atB\r\n" +
 	"\v_updated_at\"!\n" +
 	"\x0fGetVideoRequest\x12\x0e\n" +
@@ -1781,17 +1885,22 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"\x11ListVideoResponse\x12-\n" +
 	"\x05items\x18\x01 \x03(\v2\x17.video.service.v1.VideoR\x05items\x12\x19\n" +
 	"\x05total\x18\x02 \x01(\x03H\x00R\x05total\x88\x01\x01B\b\n" +
-	"\x06_total\"\xc4\x01\n" +
+	"\x06_total\"\xb3\x02\n" +
 	"\x12UpdateVideoRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x12\x19\n" +
 	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12%\n" +
 	"\vdescription\x18\x03 \x01(\tH\x01R\vdescription\x88\x01\x01\x12 \n" +
 	"\tcover_url\x18\x04 \x01(\tH\x02R\bcoverUrl\x88\x01\x01\x12\x12\n" +
-	"\x04tags\x18\x05 \x03(\tR\x04tagsB\b\n" +
+	"\x04tags\x18\x05 \x03(\tR\x04tags\x12 \n" +
+	"\tseries_id\x18\x06 \x01(\rH\x03R\bseriesId\x88\x01\x01\x12*\n" +
+	"\x0eepisode_number\x18\a \x01(\rH\x04R\repisodeNumber\x88\x01\x01B\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\f\n" +
 	"\n" +
-	"_cover_url\"$\n" +
+	"_cover_urlB\f\n" +
+	"\n" +
+	"_series_idB\x11\n" +
+	"\x0f_episode_number\"$\n" +
 	"\x12DeleteVideoRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\"\x89\x01\n" +
 	"\x18ChangeVideoStatusRequest\x12\x0e\n" +
@@ -1811,7 +1920,7 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"chunkIndex\x12\x12\n" +
 	"\x04data\x18\x03 \x01(\fR\x04data\">\n" +
 	"\x13UploadChunkResponse\x12'\n" +
-	"\x0fuploaded_chunks\x18\x01 \x03(\rR\x0euploadedChunks\"\xf8\x02\n" +
+	"\x0fuploaded_chunks\x18\x01 \x03(\rR\x0euploadedChunks\"\xe7\x03\n" +
 	"\x15CompleteUploadRequest\x12\x17\n" +
 	"\atask_id\x18\x01 \x01(\tR\x06taskId\x12\x19\n" +
 	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12%\n" +
@@ -1821,7 +1930,10 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"\bduration\x18\x06 \x01(\rH\x03R\bduration\x88\x01\x01\x12\x19\n" +
 	"\x05width\x18\a \x01(\rH\x04R\x05width\x88\x01\x01\x12\x1b\n" +
 	"\x06height\x18\b \x01(\rH\x05R\x06height\x88\x01\x01\x12\x1e\n" +
-	"\bas_draft\x18\t \x01(\bH\x06R\aasDraft\x88\x01\x01B\b\n" +
+	"\bas_draft\x18\t \x01(\bH\x06R\aasDraft\x88\x01\x01\x12 \n" +
+	"\tseries_id\x18\n" +
+	" \x01(\rH\aR\bseriesId\x88\x01\x01\x12*\n" +
+	"\x0eepisode_number\x18\v \x01(\rH\bR\repisodeNumber\x88\x01\x01B\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\f\n" +
 	"\n" +
@@ -1829,9 +1941,12 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"\t_durationB\b\n" +
 	"\x06_widthB\t\n" +
 	"\a_heightB\v\n" +
-	"\t_as_draft\"/\n" +
+	"\t_as_draftB\f\n" +
+	"\n" +
+	"_series_idB\x11\n" +
+	"\x0f_episode_number\"/\n" +
 	"\x14GetUploadTaskRequest\x12\x17\n" +
-	"\atask_id\x18\x01 \x01(\tR\x06taskId\"\xb7\x03\n" +
+	"\atask_id\x18\x01 \x01(\tR\x06taskId\"\xa6\x04\n" +
 	"\x10SaveDraftRequest\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\rH\x00R\x02id\x88\x01\x01\x12\x19\n" +
 	"\x05title\x18\x02 \x01(\tH\x01R\x05title\x88\x01\x01\x12%\n" +
@@ -1843,7 +1958,10 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"\x05width\x18\b \x01(\rH\x06R\x05width\x88\x01\x01\x12\x1b\n" +
 	"\x06height\x18\t \x01(\rH\aR\x06height\x88\x01\x01\x12)\n" +
 	"\x0eupload_task_id\x18\n" +
-	" \x01(\tH\bR\fuploadTaskId\x88\x01\x01B\x05\n" +
+	" \x01(\tH\bR\fuploadTaskId\x88\x01\x01\x12 \n" +
+	"\tseries_id\x18\v \x01(\rH\tR\bseriesId\x88\x01\x01\x12*\n" +
+	"\x0eepisode_number\x18\f \x01(\rH\n" +
+	"R\repisodeNumber\x88\x01\x01B\x05\n" +
 	"\x03_idB\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\f\n" +
@@ -1854,7 +1972,10 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"\t_durationB\b\n" +
 	"\x06_widthB\t\n" +
 	"\a_heightB\x11\n" +
-	"\x0f_upload_task_id\"!\n" +
+	"\x0f_upload_task_idB\f\n" +
+	"\n" +
+	"_series_idB\x11\n" +
+	"\x0f_episode_number\"!\n" +
 	"\x0fGetDraftRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\rR\x02id\"l\n" +
 	"\x11ListDraftResponse\x122\n" +

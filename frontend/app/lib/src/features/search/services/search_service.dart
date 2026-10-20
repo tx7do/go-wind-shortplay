@@ -50,6 +50,36 @@ class SearchService extends BaseService {
     }
   }
 
+  /// 剧集搜索（剧名模糊；游客可访问，非本人视角仅含有已发布集的剧）
+  Future<PageData<Series>> searchSeries({
+    required String keyword,
+    required PaginationQuery query,
+  }) async {
+    try {
+      final res = await _dio.get<Map<String, dynamic>>(
+        '/series',
+        queryParameters: {
+          'query': keyword,
+          'pageNum': query.pageNum,
+          'pageSize': query.pageSize,
+        },
+      );
+      final body = res.data ?? const {};
+      final items = (body['items'] as List<dynamic>? ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(Series.fromJson)
+          .toList();
+      return PageData.inferHasMore(
+        items: items,
+        total: jsonInt(body['total'], fallback: items.length),
+        pageNum: query.pageNum,
+        pageSize: query.pageSize,
+      );
+    } on DioException catch (e) {
+      throw ApiStatusException(handleDioError(e));
+    }
+  }
+
   PageData<Video> _toPage(Map<String, dynamic>? data, PaginationQuery query) {
     final body = data ?? const {};
     final items = (body['items'] as List<dynamic>? ?? const [])

@@ -99,6 +99,8 @@ message Video {
   optional VideoStatus status = 9 [json_name = "status"];       // 状态
   optional uint32 author_id = 10 [json_name = "authorId"];      // 作者ID
   repeated string tags = 11 [json_name = "tags"];               // 标签名列表
+  optional uint32 series_id = 12 [json_name = "seriesId"];      // 挂靠剧集ID（0/缺省=未挂靠）
+  optional uint32 episode_number = 13 [json_name = "episodeNumber"]; // 剧内集号（挂靠时由服务端排号或指定）
 
   // 计数（Redis 缓存 + 异步落库）
   optional uint64 like_count = 20 [json_name = "likeCount"];        // 点赞数
@@ -107,6 +109,7 @@ message Video {
   optional uint64 view_count = 23 [json_name = "viewCount"];        // 播放量
 
   optional string reject_reason = 30 [json_name = "rejectReason"]; // 驳回原因
+  optional string series_title = 31 [json_name = "seriesTitle"];   // 所属剧名（展示冗余，服务端回填）
   optional google.protobuf.Timestamp published_at = 40 [json_name = "publishedAt"]; // 发布时间
   optional google.protobuf.Timestamp created_at = 41 [json_name = "createdAt"];     // 创建时间
   optional google.protobuf.Timestamp updated_at = 42 [json_name = "updatedAt"];     // 更新时间
@@ -143,6 +146,8 @@ message VideoDraft {
   optional uint32 height = 9 [json_name = "height"];           // 分辨率高
   optional string upload_task_id = 10 [json_name = "uploadTaskId"]; // 关联上传任务号
   optional uint32 author_id = 11 [json_name = "authorId"];     // 作者ID
+  optional uint32 series_id = 12 [json_name = "seriesId"];     // 挂靠剧集ID（提交发布时挂靠）
+  optional uint32 episode_number = 13 [json_name = "episodeNumber"]; // 剧内集号（0=服务端自动排号）
   optional google.protobuf.Timestamp created_at = 20 [json_name = "createdAt"]; // 创建时间
   optional google.protobuf.Timestamp updated_at = 21 [json_name = "updatedAt"]; // 更新时间
 }
@@ -168,6 +173,10 @@ message UpdateVideoRequest {
   optional string description = 3 [json_name = "description"]; // 简介
   optional string cover_url = 4 [json_name = "coverUrl"]; // 封面
   repeated string tags = 5 [json_name = "tags"];         // 标签
+  // 挂靠剧集：字段出现且>0=挂靠（剧须为本人所有），出现且=0=解挂，缺省=不变
+  optional uint32 series_id = 6 [json_name = "seriesId"];
+  // 剧内集号：仅挂靠时生效，缺省=服务端排到当前最大集号+1
+  optional uint32 episode_number = 7 [json_name = "episodeNumber"];
 }
 
 message DeleteVideoRequest {
@@ -207,6 +216,10 @@ message CompleteUploadRequest {
   optional uint32 height = 8 [json_name = "height"];      // 分辨率高
   // 提交去向：true 存草稿；false 直接提交发布（默认）
   optional bool as_draft = 9 [json_name = "asDraft"];
+  // 挂靠剧集（剧须为本人所有；>0 生效）
+  optional uint32 series_id = 10 [json_name = "seriesId"];
+  // 剧内集号（缺省=服务端排到当前最大集号+1）
+  optional uint32 episode_number = 11 [json_name = "episodeNumber"];
 }
 
 message GetUploadTaskRequest {
@@ -224,6 +237,8 @@ message SaveDraftRequest {
   optional uint32 width = 8 [json_name = "width"];         // 分辨率宽
   optional uint32 height = 9 [json_name = "height"];       // 分辨率高
   optional string upload_task_id = 10 [json_name = "uploadTaskId"]; // 上传任务号
+  optional uint32 series_id = 11 [json_name = "seriesId"];     // 挂靠剧集ID（>0 生效）
+  optional uint32 episode_number = 12 [json_name = "episodeNumber"]; // 剧内集号（0=提交发布时自动排号）
 }
 
 message GetDraftRequest {

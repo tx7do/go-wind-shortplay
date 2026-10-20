@@ -25,6 +25,9 @@ class RouteNames {
   /// 单视频沉浸详情
   static const String videoDetail = 'video_detail';
 
+  /// 剧集详情（剧信息 + 选集）
+  static const String seriesDetail = 'series_detail';
+
   /// 他人主页
   static const String userProfile = 'user_profile';
 

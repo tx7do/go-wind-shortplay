@@ -252,6 +252,34 @@ func (_c *VideoDraftCreate) SetNillableAuthorID(v *uint32) *VideoDraftCreate {
 	return _c
 }
 
+// SetSeriesID sets the "series_id" field.
+func (_c *VideoDraftCreate) SetSeriesID(v uint32) *VideoDraftCreate {
+	_c.mutation.SetSeriesID(v)
+	return _c
+}
+
+// SetNillableSeriesID sets the "series_id" field if the given value is not nil.
+func (_c *VideoDraftCreate) SetNillableSeriesID(v *uint32) *VideoDraftCreate {
+	if v != nil {
+		_c.SetSeriesID(*v)
+	}
+	return _c
+}
+
+// SetEpisodeNumber sets the "episode_number" field.
+func (_c *VideoDraftCreate) SetEpisodeNumber(v uint32) *VideoDraftCreate {
+	_c.mutation.SetEpisodeNumber(v)
+	return _c
+}
+
+// SetNillableEpisodeNumber sets the "episode_number" field if the given value is not nil.
+func (_c *VideoDraftCreate) SetNillableEpisodeNumber(v *uint32) *VideoDraftCreate {
+	if v != nil {
+		_c.SetEpisodeNumber(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *VideoDraftCreate) SetID(v uint32) *VideoDraftCreate {
 	_c.mutation.SetID(v)
@@ -315,6 +343,14 @@ func (_c *VideoDraftCreate) defaults() error {
 		v := videodraft.DefaultAuthorID
 		_c.mutation.SetAuthorID(v)
 	}
+	if _, ok := _c.mutation.SeriesID(); !ok {
+		v := videodraft.DefaultSeriesID
+		_c.mutation.SetSeriesID(v)
+	}
+	if _, ok := _c.mutation.EpisodeNumber(); !ok {
+		v := videodraft.DefaultEpisodeNumber
+		_c.mutation.SetEpisodeNumber(v)
+	}
 	return nil
 }
 
@@ -331,6 +367,12 @@ func (_c *VideoDraftCreate) check() error {
 	}
 	if _, ok := _c.mutation.AuthorID(); !ok {
 		return &ValidationError{Name: "author_id", err: errors.New(`ent: missing required field "VideoDraft.author_id"`)}
+	}
+	if _, ok := _c.mutation.SeriesID(); !ok {
+		return &ValidationError{Name: "series_id", err: errors.New(`ent: missing required field "VideoDraft.series_id"`)}
+	}
+	if _, ok := _c.mutation.EpisodeNumber(); !ok {
+		return &ValidationError{Name: "episode_number", err: errors.New(`ent: missing required field "VideoDraft.episode_number"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := videodraft.IDValidator(v); err != nil {
@@ -437,6 +479,14 @@ func (_c *VideoDraftCreate) createSpec() (*VideoDraft, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.AuthorID(); ok {
 		_spec.SetField(videodraft.FieldAuthorID, field.TypeUint32, value)
 		_node.AuthorID = value
+	}
+	if value, ok := _c.mutation.SeriesID(); ok {
+		_spec.SetField(videodraft.FieldSeriesID, field.TypeUint32, value)
+		_node.SeriesID = value
+	}
+	if value, ok := _c.mutation.EpisodeNumber(); ok {
+		_spec.SetField(videodraft.FieldEpisodeNumber, field.TypeUint32, value)
+		_node.EpisodeNumber = value
 	}
 	return _node, _spec
 }
@@ -775,6 +825,42 @@ func (u *VideoDraftUpsert) UpdateAuthorID() *VideoDraftUpsert {
 // AddAuthorID adds v to the "author_id" field.
 func (u *VideoDraftUpsert) AddAuthorID(v uint32) *VideoDraftUpsert {
 	u.Add(videodraft.FieldAuthorID, v)
+	return u
+}
+
+// SetSeriesID sets the "series_id" field.
+func (u *VideoDraftUpsert) SetSeriesID(v uint32) *VideoDraftUpsert {
+	u.Set(videodraft.FieldSeriesID, v)
+	return u
+}
+
+// UpdateSeriesID sets the "series_id" field to the value that was provided on create.
+func (u *VideoDraftUpsert) UpdateSeriesID() *VideoDraftUpsert {
+	u.SetExcluded(videodraft.FieldSeriesID)
+	return u
+}
+
+// AddSeriesID adds v to the "series_id" field.
+func (u *VideoDraftUpsert) AddSeriesID(v uint32) *VideoDraftUpsert {
+	u.Add(videodraft.FieldSeriesID, v)
+	return u
+}
+
+// SetEpisodeNumber sets the "episode_number" field.
+func (u *VideoDraftUpsert) SetEpisodeNumber(v uint32) *VideoDraftUpsert {
+	u.Set(videodraft.FieldEpisodeNumber, v)
+	return u
+}
+
+// UpdateEpisodeNumber sets the "episode_number" field to the value that was provided on create.
+func (u *VideoDraftUpsert) UpdateEpisodeNumber() *VideoDraftUpsert {
+	u.SetExcluded(videodraft.FieldEpisodeNumber)
+	return u
+}
+
+// AddEpisodeNumber adds v to the "episode_number" field.
+func (u *VideoDraftUpsert) AddEpisodeNumber(v uint32) *VideoDraftUpsert {
+	u.Add(videodraft.FieldEpisodeNumber, v)
 	return u
 }
 
@@ -1165,6 +1251,48 @@ func (u *VideoDraftUpsertOne) AddAuthorID(v uint32) *VideoDraftUpsertOne {
 func (u *VideoDraftUpsertOne) UpdateAuthorID() *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.UpdateAuthorID()
+	})
+}
+
+// SetSeriesID sets the "series_id" field.
+func (u *VideoDraftUpsertOne) SetSeriesID(v uint32) *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.SetSeriesID(v)
+	})
+}
+
+// AddSeriesID adds v to the "series_id" field.
+func (u *VideoDraftUpsertOne) AddSeriesID(v uint32) *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.AddSeriesID(v)
+	})
+}
+
+// UpdateSeriesID sets the "series_id" field to the value that was provided on create.
+func (u *VideoDraftUpsertOne) UpdateSeriesID() *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.UpdateSeriesID()
+	})
+}
+
+// SetEpisodeNumber sets the "episode_number" field.
+func (u *VideoDraftUpsertOne) SetEpisodeNumber(v uint32) *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.SetEpisodeNumber(v)
+	})
+}
+
+// AddEpisodeNumber adds v to the "episode_number" field.
+func (u *VideoDraftUpsertOne) AddEpisodeNumber(v uint32) *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.AddEpisodeNumber(v)
+	})
+}
+
+// UpdateEpisodeNumber sets the "episode_number" field to the value that was provided on create.
+func (u *VideoDraftUpsertOne) UpdateEpisodeNumber() *VideoDraftUpsertOne {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.UpdateEpisodeNumber()
 	})
 }
 
@@ -1721,6 +1849,48 @@ func (u *VideoDraftUpsertBulk) AddAuthorID(v uint32) *VideoDraftUpsertBulk {
 func (u *VideoDraftUpsertBulk) UpdateAuthorID() *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.UpdateAuthorID()
+	})
+}
+
+// SetSeriesID sets the "series_id" field.
+func (u *VideoDraftUpsertBulk) SetSeriesID(v uint32) *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.SetSeriesID(v)
+	})
+}
+
+// AddSeriesID adds v to the "series_id" field.
+func (u *VideoDraftUpsertBulk) AddSeriesID(v uint32) *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.AddSeriesID(v)
+	})
+}
+
+// UpdateSeriesID sets the "series_id" field to the value that was provided on create.
+func (u *VideoDraftUpsertBulk) UpdateSeriesID() *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.UpdateSeriesID()
+	})
+}
+
+// SetEpisodeNumber sets the "episode_number" field.
+func (u *VideoDraftUpsertBulk) SetEpisodeNumber(v uint32) *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.SetEpisodeNumber(v)
+	})
+}
+
+// AddEpisodeNumber adds v to the "episode_number" field.
+func (u *VideoDraftUpsertBulk) AddEpisodeNumber(v uint32) *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.AddEpisodeNumber(v)
+	})
+}
+
+// UpdateEpisodeNumber sets the "episode_number" field to the value that was provided on create.
+func (u *VideoDraftUpsertBulk) UpdateEpisodeNumber() *VideoDraftUpsertBulk {
+	return u.Update(func(s *VideoDraftUpsert) {
+		s.UpdateEpisodeNumber()
 	})
 }
 

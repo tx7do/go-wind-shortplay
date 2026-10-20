@@ -1708,6 +1708,171 @@ class S {
   String get errorUploadFailed {
     return Intl.message('上传失败', name: 'errorUploadFailed', desc: '', args: []);
   }
+
+  /// `保存`
+  String get save {
+    return Intl.message('保存', name: 'save', desc: '', args: []);
+  }
+
+  /// `视频`
+  String get videosTab {
+    return Intl.message('视频', name: 'videosTab', desc: '', args: []);
+  }
+
+  /// `剧集`
+  String get seriesTab {
+    return Intl.message('剧集', name: 'seriesTab', desc: '', args: []);
+  }
+
+  /// `暂无剧集`
+  String get seriesEmpty {
+    return Intl.message('暂无剧集', name: 'seriesEmpty', desc: '', args: []);
+  }
+
+  /// `还没有剧集，发布时挂靠即可创建`
+  String get seriesEmptyMine {
+    return Intl.message(
+      '还没有剧集，发布时挂靠即可创建',
+      name: 'seriesEmptyMine',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `剧集不存在或暂无可见剧集`
+  String get seriesNotFound {
+    return Intl.message(
+      '剧集不存在或暂无可见剧集',
+      name: 'seriesNotFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `更新至{published}集 · 共{total}集`
+  String seriesUpdatedTo(int published, int total) {
+    return Intl.message(
+      '更新至$published集 · 共$total集',
+      name: 'seriesUpdatedTo',
+      desc: '',
+      args: [published, total],
+    );
+  }
+
+  /// `{count}集`
+  String seriesEpisodeBadge(int count) {
+    return Intl.message(
+      '$count集',
+      name: 'seriesEpisodeBadge',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `第{n}集`
+  String episodeN(int n) {
+    return Intl.message('第$n集', name: 'episodeN', desc: '', args: [n]);
+  }
+
+  /// `播放中`
+  String get playNow {
+    return Intl.message('播放中', name: 'playNow', desc: '', args: []);
+  }
+
+  /// `自动连播下一集`
+  String get autoNextTip {
+    return Intl.message('自动连播下一集', name: 'autoNextTip', desc: '', args: []);
+  }
+
+  /// `编辑剧集`
+  String get editSeries {
+    return Intl.message('编辑剧集', name: 'editSeries', desc: '', args: []);
+  }
+
+  /// `剧名`
+  String get seriesTitleLabel {
+    return Intl.message('剧名', name: 'seriesTitleLabel', desc: '', args: []);
+  }
+
+  /// `剧简介`
+  String get seriesDescLabel {
+    return Intl.message('剧简介', name: 'seriesDescLabel', desc: '', args: []);
+  }
+
+  /// `删除剧集`
+  String get deleteSeriesTitle {
+    return Intl.message('删除剧集', name: 'deleteSeriesTitle', desc: '', args: []);
+  }
+
+  /// `删除后剧集解绑，剧内视频保留。确定删除吗？`
+  String get deleteSeriesConfirm {
+    return Intl.message(
+      '删除后剧集解绑，剧内视频保留。确定删除吗？',
+      name: 'deleteSeriesConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `剧集已删除`
+  String get seriesDeleted {
+    return Intl.message('剧集已删除', name: 'seriesDeleted', desc: '', args: []);
+  }
+
+  /// `剧集已保存`
+  String get seriesSaved {
+    return Intl.message('剧集已保存', name: 'seriesSaved', desc: '', args: []);
+  }
+
+  /// `剧集已创建`
+  String get seriesCreated {
+    return Intl.message('剧集已创建', name: 'seriesCreated', desc: '', args: []);
+  }
+
+  /// `挂靠剧集`
+  String get attachSeries {
+    return Intl.message('挂靠剧集', name: 'attachSeries', desc: '', args: []);
+  }
+
+  /// `选择剧集`
+  String get chooseSeries {
+    return Intl.message('选择剧集', name: 'chooseSeries', desc: '', args: []);
+  }
+
+  /// `更换`
+  String get changeSeries {
+    return Intl.message('更换', name: 'changeSeries', desc: '', args: []);
+  }
+
+  /// `不挂靠剧集，作为独立视频发布`
+  String get attachSeriesNone {
+    return Intl.message(
+      '不挂靠剧集，作为独立视频发布',
+      name: 'attachSeriesNone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `发布后自动排入该剧集（当前{count}集）`
+  String attachSeriesHint(int count) {
+    return Intl.message(
+      '发布后自动排入该剧集（当前$count集）',
+      name: 'attachSeriesHint',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `移除挂靠`
+  String get attachSeriesRemove {
+    return Intl.message('移除挂靠', name: 'attachSeriesRemove', desc: '', args: []);
+  }
+
+  /// `新建剧集`
+  String get newSeries {
+    return Intl.message('新建剧集', name: 'newSeries', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

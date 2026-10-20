@@ -138,8 +138,9 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 	// 评论
 	commentRepo := data.NewCommentRepo(ctx, entClient)
 
-	// shortplay 业务域：视频 / 上传 / 草稿 / 互动 / 评论 / 举报 / 埋点 / 配置 / 看板
+	// shortplay 业务域：视频 / 剧集 / 上传 / 草稿 / 互动 / 评论 / 举报 / 埋点 / 配置 / 看板
 	videoRepo := data.NewVideoRepo(ctx, entClient)
+	seriesRepo := data.NewSeriesRepo(ctx, entClient)
 	videoDraftRepo := data.NewVideoDraftRepo(ctx, entClient)
 	uploadTaskRepo := data.NewUploadTaskRepo(ctx, entClient)
 	interactionRepo := data.NewInteractionRepo(ctx, entClient)
@@ -227,7 +228,8 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 	mediaAssetService := service.NewMediaAssetService(ctx, mediaAssetRepo)
 
 	// shortplay 业务域服务
-	videoService := service.NewVideoService(ctx, videoRepo, videoDraftRepo, uploadTaskRepo, sysConfRepo, minIOClient)
+	seriesService := service.NewSeriesService(ctx, seriesRepo, videoRepo)
+	videoService := service.NewVideoService(ctx, videoRepo, seriesService, videoDraftRepo, uploadTaskRepo, sysConfRepo, minIOClient)
 	feedService := service.NewFeedService(ctx, videoRepo, userRepo, interactionRepo, statsRepo, redisClient)
 	interactionService := service.NewInteractionService(ctx, interactionRepo, videoRepo, userRepo)
 	videoCommentService := service.NewVideoCommentService(ctx, videoCommentRepo, videoRepo, userRepo)
@@ -263,7 +265,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 		notificationRuleService,
 		notificationTemplateService,
 		notificationPreferenceService,
-		videoService, feedService, interactionService, videoCommentService,
+		videoService, seriesService, feedService, interactionService, videoCommentService,
 		reportService, sysConfService, ubaService, dashboardService,
 		// register:grpc-arg ── 新模块服务实参在此行后追加(make register 工具锚点,勿删)
 	)

@@ -51,6 +51,10 @@ class VideoPlayerItem extends StatefulWidget {
   /// 播放器就绪（宿主可取 [Player] 渲染进度条/自定义控制）
   final ValueChanged<Player>? onPlayerReady;
 
+  /// 单视频循环（默认开，抖音口径播完重头播；剧集连播场景传 false，
+  /// 播完停在末帧、completed 事件由宿主切下一集）
+  final bool loop;
+
   const VideoPlayerItem({
     super.key,
     required this.video,
@@ -61,6 +65,7 @@ class VideoPlayerItem extends StatefulWidget {
     this.onHeartbeat,
     this.onDoubleTapLike,
     this.onPlayerReady,
+    this.loop = true,
   });
 
   @override
@@ -218,8 +223,11 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
       if (mounted) setState(() => _isBuffering = false);
       return;
     }
-    // 单视频无限循环（抖音口径）：播完自动重头播，不会冻在末帧
-    await _player.setPlaylistMode(PlaylistMode.loop);
+    // 单视频循环（抖音口径）：播完自动重头播，不会冻在末帧；
+    // 剧集连播（loop=false）播完停在末帧，由宿主决定切下一集
+    await _player.setPlaylistMode(
+      widget.loop ? PlaylistMode.loop : PlaylistMode.none,
+    );
     await _player.open(Media(url), play: widget.isActive);
     _opened = true;
     if (mounted) setState(() {});

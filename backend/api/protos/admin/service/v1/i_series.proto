@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package admin.service.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "pagination/v1/pagination.proto";
+import "series/service/v1/series.proto";
+
+// 剧集管理服务（后台：列表 / 详情 / 编辑 / 删除；剧集为 UGC，管理端不提供创建）
+service SeriesService {
+  // 剧集列表（query 剧名模糊 / authorId 过滤）
+  rpc List (pagination.PagingRequest) returns (series.service.v1.ListSeriesResponse) {
+    option (google.api.http) = {
+      get: "/admin/v1/series"
+    };
+  }
+
+  // 剧集详情（全集，含未发布各状态）
+  rpc Get (series.service.v1.GetSeriesRequest) returns (series.service.v1.SeriesDetail) {
+    option (google.api.http) = {
+      get: "/admin/v1/series/{id}"
+    };
+  }
+
+  // 编辑剧集（标题 / 简介 / 封面，复用 series 域 UpdateSeriesRequest）
+  rpc Update (series.service.v1.UpdateSeriesRequest) returns (series.service.v1.Series) {
+    option (google.api.http) = {
+      put: "/admin/v1/series/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除剧集（剧内视频解挂不删除）
+  rpc Delete (series.service.v1.DeleteSeriesRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/admin/v1/series/{id}"
+    };
+  }
+}

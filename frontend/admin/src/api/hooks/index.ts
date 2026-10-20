@@ -22,8 +22,11 @@ import type {
   HandleReportRequest,
   ListResponse,
   Report,
+  Series,
+  SeriesDetail,
   SysConf,
   TopMetric,
+  UpdateSeriesRequest,
   UpdateSysConfRequest,
   UpdateUserRequest,
   UpdateVideoRequest,
@@ -141,6 +144,48 @@ export function useDeleteVideo(
 ) {
   return useMutation<void, Error, number>({
     mutationFn: (id) => adminHttp.delete<void>(`videos/${id}`),
+    ...options,
+  });
+}
+
+// ==============================
+// 剧集管理
+// ==============================
+
+export async function fetchListSeries(params: ListParams) {
+  return queryClient.fetchQuery({
+    queryKey: ['listSeries', params],
+    queryFn: () => adminHttp.get<ListResponse<Series>>('series', cleanParams(params)),
+    retry: 0,
+  });
+}
+
+export function useGetSeries(
+  id: number | undefined,
+  options?: UseQueryOptions<SeriesDetail, Error>,
+) {
+  return useQuery<SeriesDetail, Error>({
+    queryKey: ['getSeries', id],
+    queryFn: () => adminHttp.get<SeriesDetail>(`series/${id}`),
+    enabled: id !== undefined,
+    ...options,
+  });
+}
+
+export function useUpdateSeries(
+  options?: UseMutationOptions<Series, Error, { id: number } & UpdateSeriesRequest>,
+) {
+  return useMutation<Series, Error, { id: number } & UpdateSeriesRequest>({
+    mutationFn: ({ id, ...body }) => adminHttp.put<Series>(`series/${id}`, body),
+    ...options,
+  });
+}
+
+export function useDeleteSeries(
+  options?: UseMutationOptions<void, Error, number>,
+) {
+  return useMutation<void, Error, number>({
+    mutationFn: (id) => adminHttp.delete<void>(`series/${id}`),
     ...options,
   });
 }

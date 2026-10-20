@@ -12,6 +12,8 @@ import 'package:shortplay_app/src/features/common/data/models.dart';
 import 'package:shortplay_app/src/features/common/services/interaction_service.dart';
 import 'package:shortplay_app/src/features/common/widgets/login_guard.dart';
 import 'package:shortplay_app/src/features/common/widgets/paged_video_list.dart';
+import 'package:shortplay_app/src/features/series/services/series_service.dart';
+import 'package:shortplay_app/src/features/series/widgets/paged_series_list.dart';
 import 'package:shortplay_app/src/features/common/widgets/user_avatar.dart';
 import 'package:shortplay_app/src/features/profile/services/user_service.dart';
 
@@ -27,6 +29,7 @@ class UserProfilePage extends StatefulWidget {
 
 class _UserProfilePageState extends State<UserProfilePage> {
   final UserService _userService = UserService();
+  final SeriesService _seriesService = SeriesService();
   final InteractionService _interaction = InteractionService();
 
   UserProfile? _profile;
@@ -287,12 +290,37 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   ),
                 ),
               ],
-              body: PagedVideoList(
-                loader: (query) => _userService.userVideos(
-                  userId: widget.userId,
-                  query: query,
+              body: DefaultTabController(
+                length: 2,
+                child: Column(
+                  children: [
+                    TabBar(
+                      tabs: [
+                        Tab(text: loc.works),
+                        Tab(text: loc.seriesTab),
+                      ],
+                    ),
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          PagedVideoList(
+                            loader: (query) => _userService.userVideos(
+                              userId: widget.userId,
+                              query: query,
+                            ),
+                            emptyText: loc.noWorksYet,
+                          ),
+                          PagedSeriesList(
+                            loader: (query) => _seriesService.listSeries(
+                              authorId: widget.userId,
+                              paging: query,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                emptyText: loc.noWorksYet,
               ),
             ),
     );

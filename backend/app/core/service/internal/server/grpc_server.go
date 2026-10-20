@@ -16,6 +16,7 @@ import (
 	feedV1 "go-wind-shortplay/api/gen/go/feed/service/v1"
 	interactionV1 "go-wind-shortplay/api/gen/go/interaction/service/v1"
 	reportV1 "go-wind-shortplay/api/gen/go/report/service/v1"
+	seriesV1 "go-wind-shortplay/api/gen/go/series/service/v1"
 	statsV1 "go-wind-shortplay/api/gen/go/stats/service/v1"
 	sysconfV1 "go-wind-shortplay/api/gen/go/sysconf/service/v1"
 	ubaV1 "go-wind-shortplay/api/gen/go/uba/service/v1"
@@ -89,6 +90,7 @@ func NewGrpcServer(
 	notificationPreferenceService *service.NotificationPreferenceService,
 
 	videoService *service.VideoService,
+	seriesService *service.SeriesService,
 	feedService *service.FeedService,
 	interactionService *service.InteractionService,
 	videoCommentService *service.VideoCommentService,
@@ -157,6 +159,7 @@ func NewGrpcServer(
 
 	// shortplay 业务域
 	videoV1.RegisterVideoServiceServer(srv, videoService)
+	seriesV1.RegisterSeriesServiceServer(srv, seriesService)
 	feedV1.RegisterFeedServiceServer(srv, feedService)
 	interactionV1.RegisterInteractionServiceServer(srv, interactionService)
 	interactionV1.RegisterCommentServiceServer(srv, videoCommentService)

@@ -52,8 +52,12 @@ type VideoDraft struct {
 	// 关联上传任务号
 	UploadTaskID *string `json:"upload_task_id,omitempty"`
 	// 作者用户ID
-	AuthorID     uint32 `json:"author_id,omitempty"`
-	selectValues sql.SelectValues
+	AuthorID uint32 `json:"author_id,omitempty"`
+	// 挂靠剧集ID（提交发布时挂靠，0=不挂靠）
+	SeriesID uint32 `json:"series_id,omitempty"`
+	// 剧内集号（0=提交发布时自动排号）
+	EpisodeNumber uint32 `json:"episode_number,omitempty"`
+	selectValues  sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -63,7 +67,7 @@ func (*VideoDraft) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case videodraft.FieldTags:
 			values[i] = new([]byte)
-		case videodraft.FieldID, videodraft.FieldCreatedBy, videodraft.FieldUpdatedBy, videodraft.FieldDeletedBy, videodraft.FieldTenantID, videodraft.FieldDuration, videodraft.FieldWidth, videodraft.FieldHeight, videodraft.FieldAuthorID:
+		case videodraft.FieldID, videodraft.FieldCreatedBy, videodraft.FieldUpdatedBy, videodraft.FieldDeletedBy, videodraft.FieldTenantID, videodraft.FieldDuration, videodraft.FieldWidth, videodraft.FieldHeight, videodraft.FieldAuthorID, videodraft.FieldSeriesID, videodraft.FieldEpisodeNumber:
 			values[i] = new(sql.NullInt64)
 		case videodraft.FieldTitle, videodraft.FieldDescription, videodraft.FieldCoverURL, videodraft.FieldVideoURL, videodraft.FieldUploadTaskID:
 			values[i] = new(sql.NullString)
@@ -205,6 +209,18 @@ func (_m *VideoDraft) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.AuthorID = uint32(value.Int64)
 			}
+		case videodraft.FieldSeriesID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field series_id", values[i])
+			} else if value.Valid {
+				_m.SeriesID = uint32(value.Int64)
+			}
+		case videodraft.FieldEpisodeNumber:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field episode_number", values[i])
+			} else if value.Valid {
+				_m.EpisodeNumber = uint32(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -313,6 +329,12 @@ func (_m *VideoDraft) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("author_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.AuthorID))
+	builder.WriteString(", ")
+	builder.WriteString("series_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SeriesID))
+	builder.WriteString(", ")
+	builder.WriteString("episode_number=")
+	builder.WriteString(fmt.Sprintf("%v", _m.EpisodeNumber))
 	builder.WriteByte(')')
 	return builder.String()
 }

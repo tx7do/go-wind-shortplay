@@ -26,8 +26,14 @@ class AppRoutePath {
   /// 他人主页
   static const userProfile = '/user/:userId';
 
+  /// 剧集详情
+  static const seriesDetail = '/series/:seriesId';
+
   /// 视频详情路径模板（跳转用：`AppRoutePath.videoPath(1)`）
   static String videoPath(int videoId) => '/video/$videoId';
+
+  /// 剧集详情路径模板（跳转用：`AppRoutePath.seriesPath(1)`）
+  static String seriesPath(int seriesId) => '/series/$seriesId';
 
   /// 他人主页路径模板
   static String userPath(int userId) => '/user/$userId';

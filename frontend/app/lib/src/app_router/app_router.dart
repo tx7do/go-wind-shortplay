@@ -22,6 +22,7 @@ import 'package:shortplay_app/src/features/profile/pages/profile_page.dart';
 import 'package:shortplay_app/src/features/profile/pages/user_profile_page.dart';
 import 'package:shortplay_app/src/features/publish/pages/publish_page.dart';
 import 'package:shortplay_app/src/features/search/pages/search_page.dart';
+import 'package:shortplay_app/src/features/series/pages/series_detail_page.dart';
 import 'package:shortplay_app/src/features/settings/pages/settings_page.dart';
 import 'package:shortplay_app/src/features/video_detail/pages/video_detail_page.dart';
 import 'package:get_it/get_it.dart' show GetIt;
@@ -111,6 +112,22 @@ class AppRouter {
           final videoId =
               int.tryParse(state.pathParameters['videoId'] ?? '') ?? 0;
           return VideoDetailPage(videoId: videoId);
+        },
+      ),
+      // 剧集详情（全屏）
+      GoRoute(
+        path: constants.AppRoutePath.seriesDetail,
+        name: RouteNames.seriesDetail,
+        builder: (context, state) {
+          final seriesId =
+              int.tryParse(state.pathParameters['seriesId'] ?? '') ?? 0;
+          // from：来源视频（选集列表高亮当前播放集）
+          final fromVideo =
+              int.tryParse(state.uri.queryParameters['from'] ?? '');
+          return SeriesDetailPage(
+            seriesId: seriesId,
+            currentVideoId: fromVideo,
+          );
         },
       ),
       // 他人主页（全屏）

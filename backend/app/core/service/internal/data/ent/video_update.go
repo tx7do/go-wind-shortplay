@@ -322,6 +322,48 @@ func (_u *VideoUpdate) AddAuthorID(v int32) *VideoUpdate {
 	return _u
 }
 
+// SetSeriesID sets the "series_id" field.
+func (_u *VideoUpdate) SetSeriesID(v uint32) *VideoUpdate {
+	_u.mutation.ResetSeriesID()
+	_u.mutation.SetSeriesID(v)
+	return _u
+}
+
+// SetNillableSeriesID sets the "series_id" field if the given value is not nil.
+func (_u *VideoUpdate) SetNillableSeriesID(v *uint32) *VideoUpdate {
+	if v != nil {
+		_u.SetSeriesID(*v)
+	}
+	return _u
+}
+
+// AddSeriesID adds value to the "series_id" field.
+func (_u *VideoUpdate) AddSeriesID(v int32) *VideoUpdate {
+	_u.mutation.AddSeriesID(v)
+	return _u
+}
+
+// SetEpisodeNumber sets the "episode_number" field.
+func (_u *VideoUpdate) SetEpisodeNumber(v uint32) *VideoUpdate {
+	_u.mutation.ResetEpisodeNumber()
+	_u.mutation.SetEpisodeNumber(v)
+	return _u
+}
+
+// SetNillableEpisodeNumber sets the "episode_number" field if the given value is not nil.
+func (_u *VideoUpdate) SetNillableEpisodeNumber(v *uint32) *VideoUpdate {
+	if v != nil {
+		_u.SetEpisodeNumber(*v)
+	}
+	return _u
+}
+
+// AddEpisodeNumber adds value to the "episode_number" field.
+func (_u *VideoUpdate) AddEpisodeNumber(v int32) *VideoUpdate {
+	_u.mutation.AddEpisodeNumber(v)
+	return _u
+}
+
 // SetRejectReason sets the "reject_reason" field.
 func (_u *VideoUpdate) SetRejectReason(v string) *VideoUpdate {
 	_u.mutation.SetRejectReason(v)
@@ -603,6 +645,18 @@ func (_u *VideoUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedAuthorID(); ok {
 		_spec.AddField(video.FieldAuthorID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.SeriesID(); ok {
+		_spec.SetField(video.FieldSeriesID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedSeriesID(); ok {
+		_spec.AddField(video.FieldSeriesID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.EpisodeNumber(); ok {
+		_spec.SetField(video.FieldEpisodeNumber, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedEpisodeNumber(); ok {
+		_spec.AddField(video.FieldEpisodeNumber, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.RejectReason(); ok {
 		_spec.SetField(video.FieldRejectReason, field.TypeString, value)
@@ -955,6 +1009,48 @@ func (_u *VideoUpdateOne) AddAuthorID(v int32) *VideoUpdateOne {
 	return _u
 }
 
+// SetSeriesID sets the "series_id" field.
+func (_u *VideoUpdateOne) SetSeriesID(v uint32) *VideoUpdateOne {
+	_u.mutation.ResetSeriesID()
+	_u.mutation.SetSeriesID(v)
+	return _u
+}
+
+// SetNillableSeriesID sets the "series_id" field if the given value is not nil.
+func (_u *VideoUpdateOne) SetNillableSeriesID(v *uint32) *VideoUpdateOne {
+	if v != nil {
+		_u.SetSeriesID(*v)
+	}
+	return _u
+}
+
+// AddSeriesID adds value to the "series_id" field.
+func (_u *VideoUpdateOne) AddSeriesID(v int32) *VideoUpdateOne {
+	_u.mutation.AddSeriesID(v)
+	return _u
+}
+
+// SetEpisodeNumber sets the "episode_number" field.
+func (_u *VideoUpdateOne) SetEpisodeNumber(v uint32) *VideoUpdateOne {
+	_u.mutation.ResetEpisodeNumber()
+	_u.mutation.SetEpisodeNumber(v)
+	return _u
+}
+
+// SetNillableEpisodeNumber sets the "episode_number" field if the given value is not nil.
+func (_u *VideoUpdateOne) SetNillableEpisodeNumber(v *uint32) *VideoUpdateOne {
+	if v != nil {
+		_u.SetEpisodeNumber(*v)
+	}
+	return _u
+}
+
+// AddEpisodeNumber adds value to the "episode_number" field.
+func (_u *VideoUpdateOne) AddEpisodeNumber(v int32) *VideoUpdateOne {
+	_u.mutation.AddEpisodeNumber(v)
+	return _u
+}
+
 // SetRejectReason sets the "reject_reason" field.
 func (_u *VideoUpdateOne) SetRejectReason(v string) *VideoUpdateOne {
 	_u.mutation.SetRejectReason(v)
@@ -1266,6 +1362,18 @@ func (_u *VideoUpdateOne) sqlSave(ctx context.Context) (_node *Video, err error)
 	}
 	if value, ok := _u.mutation.AddedAuthorID(); ok {
 		_spec.AddField(video.FieldAuthorID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.SeriesID(); ok {
+		_spec.SetField(video.FieldSeriesID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedSeriesID(); ok {
+		_spec.AddField(video.FieldSeriesID, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.EpisodeNumber(); ok {
+		_spec.SetField(video.FieldEpisodeNumber, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedEpisodeNumber(); ok {
+		_spec.AddField(video.FieldEpisodeNumber, field.TypeUint32, value)
 	}
 	if value, ok := _u.mutation.RejectReason(); ok {
 		_spec.SetField(video.FieldRejectReason, field.TypeString, value)

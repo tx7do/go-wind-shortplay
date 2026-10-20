@@ -63,10 +63,12 @@ type VideoService struct {
 
 	log *log.Helper
 
-	videoRepo     *data.VideoRepo
-	draftRepo     *data.VideoDraftRepo
+	videoRepo      *data.VideoRepo
+	draftRepo      *data.VideoDraftRepo
 	uploadTaskRepo *data.UploadTaskRepo
-	sysConfRepo   *data.SysConfRepo
+	sysConfRepo    *data.SysConfRepo
+
+	seriesSvc *SeriesService
 
 	minio *oss.MinIOClient
 
@@ -76,6 +78,7 @@ type VideoService struct {
 func NewVideoService(
 	ctx *bootstrap.Context,
 	videoRepo *data.VideoRepo,
+	seriesSvc *SeriesService,
 	draftRepo *data.VideoDraftRepo,
 	uploadTaskRepo *data.UploadTaskRepo,
 	sysConfRepo *data.SysConfRepo,
@@ -84,6 +87,7 @@ func NewVideoService(
 	return &VideoService{
 		log:            ctx.NewLoggerHelper("video/service/core-service"),
 		videoRepo:      videoRepo,
+		seriesSvc:      seriesSvc,
 		draftRepo:      draftRepo,
 		uploadTaskRepo: uploadTaskRepo,
 		sysConfRepo:    sysConfRepo,
@@ -131,21 +135,26 @@ func draftEntityToDTO(e *ent.VideoDraft) *videoV1.VideoDraft {
 	if e == nil {
 		return nil
 	}
-	return &videoV1.VideoDraft{
-		Id:           trans.Ptr(e.ID),
-		Title:        trans.Ptr(e.Title),
-		Description:  e.Description,
-		Tags:         e.Tags,
-		CoverUrl:     e.CoverURL,
-		VideoUrl:     e.VideoURL,
-		Duration:     trans.Ptr(e.Duration),
-		Width:        trans.Ptr(e.Width),
-		Height:       trans.Ptr(e.Height),
-		UploadTaskId: e.UploadTaskID,
-		AuthorId:     trans.Ptr(e.AuthorID),
-		CreatedAt:    timeutil.TimeToTimestamppb(e.CreatedAt),
-		UpdatedAt:    timeutil.TimeToTimestamppb(e.UpdatedAt),
+	dto := &videoV1.VideoDraft{
+		Id:            trans.Ptr(e.ID),
+		Title:         trans.Ptr(e.Title),
+		Description:   e.Description,
+		Tags:          e.Tags,
+		CoverUrl:      e.CoverURL,
+		VideoUrl:      e.VideoURL,
+		Duration:      trans.Ptr(e.Duration),
+		Width:         trans.Ptr(e.Width),
+		Height:        trans.Ptr(e.Height),
+		UploadTaskId:  e.UploadTaskID,
+		AuthorId:      trans.Ptr(e.AuthorID),
+		CreatedAt:     timeutil.TimeToTimestamppb(e.CreatedAt),
+		UpdatedAt:     timeutil.TimeToTimestamppb(e.UpdatedAt),
 	}
+	if e.SeriesID > 0 {
+		dto.SeriesId = trans.Ptr(e.SeriesID)
+		dto.EpisodeNumber = trans.Ptr(e.EpisodeNumber)
+	}
+	return dto
 }
 
 // ── viewer 助手 ──
@@ -199,6 +208,19 @@ func (s *VideoService) UpdateVideo(ctx context.Context, req *videoV1.UpdateVideo
 		Title:       req.Title,
 		Description: req.Description,
 		CoverUrl:    req.CoverUrl,
+	}
+	// 挂靠剧集：>0 挂靠（校验剧归属）、=0 解挂、缺省不变
+	if req.SeriesId != nil {
+		if req.GetSeriesId() > 0 {
+			seriesID, episodeNo, err := s.seriesSvc.ResolveSeriesAttach(ctx, spViewerUserID(ctx), req.GetSeriesId(), req.GetEpisodeNumber())
+			if err != nil {
+				return nil, err
+			}
+			dto.SeriesId = trans.Ptr(seriesID)
+			dto.EpisodeNumber = trans.Ptr(episodeNo)
+		} else {
+			dto.SeriesId = trans.Ptr(uint32(0))
+		}
 	}
 	return s.videoRepo.Update(ctx, req.GetId(), dto, req.GetTags())
 }
@@ -439,6 +461,17 @@ func (s *VideoService) CompleteUpload(ctx context.Context, req *videoV1.Complete
 		dto.Title = trans.Ptr(strings.TrimSuffix(e.FileName, filepath.Ext(e.FileName)))
 	}
 
+	// 挂靠剧集：剧须为本人所有；集号缺省自动排到当前最大 +1
+	if req.GetSeriesId() > 0 {
+		seriesID, episodeNo, aerr := s.seriesSvc.ResolveSeriesAttach(ctx, uid, req.GetSeriesId(), req.GetEpisodeNumber())
+		if aerr != nil {
+			_ = s.uploadTaskRepo.UpdateStatus(ctx, e.ID, videoV1.UploadTaskStatus_UPLOAD_TASK_STATUS_FAILED, nil)
+			return nil, aerr
+		}
+		dto.SeriesId = trans.Ptr(seriesID)
+		dto.EpisodeNumber = trans.Ptr(episodeNo)
+	}
+
 	video, err := s.videoRepo.Create(ctx, dto, req.GetTags())
 	if err != nil {
 		_ = s.uploadTaskRepo.UpdateStatus(ctx, e.ID, videoV1.UploadTaskStatus_UPLOAD_TASK_STATUS_FAILED, nil)
@@ -464,18 +497,20 @@ func (s *VideoService) CompleteUpload(ctx context.Context, req *videoV1.Complete
 	}
 
 	if req.GetAsDraft() {
-		// 存草稿：建草稿行并回填任务
+		// 存草稿：建草稿行并回填任务（挂靠信息随行，提交发布时生效）
 		_, _ = s.draftRepo.Create(ctx, &videoV1.VideoDraft{
-			Title:        dto.Title,
-			Description:  dto.Description,
-			Tags:         req.GetTags(),
-			CoverUrl:     req.CoverUrl,
-			VideoUrl:     trans.Ptr(objectKey),
-			Duration:     req.Duration,
-			Width:        req.Width,
-			Height:       req.Height,
-			UploadTaskId: trans.Ptr(e.TaskID),
-			AuthorId:     trans.Ptr(uid),
+			Title:         dto.Title,
+			Description:   dto.Description,
+			Tags:          req.GetTags(),
+			CoverUrl:      req.CoverUrl,
+			VideoUrl:      trans.Ptr(objectKey),
+			Duration:      req.Duration,
+			Width:         req.Width,
+			Height:        req.Height,
+			UploadTaskId:  trans.Ptr(e.TaskID),
+			AuthorId:      trans.Ptr(uid),
+			SeriesId:      dto.SeriesId,
+			EpisodeNumber: dto.EpisodeNumber,
 		})
 	}
 
@@ -646,17 +681,25 @@ func (s *VideoService) SaveDraft(ctx context.Context, req *videoV1.SaveDraftRequ
 	if uid == 0 {
 		return nil, videoV1.ErrorUnauthorized("login required")
 	}
+	// 挂靠剧集：先校验归属（草稿保存即校验，提交发布时免二次失败）
+	if req.GetSeriesId() > 0 {
+		if _, _, err := s.seriesSvc.ResolveSeriesAttach(ctx, uid, req.GetSeriesId(), req.GetEpisodeNumber()); err != nil {
+			return nil, err
+		}
+	}
 	dto := &videoV1.VideoDraft{
-		Title:        req.Title,
-		Description:  req.Description,
-		Tags:         req.GetTags(),
-		CoverUrl:     req.CoverUrl,
-		VideoUrl:     req.VideoUrl,
-		Duration:     req.Duration,
-		Width:        req.Width,
-		Height:       req.Height,
-		UploadTaskId: req.UploadTaskId,
-		AuthorId:     trans.Ptr(uid),
+		Title:         req.Title,
+		Description:   req.Description,
+		Tags:          req.GetTags(),
+		CoverUrl:      req.CoverUrl,
+		VideoUrl:      req.VideoUrl,
+		Duration:      req.Duration,
+		Width:         req.Width,
+		Height:        req.Height,
+		UploadTaskId:  req.UploadTaskId,
+		AuthorId:      trans.Ptr(uid),
+		SeriesId:      req.SeriesId,
+		EpisodeNumber: req.EpisodeNumber,
 	}
 	if req.GetId() > 0 {
 		e, err := s.draftRepo.Get(ctx, req.GetId())
@@ -756,6 +799,15 @@ func (s *VideoService) SubmitDraft(ctx context.Context, req *videoV1.SubmitDraft
 	}
 	if status == videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED {
 		dto.PublishedAt = nowTimestamppbSP()
+	}
+	// 草稿携带的挂靠信息随提交生效（剧归属已在保存草稿时校验；集号 0 = 此刻自动排号）
+	if e.SeriesID > 0 {
+		seriesID, episodeNo, aerr := s.seriesSvc.ResolveSeriesAttach(ctx, uid, e.SeriesID, e.EpisodeNumber)
+		if aerr != nil {
+			return nil, aerr
+		}
+		dto.SeriesId = trans.Ptr(seriesID)
+		dto.EpisodeNumber = trans.Ptr(episodeNo)
 	}
 	video, err := s.videoRepo.Create(ctx, dto, e.Tags)
 	if err != nil {

@@ -1047,6 +1047,30 @@ func (f RolePermissionMutationRuleFunc) EvalMutation(ctx context.Context, m ent.
 	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.RolePermissionMutation", m)
 }
 
+// The SeriesQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type SeriesQueryRuleFunc func(context.Context, *ent.SeriesQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f SeriesQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.SeriesQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.SeriesQuery", q)
+}
+
+// The SeriesMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type SeriesMutationRuleFunc func(context.Context, *ent.SeriesMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f SeriesMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.SeriesMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.SeriesMutation", m)
+}
+
 // The SysConfigQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type SysConfigQueryRuleFunc func(context.Context, *ent.SysConfigQuery) error
@@ -1616,6 +1640,8 @@ func queryFilter(q ent.Query) (Filter, error) {
 		return q.Filter(), nil
 	case *ent.RolePermissionQuery:
 		return q.Filter(), nil
+	case *ent.SeriesQuery:
+		return q.Filter(), nil
 	case *ent.SysConfigQuery:
 		return q.Filter(), nil
 	case *ent.TaskQuery:
@@ -1738,6 +1764,8 @@ func mutationFilter(m ent.Mutation) (Filter, error) {
 	case *ent.RoleMetadataMutation:
 		return m.Filter(), nil
 	case *ent.RolePermissionMutation:
+		return m.Filter(), nil
+	case *ent.SeriesMutation:
 		return m.Filter(), nil
 	case *ent.SysConfigMutation:
 		return m.Filter(), nil

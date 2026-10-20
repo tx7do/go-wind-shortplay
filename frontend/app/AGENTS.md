@@ -57,7 +57,8 @@ lib/
         ├── feed/                  # 沉浸式 Feed（PageView + media_kit + UBA 埋点）
         ├── video_detail/          # 单视频沉浸页（复用 feed 播放组件）+ 举报
         ├── comment/               # 评论面板（楼中楼/发表/删除/点赞）
-        ├── publish/               # 发布（分片上传/草稿）
+        ├── publish/               # 发布（分片上传/草稿/挂靠剧集选择）
+        ├── series/                # 剧集（详情选集/我的剧集列表/发布选剧弹层）
         ├── profile/               # 我的 + 他人主页 + 编辑资料（头像直传 /uploads/image）
         ├── notify/                # 消息（基座收件箱 notifications/*；sp-biz 尾标记解析 videoId 直达视频）
         └── search/                # 搜索（关键词/标签聚合）

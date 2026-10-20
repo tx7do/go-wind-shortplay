@@ -84,6 +84,8 @@ func NewRestMiddleware(
 		appV1.OperationCommentServiceListReply,
 		appV1.OperationInteractionServiceGetInteractionStatus,
 		appV1.OperationVideoServiceListTag,
+		appV1.OperationSeriesServiceGetSeries,
+		appV1.OperationSeriesServiceListSeries,
 		appV1.OperationUbaServiceReportEvents,
 
 		// shortplay 旧契约认证面（/auth/*）：登录/注册/刷新在认证前到达
@@ -139,6 +141,7 @@ func NewRestServer(
 
 	spFeedService *service.FeedService,
 	spVideoService *service.VideoService,
+	spSeriesService *service.SeriesService,
 	spInteractionService *service.InteractionService,
 	spReportService *service.ReportService,
 	spUbaService *service.UbaService,
@@ -221,6 +224,7 @@ func NewRestServer(
 	// protojson 解 base64，与客户端契约不符）。
 	registerSpVideoServiceHandler(srv, spVideoService)
 	appV1.RegisterVideoServiceHTTPServer(srv, spVideoService)
+	appV1.RegisterSeriesServiceHTTPServer(srv, spSeriesService)
 
 	// register:route ── 新模块路由在此行后注册(make register 工具锚点,勿删)
 

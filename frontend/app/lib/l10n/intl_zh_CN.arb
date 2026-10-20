@@ -1,8 +1,6 @@
 {
   "appName": "风印短剧",
-
   "@@locale": "zh_CN",
-
   "home": "首页",
   "publish": "发布",
   "message": "消息",
@@ -20,12 +18,10 @@
   "loadFailed": "加载失败",
   "login": "登录",
   "backToHome": "返回首页",
-
   "pageNotFound": "页面未找到",
   "pageNotFoundDesc": "抱歉，您访问的页面不存在或已被移动。",
   "errorOccurred": "发生错误！",
   "featureNotAvailable": "该功能即将上线，敬请期待",
-
   "videoDeleted": "视频已删除",
   "videoNotFound": "视频不存在或已下架",
   "copyLink": "复制链接",
@@ -33,22 +29,21 @@
   "guestInteractionTitle": "登录后才能互动",
   "guestInteractionDesc": "登录后即可点赞、评论、收藏和关注",
   "goLogin": "去登录",
-
   "reasonFollow": "关注",
   "reasonHot": "热",
   "reasonLatest": "最新",
-
   "follow": "关注",
   "followed": "已关注",
   "unfollow": "取消关注",
   "unfollowConfirm": "确定不再关注该用户吗？",
   "cannotFollowSelf": "不能关注自己",
-
   "comment": "评论",
   "commentsCount": "{count} 条评论",
   "@commentsCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "writeComment": "写下你的评论…",
@@ -56,19 +51,25 @@
   "replyTo": "回复 {name}",
   "@replyTo": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "repliesCount": "{count} 条回复",
   "@repliesCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "expandReplies": "展开 {count} 条回复",
   "@expandReplies": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "deleteCommentConfirm": "确定删除这条评论吗？",
@@ -77,7 +78,6 @@
   "noCommentsYet": "暂无评论，快来抢沙发",
   "commentIsEmpty": "评论内容不能为空",
   "onlyOwnerCanDelete": "只能删除自己的评论",
-
   "pickVideo": "从相册选择",
   "recordVideo": "拍摄视频",
   "videoPreview": "视频预览",
@@ -96,7 +96,9 @@
   "uploadingPercent": "上传中 {percent}%",
   "@uploadingPercent": {
     "placeholders": {
-      "percent": {"type": "int"}
+      "percent": {
+        "type": "int"
+      }
     }
   },
   "mergingVideo": "视频合并处理中…",
@@ -112,7 +114,6 @@
   "advancedSettings": "高级设置",
   "tagInlineHint": "输入标签，回车或逗号添加",
   "removeVideo": "移除视频",
-
   "markAllRead": "全部已读",
   "unreadOnly": "只看未读",
   "noNewMessages": "暂无新消息",
@@ -122,7 +123,6 @@
   "notifyTypeComment": "评论",
   "notifyTypeFollow": "关注",
   "notifyTypeSystem": "系统",
-
   "works": "作品",
   "collects": "收藏",
   "creatorCenter": "创作者中心",
@@ -157,7 +157,6 @@
   "deleteVideo": "删除视频",
   "deleteVideoConfirm": "确定删除该视频吗？删除后不可恢复",
   "videoDeletedSuccess": "视频已删除",
-
   "settings": "设置",
   "appearance": "外观",
   "darkMode": "深色模式",
@@ -167,17 +166,17 @@
   "language": "语言",
   "about": "关于",
   "versionLabel": "版本",
-
   "searchHint": "搜索视频、标签",
   "searchEmpty": "没有找到「{query}」相关视频",
   "@searchEmpty": {
     "placeholders": {
-      "query": {"type": "String"}
+      "query": {
+        "type": "String"
+      }
     }
   },
   "hotTags": "热门标签",
   "searchSomeKeyword": "搜点什么看看吧",
-
   "report": "举报",
   "reportReasonTitle": "选择举报原因",
   "reportDescriptionHint": "补充说明（选填）",
@@ -190,7 +189,6 @@
   "reportReasonCopyright": "侵权",
   "reportReasonFraud": "诈骗信息",
   "reportReasonOther": "其他问题",
-
   "username": "用户名",
   "password": "密码",
   "usernameHint": "请输入用户名",
@@ -206,27 +204,31 @@
   "registerSuccess": "注册成功",
   "registerFailed": "注册失败，请稍后重试",
   "welcomeBack": "欢迎回来",
-
   "timeJustNow": "刚刚",
   "timeMinutesAgo": "{count} 分钟前",
   "@timeMinutesAgo": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "timeHoursAgo": "{count} 小时前",
   "@timeHoursAgo": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "timeDaysAgo": "{count} 天前",
   "@timeDaysAgo": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "errorDefault": "操作失败，请稍后重试",
   "errorNetworkError": "网络异常，请检查网络连接",
   "errorTimeout": "请求超时，请稍后重试",
@@ -297,5 +299,62 @@
   "errorPositionNotFound": "职位不存在",
   "errorRoleNotFound": "角色不存在",
   "errorTenantNotFound": "租户不存在",
-  "errorUploadFailed": "上传失败"
+  "errorUploadFailed": "上传失败",
+  "save": "保存",
+  "videosTab": "视频",
+  "seriesTab": "剧集",
+  "seriesEmpty": "暂无剧集",
+  "seriesEmptyMine": "还没有剧集，发布时挂靠即可创建",
+  "seriesNotFound": "剧集不存在或暂无可见剧集",
+  "seriesUpdatedTo": "更新至{published}集 · 共{total}集",
+  "@seriesUpdatedTo": {
+    "placeholders": {
+      "published": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesEpisodeBadge": "{count}集",
+  "@seriesEpisodeBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "episodeN": "第{n}集",
+  "@episodeN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "playNow": "播放中",
+  "autoNextTip": "自动连播下一集",
+  "editSeries": "编辑剧集",
+  "seriesTitleLabel": "剧名",
+  "seriesDescLabel": "剧简介",
+  "deleteSeriesTitle": "删除剧集",
+  "deleteSeriesConfirm": "删除后剧集解绑，剧内视频保留。确定删除吗？",
+  "seriesDeleted": "剧集已删除",
+  "seriesSaved": "剧集已保存",
+  "seriesCreated": "剧集已创建",
+  "attachSeries": "挂靠剧集",
+  "chooseSeries": "选择剧集",
+  "changeSeries": "更换",
+  "attachSeriesNone": "不挂靠剧集，作为独立视频发布",
+  "attachSeriesHint": "发布后自动排入该剧集（当前{count}集）",
+  "@attachSeriesHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attachSeriesRemove": "移除挂靠",
+  "newSeries": "新建剧集"
 }

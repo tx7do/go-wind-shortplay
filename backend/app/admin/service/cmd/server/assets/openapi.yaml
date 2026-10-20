@@ -4670,6 +4670,145 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/admin.service.v1.ListRouteResponse'
+    /admin/v1/series:
+        get:
+            tags:
+                - SeriesService
+            description: 剧集列表（query 剧名模糊 / authorId 过滤）
+            operationId: SeriesService_List
+            parameters:
+                - name: page
+                  in: query
+                  description: 当前页码（从1开始，默认1）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  description: 每页条数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: offset
+                  in: query
+                  description: 跳过的记录数（从0开始，默认0）
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: 最多返回的记录数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: token
+                  in: query
+                  description: 上一页最后一条记录的游标（如ID/时间戳+ID，首次请求为空）
+                  schema:
+                    type: string
+                - name: noPaging
+                  in: query
+                  description: 是否不分页，如果为true，则page和pageSize参数无效。
+                  schema:
+                    type: boolean
+                - name: query
+                  in: query
+                  description: JSON字符串过滤条件，基础语法：{"field1":"val1", "field2___icontains":"val2"}，具体请参见：https://github.com/tx7do/go-crud/tree/main/pagination/filter/README.md
+                  schema:
+                    type: string
+                - name: filter
+                  in: query
+                  description: Google AIP规范字符串过滤条件
+                  schema:
+                    type: string
+                - name: filterExpr.type
+                  in: query
+                  description: 过滤表达式类型
+                  schema:
+                    enum:
+                        - EXPR_TYPE_UNSPECIFIED
+                        - AND
+                        - OR
+                    type: string
+                    format: enum
+                - name: orderBy
+                  in: query
+                  description: 排序条件
+                  schema:
+                    type: string
+                - name: fieldMask
+                  in: query
+                  description: 字段掩码，其作用为SELECT中的字段，其语法为使用逗号分隔字段名，例如：id,realName,userName。如果为空则选中所有字段，即SELECT *。
+                  schema:
+                    type: string
+                    format: field-mask
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/series.service.v1.ListSeriesResponse'
+    /admin/v1/series/{id}:
+        get:
+            tags:
+                - SeriesService
+            description: 剧集详情（全集，含未发布各状态）
+            operationId: SeriesService_Get
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/series.service.v1.SeriesDetail'
+        put:
+            tags:
+                - SeriesService
+            description: 编辑剧集（标题 / 简介 / 封面，复用 series 域 UpdateSeriesRequest）
+            operationId: SeriesService_Update
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/series.service.v1.UpdateSeriesRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/series.service.v1.Series'
+        delete:
+            tags:
+                - SeriesService
+            description: 删除剧集（剧内视频解挂不删除）
+            operationId: SeriesService_Delete
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content: {}
     /admin/v1/sysconf:
         get:
             tags:
@@ -9628,6 +9767,62 @@ components:
                 createdAt:
                     type: string
                     format: date-time
+        series.service.v1.ListSeriesResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/series.service.v1.Series'
+                total:
+                    type: string
+        series.service.v1.Series:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                title:
+                    type: string
+                description:
+                    type: string
+                coverUrl:
+                    type: string
+                authorId:
+                    type: integer
+                    format: uint32
+                episodeCount:
+                    type: string
+                    description: 计数
+                publishedCount:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+        series.service.v1.SeriesDetail:
+            type: object
+            properties:
+                series:
+                    $ref: '#/components/schemas/series.service.v1.Series'
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/video.service.v1.Video'
+        series.service.v1.UpdateSeriesRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                title:
+                    type: string
+                description:
+                    type: string
+                coverUrl:
+                    type: string
         stats.service.v1.ListTrendsResponse:
             type: object
             properties:
@@ -10204,6 +10399,14 @@ components:
                     type: array
                     items:
                         type: string
+                seriesId:
+                    type: integer
+                    description: 挂靠剧集：字段出现且>0=挂靠（剧须为本人所有），出现且=0=解挂，缺省=不变
+                    format: uint32
+                episodeNumber:
+                    type: integer
+                    description: 剧内集号：仅挂靠时生效，缺省=服务端排到当前最大集号+1
+                    format: uint32
         video.service.v1.Video:
             type: object
             properties:
@@ -10244,6 +10447,12 @@ components:
                     type: array
                     items:
                         type: string
+                seriesId:
+                    type: integer
+                    format: uint32
+                episodeNumber:
+                    type: integer
+                    format: uint32
                 likeCount:
                     type: string
                     description: 计数（Redis 缓存 + 异步落库）
@@ -10254,6 +10463,8 @@ components:
                 viewCount:
                     type: string
                 rejectReason:
+                    type: string
+                seriesTitle:
                     type: string
                 publishedAt:
                     type: string
@@ -10358,6 +10569,8 @@ tags:
       description: 举报工单管理服务（后台）
     - name: RoleService
       description: 角色管理服务
+    - name: SeriesService
+      description: 剧集管理服务（后台：列表 / 详情 / 编辑 / 删除；剧集为 UGC，管理端不提供创建）
     - name: SysConfService
       description: 系统配置服务（后台：上传限制 / 时长限制 / 人工审核开关）
     - name: TaskService

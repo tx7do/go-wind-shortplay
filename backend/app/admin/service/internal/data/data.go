@@ -24,6 +24,7 @@ import (
 	reportV1 "go-wind-shortplay/api/gen/go/report/service/v1"
 	statsV1 "go-wind-shortplay/api/gen/go/stats/service/v1"
 	sysconfV1 "go-wind-shortplay/api/gen/go/sysconf/service/v1"
+	seriesV1 "go-wind-shortplay/api/gen/go/series/service/v1"
 	videoV1 "go-wind-shortplay/api/gen/go/video/service/v1"
 	dictV1 "go-wind-shortplay/api/gen/go/dict/service/v1"
 	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
@@ -338,6 +339,15 @@ func NewSpVideoServiceClient(ctx *bootstrap.Context, r registry.Discovery) video
 	}
 
 	return videoV1.NewVideoServiceClient(cli)
+}
+
+func NewSpSeriesServiceClient(ctx *bootstrap.Context, r registry.Discovery) seriesV1.SeriesServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return seriesV1.NewSeriesServiceClient(cli)
 }
 
 func NewSpReportServiceClient(ctx *bootstrap.Context, r registry.Discovery) reportV1.ReportServiceClient {

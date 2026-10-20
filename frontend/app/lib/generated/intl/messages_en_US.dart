@@ -20,23 +20,32 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en_US';
 
-  static String m0(count) => "${count} comments";
+  static String m0(count) => "Will be added to this series (${count} episodes)";
 
-  static String m1(count) => "View ${count} replies";
+  static String m1(count) => "${count} comments";
 
-  static String m2(count) => "${count} replies";
+  static String m2(n) => "EP${n}";
 
-  static String m3(name) => "Reply to ${name}";
+  static String m3(count) => "View ${count} replies";
 
-  static String m4(query) => "No videos found for \"${query}\"";
+  static String m4(count) => "${count} replies";
 
-  static String m5(count) => "${count} d ago";
+  static String m5(name) => "Reply to ${name}";
 
-  static String m6(count) => "${count} h ago";
+  static String m6(query) => "No videos found for \"${query}\"";
 
-  static String m7(count) => "${count} min ago";
+  static String m7(count) => "${count} EP";
 
-  static String m8(percent) => "Uploading ${percent}%";
+  static String m8(published, total) =>
+      "Updated to EP${published} · ${total} total";
+
+  static String m9(count) => "${count} d ago";
+
+  static String m10(count) => "${count} h ago";
+
+  static String m11(count) => "${count} min ago";
+
+  static String m12(percent) => "Uploading ${percent}%";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -51,6 +60,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "asDraftOption": MessageLookupByLibrary.simpleMessage(
       "Save as draft (only visible to me)",
     ),
+    "attachSeries": MessageLookupByLibrary.simpleMessage("Attach to Series"),
+    "attachSeriesHint": m0,
+    "attachSeriesNone": MessageLookupByLibrary.simpleMessage(
+      "No series — publish as a standalone video",
+    ),
+    "attachSeriesRemove": MessageLookupByLibrary.simpleMessage("Remove"),
+    "autoNextTip": MessageLookupByLibrary.simpleMessage("Playing next episode"),
     "avatarLabel": MessageLookupByLibrary.simpleMessage("Avatar"),
     "avatarTooLarge": MessageLookupByLibrary.simpleMessage(
       "Avatar image must be under 2MB",
@@ -62,6 +78,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "cannotFollowSelf": MessageLookupByLibrary.simpleMessage(
       "You cannot follow yourself",
     ),
+    "changeSeries": MessageLookupByLibrary.simpleMessage("Change"),
+    "chooseSeries": MessageLookupByLibrary.simpleMessage("Choose Series"),
     "chooseVideoToCreate": MessageLookupByLibrary.simpleMessage(
       "Select a video to start creating",
     ),
@@ -72,7 +90,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Comment cannot be empty",
     ),
     "commentSuccess": MessageLookupByLibrary.simpleMessage("Comment posted"),
-    "commentsCount": m0,
+    "commentsCount": m1,
     "confirm": MessageLookupByLibrary.simpleMessage("OK"),
     "confirmSend": MessageLookupByLibrary.simpleMessage("Send"),
     "copyLink": MessageLookupByLibrary.simpleMessage("Copy link"),
@@ -84,6 +102,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteCommentConfirm": MessageLookupByLibrary.simpleMessage(
       "Delete this comment?",
     ),
+    "deleteSeriesConfirm": MessageLookupByLibrary.simpleMessage(
+      "Videos will be detached but kept. Delete this series?",
+    ),
+    "deleteSeriesTitle": MessageLookupByLibrary.simpleMessage("Delete Series"),
     "deleteVideo": MessageLookupByLibrary.simpleMessage("Delete video"),
     "deleteVideoConfirm": MessageLookupByLibrary.simpleMessage(
       "Delete this video? This cannot be undone",
@@ -95,6 +117,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "draftSaved": MessageLookupByLibrary.simpleMessage("Draft saved"),
     "drafts": MessageLookupByLibrary.simpleMessage("Drafts"),
     "editProfile": MessageLookupByLibrary.simpleMessage("Edit profile"),
+    "editSeries": MessageLookupByLibrary.simpleMessage("Edit Series"),
+    "episodeN": m2,
     "errorAccessTokenNotFound": MessageLookupByLibrary.simpleMessage(
       "Access token not found",
     ),
@@ -277,7 +301,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorVideoNotFound": MessageLookupByLibrary.simpleMessage(
       "Video not found",
     ),
-    "expandReplies": m1,
+    "expandReplies": m3,
     "featureNotAvailable": MessageLookupByLibrary.simpleMessage(
       "This feature is coming soon",
     ),
@@ -324,6 +348,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "me": MessageLookupByLibrary.simpleMessage("Me"),
     "mergingVideo": MessageLookupByLibrary.simpleMessage("Processing video…"),
     "message": MessageLookupByLibrary.simpleMessage("Inbox"),
+    "newSeries": MessageLookupByLibrary.simpleMessage("New Series"),
     "nicknameHint": MessageLookupByLibrary.simpleMessage("Enter a nickname"),
     "nicknameLabel": MessageLookupByLibrary.simpleMessage("Nickname"),
     "noCollectedVideos": MessageLookupByLibrary.simpleMessage(
@@ -356,6 +381,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pickVideoFirst": MessageLookupByLibrary.simpleMessage(
       "Pick a video first",
     ),
+    "playNow": MessageLookupByLibrary.simpleMessage("Now Playing"),
     "profileSaved": MessageLookupByLibrary.simpleMessage("Profile updated"),
     "publish": MessageLookupByLibrary.simpleMessage("Create"),
     "publishFailed": MessageLookupByLibrary.simpleMessage(
@@ -382,9 +408,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "registerTitle": MessageLookupByLibrary.simpleMessage("Create account"),
     "rejectReasonLabel": MessageLookupByLibrary.simpleMessage("Reject reason"),
     "removeVideo": MessageLookupByLibrary.simpleMessage("Remove video"),
-    "repliesCount": m2,
+    "repliesCount": m4,
     "reply": MessageLookupByLibrary.simpleMessage("Reply"),
-    "replyTo": m3,
+    "replyTo": m5,
     "report": MessageLookupByLibrary.simpleMessage("Report"),
     "reportDescriptionHint": MessageLookupByLibrary.simpleMessage(
       "More details (optional)",
@@ -409,14 +435,30 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "reselectVideo": MessageLookupByLibrary.simpleMessage("Reselect"),
     "retry": MessageLookupByLibrary.simpleMessage("Retry"),
+    "save": MessageLookupByLibrary.simpleMessage("Save"),
     "saveDraft": MessageLookupByLibrary.simpleMessage("Save draft"),
     "saveProfile": MessageLookupByLibrary.simpleMessage("Save"),
     "search": MessageLookupByLibrary.simpleMessage("Search"),
-    "searchEmpty": m4,
+    "searchEmpty": m6,
     "searchHint": MessageLookupByLibrary.simpleMessage("Search videos, tags"),
     "searchSomeKeyword": MessageLookupByLibrary.simpleMessage(
       "Search something to explore",
     ),
+    "seriesCreated": MessageLookupByLibrary.simpleMessage("Series created"),
+    "seriesDeleted": MessageLookupByLibrary.simpleMessage("Series deleted"),
+    "seriesDescLabel": MessageLookupByLibrary.simpleMessage("Description"),
+    "seriesEmpty": MessageLookupByLibrary.simpleMessage("No series yet"),
+    "seriesEmptyMine": MessageLookupByLibrary.simpleMessage(
+      "No series yet. Attach one when publishing to create it",
+    ),
+    "seriesEpisodeBadge": m7,
+    "seriesNotFound": MessageLookupByLibrary.simpleMessage(
+      "Series not found or not visible",
+    ),
+    "seriesSaved": MessageLookupByLibrary.simpleMessage("Series saved"),
+    "seriesTab": MessageLookupByLibrary.simpleMessage("Series"),
+    "seriesTitleLabel": MessageLookupByLibrary.simpleMessage("Series Title"),
+    "seriesUpdatedTo": m8,
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
     "share": MessageLookupByLibrary.simpleMessage("Share"),
     "shareCopied": MessageLookupByLibrary.simpleMessage(
@@ -434,10 +476,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Search or create tags",
     ),
     "tagPickerTitle": MessageLookupByLibrary.simpleMessage("Pick tags"),
-    "timeDaysAgo": m5,
-    "timeHoursAgo": m6,
+    "timeDaysAgo": m9,
+    "timeHoursAgo": m10,
     "timeJustNow": MessageLookupByLibrary.simpleMessage("just now"),
-    "timeMinutesAgo": m7,
+    "timeMinutesAgo": m11,
     "titleHint": MessageLookupByLibrary.simpleMessage(
       "Give your video a catchy title",
     ),
@@ -457,7 +499,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "unreadOnly": MessageLookupByLibrary.simpleMessage("Unread only"),
     "uploading": MessageLookupByLibrary.simpleMessage("Uploading"),
-    "uploadingPercent": m8,
+    "uploadingPercent": m12,
     "username": MessageLookupByLibrary.simpleMessage("Username"),
     "usernameHint": MessageLookupByLibrary.simpleMessage("Enter username"),
     "versionLabel": MessageLookupByLibrary.simpleMessage("Version"),
@@ -470,6 +512,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Video not found or offline",
     ),
     "videoPreview": MessageLookupByLibrary.simpleMessage("Preview"),
+    "videosTab": MessageLookupByLibrary.simpleMessage("Videos"),
     "welcomeBack": MessageLookupByLibrary.simpleMessage("Welcome back"),
     "works": MessageLookupByLibrary.simpleMessage("Works"),
     "writeComment": MessageLookupByLibrary.simpleMessage("Add a comment…"),

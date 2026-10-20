@@ -69,6 +69,9 @@ managed:
       path: video/service/v1
       value: go-wind-shortplay/api/gen/go/video/service/v1;videopb
     - file_option: go_package
+      path: series/service/v1
+      value: go-wind-shortplay/api/gen/go/series/service/v1;seriespb
+    - file_option: go_package
       path: feed/service/v1
       value: go-wind-shortplay/api/gen/go/feed/service/v1;feedpb
     - file_option: go_package

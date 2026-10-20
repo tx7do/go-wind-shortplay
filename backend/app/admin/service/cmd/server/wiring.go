@@ -120,6 +120,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 
 	// shortplay 业务域
 	spVideoServiceClient := data.NewSpVideoServiceClient(ctx, discovery)
+	spSeriesServiceClient := data.NewSpSeriesServiceClient(ctx, discovery)
 	spReportServiceClient := data.NewSpReportServiceClient(ctx, discovery)
 	spDashboardServiceClient := data.NewSpDashboardServiceClient(ctx, discovery)
 	spSysConfServiceClient := data.NewSpSysConfServiceClient(ctx, discovery)
@@ -192,6 +193,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 
 	// shortplay 业务域服务
 	spVideoService := service.NewVideoService(ctx, spVideoServiceClient)
+	spSeriesService := service.NewSeriesService(ctx, spSeriesServiceClient)
 	spReportService := service.NewReportService(ctx, spReportServiceClient)
 	spDashboardService := service.NewDashboardService(ctx, spDashboardServiceClient)
 	spSysConfService := service.NewSysConfService(ctx, spSysConfServiceClient)
@@ -226,7 +228,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 		notificationRuleService,
 		notificationTemplateService,
 		notificationPreferenceService,
-		spVideoService, spReportService, spDashboardService, spSysConfService, navigationService,
+		spVideoService, spSeriesService, spReportService, spDashboardService, spSysConfService, navigationService,
 		// register:rest-arg ── 新模块服务实参在此行后追加(make register 工具锚点,勿删)
 	)
 

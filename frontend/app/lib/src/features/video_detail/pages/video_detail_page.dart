@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:media_kit/media_kit.dart' show Player;
 
 import 'package:shortplay_app/generated/l10n.dart';
+import 'package:shortplay_app/src/app_router/app_router.dart'
+    show AppRoutePath, RouteNames;
 import 'package:shortplay_app/src/core/repositories/user_auth_cache.dart';
 import 'package:shortplay_app/src/core/widgets/empty_state.dart';
 import 'package:shortplay_app/src/features/comment/widgets/comment_sheet.dart';
@@ -21,6 +23,7 @@ import 'package:shortplay_app/src/features/feed/widgets/feed_progress_bar.dart';
 import 'package:shortplay_app/src/features/feed/widgets/feed_video_info.dart';
 import 'package:shortplay_app/src/features/feed/widgets/like_burst.dart';
 import 'package:shortplay_app/src/features/feed/widgets/video_player_item.dart';
+import 'package:shortplay_app/src/features/series/services/series_service.dart';
 import 'package:shortplay_app/src/features/video_detail/services/video_service.dart';
 import 'package:shortplay_app/src/features/video_detail/widgets/report_sheet.dart';
 import 'package:get_it/get_it.dart' show GetIt;
@@ -39,6 +42,7 @@ class VideoDetailPage extends StatefulWidget {
 
 class _VideoDetailPageState extends State<VideoDetailPage> {
   final VideoService _videoService = VideoService();
+  final SeriesService _seriesService = SeriesService();
   final LikeBurstController _burst = LikeBurstController();
 
   VideoDetail? _detail;
@@ -46,6 +50,10 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
   bool _loading = true;
   Video? _current;
   Player? _player;
+
+  // 剧集上下文（挂靠剧时加载，用于剧集入口与自动连播；尽力而为）
+  SeriesDetail? _seriesCtx;
+  bool _advancing = false;
 
   @override
   void dispose() {
@@ -67,10 +75,20 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
     try {
       final detail =
           await _videoService.getDetail(videoId: widget.videoId);
+      // 挂靠剧时拉选集上下文（连播/入口），失败不阻断播放
+      SeriesDetail? seriesCtx;
+      if (detail.video.seriesId > 0) {
+        try {
+          seriesCtx = await _seriesService.getSeries(detail.video.seriesId);
+        } catch (_) {
+          seriesCtx = null;
+        }
+      }
       if (!mounted) return;
       setState(() {
         _detail = detail;
         _current = detail.video;
+        _seriesCtx = seriesCtx;
         _loading = false;
       });
     } on ApiStatusException catch (e) {
@@ -217,6 +235,26 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
     );
   }
 
+  /// 下一集（剧集上下文内当前视频的后续一集）
+  Video? get _nextEpisode {
+    final ctx = _seriesCtx;
+    if (ctx == null) return null;
+    final index = ctx.items.indexWhere((v) => v.id == widget.videoId);
+    if (index < 0 || index + 1 >= ctx.items.length) return null;
+    return ctx.items[index + 1];
+  }
+
+  /// 播完自动连播：短暂提示后整页替换为下一集详情
+  Future<void> _playNextEpisode() async {
+    final next = _nextEpisode;
+    if (next == null || _advancing) return;
+    _advancing = true;
+    if (mounted) setState(() {});
+    await Future<void>.delayed(const Duration(milliseconds: 1200));
+    if (!mounted) return;
+    context.pushReplacement(AppRoutePath.videoPath(next.id));
+  }
+
   Widget _buildError(S loc) {
     return EmptyState(
       icon: Icons.videocam_off_outlined,
@@ -230,6 +268,7 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
   Widget _buildPlayer(VideoDetail detail) {
     final video = _current ?? detail.video;
     final uba = UbaService();
+    final loc = S.of(context);
 
     return Stack(
       fit: StackFit.expand,
@@ -238,6 +277,8 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
           key: ValueKey('detail-video-${video.id}'),
           video: video,
           isActive: true,
+          // 剧集且有下一集：关单集循环，播完由 [_playNextEpisode] 切集
+          loop: _nextEpisode == null,
           onPlayerReady: (player) {
             if (mounted) setState(() => _player = player);
           },
@@ -260,12 +301,16 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
             durationMs: progress.watchMs,
             watchPercent: progress.percent,
           )),
-          onComplete: (progress) => uba.report(UbaEvent(
-            eventType: UbaEventType.videoComplete,
-            videoId: video.id,
-            durationMs: progress.watchMs,
-            watchPercent: 100,
-          )),
+          onComplete: (progress) {
+            uba.report(UbaEvent(
+              eventType: UbaEventType.videoComplete,
+              videoId: video.id,
+              durationMs: progress.watchMs,
+              watchPercent: 100,
+            ));
+            // 剧集连播：播完自动切下一集
+            unawaited(_playNextEpisode());
+          },
           onHeartbeat: (progress) => uba.report(UbaEvent(
             eventType: UbaEventType.videoHeartbeat,
             videoId: video.id,
@@ -303,7 +348,104 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
         Positioned.fill(
           child: LikeBurstLayer(controller: _burst),
         ),
+        // 剧集入口 chip（挂靠剧时展示，点击进剧集详情选集）
+        if (_seriesCtx?.series != null)
+          Positioned(
+            top: kToolbarHeight + 4.h,
+            left: 16.w,
+            child: _SeriesChip(
+              title: _seriesCtx!.series!.title,
+              episodeNumber: video.episodeNumber,
+              onTap: () => context.pushNamed(
+                RouteNames.seriesDetail,
+                pathParameters: {'seriesId': '${_seriesCtx!.series!.id}'},
+                queryParameters: {'from': '${video.id}'},
+              ),
+            ),
+          ),
+        // 自动连播提示浮层
+        if (_advancing)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: ColoredBox(
+                color: Colors.black.withAlpha(110),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.skip_next_rounded,
+                        color: Colors.white,
+                        size: 44,
+                      ),
+                      SizedBox(height: 10.h),
+                      Text(
+                        loc.autoNextTip,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
       ],
+    );
+  }
+}
+
+/// 顶部剧集入口 chip：剧名 + 当前集号（半透明黑底白字）
+class _SeriesChip extends StatelessWidget {
+  final String title;
+  final int episodeNumber;
+  final VoidCallback onTap;
+
+  const _SeriesChip({
+    required this.title,
+    required this.episodeNumber,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = S.of(context);
+    return Material(
+      color: Colors.black.withAlpha(110),
+      borderRadius: BorderRadius.circular(100),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(100),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.movie_outlined, size: 15, color: Colors.white),
+              SizedBox(width: 5.w),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 180.w),
+                child: Text(
+                  episodeNumber > 0
+                      ? '${loc.episodeN(episodeNumber)} · $title'
+                      : title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const Icon(Icons.chevron_right, size: 16, color: Colors.white),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

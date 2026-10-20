@@ -36,7 +36,7 @@
 | GET | `/tags/{tag}/videos?pageNum=` | 标签聚合 |
 | GET | `/tags?page=&pageSize=` | 标签列表（发布选择/搜索联想） |
 
-`video` 对象：`{id,title,description,coverUrl,videoUrl,duration,width,height,status:"VIDEO_STATUS_DRAFT"草稿/"VIDEO_STATUS_REVIEWING"审核中/"VIDEO_STATUS_PUBLISHED"已发布/"VIDEO_STATUS_REJECTED"驳回/"VIDEO_STATUS_OFFLINE"下架,authorId,tags[],likeCount,collectCount,commentCount,viewCount,rejectReason,publishedAt,createdAt}`（status 为枚举字符串全名；计数 int64 为字符串；coverUrl 可能是服务端拼好的完整 URL，videoUrl 为对象键，客户端经 `MediaUrl.resolve()` 统一处理——完整 http(s) 地址原样返回）
+`video` 对象：`{id,title,description,coverUrl,videoUrl,duration,width,height,status:"VIDEO_STATUS_DRAFT"草稿/"VIDEO_STATUS_REVIEWING"审核中/"VIDEO_STATUS_PUBLISHED"已发布/"VIDEO_STATUS_REJECTED"驳回/"VIDEO_STATUS_OFFLINE"下架,authorId,tags[],seriesId,episodeNumber,seriesTitle,likeCount,collectCount,commentCount,viewCount,rejectReason,publishedAt,createdAt}`（seriesId>0 表示挂靠剧集；seriesTitle 为展示冗余由服务端回填，可能缺省）`（status 为枚举字符串全名；计数 int64 为字符串；coverUrl 可能是服务端拼好的完整 URL，videoUrl 为对象键，客户端经 `MediaUrl.resolve()` 统一处理——完整 http(s) 地址原样返回）
 
 ### 创作发布（需登录）
 | 方法 | 路径 | 说明 |
@@ -50,6 +50,23 @@
 | PUT | `/videos/{id}` | 编辑本人视频 `{title?,description?,coverUrl?,tags[]}` |
 | DELETE | `/videos/{id}` | 删除本人视频 |
 | GET | `/creator/overview` | 创作者中心：`{videoCount,totalViews,totalLikes,totalCollects,totalComments,followerCount}` |
+
+### 剧集（详情/列表游客可访问）
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/series` | `{title, description?, coverUrl?}` → Series（需登录；401 未登录） |
+| GET | `/series/{id}` | 详情 `{series, items[]{video}}`：选集按 episodeNumber 升序；**游客仅见已发布集**，作者/管理员全集（含未发布各状态）；非作者且无已发布集 → 404 SERIES_NOT_FOUND |
+| PUT | `/series/{id}` | `{title?, description?, coverUrl?}`（作者本人/管理端；403 NOT_SERIES_OWNER） |
+| DELETE | `/series/{id}` | 删除剧集（剧内视频解挂保留，作者本人/管理端） |
+| GET | `/series?query=&authorId=&pageNum=` | 列表 `{items[]{Series},total}`；`query` 剧名模糊、`authorId` 按作者；**非本人视角仅返回有已发布集的剧** |
+
+`series` 对象：`{id,title,description,coverUrl,authorId,episodeCount,publishedCount,createdAt}`（episodeCount=挂靠视频总数、publishedCount=已发布数，均为服务端实时派生 int64 字符串；coverUrl 可空——展示侧回退第一集封面）
+
+**视频挂靠剧集**（挂靠语义统一，服务端校验剧归属，跨作者挂剧 403 NOT_SERIES_OWNER）：
+- 发布挂靠：`POST /uploads/{taskId}/complete` 增 `seriesId`（>0 生效）+ `episodeNumber`（缺省自动排到剧内最大集号+1）；`asDraft=true` 时挂靠信息随草稿保存，`POST /drafts/{id}/submit` 提交时生效
+- 编辑挂靠：`PUT /videos/{id}` 增 `seriesId`（**字段出现且>0=挂靠，出现且=0=解挂，缺省=不变**）+ `episodeNumber`
+- 草稿：`POST /drafts` / `VideoDraft` 对象增 `seriesId/episodeNumber`
+- 删除剧集：剧内视频仅解挂（seriesId/episodeNumber 清零），视频本体不删
 
 ### 互动（需登录，除批量状态查询）
 | 方法 | 路径 | 说明 |
@@ -175,6 +192,10 @@
 |---|---|---|
 | POST | `/uploads/image` | 图片上传：body=图片原始字节（Content-Type: image/jpeg|png|webp|gif，≤2MB）→ `{url}`（MinIO 公网地址；需登录+接口权限）。App 端同款：`POST :7700/app/v1/uploads/image`（app 端 token） |
 | GET | `/videos?authorId=` | 视频列表新增按作者过滤（用户管理"查看作品"用） |
+| GET | `/series?query=&page=&pageSize=` | 剧集列表（`query` 剧名模糊、`authorId=` 过滤） |
+| GET | `/series/{id}` | 剧集详情 `{series, items[]{video}}`：**全集（含未发布各状态）** |
+| PUT | `/series/{id}` | 编辑剧集 `{title?, description?, coverUrl?}` |
+| DELETE | `/series/{id}` | 删除剧集（剧内视频解挂保留）；需 `biz:series_manage` 权限 |
 | GET | `/dashboard/trends?days=7`（1-30，缺省 7） | 近 N 日趋势：`{items:[{date:"2026-10-18",published:"3",plays:"2",likes:"1"}]}`（数值均为 int64 字符串；published 按视频 published_at 落日统计；plays/likes 按 uba_events 当日事件计数：EVENT_TYPE_VIDEO_PLAY/EVENT_TYPE_VIDEO_LIKE） |
 
 ---

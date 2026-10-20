@@ -1,8 +1,6 @@
 {
   "appName": "Fengyin ShortPlay",
-
   "@@locale": "en_US",
-
   "home": "Home",
   "publish": "Create",
   "message": "Inbox",
@@ -20,12 +18,10 @@
   "loadFailed": "Failed to load",
   "login": "Log in",
   "backToHome": "Back to Home",
-
   "pageNotFound": "Page not found",
   "pageNotFoundDesc": "Sorry, the page you visited does not exist or has been moved.",
   "errorOccurred": "Something went wrong!",
   "featureNotAvailable": "This feature is coming soon",
-
   "videoDeleted": "Video deleted",
   "videoNotFound": "Video not found or offline",
   "copyLink": "Copy link",
@@ -33,22 +29,21 @@
   "guestInteractionTitle": "Log in to interact",
   "guestInteractionDesc": "Log in to like, comment, collect and follow",
   "goLogin": "Log in",
-
   "reasonFollow": "Following",
   "reasonHot": "Hot",
   "reasonLatest": "Latest",
-
   "follow": "Follow",
   "followed": "Following",
   "unfollow": "Unfollow",
   "unfollowConfirm": "Stop following this user?",
   "cannotFollowSelf": "You cannot follow yourself",
-
   "comment": "Comments",
   "commentsCount": "{count} comments",
   "@commentsCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "writeComment": "Add a comment…",
@@ -56,19 +51,25 @@
   "replyTo": "Reply to {name}",
   "@replyTo": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "repliesCount": "{count} replies",
   "@repliesCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "expandReplies": "View {count} replies",
   "@expandReplies": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "deleteCommentConfirm": "Delete this comment?",
@@ -77,7 +78,6 @@
   "noCommentsYet": "No comments yet. Be the first!",
   "commentIsEmpty": "Comment cannot be empty",
   "onlyOwnerCanDelete": "You can only delete your own comments",
-
   "pickVideo": "Choose from gallery",
   "recordVideo": "Record video",
   "videoPreview": "Preview",
@@ -96,7 +96,9 @@
   "uploadingPercent": "Uploading {percent}%",
   "@uploadingPercent": {
     "placeholders": {
-      "percent": {"type": "int"}
+      "percent": {
+        "type": "int"
+      }
     }
   },
   "mergingVideo": "Processing video…",
@@ -112,7 +114,6 @@
   "advancedSettings": "Advanced",
   "tagInlineHint": "Type a tag, press enter or comma",
   "removeVideo": "Remove video",
-
   "markAllRead": "Mark all read",
   "unreadOnly": "Unread only",
   "noNewMessages": "No new messages",
@@ -122,7 +123,6 @@
   "notifyTypeComment": "Comment",
   "notifyTypeFollow": "Follow",
   "notifyTypeSystem": "System",
-
   "works": "Works",
   "collects": "Collected",
   "creatorCenter": "Creator center",
@@ -157,7 +157,6 @@
   "deleteVideo": "Delete video",
   "deleteVideoConfirm": "Delete this video? This cannot be undone",
   "videoDeletedSuccess": "Video deleted",
-
   "settings": "Settings",
   "appearance": "Appearance",
   "darkMode": "Dark Mode",
@@ -167,17 +166,17 @@
   "language": "Language",
   "about": "About",
   "versionLabel": "Version",
-
   "searchHint": "Search videos, tags",
   "searchEmpty": "No videos found for \"{query}\"",
   "@searchEmpty": {
     "placeholders": {
-      "query": {"type": "String"}
+      "query": {
+        "type": "String"
+      }
     }
   },
   "hotTags": "Hot tags",
   "searchSomeKeyword": "Search something to explore",
-
   "report": "Report",
   "reportReasonTitle": "Select a reason",
   "reportDescriptionHint": "More details (optional)",
@@ -190,7 +189,6 @@
   "reportReasonCopyright": "Copyright infringement",
   "reportReasonFraud": "Fraud",
   "reportReasonOther": "Other",
-
   "username": "Username",
   "password": "Password",
   "usernameHint": "Enter username",
@@ -206,27 +204,31 @@
   "registerSuccess": "Account created",
   "registerFailed": "Sign up failed, please retry",
   "welcomeBack": "Welcome back",
-
   "timeJustNow": "just now",
   "timeMinutesAgo": "{count} min ago",
   "@timeMinutesAgo": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "timeHoursAgo": "{count} h ago",
   "@timeHoursAgo": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "timeDaysAgo": "{count} d ago",
   "@timeDaysAgo": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "errorDefault": "Operation failed, please retry",
   "errorNetworkError": "Network error, check your connection",
   "errorTimeout": "Request timed out, please retry",
@@ -297,5 +299,62 @@
   "errorPositionNotFound": "Position not found",
   "errorRoleNotFound": "Role not found",
   "errorTenantNotFound": "Tenant not found",
-  "errorUploadFailed": "Upload failed"
+  "errorUploadFailed": "Upload failed",
+  "save": "Save",
+  "videosTab": "Videos",
+  "seriesTab": "Series",
+  "seriesEmpty": "No series yet",
+  "seriesEmptyMine": "No series yet. Attach one when publishing to create it",
+  "seriesNotFound": "Series not found or not visible",
+  "seriesUpdatedTo": "Updated to EP{published} · {total} total",
+  "@seriesUpdatedTo": {
+    "placeholders": {
+      "published": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "seriesEpisodeBadge": "{count} EP",
+  "@seriesEpisodeBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "episodeN": "EP{n}",
+  "@episodeN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "playNow": "Now Playing",
+  "autoNextTip": "Playing next episode",
+  "editSeries": "Edit Series",
+  "seriesTitleLabel": "Series Title",
+  "seriesDescLabel": "Description",
+  "deleteSeriesTitle": "Delete Series",
+  "deleteSeriesConfirm": "Videos will be detached but kept. Delete this series?",
+  "seriesDeleted": "Series deleted",
+  "seriesSaved": "Series saved",
+  "seriesCreated": "Series created",
+  "attachSeries": "Attach to Series",
+  "chooseSeries": "Choose Series",
+  "changeSeries": "Change",
+  "attachSeriesNone": "No series — publish as a standalone video",
+  "attachSeriesHint": "Will be added to this series ({count} episodes)",
+  "@attachSeriesHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attachSeriesRemove": "Remove",
+  "newSeries": "New Series"
 }

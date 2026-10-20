@@ -16,6 +16,7 @@ import (
 
 	"go-wind-shortplay/app/core/service/internal/data/ent"
 	"go-wind-shortplay/app/core/service/internal/data/ent/predicate"
+	"go-wind-shortplay/app/core/service/internal/data/ent/series"
 	"go-wind-shortplay/app/core/service/internal/data/ent/video"
 	"go-wind-shortplay/app/core/service/internal/data/ent/videotag"
 	"go-wind-shortplay/app/core/service/internal/data/ent/videotagrel"
@@ -87,6 +88,10 @@ func videoEntityToDTO(e *ent.Video, tags []string) *videoV1.Video {
 	if tags != nil {
 		dto.Tags = tags
 	}
+	if e.SeriesID > 0 {
+		dto.SeriesId = trans.Ptr(e.SeriesID)
+		dto.EpisodeNumber = trans.Ptr(e.EpisodeNumber)
+	}
 	return dto
 }
 
@@ -130,7 +135,39 @@ func (r *VideoRepo) toDTO(ctx context.Context, e *ent.Video) (*videoV1.Video, er
 	if err != nil {
 		tags = nil
 	}
-	return videoEntityToDTO(e, tags), nil
+	dto := videoEntityToDTO(e, tags)
+	r.fillSeriesTitles(ctx, dto)
+	return dto, nil
+}
+
+// fillSeriesTitles 批量回填剧集名（展示冗余字段，查询失败静默跳过）
+func (r *VideoRepo) fillSeriesTitles(ctx context.Context, items ...*videoV1.Video) {
+	ids := make([]uint32, 0, len(items))
+	seen := make(map[uint32]struct{}, len(items))
+	for _, v := range items {
+		if sid := v.GetSeriesId(); sid > 0 {
+			if _, dup := seen[sid]; !dup {
+				seen[sid] = struct{}{}
+				ids = append(ids, sid)
+			}
+		}
+	}
+	if len(ids) == 0 {
+		return
+	}
+	ss, err := r.entClient.Client().Series.Query().Where(series.IDIn(ids...)).All(ctx)
+	if err != nil {
+		return
+	}
+	names := make(map[uint32]string, len(ss))
+	for _, s := range ss {
+		names[s.ID] = s.Title
+	}
+	for _, v := range items {
+		if n, ok := names[v.GetSeriesId()]; ok {
+			v.SeriesTitle = &n
+		}
+	}
 }
 
 func (r *VideoRepo) Get(ctx context.Context, id uint32) (*videoV1.Video, error) {
@@ -148,6 +185,11 @@ func (r *VideoRepo) Get(ctx context.Context, id uint32) (*videoV1.Video, error) 
 // GetEntityRaw 内部取实体（计数 ledger 等场景）
 func (r *VideoRepo) GetEntityRaw(ctx context.Context, id uint32) (*ent.Video, error) {
 	return r.entClient.Client().Video.Query().Where(video.IDEQ(id)).Only(ctx)
+}
+
+// ToDTO 实体转 DTO（跨域组装：series 详情选集列表）
+func (r *VideoRepo) ToDTO(ctx context.Context, e *ent.Video) (*videoV1.Video, error) {
+	return r.toDTO(ctx, e)
 }
 
 // adminListFilter 解析 BFF 翻译后的过滤 JSON
@@ -199,6 +241,7 @@ func (r *VideoRepo) List(ctx context.Context, req *paginationV1.PagingRequest) (
 		tags, _ := r.TagsOfVideo(ctx, e.ID)
 		resp.Items = append(resp.Items, videoEntityToDTO(e, tags))
 	}
+	r.fillSeriesTitles(ctx, resp.Items...)
 	return resp, nil
 }
 
@@ -337,6 +380,7 @@ func (r *VideoRepo) ListByAuthor(ctx context.Context, authorID uint32, isSelf bo
 		tags, _ := r.TagsOfVideo(ctx, e.ID)
 		resp.Items = append(resp.Items, videoEntityToDTO(e, tags))
 	}
+	r.fillSeriesTitles(ctx, resp.Items...)
 	return resp, nil
 }
 
@@ -384,6 +428,11 @@ func (r *VideoRepo) Create(ctx context.Context, dto *videoV1.Video, tags []strin
 		SetRejectReason(dto.GetRejectReason()).
 		SetNillablePublishedAt(timeutil.TimestamppbToTime(dto.PublishedAt)).
 		SetCreatedAt(time.Now())
+
+	if dto.GetSeriesId() > 0 {
+		builder.SetSeriesID(dto.GetSeriesId()).
+			SetEpisodeNumber(dto.GetEpisodeNumber())
+	}
 
 	if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
 		builder.SetTenantID(tid)
@@ -434,6 +483,15 @@ func (r *VideoRepo) Update(ctx context.Context, id uint32, dto *videoV1.Video, t
 	}
 	if dto.PublishedAt != nil {
 		builder.SetNillablePublishedAt(timeutil.TimestamppbToTime(dto.PublishedAt))
+	}
+	// 挂靠变更：series_id 出现即生效（>0 挂靠 / =0 解挂），集号随行
+	if dto.SeriesId != nil {
+		builder.SetSeriesID(*dto.SeriesId)
+		if *dto.SeriesId == 0 {
+			builder.SetEpisodeNumber(0)
+		} else if dto.EpisodeNumber != nil {
+			builder.SetEpisodeNumber(*dto.EpisodeNumber)
+		}
 	}
 	builder.SetUpdatedAt(time.Now())
 

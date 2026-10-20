@@ -49,6 +49,11 @@ class Video {
   final DateTime? publishedAt;
   final DateTime? createdAt;
 
+  /// 挂靠剧集（0=未挂靠；episodeNumber 为剧内集号，seriesTitle 为展示冗余）
+  final int seriesId;
+  final int episodeNumber;
+  final String seriesTitle;
+
   /// 查看者互动状态（详情接口 viewerState；列表接口由批量状态查询回填）
   final bool liked;
   final bool collected;
@@ -73,6 +78,9 @@ class Video {
     this.rejectReason = '',
     this.publishedAt,
     this.createdAt,
+    this.seriesId = 0,
+    this.episodeNumber = 0,
+    this.seriesTitle = '',
     this.liked = false,
     this.collected = false,
     this.followingAuthor = false,
@@ -101,6 +109,9 @@ class Video {
       rejectReason: jsonString(json['rejectReason']),
       publishedAt: parseTime(json['publishedAt']),
       createdAt: parseTime(json['createdAt']),
+      seriesId: jsonInt(json['seriesId']),
+      episodeNumber: jsonInt(json['episodeNumber']),
+      seriesTitle: jsonString(json['seriesTitle']),
       liked: jsonBool(viewer?['liked']),
       collected: jsonBool(viewer?['collected']),
       followingAuthor: jsonBool(viewer?['following']),
@@ -315,6 +326,67 @@ class VideoTag {
       id: jsonInt(json['id']),
       name: jsonString(json['name']),
       videoCount: jsonInt(json['videoCount']),
+    );
+  }
+}
+
+/// 剧集（series.service.v1.Series）
+///
+/// 集数（episodeCount/publishedCount）为服务端实时派生的 int64（字符串形态）。
+class Series {
+  final int id;
+  final String title;
+  final String description;
+  final String coverUrl;
+  final int authorId;
+  final int episodeCount;
+  final int publishedCount;
+  final DateTime? createdAt;
+
+  const Series({
+    required this.id,
+    this.title = '',
+    this.description = '',
+    this.coverUrl = '',
+    this.authorId = 0,
+    this.episodeCount = 0,
+    this.publishedCount = 0,
+    this.createdAt,
+  });
+
+  factory Series.fromJson(Map<String, dynamic> json) {
+    return Series(
+      id: jsonInt(json['id']),
+      title: jsonString(json['title']),
+      description: jsonString(json['description']),
+      coverUrl: jsonString(json['coverUrl']),
+      authorId: jsonInt(json['authorId']),
+      episodeCount: jsonInt(json['episodeCount']),
+      publishedCount: jsonInt(json['publishedCount']),
+      createdAt: parseTime(json['createdAt']),
+    );
+  }
+
+  /// 封面地址（对象键 → 媒体网关 URL）
+  String get coverDisplayUrl => MediaUrl.resolve(coverUrl);
+}
+
+/// 剧集详情（series.service.v1.SeriesDetail：剧信息 + 选集，集号升序）
+class SeriesDetail {
+  final Series? series;
+  final List<Video> items;
+
+  const SeriesDetail({this.series, this.items = const []});
+
+  factory SeriesDetail.fromJson(Map<String, dynamic> json) {
+    return SeriesDetail(
+      series: json['series'] is Map<String, dynamic>
+          ? Series.fromJson(json['series'] as Map<String, dynamic>)
+          : null,
+      items: (json['items'] as List<dynamic>? ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(Video.fromJson)
+          .toList(),
     );
   }
 }

@@ -24,7 +24,10 @@ import 'package:shortplay_app/src/core/utilities/platform.dart';
 import 'package:shortplay_app/src/features/common/services/tag_service.dart';
 import 'package:shortplay_app/src/features/common/widgets/cover_image.dart';
 import 'package:shortplay_app/src/features/publish/services/draft_service.dart';
+import 'package:shortplay_app/src/features/common/data/models.dart'
+    show Series;
 import 'package:shortplay_app/src/features/publish/services/upload_service.dart';
+import 'package:shortplay_app/src/features/publish/widgets/series_picker_sheet.dart';
 import 'package:get_it/get_it.dart' show GetIt;
 
 /// 发布页（抖音风格重设计）：
@@ -61,6 +64,9 @@ class _PublishPageState extends State<PublishPage>
   int? _videoDurationMs;
 
   final List<String> _tags = [];
+
+  // 挂靠剧集（null=不挂靠；发布后服务端自动排集号）
+  Series? _attachedSeries;
 
   bool _asDraft = false;
   bool _uploading = false;
@@ -344,6 +350,7 @@ class _PublishPageState extends State<PublishPage>
         description: _descriptionController.text.trim(),
         tags: _tags,
         asDraft: asDraft,
+        seriesId: _attachedSeries?.id,
         onProgress: (progress) {
           if (!mounted) return;
           setState(() => _uploadPercent = progress.percent);
@@ -371,7 +378,10 @@ class _PublishPageState extends State<PublishPage>
       _clearVideo();
       _titleController.clear();
       _descriptionController.clear();
-      setState(() => _tags.clear());
+      setState(() {
+        _tags.clear();
+        _attachedSeries = null;
+      });
     } on ApiStatusException catch (e) {
       EasyLoading.dismiss();
       EasyLoading.showToast(_uploadErrorMessage(e, loc));
@@ -583,6 +593,8 @@ class _PublishPageState extends State<PublishPage>
                     ),
                     SizedBox(height: 10.h),
                     _buildTagsCard(theme, loc),
+                    SizedBox(height: 10.h),
+                    _buildSeriesCard(theme, loc),
                     SizedBox(height: 10.h),
                     _buildAdvancedCard(theme, loc),
                   ],
@@ -854,6 +866,127 @@ class _PublishPageState extends State<PublishPage>
   }
 
   /// 高级设置卡：收纳「存为草稿」开关
+  /// 挂靠剧集卡：选中剧名 + 更换/移除；点击进选剧弹层
+  Widget _buildSeriesCard(ThemeData theme, S loc) {
+    final series = _attachedSeries;
+    return _buildFieldCard(
+      theme,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.movie_outlined,
+                size: 15.sp,
+                color: theme.colorScheme.primary,
+              ),
+              SizedBox(width: 6.w),
+              Text(
+                loc.attachSeries,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface.withAlpha(180),
+                ),
+              ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: _showSeriesPicker,
+                icon: Icon(Icons.playlist_add_check_rounded, size: 14.sp),
+                label: Text(
+                  series == null ? loc.chooseSeries : loc.changeSeries,
+                  style: TextStyle(fontSize: 12.sp),
+                ),
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                ),
+              ),
+            ],
+          ),
+          if (series != null)
+            Padding(
+              padding: EdgeInsets.only(top: 4.h, bottom: 6.h),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          series.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          loc.attachSeriesHint(series.publishedCount),
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: theme.colorScheme.onSurface.withAlpha(110),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    tooltip: loc.attachSeriesRemove,
+                    icon: Icon(
+                      Icons.close_rounded,
+                      size: 18.sp,
+                      color: theme.colorScheme.onSurface.withAlpha(120),
+                    ),
+                    onPressed: () => setState(() => _attachedSeries = null),
+                  ),
+                ],
+              ),
+            )
+          else
+            Padding(
+              padding: EdgeInsets.only(bottom: 6.h),
+              child: Text(
+                loc.attachSeriesNone,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: theme.colorScheme.onSurface.withAlpha(100),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// 选剧弹层：我的剧集分页列表 + 新建剧集
+  Future<void> _showSeriesPicker() async {
+    if (!GetIt.instance<UserAuthCache>().hasLogin) {
+      final ok = await _ensureLoginOrExit();
+      if (!ok || !mounted) return;
+    }
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      constraints: const BoxConstraints(maxWidth: 560),
+      builder: (sheetContext) {
+        return SeriesPickerSheet(
+          selectedId: _attachedSeries?.id ?? 0,
+          onSelected: (series) {
+            if (!mounted) return;
+            setState(() => _attachedSeries = series);
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildAdvancedCard(ThemeData theme, S loc) {
     return Container(
       width: double.infinity,

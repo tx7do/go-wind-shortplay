@@ -159,6 +159,12 @@ export interface Video {
   status?: ProtoEnum;
   authorId?: number;
   tags?: string[];
+  /** 挂靠剧集ID（0/缺省=未挂靠） */
+  seriesId?: number;
+  /** 剧内集号 */
+  episodeNumber?: number;
+  /** 所属剧名（展示冗余，服务端回填） */
+  seriesTitle?: string;
   likeCount?: Int64;
   collectCount?: Int64;
   commentCount?: Int64;
@@ -525,4 +531,31 @@ export interface ListNotificationsResponse {
   items?: AdminNotification[];
   total?: Int64;
   unreadCount?: Int64;
+}
+
+// ========== 剧集 ==========
+
+/** GET /admin/v1/series 条目（episodeCount/publishedCount 为服务端实时派生） */
+export interface Series {
+  id?: number;
+  title?: string;
+  description?: string;
+  coverUrl?: string;
+  authorId?: number;
+  episodeCount?: Int64;
+  publishedCount?: Int64;
+  createdAt?: ProtoTimestamp;
+  updatedAt?: ProtoTimestamp;
+}
+
+/** GET /admin/v1/series/{id} 响应：剧信息 + 选集（episodeNumber 升序，admin 全状态） */
+export interface SeriesDetail {
+  series?: Series;
+  items?: Video[];
+}
+
+export interface UpdateSeriesRequest {
+  title?: string;
+  description?: string;
+  coverUrl?: string;
 }

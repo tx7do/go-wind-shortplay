@@ -19,6 +19,10 @@ class VideoDraft {
   final String uploadTaskId;
   final DateTime? createdAt;
 
+  /// 挂靠剧集（提交发布时服务端按此挂靠；episodeNumber 0=自动排号）
+  final int seriesId;
+  final int episodeNumber;
+
   const VideoDraft({
     required this.id,
     this.title = '',
@@ -29,6 +33,8 @@ class VideoDraft {
     this.duration = 0,
     this.uploadTaskId = '',
     this.createdAt,
+    this.seriesId = 0,
+    this.episodeNumber = 0,
   });
 
   factory VideoDraft.fromJson(Map<String, dynamic> json) {
@@ -44,6 +50,8 @@ class VideoDraft {
       duration: jsonInt(json['duration']),
       uploadTaskId: jsonString(json['uploadTaskId']),
       createdAt: parseTime(json['createdAt']),
+      seriesId: jsonInt(json['seriesId']),
+      episodeNumber: jsonInt(json['episodeNumber']),
     );
   }
 

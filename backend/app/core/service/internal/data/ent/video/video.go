@@ -46,6 +46,10 @@ const (
 	FieldStatus = "status"
 	// FieldAuthorID holds the string denoting the author_id field in the database.
 	FieldAuthorID = "author_id"
+	// FieldSeriesID holds the string denoting the series_id field in the database.
+	FieldSeriesID = "series_id"
+	// FieldEpisodeNumber holds the string denoting the episode_number field in the database.
+	FieldEpisodeNumber = "episode_number"
 	// FieldRejectReason holds the string denoting the reject_reason field in the database.
 	FieldRejectReason = "reject_reason"
 	// FieldLikeCount holds the string denoting the like_count field in the database.
@@ -81,6 +85,8 @@ var Columns = []string{
 	FieldHeight,
 	FieldStatus,
 	FieldAuthorID,
+	FieldSeriesID,
+	FieldEpisodeNumber,
 	FieldRejectReason,
 	FieldLikeCount,
 	FieldCollectCount,
@@ -119,6 +125,10 @@ var (
 	DefaultHeight uint32
 	// DefaultAuthorID holds the default value on creation for the "author_id" field.
 	DefaultAuthorID uint32
+	// DefaultSeriesID holds the default value on creation for the "series_id" field.
+	DefaultSeriesID uint32
+	// DefaultEpisodeNumber holds the default value on creation for the "episode_number" field.
+	DefaultEpisodeNumber uint32
 	// DefaultLikeCount holds the default value on creation for the "like_count" field.
 	DefaultLikeCount uint64
 	// DefaultCollectCount holds the default value on creation for the "collect_count" field.
@@ -246,6 +256,16 @@ func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 // ByAuthorID orders the results by the author_id field.
 func ByAuthorID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAuthorID, opts...).ToFunc()
+}
+
+// BySeriesID orders the results by the series_id field.
+func BySeriesID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSeriesID, opts...).ToFunc()
+}
+
+// ByEpisodeNumber orders the results by the episode_number field.
+func ByEpisodeNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEpisodeNumber, opts...).ToFunc()
 }
 
 // ByRejectReason orders the results by the reject_reason field.

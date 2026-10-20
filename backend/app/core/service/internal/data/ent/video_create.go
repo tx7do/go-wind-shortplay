@@ -238,6 +238,34 @@ func (_c *VideoCreate) SetNillableAuthorID(v *uint32) *VideoCreate {
 	return _c
 }
 
+// SetSeriesID sets the "series_id" field.
+func (_c *VideoCreate) SetSeriesID(v uint32) *VideoCreate {
+	_c.mutation.SetSeriesID(v)
+	return _c
+}
+
+// SetNillableSeriesID sets the "series_id" field if the given value is not nil.
+func (_c *VideoCreate) SetNillableSeriesID(v *uint32) *VideoCreate {
+	if v != nil {
+		_c.SetSeriesID(*v)
+	}
+	return _c
+}
+
+// SetEpisodeNumber sets the "episode_number" field.
+func (_c *VideoCreate) SetEpisodeNumber(v uint32) *VideoCreate {
+	_c.mutation.SetEpisodeNumber(v)
+	return _c
+}
+
+// SetNillableEpisodeNumber sets the "episode_number" field if the given value is not nil.
+func (_c *VideoCreate) SetNillableEpisodeNumber(v *uint32) *VideoCreate {
+	if v != nil {
+		_c.SetEpisodeNumber(*v)
+	}
+	return _c
+}
+
 // SetRejectReason sets the "reject_reason" field.
 func (_c *VideoCreate) SetRejectReason(v string) *VideoCreate {
 	_c.mutation.SetRejectReason(v)
@@ -389,6 +417,14 @@ func (_c *VideoCreate) defaults() error {
 		v := video.DefaultAuthorID
 		_c.mutation.SetAuthorID(v)
 	}
+	if _, ok := _c.mutation.SeriesID(); !ok {
+		v := video.DefaultSeriesID
+		_c.mutation.SetSeriesID(v)
+	}
+	if _, ok := _c.mutation.EpisodeNumber(); !ok {
+		v := video.DefaultEpisodeNumber
+		_c.mutation.SetEpisodeNumber(v)
+	}
 	if _, ok := _c.mutation.LikeCount(); !ok {
 		v := video.DefaultLikeCount
 		_c.mutation.SetLikeCount(v)
@@ -437,6 +473,12 @@ func (_c *VideoCreate) check() error {
 	}
 	if _, ok := _c.mutation.AuthorID(); !ok {
 		return &ValidationError{Name: "author_id", err: errors.New(`ent: missing required field "Video.author_id"`)}
+	}
+	if _, ok := _c.mutation.SeriesID(); !ok {
+		return &ValidationError{Name: "series_id", err: errors.New(`ent: missing required field "Video.series_id"`)}
+	}
+	if _, ok := _c.mutation.EpisodeNumber(); !ok {
+		return &ValidationError{Name: "episode_number", err: errors.New(`ent: missing required field "Video.episode_number"`)}
 	}
 	if _, ok := _c.mutation.LikeCount(); !ok {
 		return &ValidationError{Name: "like_count", err: errors.New(`ent: missing required field "Video.like_count"`)}
@@ -551,6 +593,14 @@ func (_c *VideoCreate) createSpec() (*Video, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.AuthorID(); ok {
 		_spec.SetField(video.FieldAuthorID, field.TypeUint32, value)
 		_node.AuthorID = value
+	}
+	if value, ok := _c.mutation.SeriesID(); ok {
+		_spec.SetField(video.FieldSeriesID, field.TypeUint32, value)
+		_node.SeriesID = value
+	}
+	if value, ok := _c.mutation.EpisodeNumber(); ok {
+		_spec.SetField(video.FieldEpisodeNumber, field.TypeUint32, value)
+		_node.EpisodeNumber = value
 	}
 	if value, ok := _c.mutation.RejectReason(); ok {
 		_spec.SetField(video.FieldRejectReason, field.TypeString, value)
@@ -883,6 +933,42 @@ func (u *VideoUpsert) UpdateAuthorID() *VideoUpsert {
 // AddAuthorID adds v to the "author_id" field.
 func (u *VideoUpsert) AddAuthorID(v uint32) *VideoUpsert {
 	u.Add(video.FieldAuthorID, v)
+	return u
+}
+
+// SetSeriesID sets the "series_id" field.
+func (u *VideoUpsert) SetSeriesID(v uint32) *VideoUpsert {
+	u.Set(video.FieldSeriesID, v)
+	return u
+}
+
+// UpdateSeriesID sets the "series_id" field to the value that was provided on create.
+func (u *VideoUpsert) UpdateSeriesID() *VideoUpsert {
+	u.SetExcluded(video.FieldSeriesID)
+	return u
+}
+
+// AddSeriesID adds v to the "series_id" field.
+func (u *VideoUpsert) AddSeriesID(v uint32) *VideoUpsert {
+	u.Add(video.FieldSeriesID, v)
+	return u
+}
+
+// SetEpisodeNumber sets the "episode_number" field.
+func (u *VideoUpsert) SetEpisodeNumber(v uint32) *VideoUpsert {
+	u.Set(video.FieldEpisodeNumber, v)
+	return u
+}
+
+// UpdateEpisodeNumber sets the "episode_number" field to the value that was provided on create.
+func (u *VideoUpsert) UpdateEpisodeNumber() *VideoUpsert {
+	u.SetExcluded(video.FieldEpisodeNumber)
+	return u
+}
+
+// AddEpisodeNumber adds v to the "episode_number" field.
+func (u *VideoUpsert) AddEpisodeNumber(v uint32) *VideoUpsert {
+	u.Add(video.FieldEpisodeNumber, v)
 	return u
 }
 
@@ -1346,6 +1432,48 @@ func (u *VideoUpsertOne) AddAuthorID(v uint32) *VideoUpsertOne {
 func (u *VideoUpsertOne) UpdateAuthorID() *VideoUpsertOne {
 	return u.Update(func(s *VideoUpsert) {
 		s.UpdateAuthorID()
+	})
+}
+
+// SetSeriesID sets the "series_id" field.
+func (u *VideoUpsertOne) SetSeriesID(v uint32) *VideoUpsertOne {
+	return u.Update(func(s *VideoUpsert) {
+		s.SetSeriesID(v)
+	})
+}
+
+// AddSeriesID adds v to the "series_id" field.
+func (u *VideoUpsertOne) AddSeriesID(v uint32) *VideoUpsertOne {
+	return u.Update(func(s *VideoUpsert) {
+		s.AddSeriesID(v)
+	})
+}
+
+// UpdateSeriesID sets the "series_id" field to the value that was provided on create.
+func (u *VideoUpsertOne) UpdateSeriesID() *VideoUpsertOne {
+	return u.Update(func(s *VideoUpsert) {
+		s.UpdateSeriesID()
+	})
+}
+
+// SetEpisodeNumber sets the "episode_number" field.
+func (u *VideoUpsertOne) SetEpisodeNumber(v uint32) *VideoUpsertOne {
+	return u.Update(func(s *VideoUpsert) {
+		s.SetEpisodeNumber(v)
+	})
+}
+
+// AddEpisodeNumber adds v to the "episode_number" field.
+func (u *VideoUpsertOne) AddEpisodeNumber(v uint32) *VideoUpsertOne {
+	return u.Update(func(s *VideoUpsert) {
+		s.AddEpisodeNumber(v)
+	})
+}
+
+// UpdateEpisodeNumber sets the "episode_number" field to the value that was provided on create.
+func (u *VideoUpsertOne) UpdateEpisodeNumber() *VideoUpsertOne {
+	return u.Update(func(s *VideoUpsert) {
+		s.UpdateEpisodeNumber()
 	})
 }
 
@@ -1993,6 +2121,48 @@ func (u *VideoUpsertBulk) AddAuthorID(v uint32) *VideoUpsertBulk {
 func (u *VideoUpsertBulk) UpdateAuthorID() *VideoUpsertBulk {
 	return u.Update(func(s *VideoUpsert) {
 		s.UpdateAuthorID()
+	})
+}
+
+// SetSeriesID sets the "series_id" field.
+func (u *VideoUpsertBulk) SetSeriesID(v uint32) *VideoUpsertBulk {
+	return u.Update(func(s *VideoUpsert) {
+		s.SetSeriesID(v)
+	})
+}
+
+// AddSeriesID adds v to the "series_id" field.
+func (u *VideoUpsertBulk) AddSeriesID(v uint32) *VideoUpsertBulk {
+	return u.Update(func(s *VideoUpsert) {
+		s.AddSeriesID(v)
+	})
+}
+
+// UpdateSeriesID sets the "series_id" field to the value that was provided on create.
+func (u *VideoUpsertBulk) UpdateSeriesID() *VideoUpsertBulk {
+	return u.Update(func(s *VideoUpsert) {
+		s.UpdateSeriesID()
+	})
+}
+
+// SetEpisodeNumber sets the "episode_number" field.
+func (u *VideoUpsertBulk) SetEpisodeNumber(v uint32) *VideoUpsertBulk {
+	return u.Update(func(s *VideoUpsert) {
+		s.SetEpisodeNumber(v)
+	})
+}
+
+// AddEpisodeNumber adds v to the "episode_number" field.
+func (u *VideoUpsertBulk) AddEpisodeNumber(v uint32) *VideoUpsertBulk {
+	return u.Update(func(s *VideoUpsert) {
+		s.AddEpisodeNumber(v)
+	})
+}
+
+// UpdateEpisodeNumber sets the "episode_number" field to the value that was provided on create.
+func (u *VideoUpsertBulk) UpdateEpisodeNumber() *VideoUpsertBulk {
+	return u.Update(func(s *VideoUpsert) {
+		s.UpdateEpisodeNumber()
 	})
 }
 

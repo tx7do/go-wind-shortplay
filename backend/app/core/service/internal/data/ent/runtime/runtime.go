@@ -45,6 +45,7 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent/rolemetadata"
 	"go-wind-shortplay/app/core/service/internal/data/ent/rolepermission"
 	"go-wind-shortplay/app/core/service/internal/data/ent/schema"
+	"go-wind-shortplay/app/core/service/internal/data/ent/series"
 	"go-wind-shortplay/app/core/service/internal/data/ent/sysconfig"
 	"go-wind-shortplay/app/core/service/internal/data/ent/task"
 	"go-wind-shortplay/app/core/service/internal/data/ent/tenant"
@@ -1279,6 +1280,38 @@ func init() {
 	rolepermissionDescID := rolepermissionMixinFields0[0].Descriptor()
 	// rolepermission.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	rolepermission.IDValidator = rolepermissionDescID.Validators[0].(func(uint32) error)
+	seriesMixin := schema.Series{}.Mixin()
+	series.Policy = privacy.NewPolicies(seriesMixin[3], schema.Series{})
+	series.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := series.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	seriesMixinFields0 := seriesMixin[0].Fields()
+	_ = seriesMixinFields0
+	seriesMixinFields3 := seriesMixin[3].Fields()
+	_ = seriesMixinFields3
+	seriesFields := schema.Series{}.Fields()
+	_ = seriesFields
+	// seriesDescTenantID is the schema descriptor for tenant_id field.
+	seriesDescTenantID := seriesMixinFields3[0].Descriptor()
+	// series.DefaultTenantID holds the default value on creation for the tenant_id field.
+	series.DefaultTenantID = seriesDescTenantID.Default.(uint32)
+	// seriesDescTitle is the schema descriptor for title field.
+	seriesDescTitle := seriesFields[0].Descriptor()
+	// series.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	series.TitleValidator = seriesDescTitle.Validators[0].(func(string) error)
+	// seriesDescAuthorID is the schema descriptor for author_id field.
+	seriesDescAuthorID := seriesFields[3].Descriptor()
+	// series.DefaultAuthorID holds the default value on creation for the author_id field.
+	series.DefaultAuthorID = seriesDescAuthorID.Default.(uint32)
+	// seriesDescID is the schema descriptor for id field.
+	seriesDescID := seriesMixinFields0[0].Descriptor()
+	// series.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	series.IDValidator = seriesDescID.Validators[0].(func(uint32) error)
 	sysconfigMixin := schema.SysConfig{}.Mixin()
 	sysconfigMixinFields0 := sysconfigMixin[0].Fields()
 	_ = sysconfigMixinFields0
@@ -1701,20 +1734,28 @@ func init() {
 	videoDescAuthorID := videoFields[8].Descriptor()
 	// video.DefaultAuthorID holds the default value on creation for the author_id field.
 	video.DefaultAuthorID = videoDescAuthorID.Default.(uint32)
+	// videoDescSeriesID is the schema descriptor for series_id field.
+	videoDescSeriesID := videoFields[9].Descriptor()
+	// video.DefaultSeriesID holds the default value on creation for the series_id field.
+	video.DefaultSeriesID = videoDescSeriesID.Default.(uint32)
+	// videoDescEpisodeNumber is the schema descriptor for episode_number field.
+	videoDescEpisodeNumber := videoFields[10].Descriptor()
+	// video.DefaultEpisodeNumber holds the default value on creation for the episode_number field.
+	video.DefaultEpisodeNumber = videoDescEpisodeNumber.Default.(uint32)
 	// videoDescLikeCount is the schema descriptor for like_count field.
-	videoDescLikeCount := videoFields[10].Descriptor()
+	videoDescLikeCount := videoFields[12].Descriptor()
 	// video.DefaultLikeCount holds the default value on creation for the like_count field.
 	video.DefaultLikeCount = videoDescLikeCount.Default.(uint64)
 	// videoDescCollectCount is the schema descriptor for collect_count field.
-	videoDescCollectCount := videoFields[11].Descriptor()
+	videoDescCollectCount := videoFields[13].Descriptor()
 	// video.DefaultCollectCount holds the default value on creation for the collect_count field.
 	video.DefaultCollectCount = videoDescCollectCount.Default.(uint64)
 	// videoDescCommentCount is the schema descriptor for comment_count field.
-	videoDescCommentCount := videoFields[12].Descriptor()
+	videoDescCommentCount := videoFields[14].Descriptor()
 	// video.DefaultCommentCount holds the default value on creation for the comment_count field.
 	video.DefaultCommentCount = videoDescCommentCount.Default.(uint64)
 	// videoDescViewCount is the schema descriptor for view_count field.
-	videoDescViewCount := videoFields[13].Descriptor()
+	videoDescViewCount := videoFields[15].Descriptor()
 	// video.DefaultViewCount holds the default value on creation for the view_count field.
 	video.DefaultViewCount = videoDescViewCount.Default.(uint64)
 	// videoDescID is the schema descriptor for id field.
@@ -1837,6 +1878,14 @@ func init() {
 	videodraftDescAuthorID := videodraftFields[9].Descriptor()
 	// videodraft.DefaultAuthorID holds the default value on creation for the author_id field.
 	videodraft.DefaultAuthorID = videodraftDescAuthorID.Default.(uint32)
+	// videodraftDescSeriesID is the schema descriptor for series_id field.
+	videodraftDescSeriesID := videodraftFields[10].Descriptor()
+	// videodraft.DefaultSeriesID holds the default value on creation for the series_id field.
+	videodraft.DefaultSeriesID = videodraftDescSeriesID.Default.(uint32)
+	// videodraftDescEpisodeNumber is the schema descriptor for episode_number field.
+	videodraftDescEpisodeNumber := videodraftFields[11].Descriptor()
+	// videodraft.DefaultEpisodeNumber holds the default value on creation for the episode_number field.
+	videodraft.DefaultEpisodeNumber = videodraftDescEpisodeNumber.Default.(uint32)
 	// videodraftDescID is the schema descriptor for id field.
 	videodraftDescID := videodraftMixinFields0[0].Descriptor()
 	// videodraft.IDValidator is a validator for the "id" field. It is called by the builders before save.

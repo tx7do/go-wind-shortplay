@@ -11,6 +11,7 @@ import 'package:shortplay_app/src/features/common/services/tag_service.dart';
 import 'package:shortplay_app/src/features/common/widgets/paged_video_list.dart';
 import 'package:shortplay_app/src/features/common/data/models.dart';
 import 'package:shortplay_app/src/features/search/services/search_service.dart';
+import 'package:shortplay_app/src/features/series/widgets/paged_series_list.dart';
 
 /// 搜索页：关键词/标签搜索封面卡片列表 → 进详情
 class SearchPage extends StatefulWidget {
@@ -73,6 +74,15 @@ class _SearchPageState extends State<SearchPage> {
     _debounce = Timer(const Duration(milliseconds: 400), () {
       if (mounted) setState(() => _keyword = value.trim());
     });
+  }
+
+  /// 剧集搜索（剧名模糊；# 标签开头不出剧集结果）
+  Future<PageData<Series>> _seriesLoader(PaginationQuery query) async {
+    final keyword = _keyword.replaceFirst(RegExp('^#'), '');
+    if (keyword.isEmpty || _keyword.startsWith('#')) {
+      return const PageData<Series>(items: [], hasMore: false);
+    }
+    return _searchService.searchSeries(keyword: keyword, query: query);
   }
 
   /// 关键词搜索 / 标签聚合（# 开头走标签精确匹配）
@@ -144,10 +154,33 @@ class _SearchPageState extends State<SearchPage> {
         ),
       ),
       body: hasKeyword
-          ? PagedVideoList(
-              key: ValueKey('search-$_keyword'),
-              loader: _loader,
-              emptyText: loc.searchEmpty(_keyword),
+          ? DefaultTabController(
+              length: 2,
+              child: Column(
+                children: [
+                  TabBar(
+                    tabs: [
+                      Tab(text: loc.videosTab),
+                      Tab(text: loc.seriesTab),
+                    ],
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        PagedVideoList(
+                          key: ValueKey('search-video-$_keyword'),
+                          loader: _loader,
+                          emptyText: loc.searchEmpty(_keyword),
+                        ),
+                        PagedSeriesList(
+                          key: ValueKey('search-series-$_keyword'),
+                          loader: _seriesLoader,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             )
           : _buildHotTags(theme, loc),
     );
