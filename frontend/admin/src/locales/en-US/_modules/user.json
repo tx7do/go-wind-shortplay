@@ -11,7 +11,7 @@
   "statusNormal": "Normal",
   "statusDisabled": "Disabled",
   "create": "Create User",
-  "edit": "Edit User",
+  "edit": "Update User",
   "resetPassword": "Reset Password",
   "newPassword": "New Password",
   "newPasswordPlaceholder": "Leave empty to keep unchanged",

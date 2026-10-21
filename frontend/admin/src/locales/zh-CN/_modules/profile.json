@@ -157,7 +157,7 @@
   "accountBind": {
     "email": "邮箱账号",
     "phone": "手机号",
-    "bound": "已绑定：{value}",
+    "bound": "已绑定：{{value}}",
     "unbound": "未绑定，可在基本设置中填写",
     "modify": "修改",
     "bindNow": "立即绑定",

@@ -157,7 +157,7 @@
   "accountBind": {
     "email": "Email Account",
     "phone": "Phone Number",
-    "bound": "Bound: {value}",
+    "bound": "Bound: {{value}}",
     "unbound": "Not bound; fill it in Basic Settings",
     "modify": "Modify",
     "bindNow": "Bind Now",
