@@ -177,6 +177,7 @@ class _FeedPageState extends State<FeedPage>
     await showCommentSheet(
       context,
       videoId: video.id,
+      videoAuthorId: video.authorId,
       onCommentCountChanged: (delta) {
         FeedItem? item;
         for (final candidate in context.read<FeedBloc>().state.items) {

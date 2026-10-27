@@ -171,6 +171,8 @@ export interface Video {
   viewCount?: Int64;
   rejectReason?: string;
   publishedAt?: ProtoTimestamp;
+  /** 计划发布时间（草稿定时中；到期自动转已发布并清空） */
+  scheduledAt?: ProtoTimestamp;
   createdAt?: ProtoTimestamp;
   updatedAt?: ProtoTimestamp;
 }
@@ -205,6 +207,22 @@ export interface Comment {
   parentId?: number;
   likeCount?: Int64;
   replyCount?: Int64;
+  /** 作者置顶（仅一级评论；列表置顶优先） */
+  pinned?: boolean;
+  createdAt?: ProtoTimestamp;
+}
+
+// ========== 弹幕 ==========
+
+export interface Danmaku {
+  id?: number;
+  videoId?: number;
+  userId?: number;
+  user?: UserBrief;
+  content?: string;
+  /** 时间轴偏移（毫秒） */
+  timeOffsetMs?: Int64;
+  status?: ProtoEnum;
   createdAt?: ProtoTimestamp;
 }
 
@@ -305,6 +323,7 @@ export interface SysConf {
   announcementEnabled?: boolean;
   announcementText?: string;
   announcementLink?: string;
+  danmakuEnabled?: boolean;
   updatedAt?: ProtoTimestamp;
 }
 
@@ -319,6 +338,7 @@ export interface UpdateSysConfRequest {
   announcementEnabled?: boolean;
   announcementText?: string;
   announcementLink?: string;
+  danmakuEnabled?: boolean;
 }
 
 // ========== 组织与权限（基座 RBAC 契约：cms i_role/i_menu/i_api/i_department） ==========

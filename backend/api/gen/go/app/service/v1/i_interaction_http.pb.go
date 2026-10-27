@@ -463,6 +463,7 @@ const OperationCommentServiceCreateComment = "/app.service.v1.CommentService/Cre
 const OperationCommentServiceDeleteComment = "/app.service.v1.CommentService/DeleteComment"
 const OperationCommentServiceListComment = "/app.service.v1.CommentService/ListComment"
 const OperationCommentServiceListReply = "/app.service.v1.CommentService/ListReply"
+const OperationCommentServicePinComment = "/app.service.v1.CommentService/PinComment"
 
 type CommentServiceHTTPServer interface {
 	// CreateComment 发表评论
@@ -473,6 +474,8 @@ type CommentServiceHTTPServer interface {
 	ListComment(context.Context, *v1.ListCommentRequest) (*v1.ListCommentResponse, error)
 	// ListReply 评论的回复列表（楼中楼）
 	ListReply(context.Context, *v1.ListReplyRequest) (*v1.ListCommentResponse, error)
+	// PinComment 置顶/取消置顶评论（视频作者本人）
+	PinComment(context.Context, *v1.PinCommentRequest) (*v1.Comment, error)
 }
 
 func RegisterCommentServiceHTTPServer(s *http.Server, srv CommentServiceHTTPServer) {
@@ -481,6 +484,7 @@ func RegisterCommentServiceHTTPServer(s *http.Server, srv CommentServiceHTTPServ
 	r.DELETE("/app/v1/comments/{id}", _CommentService_DeleteComment0_HTTP_Handler(srv))
 	r.GET("/app/v1/videos/{video_id}/comments", _CommentService_ListComment0_HTTP_Handler(srv))
 	r.GET("/app/v1/comments/{comment_id}/replies", _CommentService_ListReply0_HTTP_Handler(srv))
+	r.PUT("/app/v1/comments/{id}/pin", _CommentService_PinComment0_HTTP_Handler(srv))
 }
 
 func _CommentService_CreateComment0_HTTP_Handler(srv CommentServiceHTTPServer) func(ctx http.Context) error {
@@ -574,6 +578,31 @@ func _CommentService_ListReply0_HTTP_Handler(srv CommentServiceHTTPServer) func(
 	}
 }
 
+func _CommentService_PinComment0_HTTP_Handler(srv CommentServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.PinCommentRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationCommentServicePinComment)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PinComment(ctx, req.(*v1.PinCommentRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.Comment)
+		return ctx.Result(200, reply)
+	}
+}
+
 type CommentServiceHTTPClient interface {
 	// CreateComment 发表评论
 	CreateComment(ctx context.Context, req *v1.CreateCommentRequest, opts ...http.CallOption) (rsp *v1.Comment, err error)
@@ -583,6 +612,8 @@ type CommentServiceHTTPClient interface {
 	ListComment(ctx context.Context, req *v1.ListCommentRequest, opts ...http.CallOption) (rsp *v1.ListCommentResponse, err error)
 	// ListReply 评论的回复列表（楼中楼）
 	ListReply(ctx context.Context, req *v1.ListReplyRequest, opts ...http.CallOption) (rsp *v1.ListCommentResponse, err error)
+	// PinComment 置顶/取消置顶评论（视频作者本人）
+	PinComment(ctx context.Context, req *v1.PinCommentRequest, opts ...http.CallOption) (rsp *v1.Comment, err error)
 }
 
 type CommentServiceHTTPClientImpl struct {
@@ -643,6 +674,20 @@ func (c *CommentServiceHTTPClientImpl) ListReply(ctx context.Context, in *v1.Lis
 	opts = append(opts, http.Operation(OperationCommentServiceListReply))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PinComment 置顶/取消置顶评论（视频作者本人）
+func (c *CommentServiceHTTPClientImpl) PinComment(ctx context.Context, in *v1.PinCommentRequest, opts ...http.CallOption) (*v1.Comment, error) {
+	var out v1.Comment
+	pattern := "/app/v1/comments/{id}/pin"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationCommentServicePinComment))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

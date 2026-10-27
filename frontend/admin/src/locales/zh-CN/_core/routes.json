@@ -5,7 +5,7 @@
   "reports": "举报管理",
   "users": "用户管理",
   "sysconf": "系统配置",
-      "series": "剧集管理",
+  "series": "剧集管理",
   "permission": "组织与权限",
   "permission-roles": "角色管理",
   "permission-menus": "菜单管理",
@@ -121,5 +121,7 @@
   "shortPlay.video": "视频管理",
   "shortPlay.comment": "评论管理",
   "shortPlay.report": "举报管理",
-  "shortPlay.sysconf": "系统配置"
+  "shortPlay.sysconf": "系统配置",
+  "shortPlay.danmaku": "弹幕管理",
+  "shortPlay.series": "剧集管理"
 }

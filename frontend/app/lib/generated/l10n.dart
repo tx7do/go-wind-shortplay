@@ -2038,6 +2038,76 @@ class S {
   String get hotKeywords {
     return Intl.message('热搜词', name: 'hotKeywords', desc: '', args: []);
   }
+
+  /// `弹幕`
+  String get danmaku {
+    return Intl.message('弹幕', name: 'danmaku', desc: '', args: []);
+  }
+
+  /// `发送弹幕`
+  String get danmakuSendTitle {
+    return Intl.message('发送弹幕', name: 'danmakuSendTitle', desc: '', args: []);
+  }
+
+  /// `说点什么…`
+  String get danmakuSendHint {
+    return Intl.message('说点什么…', name: 'danmakuSendHint', desc: '', args: []);
+  }
+
+  /// `发送`
+  String get danmakuSendAction {
+    return Intl.message('发送', name: 'danmakuSendAction', desc: '', args: []);
+  }
+
+  /// `播放`
+  String get playback {
+    return Intl.message('播放', name: 'playback', desc: '', args: []);
+  }
+
+  /// `置顶`
+  String get pinnedBadge {
+    return Intl.message('置顶', name: 'pinnedBadge', desc: '', args: []);
+  }
+
+  /// `置顶`
+  String get pin {
+    return Intl.message('置顶', name: 'pin', desc: '', args: []);
+  }
+
+  /// `取消置顶`
+  String get unpin {
+    return Intl.message('取消置顶', name: 'unpin', desc: '', args: []);
+  }
+
+  /// `定时发布（到点自动上线）`
+  String get scheduledPublishOption {
+    return Intl.message(
+      '定时发布（到点自动上线）',
+      name: 'scheduledPublishOption',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `已设为定时发布`
+  String get scheduledPublished {
+    return Intl.message(
+      '已设为定时发布',
+      name: 'scheduledPublished',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `定时时间须晚于当前`
+  String get scheduledTimePast {
+    return Intl.message(
+      '定时时间须晚于当前',
+      name: 'scheduledTimePast',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -2047,6 +2117,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'zh', countryCode: 'CN'),
       Locale.fromSubtags(languageCode: 'en', countryCode: 'US'),
+      Locale.fromSubtags(languageCode: 'ja', countryCode: 'JP'),
     ];
   }
 

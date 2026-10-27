@@ -69,5 +69,7 @@
   "batchClearSelection": "Clear selection",
   "batchApproveConfirm": "Approve {{count}} selected videos?",
   "batchRejectTitle": "Batch Reject",
-  "batchDone": "Batch done: {{ok}} succeeded, {{fail}} failed"
+  "batchDone": "Batch done: {{ok}} succeeded, {{fail}} failed",
+  "scheduledAt": "Scheduled",
+  "publishNow": "Publish"
 }

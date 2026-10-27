@@ -66,7 +66,7 @@
 ### 公告运营位
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/sysconf` | 系统配置（游客可访问）：App 消费 `announcementEnabled/announcementText/announcementLink`——开关开且文案非空时首页顶部展示公告横幅，可关闭；链接非空点击外跳 |
+| GET | `/sysconf` | 系统配置（游客可访问）：App 消费 `announcementEnabled/announcementText/announcementLink/danmakuEnabled`——开关开且文案非空时首页顶部展示公告横幅，可关闭；链接非空点击外跳 |
 
 ### 剧集（详情/列表游客可访问）
 | 方法 | 路径 | 说明 |
@@ -82,6 +82,23 @@
 `series` 对象：`{id,title,description,coverUrl,authorId,episodeCount,publishedCount,followerCount,createdAt}`（episodeCount=挂靠视频总数、publishedCount=已发布数、followerCount=追剧人数，均为服务端实时派生 int64 字符串；coverUrl 可空——展示侧回退第一集封面）
 
 **追剧闭环**：追剧后新集发布（人工审核通过 / 审核关直发 / 草稿直发任一路径）向全部追剧者（作者除外，截断前 200 人）发站内信「追更更新」，内容带视频跳转标记（App 端解析 videoId 直达）。
+
+### 弹幕
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/videos/{videoId}/danmaku?limit=` | **视频弹幕**（游客可访问）：仅 VISIBLE，按时间轴偏移升序，缺省 500 上限 1000；`danmaku{userId,user,content,timeOffsetMs,status,createdAt}`（timeOffsetMs 为 int64 字符串）；视频可见性同详情口径 |
+| POST | `/videos/{videoId}/danmaku` | `{content(≤100字), timeOffsetMs}` → Danmaku（需登录；sysconf `danmakuEnabled` 关闭 → 403 DANMAKU_DISABLED；敏感词命中 → 403 DANMAKU_SENSITIVE_WORD_HIT） |
+
+### 定时发布（视频）
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| — | `POST /uploads/{taskId}/complete` 增 `scheduledAt` | 定时发布（须未来时间；人工审核关的直发路径生效：视频先存 DRAFT，到期 asynq 任务自动转 PUBLISHED 并清空 scheduledAt；`POST /drafts/{id}/submit` 同参同语义） |
+| PUT | `/videos/{id}/schedule` | `{scheduledAt?}` 设置/取消定时（作者本人或管理端；仅 DRAFT 可定时，scheduledAt 缺省=取消）；到期任务丢失有补偿语义：任务自校验状态，非 DRAFT 跳过 |
+
+### 评论置顶
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| PUT | `/comments/{id}/pin` | `{pinned}` 置顶/取消（视频作者本人或管理端；仅一级评论）；评论列表排序：置顶优先 → 最热/最新；`Comment` 增 `pinned` 字段 |
 
 **视频挂靠剧集**（挂靠语义统一，服务端校验剧归属，跨作者挂剧 403 NOT_SERIES_OWNER）：
 - 发布挂靠：`POST /uploads/{taskId}/complete` 增 `seriesId`（>0 生效）+ `episodeNumber`（缺省自动排到剧内最大集号+1）；`asDraft=true` 时挂靠信息随草稿保存，`POST /drafts/{id}/submit` 提交时生效

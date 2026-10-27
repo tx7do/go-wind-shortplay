@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/uuid"
+	"github.com/hibiken/asynq"
 	minio "github.com/minio/minio-go/v7"
 	paginationV1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
 	"github.com/tx7do/kratos-bootstrap/bootstrap"
@@ -22,6 +23,7 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data"
 	"go-wind-shortplay/app/core/service/internal/data/ent"
 	"go-wind-shortplay/app/core/service/internal/data/ent/uploadtask"
+	videopkg "go-wind-shortplay/app/core/service/internal/data/ent/video"
 	crudViewer "github.com/tx7do/go-crud/viewer"
 	appViewer "go-wind-shortplay/pkg/entgo/viewer"
 	"go-wind-shortplay/pkg/oss"
@@ -276,6 +278,12 @@ func (s *VideoService) ChangeVideoStatus(ctx context.Context, req *videoV1.Chang
 	dto := &videoV1.Video{Status: to.Enum()}
 	if to == videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED {
 		dto.PublishedAt = nowTimestamppbSP()
+		// 定时视频经审核/管理员直发时清空计划时间，避免遗留过期排程
+		if cur.GetScheduledAt() != nil {
+			if _, serr := s.videoRepo.SetScheduledAt(ctx, req.GetId(), nil); serr != nil {
+				s.log.Errorf("clear scheduled_at on publish failed: %s", serr.Error())
+			}
+		}
 	}
 	if to == videoV1.VideoStatus_VIDEO_STATUS_REJECTED || to == videoV1.VideoStatus_VIDEO_STATUS_OFFLINE {
 		reason := req.GetReason()
@@ -310,6 +318,129 @@ func (s *VideoService) ChangeVideoStatus(ctx context.Context, req *videoV1.Chang
 		s.seriesSvc.NotifyFollowersNewEpisode(ctx, updated.GetSeriesId(), updated.GetId(), updated.GetEpisodeNumber(), updated.GetTitle(), updated.GetAuthorId())
 	}
 	return updated, nil
+}
+
+// ScheduleVideo 设置/取消定时发布（作者本人或管理端；仅 DRAFT 可定时）
+func (s *VideoService) ScheduleVideo(ctx context.Context, req *videoV1.ScheduleVideoRequest) (*videoV1.Video, error) {
+	if req == nil || req.GetId() == 0 {
+		return nil, videoV1.ErrorBadRequest("invalid parameter")
+	}
+	cur, err := s.videoRepo.Get(ctx, req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	uid := spViewerUserID(ctx)
+	if !spIsAdminCaller(ctx) && cur.GetAuthorId() != uid {
+		return nil, videoV1.ErrorForbidden("not video owner")
+	}
+	if cur.GetStatus() != videoV1.VideoStatus_VIDEO_STATUS_DRAFT {
+		return nil, videoV1.ErrorInvalidStatusTransition("only draft videos can be scheduled, current: %s", cur.GetStatus())
+	}
+
+	var at *time.Time
+	if req.ScheduledAt != nil {
+		t := req.GetScheduledAt().AsTime()
+		if !t.After(time.Now()) {
+			return nil, videoV1.ErrorBadRequest("scheduled time must be in the future")
+		}
+		at = &t
+	}
+	if _, err := s.videoRepo.SetScheduledAt(ctx, req.GetId(), at); err != nil {
+		return nil, err
+	}
+	s.schedulePublishTask(ctx, req.GetId(), at)
+	return s.videoRepo.Get(ctx, req.GetId())
+}
+
+// spScheduledFuture 请求里的计划时间是否有效（非空且在未来）
+func spScheduledFuture(ts *timestamppb.Timestamp) bool {
+	return ts != nil && ts.AsTime().After(time.Now())
+}
+
+// schedulePublishTask 定时发布入队（asynq ProcessAt；取消定时则尽力撤销任务）。
+// 入队失败仅记日志：到期任务属尽力而为，另有补偿扫描兜底（spScheduledSweep）。
+func (s *VideoService) schedulePublishTask(ctx context.Context, videoID uint32, at *time.Time) {
+	if s.taskEnqueuer == nil {
+		return
+	}
+	if at == nil {
+		// 取消定时：asynq 无按载荷撤销，任务到期后自校验状态（非 DRAFT 直接跳过）
+		return
+	}
+	if err := s.taskEnqueuer.NewTask(
+		task.VideoScheduledPublishTaskType,
+		&task.VideoScheduledPublishData{VideoID: videoID},
+		asynq.ProcessAt(*at),
+	); err != nil {
+		s.log.Errorf("enqueue scheduled publish failed: %v", err)
+	}
+}
+
+// afterVideoCreated 视频创建后的发布副作用统一入口：
+// 已发布 → 追更 fan-out；DRAFT+定时 → 排程入队。
+func (s *VideoService) afterVideoCreated(ctx context.Context, video *videoV1.Video) {
+	if video == nil {
+		return
+	}
+	if video.GetStatus() == videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED {
+		if video.GetSeriesId() > 0 && s.seriesSvc != nil {
+			s.seriesSvc.NotifyFollowersNewEpisode(ctx, video.GetSeriesId(), video.GetId(), video.GetEpisodeNumber(), video.GetTitle(), video.GetAuthorId())
+		}
+		return
+	}
+	if video.GetStatus() == videoV1.VideoStatus_VIDEO_STATUS_DRAFT && video.GetScheduledAt() != nil {
+		at := video.GetScheduledAt().AsTime()
+		s.schedulePublishTask(ctx, video.GetId(), &at)
+	}
+}
+
+// AsyncScheduledPublish asynq 订阅者：到期把 DRAFT+定时视频转 PUBLISHED。
+// 系统上下文执行；状态自校验（已发布/已删除/已改期则跳过）。
+func (s *VideoService) AsyncScheduledPublish(_ string, payload *task.VideoScheduledPublishData) error {
+	if payload == nil || payload.VideoID == 0 {
+		return nil
+	}
+	ctx := spSystemContext()
+	e, err := s.videoRepo.GetEntityRaw(ctx, payload.VideoID)
+	if err != nil {
+		return nil // 已删除：不重试
+	}
+	if e.Status != videopkg.StatusDraft || e.ScheduledAt == nil {
+		return nil // 状态已变（取消定时/管理员提前发布）：跳过
+	}
+	s.publishScheduledNow(ctx, e.ID, e.ScheduledAt)
+	return nil
+}
+
+// publishScheduledNow 执行定时转发布（清计划时间 → 状态机内流转 → 追更 fan-out）
+func (s *VideoService) publishScheduledNow(ctx context.Context, videoID uint32, scheduledAt *time.Time) {
+	// 先清计划时间再走 Update 状态流转，保证两步任一失败可见
+	if _, err := s.videoRepo.SetScheduledAt(ctx, videoID, nil); err != nil {
+		s.log.Errorf("clear scheduled_at before publish failed: %s", err.Error())
+		return
+	}
+	dto := &videoV1.Video{
+		Status:      videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED.Enum(),
+		PublishedAt: nowTimestamppbSP(),
+	}
+	updated, err := s.videoRepo.Update(ctx, videoID, dto, nil)
+	if err != nil {
+		s.log.Errorf("scheduled publish failed: %s", err.Error())
+		return
+	}
+	// 敏感词兜底复检：定时内容若命中词表转审核而非直接可见
+	if spHitSensitiveWords(ctx, s.sysConfRepo, updated.GetTitle(), updated.GetDescription()) {
+		if _, err := s.videoRepo.Update(ctx, videoID, &videoV1.Video{
+			Status: videoV1.VideoStatus_VIDEO_STATUS_REVIEWING.Enum(),
+		}, nil); err != nil {
+			s.log.Errorf("scheduled publish sensitive fallback failed: %s", err.Error())
+		}
+		return
+	}
+	if updated.GetSeriesId() > 0 && s.seriesSvc != nil {
+		s.seriesSvc.NotifyFollowersNewEpisode(ctx, updated.GetSeriesId(), updated.GetId(), updated.GetEpisodeNumber(), updated.GetTitle(), updated.GetAuthorId())
+	}
+	s.log.Infof("scheduled video %d published (planned at %s)", videoID, scheduledAt.Format(time.RFC3339))
 }
 
 // ── 分片上传 ──
@@ -465,10 +596,15 @@ func (s *VideoService) CompleteUpload(ctx context.Context, req *videoV1.Complete
 	if !req.GetAsDraft() {
 		if conf.ManualReviewEnabled {
 			videoStatus = videoV1.VideoStatus_VIDEO_STATUS_REVIEWING
+		} else if spScheduledFuture(req.ScheduledAt) {
+			// 定时发布：直发路径先存 DRAFT，到期任务自动转 PUBLISHED
+			videoStatus = videoV1.VideoStatus_VIDEO_STATUS_DRAFT
 		} else {
 			videoStatus = videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED
 		}
 	}
+
+
 	dto := &videoV1.Video{
 		Title:       req.Title,
 		Description: req.Description,
@@ -484,6 +620,10 @@ func (s *VideoService) CompleteUpload(ctx context.Context, req *videoV1.Complete
 	}
 	if strings.TrimSpace(req.GetTitle()) == "" {
 		dto.Title = trans.Ptr(strings.TrimSuffix(e.FileName, filepath.Ext(e.FileName)))
+	}
+	// 直发+定时：计划时间随行落库（状态已在上文决策为 DRAFT，见排程入队）
+	if !req.GetAsDraft() && spScheduledFuture(req.ScheduledAt) {
+		dto.ScheduledAt = req.ScheduledAt
 	}
 
 	// 挂靠剧集：剧须为本人所有；集号缺省自动排到当前最大 +1
@@ -511,10 +651,8 @@ func (s *VideoService) CompleteUpload(ctx context.Context, req *videoV1.Complete
 		return nil, err
 	}
 
-	// 直发即可见：挂靠剧集时 fan-out 追更通知（尽力而为）
-	if video.GetStatus() == videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED && video.GetSeriesId() > 0 && s.seriesSvc != nil {
-		s.seriesSvc.NotifyFollowersNewEpisode(ctx, video.GetSeriesId(), video.GetId(), video.GetEpisodeNumber(), video.GetTitle(), video.GetAuthorId())
-	}
+	// 发布副作用（追更 fan-out）与定时排程
+	s.afterVideoCreated(ctx, video)
 	_ = s.uploadTaskRepo.UpdateStatus(ctx, e.ID, videoV1.UploadTaskStatus_UPLOAD_TASK_STATUS_COMPLETED, func(b *ent.UploadTaskUpdateOne) {
 		b.SetFileKey(objectKey)
 		b.SetVideoID(video.GetId())
@@ -821,6 +959,9 @@ func (s *VideoService) SubmitDraft(ctx context.Context, req *videoV1.SubmitDraft
 	status := videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED
 	if conf.ManualReviewEnabled {
 		status = videoV1.VideoStatus_VIDEO_STATUS_REVIEWING
+	} else if spScheduledFuture(req.ScheduledAt) {
+		// 定时发布：直发路径先存 DRAFT，到期任务自动转 PUBLISHED
+		status = videoV1.VideoStatus_VIDEO_STATUS_DRAFT
 	}
 	// 敏感词过滤：命中（标题/简介）强制转审核中，即使人工审核关
 	if status == videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED {
@@ -848,6 +989,9 @@ func (s *VideoService) SubmitDraft(ctx context.Context, req *videoV1.SubmitDraft
 	if status == videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED {
 		dto.PublishedAt = nowTimestamppbSP()
 	}
+	if status == videoV1.VideoStatus_VIDEO_STATUS_DRAFT && spScheduledFuture(req.ScheduledAt) {
+		dto.ScheduledAt = req.ScheduledAt
+	}
 	// 草稿携带的挂靠信息随提交生效（剧归属已在保存草稿时校验；集号 0 = 此刻自动排号）
 	if e.SeriesID > 0 {
 		seriesID, episodeNo, aerr := s.seriesSvc.ResolveSeriesAttach(ctx, uid, e.SeriesID, e.EpisodeNumber)
@@ -861,10 +1005,8 @@ func (s *VideoService) SubmitDraft(ctx context.Context, req *videoV1.SubmitDraft
 	if err != nil {
 		return nil, err
 	}
-	// 直发即可见：挂靠剧集时 fan-out 追更通知（尽力而为）
-	if status == videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED && video.GetSeriesId() > 0 && s.seriesSvc != nil {
-		s.seriesSvc.NotifyFollowersNewEpisode(ctx, video.GetSeriesId(), video.GetId(), video.GetEpisodeNumber(), video.GetTitle(), video.GetAuthorId())
-	}
+	// 发布副作用（追更 fan-out）与定时排程
+	s.afterVideoCreated(ctx, video)
 	if err = s.draftRepo.Delete(ctx, e.ID); err != nil {
 		s.log.Errorf("delete draft after submit failed: %s", err.Error())
 	}

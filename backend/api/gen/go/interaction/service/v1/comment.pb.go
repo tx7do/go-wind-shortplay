@@ -82,6 +82,7 @@ type Comment struct {
 	ParentId      *uint32                `protobuf:"varint,6,opt,name=parent_id,json=parentId,proto3,oneof" json:"parent_id,omitempty"`       // 父评论ID（Phase 2 楼中楼）
 	LikeCount     *uint64                `protobuf:"varint,7,opt,name=like_count,json=likeCount,proto3,oneof" json:"like_count,omitempty"`    // 点赞数
 	ReplyCount    *uint64                `protobuf:"varint,8,opt,name=reply_count,json=replyCount,proto3,oneof" json:"reply_count,omitempty"` // 回复数（仅一级评论维护）
+	Pinned        *bool                  `protobuf:"varint,9,opt,name=pinned,proto3,oneof" json:"pinned,omitempty"`                           // 作者置顶（仅一级评论；列表置顶优先）
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,20,opt,name=created_at,json=createdAt,proto3,oneof" json:"created_at,omitempty"`    // 创建时间
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -171,6 +172,13 @@ func (x *Comment) GetReplyCount() uint64 {
 		return *x.ReplyCount
 	}
 	return 0
+}
+
+func (x *Comment) GetPinned() bool {
+	if x != nil && x.Pinned != nil {
+		return *x.Pinned
+	}
+	return false
 }
 
 func (x *Comment) GetCreatedAt() *timestamppb.Timestamp {
@@ -284,6 +292,58 @@ func (x *DeleteCommentRequest) GetId() uint32 {
 	return 0
 }
 
+type PinCommentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`         // 评论ID
+	Pinned        bool                   `protobuf:"varint,2,opt,name=pinned,proto3" json:"pinned,omitempty"` // 目标状态（true 置顶 / false 取消）
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PinCommentRequest) Reset() {
+	*x = PinCommentRequest{}
+	mi := &file_interaction_service_v1_comment_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PinCommentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PinCommentRequest) ProtoMessage() {}
+
+func (x *PinCommentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_interaction_service_v1_comment_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PinCommentRequest.ProtoReflect.Descriptor instead.
+func (*PinCommentRequest) Descriptor() ([]byte, []int) {
+	return file_interaction_service_v1_comment_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *PinCommentRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *PinCommentRequest) GetPinned() bool {
+	if x != nil {
+		return x.Pinned
+	}
+	return false
+}
+
 type ListCommentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	VideoId       uint32                 `protobuf:"varint,1,opt,name=video_id,json=videoId,proto3" json:"video_id,omitempty"`                          // 视频ID
@@ -296,7 +356,7 @@ type ListCommentRequest struct {
 
 func (x *ListCommentRequest) Reset() {
 	*x = ListCommentRequest{}
-	mi := &file_interaction_service_v1_comment_proto_msgTypes[3]
+	mi := &file_interaction_service_v1_comment_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -308,7 +368,7 @@ func (x *ListCommentRequest) String() string {
 func (*ListCommentRequest) ProtoMessage() {}
 
 func (x *ListCommentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_interaction_service_v1_comment_proto_msgTypes[3]
+	mi := &file_interaction_service_v1_comment_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -321,7 +381,7 @@ func (x *ListCommentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCommentRequest.ProtoReflect.Descriptor instead.
 func (*ListCommentRequest) Descriptor() ([]byte, []int) {
-	return file_interaction_service_v1_comment_proto_rawDescGZIP(), []int{3}
+	return file_interaction_service_v1_comment_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ListCommentRequest) GetVideoId() uint32 {
@@ -363,7 +423,7 @@ type ListReplyRequest struct {
 
 func (x *ListReplyRequest) Reset() {
 	*x = ListReplyRequest{}
-	mi := &file_interaction_service_v1_comment_proto_msgTypes[4]
+	mi := &file_interaction_service_v1_comment_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -375,7 +435,7 @@ func (x *ListReplyRequest) String() string {
 func (*ListReplyRequest) ProtoMessage() {}
 
 func (x *ListReplyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_interaction_service_v1_comment_proto_msgTypes[4]
+	mi := &file_interaction_service_v1_comment_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -388,7 +448,7 @@ func (x *ListReplyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListReplyRequest.ProtoReflect.Descriptor instead.
 func (*ListReplyRequest) Descriptor() ([]byte, []int) {
-	return file_interaction_service_v1_comment_proto_rawDescGZIP(), []int{4}
+	return file_interaction_service_v1_comment_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ListReplyRequest) GetCommentId() uint32 {
@@ -422,7 +482,7 @@ type ListCommentResponse struct {
 
 func (x *ListCommentResponse) Reset() {
 	*x = ListCommentResponse{}
-	mi := &file_interaction_service_v1_comment_proto_msgTypes[5]
+	mi := &file_interaction_service_v1_comment_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -434,7 +494,7 @@ func (x *ListCommentResponse) String() string {
 func (*ListCommentResponse) ProtoMessage() {}
 
 func (x *ListCommentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_interaction_service_v1_comment_proto_msgTypes[5]
+	mi := &file_interaction_service_v1_comment_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -447,7 +507,7 @@ func (x *ListCommentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCommentResponse.ProtoReflect.Descriptor instead.
 func (*ListCommentResponse) Descriptor() ([]byte, []int) {
-	return file_interaction_service_v1_comment_proto_rawDescGZIP(), []int{5}
+	return file_interaction_service_v1_comment_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ListCommentResponse) GetItems() []*Comment {
@@ -468,7 +528,7 @@ var File_interaction_service_v1_comment_proto protoreflect.FileDescriptor
 
 const file_interaction_service_v1_comment_proto_rawDesc = "" +
 	"\n" +
-	"$interaction/service/v1/comment.proto\x12\x16interaction.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a$identity/service/v1/user_brief.proto\x1a\x1epagination/v1/pagination.proto\"\xc3\x03\n" +
+	"$interaction/service/v1/comment.proto\x12\x16interaction.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a$identity/service/v1/user_brief.proto\x1a\x1epagination/v1/pagination.proto\"\xeb\x03\n" +
 	"\aComment\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\rH\x00R\x02id\x88\x01\x01\x12\x1e\n" +
 	"\bvideo_id\x18\x02 \x01(\rH\x01R\avideoId\x88\x01\x01\x12\x1c\n" +
@@ -479,9 +539,10 @@ const file_interaction_service_v1_comment_proto_rawDesc = "" +
 	"\n" +
 	"like_count\x18\a \x01(\x04H\x05R\tlikeCount\x88\x01\x01\x12$\n" +
 	"\vreply_count\x18\b \x01(\x04H\x06R\n" +
-	"replyCount\x88\x01\x01\x12>\n" +
+	"replyCount\x88\x01\x01\x12\x1b\n" +
+	"\x06pinned\x18\t \x01(\bH\aR\x06pinned\x88\x01\x01\x12>\n" +
 	"\n" +
-	"created_at\x18\x14 \x01(\v2\x1a.google.protobuf.TimestampH\aR\tcreatedAt\x88\x01\x01B\x05\n" +
+	"created_at\x18\x14 \x01(\v2\x1a.google.protobuf.TimestampH\bR\tcreatedAt\x88\x01\x01B\x05\n" +
 	"\x03_idB\v\n" +
 	"\t_video_idB\n" +
 	"\n" +
@@ -491,7 +552,8 @@ const file_interaction_service_v1_comment_proto_rawDesc = "" +
 	"\n" +
 	"_parent_idB\r\n" +
 	"\v_like_countB\x0e\n" +
-	"\f_reply_countB\r\n" +
+	"\f_reply_countB\t\n" +
+	"\a_pinnedB\r\n" +
 	"\v_created_at\"{\n" +
 	"\x14CreateCommentRequest\x12\x19\n" +
 	"\bvideo_id\x18\x01 \x01(\rR\avideoId\x12\x18\n" +
@@ -500,7 +562,10 @@ const file_interaction_service_v1_comment_proto_rawDesc = "" +
 	"\n" +
 	"_parent_id\"&\n" +
 	"\x14DeleteCommentRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\rR\x02id\"\xd3\x01\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\";\n" +
+	"\x11PinCommentRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12\x16\n" +
+	"\x06pinned\x18\x02 \x01(\bR\x06pinned\"\xd3\x01\n" +
 	"\x12ListCommentRequest\x12\x19\n" +
 	"\bvideo_id\x18\x01 \x01(\rR\avideoId\x12\x1e\n" +
 	"\bpage_num\x18\x02 \x01(\rH\x00R\apageNum\x88\x01\x01\x12 \n" +
@@ -524,13 +589,15 @@ const file_interaction_service_v1_comment_proto_rawDesc = "" +
 	"\x06_total*<\n" +
 	"\vCommentSort\x12\x17\n" +
 	"\x13COMMENT_SORT_LATEST\x10\x00\x12\x14\n" +
-	"\x10COMMENT_SORT_HOT\x10\x012\xf2\x03\n" +
+	"\x10COMMENT_SORT_HOT\x10\x012\xce\x04\n" +
 	"\x0eCommentService\x12`\n" +
 	"\rCreateComment\x12,.interaction.service.v1.CreateCommentRequest\x1a\x1f.interaction.service.v1.Comment\"\x00\x12W\n" +
 	"\rDeleteComment\x12,.interaction.service.v1.DeleteCommentRequest\x1a\x16.google.protobuf.Empty\"\x00\x12h\n" +
 	"\vListComment\x12*.interaction.service.v1.ListCommentRequest\x1a+.interaction.service.v1.ListCommentResponse\"\x00\x12d\n" +
 	"\tListReply\x12(.interaction.service.v1.ListReplyRequest\x1a+.interaction.service.v1.ListCommentResponse\"\x00\x12U\n" +
-	"\tAdminList\x12\x19.pagination.PagingRequest\x1a+.interaction.service.v1.ListCommentResponse\"\x00B\xe7\x01\n" +
+	"\tAdminList\x12\x19.pagination.PagingRequest\x1a+.interaction.service.v1.ListCommentResponse\"\x00\x12Z\n" +
+	"\n" +
+	"PinComment\x12).interaction.service.v1.PinCommentRequest\x1a\x1f.interaction.service.v1.Comment\"\x00B\xe7\x01\n" +
 	"\x1acom.interaction.service.v1B\fCommentProtoP\x01ZAgo-wind-shortplay/api/gen/go/interaction/service/v1;interactionpb\xa2\x02\x03ISX\xaa\x02\x16Interaction.Service.V1\xca\x02\x16Interaction\\Service\\V1\xe2\x02\"Interaction\\Service\\V1\\GPBMetadata\xea\x02\x18Interaction::Service::V1b\x06proto3"
 
 var (
@@ -546,37 +613,40 @@ func file_interaction_service_v1_comment_proto_rawDescGZIP() []byte {
 }
 
 var file_interaction_service_v1_comment_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_interaction_service_v1_comment_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_interaction_service_v1_comment_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_interaction_service_v1_comment_proto_goTypes = []any{
 	(CommentSort)(0),              // 0: interaction.service.v1.CommentSort
 	(*Comment)(nil),               // 1: interaction.service.v1.Comment
 	(*CreateCommentRequest)(nil),  // 2: interaction.service.v1.CreateCommentRequest
 	(*DeleteCommentRequest)(nil),  // 3: interaction.service.v1.DeleteCommentRequest
-	(*ListCommentRequest)(nil),    // 4: interaction.service.v1.ListCommentRequest
-	(*ListReplyRequest)(nil),      // 5: interaction.service.v1.ListReplyRequest
-	(*ListCommentResponse)(nil),   // 6: interaction.service.v1.ListCommentResponse
-	(*v1.UserBrief)(nil),          // 7: identity.service.v1.UserBrief
-	(*timestamppb.Timestamp)(nil), // 8: google.protobuf.Timestamp
-	(*v11.PagingRequest)(nil),     // 9: pagination.PagingRequest
-	(*emptypb.Empty)(nil),         // 10: google.protobuf.Empty
+	(*PinCommentRequest)(nil),     // 4: interaction.service.v1.PinCommentRequest
+	(*ListCommentRequest)(nil),    // 5: interaction.service.v1.ListCommentRequest
+	(*ListReplyRequest)(nil),      // 6: interaction.service.v1.ListReplyRequest
+	(*ListCommentResponse)(nil),   // 7: interaction.service.v1.ListCommentResponse
+	(*v1.UserBrief)(nil),          // 8: identity.service.v1.UserBrief
+	(*timestamppb.Timestamp)(nil), // 9: google.protobuf.Timestamp
+	(*v11.PagingRequest)(nil),     // 10: pagination.PagingRequest
+	(*emptypb.Empty)(nil),         // 11: google.protobuf.Empty
 }
 var file_interaction_service_v1_comment_proto_depIdxs = []int32{
-	7,  // 0: interaction.service.v1.Comment.user:type_name -> identity.service.v1.UserBrief
-	8,  // 1: interaction.service.v1.Comment.created_at:type_name -> google.protobuf.Timestamp
+	8,  // 0: interaction.service.v1.Comment.user:type_name -> identity.service.v1.UserBrief
+	9,  // 1: interaction.service.v1.Comment.created_at:type_name -> google.protobuf.Timestamp
 	0,  // 2: interaction.service.v1.ListCommentRequest.sort:type_name -> interaction.service.v1.CommentSort
 	1,  // 3: interaction.service.v1.ListCommentResponse.items:type_name -> interaction.service.v1.Comment
 	2,  // 4: interaction.service.v1.CommentService.CreateComment:input_type -> interaction.service.v1.CreateCommentRequest
 	3,  // 5: interaction.service.v1.CommentService.DeleteComment:input_type -> interaction.service.v1.DeleteCommentRequest
-	4,  // 6: interaction.service.v1.CommentService.ListComment:input_type -> interaction.service.v1.ListCommentRequest
-	5,  // 7: interaction.service.v1.CommentService.ListReply:input_type -> interaction.service.v1.ListReplyRequest
-	9,  // 8: interaction.service.v1.CommentService.AdminList:input_type -> pagination.PagingRequest
-	1,  // 9: interaction.service.v1.CommentService.CreateComment:output_type -> interaction.service.v1.Comment
-	10, // 10: interaction.service.v1.CommentService.DeleteComment:output_type -> google.protobuf.Empty
-	6,  // 11: interaction.service.v1.CommentService.ListComment:output_type -> interaction.service.v1.ListCommentResponse
-	6,  // 12: interaction.service.v1.CommentService.ListReply:output_type -> interaction.service.v1.ListCommentResponse
-	6,  // 13: interaction.service.v1.CommentService.AdminList:output_type -> interaction.service.v1.ListCommentResponse
-	9,  // [9:14] is the sub-list for method output_type
-	4,  // [4:9] is the sub-list for method input_type
+	5,  // 6: interaction.service.v1.CommentService.ListComment:input_type -> interaction.service.v1.ListCommentRequest
+	6,  // 7: interaction.service.v1.CommentService.ListReply:input_type -> interaction.service.v1.ListReplyRequest
+	10, // 8: interaction.service.v1.CommentService.AdminList:input_type -> pagination.PagingRequest
+	4,  // 9: interaction.service.v1.CommentService.PinComment:input_type -> interaction.service.v1.PinCommentRequest
+	1,  // 10: interaction.service.v1.CommentService.CreateComment:output_type -> interaction.service.v1.Comment
+	11, // 11: interaction.service.v1.CommentService.DeleteComment:output_type -> google.protobuf.Empty
+	7,  // 12: interaction.service.v1.CommentService.ListComment:output_type -> interaction.service.v1.ListCommentResponse
+	7,  // 13: interaction.service.v1.CommentService.ListReply:output_type -> interaction.service.v1.ListCommentResponse
+	7,  // 14: interaction.service.v1.CommentService.AdminList:output_type -> interaction.service.v1.ListCommentResponse
+	1,  // 15: interaction.service.v1.CommentService.PinComment:output_type -> interaction.service.v1.Comment
+	10, // [10:16] is the sub-list for method output_type
+	4,  // [4:10] is the sub-list for method input_type
 	4,  // [4:4] is the sub-list for extension type_name
 	4,  // [4:4] is the sub-list for extension extendee
 	0,  // [0:4] is the sub-list for field type_name
@@ -589,16 +659,16 @@ func file_interaction_service_v1_comment_proto_init() {
 	}
 	file_interaction_service_v1_comment_proto_msgTypes[0].OneofWrappers = []any{}
 	file_interaction_service_v1_comment_proto_msgTypes[1].OneofWrappers = []any{}
-	file_interaction_service_v1_comment_proto_msgTypes[3].OneofWrappers = []any{}
 	file_interaction_service_v1_comment_proto_msgTypes[4].OneofWrappers = []any{}
 	file_interaction_service_v1_comment_proto_msgTypes[5].OneofWrappers = []any{}
+	file_interaction_service_v1_comment_proto_msgTypes[6].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_interaction_service_v1_comment_proto_rawDesc), len(file_interaction_service_v1_comment_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

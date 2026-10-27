@@ -6,7 +6,10 @@ import 'package:shortplay_app/generated/l10n.dart';
 import 'package:shortplay_app/src/core/services/pagination_query.dart';
 import 'package:shortplay_app/src/core/transport/http/status.dart';
 import 'package:shortplay_app/src/core/utilities/convert.dart';
+import 'package:shortplay_app/src/features/comment/models/comment.dart';
 import 'package:shortplay_app/src/features/common/data/models.dart';
+import 'package:shortplay_app/src/features/common/services/sysconf_service.dart';
+import 'package:shortplay_app/src/features/danmaku/services/danmaku_service.dart';
 import 'package:shortplay_app/src/features/history/services/history_service.dart';
 import 'package:shortplay_app/src/features/video_detail/services/video_service.dart'
     show VideoDetail;
@@ -121,6 +124,37 @@ void main() {
       });
       expect(item.video.id, 9);
       expect(item.reason, FeedReason.hot);
+    });
+
+    test('DanmakuItem/Comment.pinned/SysConf 解析新字段', () {
+      final d = DanmakuItem.fromJson({
+        'id': '9',
+        'userId': 3,
+        'content': 'hello',
+        'timeOffsetMs': '12345',
+      });
+      expect(d.id, 9);
+      expect(d.timeOffsetMs, 12345);
+      expect(d.content, 'hello');
+
+      final c = Comment.fromJson({
+        'id': 1,
+        'videoId': 2,
+        'content': 'nice',
+        'likeCount': '5',
+        'pinned': true,
+      });
+      expect(c.pinned, isTrue);
+      expect(c.copyWith(pinned: false).pinned, isFalse);
+
+      const conf = SysConf(
+        announcementEnabled: true,
+        announcementText: 'hi',
+        danmakuEnabled: false,
+      );
+      expect(conf.danmakuEnabled, isFalse);
+      // 缺省开（JSON 缺字段不关弹幕）
+      expect(SysConf.fromJson(const {}).danmakuEnabled, isTrue);
     });
 
     test('HistoryEntry 进度判定', () {

@@ -81,6 +81,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 	spInteractionServiceClient := data.NewSpInteractionServiceClient(ctx, discovery)
 	spReportServiceClient := data.NewSpReportServiceClient(ctx, discovery)
 	spUbaServiceClient := data.NewSpUbaServiceClient(ctx, discovery)
+	spDanmakuServiceClient := data.NewSpDanmakuServiceClient(ctx, discovery)
 	spDashboardServiceClient := data.NewSpDashboardServiceClient(ctx, discovery)
 	spSysConfServiceClient := data.NewSpSysConfServiceClient(ctx, discovery)
 
@@ -111,6 +112,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 	spInteractionService := service.NewInteractionService(ctx, spInteractionServiceClient, accessTokenChecker)
 	spReportService := service.NewReportService(ctx, spReportServiceClient)
 	spUbaService := service.NewUbaService(ctx, spUbaServiceClient)
+	spDanmakuService := service.NewDanmakuService(ctx, spDanmakuServiceClient)
 	spUserService := service.NewUserService(ctx, userServiceClient, spDashboardServiceClient, spVideoServiceClient)
 	spSysConfService := service.NewSysConfService(ctx, spSysConfServiceClient)
 
@@ -132,6 +134,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 		commentService,
 		spFeedService, spVideoService, spSeriesService, spInteractionService,
 		spReportService, spUbaService, spUserService, spSysConfService,
+		spDanmakuService,
 		notificationService,
 		// register:rest-arg ── 新模块服务实参在此行后追加(make register 工具锚点,勿删)
 	)

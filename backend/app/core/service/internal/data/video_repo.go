@@ -82,6 +82,7 @@ func videoEntityToDTO(e *ent.Video, tags []string) *videoV1.Video {
 		ViewCount:    trans.Ptr(e.ViewCount),
 		RejectReason: e.RejectReason,
 		PublishedAt:  timeutil.TimeToTimestamppb(e.PublishedAt),
+		ScheduledAt:  timeutil.TimeToTimestamppb(e.ScheduledAt),
 		CreatedAt:    timeutil.TimeToTimestamppb(e.CreatedAt),
 		UpdatedAt:    timeutil.TimeToTimestamppb(e.UpdatedAt),
 	}
@@ -437,6 +438,7 @@ func (r *VideoRepo) Create(ctx context.Context, dto *videoV1.Video, tags []strin
 		SetAuthorID(dto.GetAuthorId()).
 		SetRejectReason(dto.GetRejectReason()).
 		SetNillablePublishedAt(timeutil.TimestamppbToTime(dto.PublishedAt)).
+		SetNillableScheduledAt(timeutil.TimestamppbToTime(dto.ScheduledAt)).
 		SetCreatedAt(time.Now())
 
 	if dto.GetSeriesId() > 0 {
@@ -462,6 +464,40 @@ func (r *VideoRepo) Create(ctx context.Context, dto *videoV1.Video, tags []strin
 }
 
 // Update 更新视频（部分字段）
+// SetScheduledAt 设置/清空计划发布时间（定时发布排程用；at=nil 取消定时）
+func (r *VideoRepo) SetScheduledAt(ctx context.Context, id uint32, at *time.Time) (*ent.Video, error) {
+	builder := r.entClient.Client().Video.UpdateOneID(id)
+	if at == nil {
+		builder.ClearScheduledAt()
+	} else {
+		builder.SetScheduledAt(*at)
+	}
+	builder.SetUpdatedAt(time.Now())
+	e, err := builder.Save(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, videoV1.ErrorVideoNotFound("video not found")
+		}
+		r.log.Errorf("set scheduled at failed: %s", err.Error())
+		return nil, videoV1.ErrorInternalServerError("set scheduled at failed")
+	}
+	return e, nil
+}
+
+// ScheduledDueVideos 到期未发布的定时视频（status/scheduled_at 索引扫描兜底口；
+// 正常路径走 asynq 定时任务，此处供任务丢失后的补偿扫描）
+func (r *VideoRepo) ScheduledDueVideos(ctx context.Context, due time.Time, limit int) ([]*ent.Video, error) {
+	return r.entClient.Client().Video.Query().
+		Where(
+			video.StatusEQ(video.StatusDraft),
+			video.ScheduledAtNotNil(),
+			video.ScheduledAtLT(due),
+		).
+		Order(ent.Asc(video.FieldScheduledAt)).
+		Limit(limit).
+		All(ctx)
+}
+
 func (r *VideoRepo) Update(ctx context.Context, id uint32, dto *videoV1.Video, tags []string) (*videoV1.Video, error) {
 	builder := r.entClient.Client().Video.UpdateOneID(id)
 	if dto.Title != nil {

@@ -27,6 +27,7 @@ const (
 	VideoService_UpdateVideo_FullMethodName       = "/video.service.v1.VideoService/UpdateVideo"
 	VideoService_DeleteVideo_FullMethodName       = "/video.service.v1.VideoService/DeleteVideo"
 	VideoService_ChangeVideoStatus_FullMethodName = "/video.service.v1.VideoService/ChangeVideoStatus"
+	VideoService_ScheduleVideo_FullMethodName     = "/video.service.v1.VideoService/ScheduleVideo"
 	VideoService_CreateUploadTask_FullMethodName  = "/video.service.v1.VideoService/CreateUploadTask"
 	VideoService_UploadChunk_FullMethodName       = "/video.service.v1.VideoService/UploadChunk"
 	VideoService_CompleteUpload_FullMethodName    = "/video.service.v1.VideoService/CompleteUpload"
@@ -64,6 +65,8 @@ type VideoServiceClient interface {
 	DeleteVideo(ctx context.Context, in *DeleteVideoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 变更视频状态（审核通过 / 驳回 / 强制下架，管理端）
 	ChangeVideoStatus(ctx context.Context, in *ChangeVideoStatusRequest, opts ...grpc.CallOption) (*Video, error)
+	// 设置/取消定时发布（作者本人或管理端；仅 DRAFT 可定时；scheduledAt 缺省=取消）
+	ScheduleVideo(ctx context.Context, in *ScheduleVideoRequest, opts ...grpc.CallOption) (*Video, error)
 	// 创建上传任务，返回任务号与分片参数
 	CreateUploadTask(ctx context.Context, in *CreateUploadTaskRequest, opts ...grpc.CallOption) (*UploadTask, error)
 	// 上传单个分片（顺序上传）
@@ -150,6 +153,16 @@ func (c *videoServiceClient) ChangeVideoStatus(ctx context.Context, in *ChangeVi
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Video)
 	err := c.cc.Invoke(ctx, VideoService_ChangeVideoStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *videoServiceClient) ScheduleVideo(ctx context.Context, in *ScheduleVideoRequest, opts ...grpc.CallOption) (*Video, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Video)
+	err := c.cc.Invoke(ctx, VideoService_ScheduleVideo_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -290,6 +303,8 @@ type VideoServiceServer interface {
 	DeleteVideo(context.Context, *DeleteVideoRequest) (*emptypb.Empty, error)
 	// 变更视频状态（审核通过 / 驳回 / 强制下架，管理端）
 	ChangeVideoStatus(context.Context, *ChangeVideoStatusRequest) (*Video, error)
+	// 设置/取消定时发布（作者本人或管理端；仅 DRAFT 可定时；scheduledAt 缺省=取消）
+	ScheduleVideo(context.Context, *ScheduleVideoRequest) (*Video, error)
 	// 创建上传任务，返回任务号与分片参数
 	CreateUploadTask(context.Context, *CreateUploadTaskRequest) (*UploadTask, error)
 	// 上传单个分片（顺序上传）
@@ -339,6 +354,9 @@ func (UnimplementedVideoServiceServer) DeleteVideo(context.Context, *DeleteVideo
 }
 func (UnimplementedVideoServiceServer) ChangeVideoStatus(context.Context, *ChangeVideoStatusRequest) (*Video, error) {
 	return nil, status.Error(codes.Unimplemented, "method ChangeVideoStatus not implemented")
+}
+func (UnimplementedVideoServiceServer) ScheduleVideo(context.Context, *ScheduleVideoRequest) (*Video, error) {
+	return nil, status.Error(codes.Unimplemented, "method ScheduleVideo not implemented")
 }
 func (UnimplementedVideoServiceServer) CreateUploadTask(context.Context, *CreateUploadTaskRequest) (*UploadTask, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateUploadTask not implemented")
@@ -498,6 +516,24 @@ func _VideoService_ChangeVideoStatus_Handler(srv interface{}, ctx context.Contex
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(VideoServiceServer).ChangeVideoStatus(ctx, req.(*ChangeVideoStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VideoService_ScheduleVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ScheduleVideoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoServiceServer).ScheduleVideo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoService_ScheduleVideo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoServiceServer).ScheduleVideo(ctx, req.(*ScheduleVideoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -730,6 +766,10 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ChangeVideoStatus",
 			Handler:    _VideoService_ChangeVideoStatus_Handler,
+		},
+		{
+			MethodName: "ScheduleVideo",
+			Handler:    _VideoService_ScheduleVideo_Handler,
 		},
 		{
 			MethodName: "CreateUploadTask",

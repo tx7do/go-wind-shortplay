@@ -50,6 +50,7 @@ func commentEntityToDTO(e *ent.VideoComment, user *identityV1.UserBrief) *intera
 		ParentId:  trans.Ptr(e.ParentID),
 		LikeCount: trans.Ptr(e.LikeCount),
 		ReplyCount: trans.Ptr(e.ReplyCount),
+		Pinned:    trans.Ptr(e.Pinned),
 		CreatedAt: timeutil.TimeToTimestamppb(e.CreatedAt),
 	}
 }
@@ -88,11 +89,12 @@ func (r *VideoCommentRepo) ListByVideo(ctx context.Context, videoID uint32, pare
 		r.log.Errorf("count comments failed: %s", err.Error())
 		return nil, 0, interactionV1.ErrorInternalServerError("count comments failed")
 	}
+	// 作者置顶优先（pinned 仅一级评论维护，回复列表不受影响）
 	if hotSort {
-		// 最热：点赞为主、回复数加权，id 兜底稳定序
-		q.Order(ent.Desc(videocomment.FieldLikeCount), ent.Desc(videocomment.FieldReplyCount), ent.Desc(videocomment.FieldID))
+		// 最热：置顶优先 → 点赞为主、回复数加权，id 兜底稳定序
+		q.Order(ent.Desc(videocomment.FieldPinned), ent.Desc(videocomment.FieldLikeCount), ent.Desc(videocomment.FieldReplyCount), ent.Desc(videocomment.FieldID))
 	} else {
-		q.Order(ent.Desc(videocomment.FieldCreatedAt), ent.Desc(videocomment.FieldID))
+		q.Order(ent.Desc(videocomment.FieldPinned), ent.Desc(videocomment.FieldCreatedAt), ent.Desc(videocomment.FieldID))
 	}
 	items, err := q.
 		Offset(int(page-1) * int(pageSize)).Limit(int(pageSize)).All(ctx)
@@ -200,6 +202,22 @@ func (r *VideoCommentRepo) Create(ctx context.Context, videoID, userID uint32, c
 	if err != nil {
 		r.log.Errorf("create comment failed: %s", err.Error())
 		return nil, interactionV1.ErrorInternalServerError("create comment failed")
+	}
+	return e, nil
+}
+
+// SetPinned 作者置顶/取消置顶（仅一级评论，服务层校验）
+func (r *VideoCommentRepo) SetPinned(ctx context.Context, id uint32, pinned bool) (*ent.VideoComment, error) {
+	e, err := r.entClient.Client().VideoComment.UpdateOneID(id).
+		SetPinned(pinned).
+		SetUpdatedAt(time.Now()).
+		Save(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, interactionV1.ErrorCommentNotFound("comment not found")
+		}
+		r.log.Errorf("set comment pinned failed: %s", err.Error())
+		return nil, interactionV1.ErrorInternalServerError("set comment pinned failed")
 	}
 	return e, nil
 }

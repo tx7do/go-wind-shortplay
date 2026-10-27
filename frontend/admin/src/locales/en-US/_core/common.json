@@ -367,7 +367,8 @@
       "video": "Video Management",
       "comment": "Comment Management",
       "report": "Report Management",
-      "sysconf": "System Settings"
+      "sysconf": "System Settings",
+      "danmaku": "Danmaku"
     }
   },
   "page": {

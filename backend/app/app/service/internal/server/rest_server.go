@@ -89,6 +89,7 @@ func NewRestMiddleware(
 		appV1.OperationSeriesServiceListSeries,
 		appV1.OperationFeedServiceListHotKeywords,
 		appV1.OperationSysConfServiceGetSysConf,
+		appV1.OperationDanmakuServiceListVideoDanmaku,
 		appV1.OperationUbaServiceReportEvents,
 
 		// shortplay 旧契约认证面（/auth/*）：登录/注册/刷新在认证前到达
@@ -156,6 +157,7 @@ func NewRestServer(
 	spUbaService *service.UbaService,
 	spUserService *service.UserService,
 	spSysConfService *service.SysConfService,
+	spDanmakuService *service.DanmakuService,
 	notificationService *service.NotificationService,
 
 	// register:param ── 新模块服务形参在此行后注册(make register 工具锚点,勿删)
@@ -231,6 +233,9 @@ func NewRestServer(
 
 	// 系统配置（App 启动拉运营开关与公告；游客白名单）
 	appV1.RegisterSysConfServiceHTTPServer(srv, spSysConfService)
+
+	// 弹幕（发送需登录不入白名单；列表游客白名单）
+	appV1.RegisterDanmakuServiceHTTPServer(srv, spDanmakuService)
 
 	// 视频创作服务：分片字节路由必须先于生成路由注册（kratos mux 同 pattern
 	// 先注册者优先；body=application/octet-stream 原始字节，生成层只能按

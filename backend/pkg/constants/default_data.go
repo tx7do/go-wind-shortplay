@@ -236,6 +236,15 @@ var DefaultPermissions = []*permissionV1.Permission{
 		Status:      trans.Ptr(permissionV1.Permission_ON),
 		MenuIds:     []uint32{76},
 	},
+	{
+		Id:          trans.Ptr(uint32(13)),
+		GroupId:     trans.Ptr(uint32(1)),
+		Name:        trans.Ptr("弹幕管理"),
+		Description: trans.Ptr("弹幕查看/隐藏/删除（/admin/v1/danmaku*）"),
+		Code:        trans.Ptr(BizDanmakuManagePermissionCode),
+		Status:      trans.Ptr(permissionV1.Permission_ON),
+		MenuIds:     []uint32{77},
+	},
 }
 
 // DefaultRoles 系统初始化默认角色数据。
@@ -1020,6 +1029,21 @@ var DefaultMenus = []*permissionV1.Menu{
 			Order:     trans.Ptr(int32(5)),
 			Title:     trans.Ptr("menu.shortPlay.series"),
 			Icon:      trans.Ptr("lucide:film"),
+			Authority: []string{"sys:platform_admin", "sys:tenant_manager"},
+		},
+	},
+	{
+		Id:        trans.Ptr(uint32(77)),
+		ParentId:  trans.Ptr(uint32(75)),
+		Type:      permissionV1.Menu_MENU.Enum(),
+		Name:      trans.Ptr("DanmakuManagement"),
+		Path:      trans.Ptr("danmaku"),
+		Component: trans.Ptr("danmaku"),
+		CreatedAt: timeutil.TimeToTimestamppb(trans.Ptr(time.Now())),
+		Meta: &permissionV1.MenuMeta{
+			Order:     trans.Ptr(int32(6)),
+			Title:     trans.Ptr("menu.shortPlay.danmaku"),
+			Icon:      trans.Ptr("lucide:message-square-text"),
 			Authority: []string{"sys:platform_admin", "sys:tenant_manager"},
 		},
 	},

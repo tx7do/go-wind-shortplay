@@ -25,6 +25,7 @@ message SysConf {
   optional bool announcement_enabled = 8 [json_name = "announcementEnabled"];   // App 公告横幅开关
   optional string announcement_text = 9 [json_name = "announcementText"];       // 公告文案（空则不展示）
   optional string announcement_link = 10 [json_name = "announcementLink"];      // 公告跳转链接（可空）
+  optional bool danmaku_enabled = 11 [json_name = "danmakuEnabled"];            // 弹幕开关（关闭则 App 隐藏弹幕层并拒绝发送）
   optional google.protobuf.Timestamp updated_at = 20 [json_name = "updatedAt"]; // 更新时间
 }
 
@@ -39,4 +40,5 @@ message UpdateSysConfRequest {
   optional bool announcement_enabled = 8 [json_name = "announcementEnabled"];
   optional string announcement_text = 9 [json_name = "announcementText"];
   optional string announcement_link = 10 [json_name = "announcementLink"];
+  optional bool danmaku_enabled = 11 [json_name = "danmakuEnabled"];
 }

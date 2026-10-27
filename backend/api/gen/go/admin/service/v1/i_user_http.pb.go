@@ -55,18 +55,18 @@ type UserServiceHTTPServer interface {
 
 func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/v1/users", _UserService_List28_HTTP_Handler(srv))
+	r.GET("/admin/v1/users", _UserService_List29_HTTP_Handler(srv))
 	r.GET("/admin/v1/users/{id}", _UserService_Get29_HTTP_Handler(srv))
 	r.POST("/admin/v1/users", _UserService_Create19_HTTP_Handler(srv))
 	r.PUT("/admin/v1/users/{id}", _UserService_Update21_HTTP_Handler(srv))
-	r.DELETE("/admin/v1/users/{id}", _UserService_Delete21_HTTP_Handler(srv))
+	r.DELETE("/admin/v1/users/{id}", _UserService_Delete22_HTTP_Handler(srv))
 	r.PUT("/admin/v1/users/{id}/status", _UserService_UpdateStatus0_HTTP_Handler(srv))
 	r.GET("/admin/v1/users/{user_id}/stats", _UserService_GetStats0_HTTP_Handler(srv))
 	r.PUT("/admin/v1/users/{id}/roles", _UserService_SetUserRoles0_HTTP_Handler(srv))
 	r.GET("/admin/v1/users/{id}/role-ids", _UserService_GetUserRoleIds0_HTTP_Handler(srv))
 }
 
-func _UserService_List28_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+func _UserService_List29_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v1.PagingRequest
 		if err := ctx.BindQuery(&in); err != nil {
@@ -154,7 +154,7 @@ func _UserService_Update21_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http
 	}
 }
 
-func _UserService_Delete21_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+func _UserService_Delete22_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in GetAppUserRequest
 		if err := ctx.BindQuery(&in); err != nil {

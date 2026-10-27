@@ -14,6 +14,7 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent/api"
 	"go-wind-shortplay/app/core/service/internal/data/ent/apiauditlog"
 	"go-wind-shortplay/app/core/service/internal/data/ent/comment"
+	"go-wind-shortplay/app/core/service/internal/data/ent/danmaku"
 	"go-wind-shortplay/app/core/service/internal/data/ent/dataaccessauditlog"
 	"go-wind-shortplay/app/core/service/internal/data/ent/dictentry"
 	"go-wind-shortplay/app/core/service/internal/data/ent/dictentryi18n"
@@ -89,6 +90,8 @@ type Client struct {
 	ApiAuditLog *ApiAuditLogClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
+	// Danmaku is the client for interacting with the Danmaku builders.
+	Danmaku *DanmakuClient
 	// DataAccessAuditLog is the client for interacting with the DataAccessAuditLog builders.
 	DataAccessAuditLog *DataAccessAuditLogClient
 	// DictEntry is the client for interacting with the DictEntry builders.
@@ -217,6 +220,7 @@ func (c *Client) init() {
 	c.Api = NewAPIClient(c.config)
 	c.ApiAuditLog = NewApiAuditLogClient(c.config)
 	c.Comment = NewCommentClient(c.config)
+	c.Danmaku = NewDanmakuClient(c.config)
 	c.DataAccessAuditLog = NewDataAccessAuditLogClient(c.config)
 	c.DictEntry = NewDictEntryClient(c.config)
 	c.DictEntryI18n = NewDictEntryI18nClient(c.config)
@@ -369,6 +373,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Api:                      NewAPIClient(cfg),
 		ApiAuditLog:              NewApiAuditLogClient(cfg),
 		Comment:                  NewCommentClient(cfg),
+		Danmaku:                  NewDanmakuClient(cfg),
 		DataAccessAuditLog:       NewDataAccessAuditLogClient(cfg),
 		DictEntry:                NewDictEntryClient(cfg),
 		DictEntryI18n:            NewDictEntryI18nClient(cfg),
@@ -448,6 +453,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Api:                      NewAPIClient(cfg),
 		ApiAuditLog:              NewApiAuditLogClient(cfg),
 		Comment:                  NewCommentClient(cfg),
+		Danmaku:                  NewDanmakuClient(cfg),
 		DataAccessAuditLog:       NewDataAccessAuditLogClient(cfg),
 		DictEntry:                NewDictEntryClient(cfg),
 		DictEntryI18n:            NewDictEntryI18nClient(cfg),
@@ -534,7 +540,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Api, c.ApiAuditLog, c.Comment, c.DataAccessAuditLog, c.DictEntry,
+		c.Api, c.ApiAuditLog, c.Comment, c.Danmaku, c.DataAccessAuditLog, c.DictEntry,
 		c.DictEntryI18n, c.DictType, c.File, c.InternalMessage,
 		c.InternalMessageCategory, c.InternalMessageRecipient, c.Language,
 		c.LoginAuditLog, c.LoginPolicy, c.MediaAsset, c.MediaVariant, c.Membership,
@@ -557,7 +563,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Api, c.ApiAuditLog, c.Comment, c.DataAccessAuditLog, c.DictEntry,
+		c.Api, c.ApiAuditLog, c.Comment, c.Danmaku, c.DataAccessAuditLog, c.DictEntry,
 		c.DictEntryI18n, c.DictType, c.File, c.InternalMessage,
 		c.InternalMessageCategory, c.InternalMessageRecipient, c.Language,
 		c.LoginAuditLog, c.LoginPolicy, c.MediaAsset, c.MediaVariant, c.Membership,
@@ -585,6 +591,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ApiAuditLog.mutate(ctx, m)
 	case *CommentMutation:
 		return c.Comment.mutate(ctx, m)
+	case *DanmakuMutation:
+		return c.Danmaku.mutate(ctx, m)
 	case *DataAccessAuditLogMutation:
 		return c.DataAccessAuditLog.mutate(ctx, m)
 	case *DictEntryMutation:
@@ -1135,6 +1143,140 @@ func (c *CommentClient) mutate(ctx context.Context, m *CommentMutation) (Value, 
 		return (&CommentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Comment mutation op: %q", m.Op())
+	}
+}
+
+// DanmakuClient is a client for the Danmaku schema.
+type DanmakuClient struct {
+	config
+}
+
+// NewDanmakuClient returns a client for the Danmaku from the given config.
+func NewDanmakuClient(c config) *DanmakuClient {
+	return &DanmakuClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `danmaku.Hooks(f(g(h())))`.
+func (c *DanmakuClient) Use(hooks ...Hook) {
+	c.hooks.Danmaku = append(c.hooks.Danmaku, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `danmaku.Intercept(f(g(h())))`.
+func (c *DanmakuClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Danmaku = append(c.inters.Danmaku, interceptors...)
+}
+
+// Create returns a builder for creating a Danmaku entity.
+func (c *DanmakuClient) Create() *DanmakuCreate {
+	mutation := newDanmakuMutation(c.config, OpCreate)
+	return &DanmakuCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Danmaku entities.
+func (c *DanmakuClient) CreateBulk(builders ...*DanmakuCreate) *DanmakuCreateBulk {
+	return &DanmakuCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DanmakuClient) MapCreateBulk(slice any, setFunc func(*DanmakuCreate, int)) *DanmakuCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DanmakuCreateBulk{err: fmt.Errorf("calling to DanmakuClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DanmakuCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DanmakuCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Danmaku.
+func (c *DanmakuClient) Update() *DanmakuUpdate {
+	mutation := newDanmakuMutation(c.config, OpUpdate)
+	return &DanmakuUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DanmakuClient) UpdateOne(_m *Danmaku) *DanmakuUpdateOne {
+	mutation := newDanmakuMutation(c.config, OpUpdateOne, withDanmaku(_m))
+	return &DanmakuUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DanmakuClient) UpdateOneID(id uint32) *DanmakuUpdateOne {
+	mutation := newDanmakuMutation(c.config, OpUpdateOne, withDanmakuID(id))
+	return &DanmakuUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Danmaku.
+func (c *DanmakuClient) Delete() *DanmakuDelete {
+	mutation := newDanmakuMutation(c.config, OpDelete)
+	return &DanmakuDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DanmakuClient) DeleteOne(_m *Danmaku) *DanmakuDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DanmakuClient) DeleteOneID(id uint32) *DanmakuDeleteOne {
+	builder := c.Delete().Where(danmaku.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DanmakuDeleteOne{builder}
+}
+
+// Query returns a query builder for Danmaku.
+func (c *DanmakuClient) Query() *DanmakuQuery {
+	return &DanmakuQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDanmaku},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Danmaku entity by its id.
+func (c *DanmakuClient) Get(ctx context.Context, id uint32) (*Danmaku, error) {
+	return c.Query().Where(danmaku.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DanmakuClient) GetX(ctx context.Context, id uint32) *Danmaku {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *DanmakuClient) Hooks() []Hook {
+	hooks := c.hooks.Danmaku
+	return append(hooks[:len(hooks):len(hooks)], danmaku.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *DanmakuClient) Interceptors() []Interceptor {
+	return c.inters.Danmaku
+}
+
+func (c *DanmakuClient) mutate(ctx context.Context, m *DanmakuMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DanmakuCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DanmakuUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DanmakuUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DanmakuDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Danmaku mutation op: %q", m.Op())
 	}
 }
 
@@ -8963,8 +9105,8 @@ func (c *VideoTagRelClient) mutate(ctx context.Context, m *VideoTagRelMutation) 
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Api, ApiAuditLog, Comment, DataAccessAuditLog, DictEntry, DictEntryI18n,
-		DictType, File, InternalMessage, InternalMessageCategory,
+		Api, ApiAuditLog, Comment, Danmaku, DataAccessAuditLog, DictEntry,
+		DictEntryI18n, DictType, File, InternalMessage, InternalMessageCategory,
 		InternalMessageRecipient, Language, LoginAuditLog, LoginPolicy, MediaAsset,
 		MediaVariant, Membership, MembershipOrgUnit, MembershipPosition,
 		MembershipRole, Menu, NotificationChannel, NotificationDelivery,
@@ -8977,8 +9119,8 @@ type (
 		VideoDraft, VideoLike, VideoReport, VideoTag, VideoTagRel []ent.Hook
 	}
 	inters struct {
-		Api, ApiAuditLog, Comment, DataAccessAuditLog, DictEntry, DictEntryI18n,
-		DictType, File, InternalMessage, InternalMessageCategory,
+		Api, ApiAuditLog, Comment, Danmaku, DataAccessAuditLog, DictEntry,
+		DictEntryI18n, DictType, File, InternalMessage, InternalMessageCategory,
 		InternalMessageRecipient, Language, LoginAuditLog, LoginPolicy, MediaAsset,
 		MediaVariant, Membership, MembershipOrgUnit, MembershipPosition,
 		MembershipRole, Menu, NotificationChannel, NotificationDelivery,

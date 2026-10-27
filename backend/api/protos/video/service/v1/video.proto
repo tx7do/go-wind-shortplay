@@ -31,6 +31,9 @@ service VideoService {
   // 变更视频状态（审核通过 / 驳回 / 强制下架，管理端）
   rpc ChangeVideoStatus (ChangeVideoStatusRequest) returns (Video) {}
 
+  // 设置/取消定时发布（作者本人或管理端；仅 DRAFT 可定时；scheduledAt 缺省=取消）
+  rpc ScheduleVideo (ScheduleVideoRequest) returns (Video) {}
+
   // ── 分片上传 ──
 
   // 创建上传任务，返回任务号与分片参数
@@ -118,6 +121,7 @@ message Video {
   optional string reject_reason = 30 [json_name = "rejectReason"]; // 驳回原因
   optional string series_title = 31 [json_name = "seriesTitle"];   // 所属剧名（展示冗余，服务端回填）
   optional google.protobuf.Timestamp published_at = 40 [json_name = "publishedAt"]; // 发布时间
+  optional google.protobuf.Timestamp scheduled_at = 43 [json_name = "scheduledAt"]; // 计划发布时间（DRAFT 定时中；到期自动转 PUBLISHED 并清空）
   optional google.protobuf.Timestamp created_at = 41 [json_name = "createdAt"];     // 创建时间
   optional google.protobuf.Timestamp updated_at = 42 [json_name = "updatedAt"];     // 更新时间
 }
@@ -227,6 +231,8 @@ message CompleteUploadRequest {
   optional uint32 series_id = 10 [json_name = "seriesId"];
   // 剧内集号（缺省=服务端排到当前最大集号+1）
   optional uint32 episode_number = 11 [json_name = "episodeNumber"];
+  // 定时发布（须为未来时间；人工审核关的直发路径生效：视频先存 DRAFT，到期自动转 PUBLISHED）
+  optional google.protobuf.Timestamp scheduled_at = 12 [json_name = "scheduledAt"];
 }
 
 message GetUploadTaskRequest {
@@ -261,8 +267,16 @@ message DeleteDraftRequest {
   uint32 id = 1 [json_name = "id"]; // 草稿ID
 }
 
+message ScheduleVideoRequest {
+  uint32 id = 1 [json_name = "id"]; // 视频ID
+  // 计划发布时间（须为未来时间；缺省=取消定时）
+  optional google.protobuf.Timestamp scheduled_at = 2 [json_name = "scheduledAt"];
+}
+
 message SubmitDraftRequest {
   uint32 id = 1 [json_name = "id"]; // 草稿ID
+  // 定时发布（须为未来时间；人工审核关时生效：先存 DRAFT，到期自动转 PUBLISHED）
+  optional google.protobuf.Timestamp scheduled_at = 2 [json_name = "scheduledAt"];
 }
 
 message ListTagResponse {

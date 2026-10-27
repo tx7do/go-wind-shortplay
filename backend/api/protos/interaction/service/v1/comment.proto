@@ -25,6 +25,9 @@ service CommentService {
 
   // 管理端全量评论列表（admin BFF 评论管理转发入口）
   rpc AdminList (pagination.PagingRequest) returns (ListCommentResponse) {}
+
+  // 置顶/取消置顶评论（视频作者或管理端；仅一级评论）
+  rpc PinComment (PinCommentRequest) returns (Comment) {}
 }
 
 message Comment {
@@ -36,6 +39,7 @@ message Comment {
   optional uint32 parent_id = 6 [json_name = "parentId"];    // 父评论ID（Phase 2 楼中楼）
   optional uint64 like_count = 7 [json_name = "likeCount"];  // 点赞数
   optional uint64 reply_count = 8 [json_name = "replyCount"]; // 回复数（仅一级评论维护）
+  optional bool pinned = 9 [json_name = "pinned"];           // 作者置顶（仅一级评论；列表置顶优先）
   optional google.protobuf.Timestamp created_at = 20 [json_name = "createdAt"]; // 创建时间
 }
 
@@ -47,6 +51,11 @@ message CreateCommentRequest {
 
 message DeleteCommentRequest {
   uint32 id = 1 [json_name = "id"]; // 评论ID
+}
+
+message PinCommentRequest {
+  uint32 id = 1 [json_name = "id"]; // 评论ID
+  bool pinned = 2 [json_name = "pinned"]; // 目标状态（true 置顶 / false 取消）
 }
 
 // 评论排序方式

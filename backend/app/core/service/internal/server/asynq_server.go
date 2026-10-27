@@ -63,6 +63,11 @@ func NewAsynqServer(ctx *bootstrap.Context, taskService *service.TaskService, in
 		log.Error(err)
 	}
 
+	// shortplay 定时发布（到期 DRAFT → PUBLISHED；任务丢失有补偿扫描兜底）
+	if err = asynq.RegisterSubscriber(srv, task.VideoScheduledPublishTaskType, videoService.AsyncScheduledPublish); err != nil {
+		log.Error(err)
+	}
+
 	// 启动所有的任务
 	_, _ = taskService.StartAllTask(appViewer.NewSystemViewerContext(ctx.Context()), nil)
 

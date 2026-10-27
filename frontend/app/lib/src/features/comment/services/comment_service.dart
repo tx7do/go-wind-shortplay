@@ -62,10 +62,7 @@ class CommentService extends BaseService {
     try {
       final res = await _dio.post<Map<String, dynamic>>(
         '/videos/$videoId/comments',
-        data: {
-          'content': content,
-          if (parentId > 0) 'parentId': parentId,
-        },
+        data: {'content': content, if (parentId > 0) 'parentId': parentId},
       );
       final data = res.data;
       if (data == null) {
@@ -78,6 +75,19 @@ class CommentService extends BaseService {
   }
 
   /// 删除自己的评论
+  /// 置顶/取消置顶评论（视频作者本人；仅一级评论），返回更新后的评论
+  Future<Comment> pin(int commentId, {required bool pinned}) async {
+    try {
+      final res = await _dio.put<Map<String, dynamic>>(
+        '/comments/$commentId/pin',
+        data: {'pinned': pinned},
+      );
+      return Comment.fromJson(res.data ?? const {});
+    } on DioException catch (e) {
+      throw ApiStatusException(handleDioError(e));
+    }
+  }
+
   Future<void> delete(int commentId) async {
     try {
       await _dio.delete<Object?>('/comments/$commentId');

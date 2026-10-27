@@ -36,6 +36,7 @@ import type {
   UpdateUserRequest,
   UpdateVideoRequest,
   Video,
+  Danmaku,
 } from '@/api/types';
 import { queryClient, type PaginationQuery } from '@/core';
 
@@ -121,6 +122,16 @@ export function useGetVideo(id: number | undefined, options?: UseQueryOptions<Vi
     queryKey: ['getVideo', id],
     queryFn: () => adminHttp.get<Video>(`videos/${id}`),
     enabled: id != null,
+    ...options,
+  });
+}
+
+export function useScheduleVideo(
+  options?: UseMutationOptions<Video, Error, { id: number; scheduledAt?: string | null }>,
+) {
+  return useMutation<Video, Error, { id: number; scheduledAt?: string | null }>({
+    mutationFn: ({ id, scheduledAt }) =>
+      adminHttp.put<Video>(`videos/${id}/schedule`, { scheduledAt: scheduledAt ?? null }),
     ...options,
   });
 }
@@ -254,6 +265,34 @@ export async function fetchListComments(params: ListParams) {
 export function useDeleteComment(options?: UseMutationOptions<void, Error, number>) {
   return useMutation<void, Error, number>({
     mutationFn: (id) => adminHttp.delete<void>(`comments/${id}`),
+    ...options,
+  });
+}
+
+// ==============================
+// 弹幕管理
+// ==============================
+
+export async function fetchListDanmaku(params: ListParams) {
+  return queryClient.fetchQuery({
+    queryKey: ['listDanmaku', params],
+    queryFn: () => adminHttp.get<ListResponse<Danmaku>>('danmaku', cleanParams(params)),
+    retry: 0,
+  });
+}
+
+export function useDeleteDanmaku(options?: UseMutationOptions<void, Error, number>) {
+  return useMutation<void, Error, number>({
+    mutationFn: (id) => adminHttp.delete<void>(`danmaku/${id}`),
+    ...options,
+  });
+}
+
+export function useSetDanmakuStatus(
+  options?: UseMutationOptions<Danmaku, Error, { id: number; status: string }>,
+) {
+  return useMutation<Danmaku, Error, { id: number; status: string }>({
+    mutationFn: ({ id, status }) => adminHttp.post<Danmaku>(`danmaku/${id}/status`, { status }),
     ...options,
   });
 }

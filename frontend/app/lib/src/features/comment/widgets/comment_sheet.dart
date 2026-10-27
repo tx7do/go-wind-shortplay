@@ -23,6 +23,9 @@ import 'package:get_it/get_it.dart' show GetIt;
 Future<void> showCommentSheet(
   BuildContext context, {
   required int videoId,
+
+  /// 视频作者ID（>0 且为当前登录用户时展示置顶操作）
+  int videoAuthorId = 0,
   ValueChanged<int>? onCommentCountChanged,
 }) {
   return showModalBottomSheet(
@@ -36,6 +39,7 @@ Future<void> showCommentSheet(
       return BlocProvider(
         create: (_) => CommentBloc()..add(CommentListRequested(videoId)),
         child: CommentSheet(
+          videoAuthorId: videoAuthorId,
           onCommentCountChanged: onCommentCountChanged,
         ),
       );
@@ -46,7 +50,14 @@ Future<void> showCommentSheet(
 class CommentSheet extends StatefulWidget {
   final ValueChanged<int>? onCommentCountChanged;
 
-  const CommentSheet({super.key, this.onCommentCountChanged});
+  /// 视频作者ID（>0 且为当前登录用户时展示置顶操作）
+  final int videoAuthorId;
+
+  const CommentSheet({
+    super.key,
+    this.videoAuthorId = 0,
+    this.onCommentCountChanged,
+  });
 
   @override
   State<CommentSheet> createState() => _CommentSheetState();
@@ -93,9 +104,9 @@ class _CommentSheetState extends State<CommentSheet> {
     final parent = _replyTarget;
     try {
       await context.read<CommentBloc>().postComment(
-            content: content,
-            parent: parent,
-          );
+        content: content,
+        parent: parent,
+      );
       if (!mounted) return;
       _inputController.clear();
       _setReplyTarget(null);
@@ -142,6 +153,12 @@ class _CommentSheetState extends State<CommentSheet> {
     if (!await ensureLogin(context)) return;
     if (!mounted) return;
     context.read<CommentBloc>().add(CommentLikeToggled(comment));
+  }
+
+  Future<void> _togglePin(Comment comment) async {
+    if (!await ensureLogin(context)) return;
+    if (!mounted) return;
+    context.read<CommentBloc>().add(CommentPinToggled(comment));
   }
 
   @override
@@ -191,8 +208,9 @@ class _CommentSheetState extends State<CommentSheet> {
                     const Spacer(),
                     _SortToggle(
                       current: state.sort,
-                      onChanged: (mode) =>
-                          context.read<CommentBloc>().add(CommentSortChanged(mode)),
+                      onChanged: (mode) => context.read<CommentBloc>().add(
+                        CommentSortChanged(mode),
+                      ),
                     ),
                   ],
                 ),
@@ -203,10 +221,7 @@ class _CommentSheetState extends State<CommentSheet> {
               Flexible(child: _buildList(context, state, loc, theme)),
               Divider(height: 1, color: theme.dividerColor),
               // 输入栏
-              SafeArea(
-                top: false,
-                child: _buildInputBar(context, loc, theme),
-              ),
+              SafeArea(top: false, child: _buildInputBar(context, loc, theme)),
             ],
           ),
         );
@@ -264,6 +279,10 @@ class _CommentSheetState extends State<CommentSheet> {
         return _CommentTile(
           comment: comment,
           currentUserId: GetIt.instance<UserAuthCache>().userId,
+          canPin:
+              widget.videoAuthorId > 0 &&
+              GetIt.instance<UserAuthCache>().userId == widget.videoAuthorId,
+          onPin: () => _togglePin(comment),
           onReply: () => _setReplyTarget(comment),
           onLike: () => _toggleLike(comment),
           onDelete: () => _deleteComment(comment),
@@ -272,11 +291,7 @@ class _CommentSheetState extends State<CommentSheet> {
     );
   }
 
-  Widget _buildInputBar(
-    BuildContext context,
-    S loc,
-    ThemeData theme,
-  ) {
+  Widget _buildInputBar(BuildContext context, S loc, ThemeData theme) {
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 8.h),
       child: Row(
@@ -295,8 +310,10 @@ class _CommentSheetState extends State<CommentSheet> {
                 ),
                 filled: true,
                 fillColor: theme.colorScheme.surfaceContainerHighest,
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 14.w,
+                  vertical: 10.h,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.r),
                   borderSide: BorderSide.none,
@@ -341,6 +358,10 @@ class _CommentSheetState extends State<CommentSheet> {
 class _CommentTile extends StatelessWidget {
   final Comment comment;
   final int currentUserId;
+
+  /// 当前用户是否为视频作者（可置顶一级评论）
+  final bool canPin;
+  final VoidCallback? onPin;
   final VoidCallback onReply;
   final VoidCallback onLike;
   final VoidCallback onDelete;
@@ -348,6 +369,8 @@ class _CommentTile extends StatelessWidget {
   const _CommentTile({
     required this.comment,
     required this.currentUserId,
+    this.canPin = false,
+    this.onPin,
     required this.onReply,
     required this.onLike,
     required this.onDelete,
@@ -373,13 +396,43 @@ class _CommentTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      comment.user.nickname,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w500,
-                        color: theme.colorScheme.onSurface.withAlpha(160),
-                      ),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            comment.user.nickname,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                              color: theme.colorScheme.onSurface.withAlpha(160),
+                            ),
+                          ),
+                        ),
+                        if (comment.pinned) ...[
+                          SizedBox(width: 6.w),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 6.w,
+                              vertical: 1.h,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(
+                                color: theme.colorScheme.primary.withAlpha(150),
+                              ),
+                            ),
+                            child: Text(
+                              loc.pinnedBadge,
+                              style: TextStyle(
+                                fontSize: 9.sp,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     SizedBox(height: 3.h),
                     Text(
@@ -411,6 +464,24 @@ class _CommentTile extends StatelessWidget {
                             ),
                           ),
                         ),
+                        if (canPin && !comment.isReply && onPin != null) ...[
+                          SizedBox(width: 16.w),
+                          GestureDetector(
+                            onTap: onPin,
+                            child: Text(
+                              comment.pinned ? loc.unpin : loc.pin,
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w600,
+                                color: comment.pinned
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurface.withAlpha(
+                                        150,
+                                      ),
+                              ),
+                            ),
+                          ),
+                        ],
                         if (isMine) ...[
                           SizedBox(width: 16.w),
                           GestureDetector(
@@ -439,12 +510,9 @@ class _CommentTile extends StatelessWidget {
                   child: Column(
                     children: [
                       Icon(
-                        comment.liked
-                            ? Icons.favorite
-                            : Icons.favorite_border,
+                        comment.liked ? Icons.favorite : Icons.favorite_border,
                         size: 16.sp,
-                        color:
-                            comment.liked ? theme.colorScheme.error : null,
+                        color: comment.liked ? theme.colorScheme.error : null,
                       ),
                       if (comment.likeCount > 0)
                         Text(
@@ -520,9 +588,9 @@ class _RepliesSectionState extends State<_RepliesSection> {
           if (!_expanded)
             GestureDetector(
               onTap: () {
-                context
-                    .read<CommentBloc>()
-                    .add(CommentRepliesRequested(comment));
+                context.read<CommentBloc>().add(
+                  CommentRepliesRequested(comment),
+                );
                 setState(() => _expanded = true);
               },
               child: Text(
@@ -591,10 +659,7 @@ class _ReplyTile extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 2.h),
-              Text(
-                reply.content,
-                style: TextStyle(fontSize: 13.sp),
-              ),
+              Text(reply.content, style: TextStyle(fontSize: 13.sp)),
               SizedBox(height: 2.h),
               Row(
                 children: [
@@ -668,8 +733,8 @@ String? localizedCommentError(BuildContext context, ApiStatusException e) {
   switch (e.status.getReason) {
     case 'NOT_OWNER':
       return loc.onlyOwnerCanDelete;
-      case 'SENSITIVE_WORD_HIT':
-        return loc.errorSensitiveWordHit;
+    case 'SENSITIVE_WORD_HIT':
+      return loc.errorSensitiveWordHit;
     default:
       return null;
   }
@@ -680,10 +745,7 @@ class _SortToggle extends StatelessWidget {
   final CommentSortMode current;
   final ValueChanged<CommentSortMode> onChanged;
 
-  const _SortToggle({
-    required this.current,
-    required this.onChanged,
-  });
+  const _SortToggle({required this.current, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {

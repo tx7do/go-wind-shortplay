@@ -45,4 +45,12 @@ service VideoService {
       delete: "/admin/v1/videos/{id}"
     };
   }
+
+  // 设置/取消定时发布（仅草稿；scheduledAt 缺省=取消）
+  rpc ScheduleVideo (video.service.v1.ScheduleVideoRequest) returns (video.service.v1.Video) {
+    option (google.api.http) = {
+      put: "/admin/v1/videos/{id}/schedule"
+      body: "*"
+    };
+  }
 }

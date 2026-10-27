@@ -267,6 +267,39 @@ func (m *Video) validate(all bool) error {
 
 	}
 
+	if m.ScheduledAt != nil {
+
+		if all {
+			switch v := interface{}(m.GetScheduledAt()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, VideoValidationError{
+						field:  "ScheduledAt",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, VideoValidationError{
+						field:  "ScheduledAt",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetScheduledAt()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return VideoValidationError{
+					field:  "ScheduledAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
 	if m.CreatedAt != nil {
 
 		if all {
@@ -1969,6 +2002,39 @@ func (m *CompleteUploadRequest) validate(all bool) error {
 		// no validation rules for EpisodeNumber
 	}
 
+	if m.ScheduledAt != nil {
+
+		if all {
+			switch v := interface{}(m.GetScheduledAt()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, CompleteUploadRequestValidationError{
+						field:  "ScheduledAt",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, CompleteUploadRequestValidationError{
+						field:  "ScheduledAt",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetScheduledAt()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return CompleteUploadRequestValidationError{
+					field:  "ScheduledAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
 	if len(errors) > 0 {
 		return CompleteUploadRequestMultiError(errors)
 	}
@@ -2643,6 +2709,143 @@ var _ interface {
 	ErrorName() string
 } = DeleteDraftRequestValidationError{}
 
+// Validate checks the field values on ScheduleVideoRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ScheduleVideoRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ScheduleVideoRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ScheduleVideoRequestMultiError, or nil if none found.
+func (m *ScheduleVideoRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ScheduleVideoRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	if m.ScheduledAt != nil {
+
+		if all {
+			switch v := interface{}(m.GetScheduledAt()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ScheduleVideoRequestValidationError{
+						field:  "ScheduledAt",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ScheduleVideoRequestValidationError{
+						field:  "ScheduledAt",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetScheduledAt()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ScheduleVideoRequestValidationError{
+					field:  "ScheduledAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return ScheduleVideoRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ScheduleVideoRequestMultiError is an error wrapping multiple validation
+// errors returned by ScheduleVideoRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ScheduleVideoRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ScheduleVideoRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ScheduleVideoRequestMultiError) AllErrors() []error { return m }
+
+// ScheduleVideoRequestValidationError is the validation error returned by
+// ScheduleVideoRequest.Validate if the designated constraints aren't met.
+type ScheduleVideoRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ScheduleVideoRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ScheduleVideoRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ScheduleVideoRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ScheduleVideoRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ScheduleVideoRequestValidationError) ErrorName() string {
+	return "ScheduleVideoRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ScheduleVideoRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sScheduleVideoRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ScheduleVideoRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ScheduleVideoRequestValidationError{}
+
 // Validate checks the field values on SubmitDraftRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -2666,6 +2869,39 @@ func (m *SubmitDraftRequest) validate(all bool) error {
 	var errors []error
 
 	// no validation rules for Id
+
+	if m.ScheduledAt != nil {
+
+		if all {
+			switch v := interface{}(m.GetScheduledAt()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, SubmitDraftRequestValidationError{
+						field:  "ScheduledAt",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, SubmitDraftRequestValidationError{
+						field:  "ScheduledAt",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetScheduledAt()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return SubmitDraftRequestValidationError{
+					field:  "ScheduledAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
 
 	if len(errors) > 0 {
 		return SubmitDraftRequestMultiError(errors)

@@ -422,6 +422,7 @@ func (s *VideoCommentService) CreateComment(ctx context.Context, req *interactio
 		ParentId:  trans.Ptr(e.ParentID),
 		LikeCount: trans.Ptr(e.LikeCount),
 		ReplyCount: trans.Ptr(e.ReplyCount),
+		Pinned:    trans.Ptr(e.Pinned),
 		CreatedAt: rowCreatedAtSP(e.CreatedAt),
 	}
 	s.enrichCommentAuthors(ctx, []*interactionV1.Comment{dto})
@@ -444,6 +445,50 @@ func (s *VideoCommentService) DeleteComment(ctx context.Context, req *interactio
 	return &emptypb.Empty{}, nil
 }
 
+// PinComment 置顶/取消置顶评论（视频作者或管理端；仅一级评论，置顶优先展示）
+func (s *VideoCommentService) PinComment(ctx context.Context, req *interactionV1.PinCommentRequest) (*interactionV1.Comment, error) {
+	if req == nil || req.GetId() == 0 {
+		return nil, interactionV1.ErrorBadRequest("invalid parameter")
+	}
+	e, err := s.commentRepo.Get(ctx, req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	if e.ParentID > 0 {
+		return nil, interactionV1.ErrorBadRequest("only top-level comments can be pinned")
+	}
+	if !spIsAdminCaller(ctx) {
+		uid := spViewerUserID(ctx)
+		if uid == 0 {
+			return nil, interactionV1.ErrorUnauthorized("login required")
+		}
+		v, verr := s.videoRepo.GetEntityRaw(ctx, e.VideoID)
+		if verr != nil {
+			return nil, interactionV1.ErrorVideoNotFound("video not found")
+		}
+		if v.AuthorID != uid {
+			return nil, interactionV1.ErrorNotCommentOwner("only video author can pin")
+		}
+	}
+	ne, err := s.commentRepo.SetPinned(ctx, req.GetId(), req.GetPinned())
+	if err != nil {
+		return nil, err
+	}
+	dto := &interactionV1.Comment{
+		Id:        trans.Ptr(ne.ID),
+		VideoId:   trans.Ptr(ne.VideoID),
+		UserId:    trans.Ptr(ne.UserID),
+		Content:   trans.Ptr(ne.Content),
+		ParentId:  trans.Ptr(ne.ParentID),
+		LikeCount: trans.Ptr(ne.LikeCount),
+		ReplyCount: trans.Ptr(ne.ReplyCount),
+		Pinned:    trans.Ptr(ne.Pinned),
+		CreatedAt: rowCreatedAtSP(ne.CreatedAt),
+	}
+	s.enrichCommentAuthors(ctx, []*interactionV1.Comment{dto})
+	return dto, nil
+}
+
 // ListComment 视频评论列表（游客可读）
 func (s *VideoCommentService) ListComment(ctx context.Context, req *interactionV1.ListCommentRequest) (*interactionV1.ListCommentResponse, error) {
 	if req.GetVideoId() == 0 {
@@ -464,6 +509,7 @@ func (s *VideoCommentService) ListComment(ctx context.Context, req *interactionV
 			ParentId:  trans.Ptr(e.ParentID),
 			LikeCount: trans.Ptr(e.LikeCount),
 			ReplyCount: trans.Ptr(e.ReplyCount),
+			Pinned:    trans.Ptr(e.Pinned),
 			CreatedAt: rowCreatedAtSP(e.CreatedAt),
 		})
 	}
@@ -490,6 +536,7 @@ func (s *VideoCommentService) ListReply(ctx context.Context, req *interactionV1.
 			ParentId:  trans.Ptr(e.ParentID),
 			LikeCount: trans.Ptr(e.LikeCount),
 			ReplyCount: trans.Ptr(e.ReplyCount),
+			Pinned:    trans.Ptr(e.Pinned),
 			CreatedAt: rowCreatedAtSP(e.CreatedAt),
 		})
 	}

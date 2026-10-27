@@ -37,6 +37,7 @@ var resolvableComponents = map[string]bool{
 	"videos":                 true,
 	"series":                 true,
 	"comments":               true,
+	"danmaku":                true,
 	"reports":                true,
 	"users":                  true,
 	"sysconf":                true,

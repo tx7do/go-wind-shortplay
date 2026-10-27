@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package danmaku.service.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "identity/service/v1/user_brief.proto";
+import "pagination/v1/pagination.proto";
+
+// 弹幕服务（观演氛围：视频时间轴上的短评论）
+//
+// 发送需登录并经敏感词过滤（sysconf 词表，命中拒绝）；sysconf
+// danmaku_enabled 关闭时拒绝发送（前端同步隐藏弹幕层）。
+// 可见性跟随视频：仅已发布视频的 VISIBLE 弹幕对公众可读（游客可读）。
+service DanmakuService {
+  // 发送弹幕（需登录）
+  rpc SendDanmaku (SendDanmakuRequest) returns (Danmaku) {}
+
+  // 视频弹幕列表（游客可读，VISIBLE，按时间轴偏移升序；上限防巨量拉爆）
+  rpc ListVideoDanmaku (ListVideoDanmakuRequest) returns (ListDanmakuResponse) {}
+
+  // 管理端全量列表（videoId / status / content 模糊过滤）
+  rpc AdminList (pagination.PagingRequest) returns (ListDanmakuResponse) {}
+
+  // 管理端删除弹幕
+  rpc DeleteDanmaku (DeleteDanmakuRequest) returns (google.protobuf.Empty) {}
+
+  // 管理端隐藏/恢复弹幕（不删行，可回滚）
+  rpc SetDanmakuStatus (SetDanmakuStatusRequest) returns (Danmaku) {}
+}
+
+// 弹幕状态
+enum DanmakuStatus {
+  DANMAKU_STATUS_UNSPECIFIED = 0;
+  DANMAKU_STATUS_VISIBLE = 1; // 可见（缺省）
+  DANMAKU_STATUS_HIDDEN = 2;  // 已隐藏（管理端下屏）
+}
+
+message Danmaku {
+  optional uint32 id = 1 [json_name = "id"];                    // 弹幕ID
+  optional uint32 video_id = 2 [json_name = "videoId"];         // 视频ID
+  optional uint32 user_id = 3 [json_name = "userId"];           // 发送人ID
+  identity.service.v1.UserBrief user = 4 [json_name = "user"];  // 发送人（冗余展示）
+  optional string content = 5 [json_name = "content"];          // 内容
+  optional uint64 time_offset_ms = 6 [json_name = "timeOffsetMs"]; // 时间轴偏移（毫秒）
+  optional DanmakuStatus status = 7 [json_name = "status"];     // 状态
+
+  optional google.protobuf.Timestamp created_at = 20 [json_name = "createdAt"]; // 发送时间
+}
+
+message SendDanmakuRequest {
+  uint32 video_id = 1 [json_name = "videoId"];        // 视频ID
+  string content = 2 [json_name = "content"];         // 内容（≤100 字）
+  uint64 time_offset_ms = 3 [json_name = "timeOffsetMs"]; // 播放位置（毫秒）
+}
+
+message ListVideoDanmakuRequest {
+  uint32 video_id = 1 [json_name = "videoId"]; // 视频ID
+  optional uint32 limit = 2 [json_name = "limit"]; // 上限（缺省 500，上限 1000）
+}
+
+message ListDanmakuResponse {
+  repeated Danmaku items = 1 [json_name = "items"]; // 弹幕列表
+  optional int64 total = 2 [json_name = "total"];   // 总数（仅管理端分页语义）
+}
+
+message DeleteDanmakuRequest {
+  uint32 id = 1 [json_name = "id"]; // 弹幕ID
+}
+
+message SetDanmakuStatusRequest {
+  uint32 id = 1 [json_name = "id"];                 // 弹幕ID
+  DanmakuStatus status = 2 [json_name = "status"];  // 目标状态（VISIBLE/HIDDEN）
+}

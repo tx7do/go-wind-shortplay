@@ -124,6 +124,11 @@ func AnnouncementLink(v string) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldEQ(FieldAnnouncementLink, v))
 }
 
+// DanmakuEnabled applies equality check predicate on the "danmaku_enabled" field. It's identical to DanmakuEnabledEQ.
+func DanmakuEnabled(v bool) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldDanmakuEnabled, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldEQ(FieldCreatedAt, v))
@@ -702,6 +707,16 @@ func AnnouncementLinkEqualFold(v string) predicate.SysConfig {
 // AnnouncementLinkContainsFold applies the ContainsFold predicate on the "announcement_link" field.
 func AnnouncementLinkContainsFold(v string) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldContainsFold(FieldAnnouncementLink, v))
+}
+
+// DanmakuEnabledEQ applies the EQ predicate on the "danmaku_enabled" field.
+func DanmakuEnabledEQ(v bool) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldDanmakuEnabled, v))
+}
+
+// DanmakuEnabledNEQ applies the NEQ predicate on the "danmaku_enabled" field.
+func DanmakuEnabledNEQ(v bool) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNEQ(FieldDanmakuEnabled, v))
 }
 
 // And groups predicates with the AND operator between them.

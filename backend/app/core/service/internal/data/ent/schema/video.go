@@ -109,6 +109,11 @@ func (Video) Fields() []ent.Field {
 			Comment("发布时间").
 			Optional().
 			Nillable(),
+
+		field.Time("scheduled_at").
+			Comment("计划发布时间（DRAFT 定时中，到期任务自动转 PUBLISHED 并清空）").
+			Optional().
+			Nillable(),
 	}
 }
 
@@ -126,6 +131,9 @@ func (Video) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("status", "published_at").
 			StorageKey("idx_sp_video_status_published_at"),
+
+		index.Fields("status", "scheduled_at").
+			StorageKey("idx_sp_video_status_scheduled_at"),
 
 		index.Fields("author_id", "status").
 			StorageKey("idx_sp_video_author_status"),

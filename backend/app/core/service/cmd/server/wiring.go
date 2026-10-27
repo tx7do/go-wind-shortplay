@@ -140,6 +140,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 
 	// shortplay 业务域：视频 / 剧集 / 追剧 / 上传 / 草稿 / 互动 / 评论 / 举报 / 埋点 / 配置 / 看板
 	videoRepo := data.NewVideoRepo(ctx, entClient)
+	danmakuRepo := data.NewDanmakuRepo(ctx, entClient)
 	seriesRepo := data.NewSeriesRepo(ctx, entClient)
 	seriesFollowRepo := data.NewSeriesFollowRepo(ctx, entClient)
 	videoDraftRepo := data.NewVideoDraftRepo(ctx, entClient)
@@ -236,6 +237,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 	videoCommentService := service.NewVideoCommentService(ctx, videoCommentRepo, videoRepo, userRepo, sysConfRepo)
 	reportService := service.NewReportService(ctx, reportRepo, userRepo, videoRepo, videoCommentRepo)
 	sysConfService := service.NewSysConfService(ctx, sysConfRepo)
+	danmakuService := service.NewDanmakuService(ctx, danmakuRepo, videoRepo, userRepo, sysConfRepo)
 	ubaService := service.NewUbaService(ctx, ubaRepo, videoRepo, redisClient)
 	dashboardService := service.NewDashboardService(ctx, statsRepo, videoRepo, interactionRepo, userRepo)
 
@@ -273,7 +275,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 		notificationTemplateService,
 		notificationPreferenceService,
 		videoService, seriesService, feedService, interactionService, videoCommentService,
-		reportService, sysConfService, ubaService, dashboardService,
+		reportService, sysConfService, ubaService, dashboardService, danmakuService,
 		// register:grpc-arg ── 新模块服务实参在此行后追加(make register 工具锚点,勿删)
 	)
 	if err != nil {

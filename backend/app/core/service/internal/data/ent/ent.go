@@ -9,6 +9,7 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent/api"
 	"go-wind-shortplay/app/core/service/internal/data/ent/apiauditlog"
 	"go-wind-shortplay/app/core/service/internal/data/ent/comment"
+	"go-wind-shortplay/app/core/service/internal/data/ent/danmaku"
 	"go-wind-shortplay/app/core/service/internal/data/ent/dataaccessauditlog"
 	"go-wind-shortplay/app/core/service/internal/data/ent/dictentry"
 	"go-wind-shortplay/app/core/service/internal/data/ent/dictentryi18n"
@@ -135,6 +136,7 @@ func checkColumn(t, c string) error {
 			api.Table:                      api.ValidColumn,
 			apiauditlog.Table:              apiauditlog.ValidColumn,
 			comment.Table:                  comment.ValidColumn,
+			danmaku.Table:                  danmaku.ValidColumn,
 			dataaccessauditlog.Table:       dataaccessauditlog.ValidColumn,
 			dictentry.Table:                dictentry.ValidColumn,
 			dictentryi18n.Table:            dictentryi18n.ValidColumn,

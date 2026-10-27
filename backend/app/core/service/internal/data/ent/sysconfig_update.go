@@ -319,6 +319,20 @@ func (_u *SysConfigUpdate) SetNillableAnnouncementLink(v *string) *SysConfigUpda
 	return _u
 }
 
+// SetDanmakuEnabled sets the "danmaku_enabled" field.
+func (_u *SysConfigUpdate) SetDanmakuEnabled(v bool) *SysConfigUpdate {
+	_u.mutation.SetDanmakuEnabled(v)
+	return _u
+}
+
+// SetNillableDanmakuEnabled sets the "danmaku_enabled" field if the given value is not nil.
+func (_u *SysConfigUpdate) SetNillableDanmakuEnabled(v *bool) *SysConfigUpdate {
+	if v != nil {
+		_u.SetDanmakuEnabled(*v)
+	}
+	return _u
+}
+
 // Mutation returns the SysConfigMutation object of the builder.
 func (_u *SysConfigUpdate) Mutation() *SysConfigMutation {
 	return _u.mutation
@@ -462,6 +476,9 @@ func (_u *SysConfigUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AnnouncementLink(); ok {
 		_spec.SetField(sysconfig.FieldAnnouncementLink, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DanmakuEnabled(); ok {
+		_spec.SetField(sysconfig.FieldDanmakuEnabled, field.TypeBool, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -774,6 +791,20 @@ func (_u *SysConfigUpdateOne) SetNillableAnnouncementLink(v *string) *SysConfigU
 	return _u
 }
 
+// SetDanmakuEnabled sets the "danmaku_enabled" field.
+func (_u *SysConfigUpdateOne) SetDanmakuEnabled(v bool) *SysConfigUpdateOne {
+	_u.mutation.SetDanmakuEnabled(v)
+	return _u
+}
+
+// SetNillableDanmakuEnabled sets the "danmaku_enabled" field if the given value is not nil.
+func (_u *SysConfigUpdateOne) SetNillableDanmakuEnabled(v *bool) *SysConfigUpdateOne {
+	if v != nil {
+		_u.SetDanmakuEnabled(*v)
+	}
+	return _u
+}
+
 // Mutation returns the SysConfigMutation object of the builder.
 func (_u *SysConfigUpdateOne) Mutation() *SysConfigMutation {
 	return _u.mutation
@@ -947,6 +978,9 @@ func (_u *SysConfigUpdateOne) sqlSave(ctx context.Context) (_node *SysConfig, er
 	}
 	if value, ok := _u.mutation.AnnouncementLink(); ok {
 		_spec.SetField(sysconfig.FieldAnnouncementLink, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DanmakuEnabled(); ok {
+		_spec.SetField(sysconfig.FieldDanmakuEnabled, field.TypeBool, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &SysConfig{config: _u.config}

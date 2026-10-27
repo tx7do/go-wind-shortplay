@@ -69,5 +69,7 @@
   "batchClearSelection": "取消选择",
   "batchApproveConfirm": "确认批量通过选中的 {{count}} 条视频？",
   "batchRejectTitle": "批量驳回",
-  "batchDone": "批量完成：{{ok}} 成功，{{fail}} 失败"
+  "batchDone": "批量完成：{{ok}} 成功，{{fail}} 失败",
+  "scheduledAt": "计划发布",
+  "publishNow": "发布"
 }

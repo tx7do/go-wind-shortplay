@@ -204,6 +204,20 @@ func (_c *VideoCommentCreate) SetNillableReplyCount(v *uint64) *VideoCommentCrea
 	return _c
 }
 
+// SetPinned sets the "pinned" field.
+func (_c *VideoCommentCreate) SetPinned(v bool) *VideoCommentCreate {
+	_c.mutation.SetPinned(v)
+	return _c
+}
+
+// SetNillablePinned sets the "pinned" field if the given value is not nil.
+func (_c *VideoCommentCreate) SetNillablePinned(v *bool) *VideoCommentCreate {
+	if v != nil {
+		_c.SetPinned(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *VideoCommentCreate) SetID(v uint32) *VideoCommentCreate {
 	_c.mutation.SetID(v)
@@ -275,6 +289,10 @@ func (_c *VideoCommentCreate) defaults() error {
 		v := videocomment.DefaultReplyCount
 		_c.mutation.SetReplyCount(v)
 	}
+	if _, ok := _c.mutation.Pinned(); !ok {
+		v := videocomment.DefaultPinned
+		_c.mutation.SetPinned(v)
+	}
 	return nil
 }
 
@@ -297,6 +315,9 @@ func (_c *VideoCommentCreate) check() error {
 	}
 	if _, ok := _c.mutation.ReplyCount(); !ok {
 		return &ValidationError{Name: "reply_count", err: errors.New(`ent: missing required field "VideoComment.reply_count"`)}
+	}
+	if _, ok := _c.mutation.Pinned(); !ok {
+		return &ValidationError{Name: "pinned", err: errors.New(`ent: missing required field "VideoComment.pinned"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := videocomment.IDValidator(v); err != nil {
@@ -387,6 +408,10 @@ func (_c *VideoCommentCreate) createSpec() (*VideoComment, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.ReplyCount(); ok {
 		_spec.SetField(videocomment.FieldReplyCount, field.TypeUint64, value)
 		_node.ReplyCount = value
+	}
+	if value, ok := _c.mutation.Pinned(); ok {
+		_spec.SetField(videocomment.FieldPinned, field.TypeBool, value)
+		_node.Pinned = value
 	}
 	return _node, _spec
 }
@@ -647,6 +672,18 @@ func (u *VideoCommentUpsert) UpdateReplyCount() *VideoCommentUpsert {
 // AddReplyCount adds v to the "reply_count" field.
 func (u *VideoCommentUpsert) AddReplyCount(v uint64) *VideoCommentUpsert {
 	u.Add(videocomment.FieldReplyCount, v)
+	return u
+}
+
+// SetPinned sets the "pinned" field.
+func (u *VideoCommentUpsert) SetPinned(v bool) *VideoCommentUpsert {
+	u.Set(videocomment.FieldPinned, v)
+	return u
+}
+
+// UpdatePinned sets the "pinned" field to the value that was provided on create.
+func (u *VideoCommentUpsert) UpdatePinned() *VideoCommentUpsert {
+	u.SetExcluded(videocomment.FieldPinned)
 	return u
 }
 
@@ -946,6 +983,20 @@ func (u *VideoCommentUpsertOne) AddReplyCount(v uint64) *VideoCommentUpsertOne {
 func (u *VideoCommentUpsertOne) UpdateReplyCount() *VideoCommentUpsertOne {
 	return u.Update(func(s *VideoCommentUpsert) {
 		s.UpdateReplyCount()
+	})
+}
+
+// SetPinned sets the "pinned" field.
+func (u *VideoCommentUpsertOne) SetPinned(v bool) *VideoCommentUpsertOne {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.SetPinned(v)
+	})
+}
+
+// UpdatePinned sets the "pinned" field to the value that was provided on create.
+func (u *VideoCommentUpsertOne) UpdatePinned() *VideoCommentUpsertOne {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.UpdatePinned()
 	})
 }
 
@@ -1411,6 +1462,20 @@ func (u *VideoCommentUpsertBulk) AddReplyCount(v uint64) *VideoCommentUpsertBulk
 func (u *VideoCommentUpsertBulk) UpdateReplyCount() *VideoCommentUpsertBulk {
 	return u.Update(func(s *VideoCommentUpsert) {
 		s.UpdateReplyCount()
+	})
+}
+
+// SetPinned sets the "pinned" field.
+func (u *VideoCommentUpsertBulk) SetPinned(v bool) *VideoCommentUpsertBulk {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.SetPinned(v)
+	})
+}
+
+// UpdatePinned sets the "pinned" field to the value that was provided on create.
+func (u *VideoCommentUpsertBulk) UpdatePinned() *VideoCommentUpsertBulk {
+	return u.Update(func(s *VideoCommentUpsert) {
+		s.UpdatePinned()
 	})
 }
 

@@ -38,6 +38,8 @@ const (
 	FieldLikeCount = "like_count"
 	// FieldReplyCount holds the string denoting the reply_count field in the database.
 	FieldReplyCount = "reply_count"
+	// FieldPinned holds the string denoting the pinned field in the database.
+	FieldPinned = "pinned"
 	// Table holds the table name of the videocomment in the database.
 	Table = "sp_video_comments"
 )
@@ -58,6 +60,7 @@ var Columns = []string{
 	FieldParentID,
 	FieldLikeCount,
 	FieldReplyCount,
+	FieldPinned,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -92,6 +95,8 @@ var (
 	DefaultLikeCount uint64
 	// DefaultReplyCount holds the default value on creation for the "reply_count" field.
 	DefaultReplyCount uint64
+	// DefaultPinned holds the default value on creation for the "pinned" field.
+	DefaultPinned bool
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
@@ -167,4 +172,9 @@ func ByLikeCount(opts ...sql.OrderTermOption) OrderOption {
 // ByReplyCount orders the results by the reply_count field.
 func ByReplyCount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldReplyCount, opts...).ToFunc()
+}
+
+// ByPinned orders the results by the pinned field.
+func ByPinned(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPinned, opts...).ToFunc()
 }

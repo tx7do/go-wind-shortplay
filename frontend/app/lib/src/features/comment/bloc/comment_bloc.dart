@@ -34,7 +34,10 @@ class CommentListRequested extends CommentEvent {
   final int videoId;
   final CommentSortMode sort;
 
-  const CommentListRequested(this.videoId, {this.sort = CommentSortMode.latest});
+  const CommentListRequested(
+    this.videoId, {
+    this.sort = CommentSortMode.latest,
+  });
 
   @override
   List<Object?> get props => [videoId, sort];
@@ -81,6 +84,16 @@ class CommentLikeToggled extends CommentEvent {
   final Comment comment;
 
   const CommentLikeToggled(this.comment);
+
+  @override
+  List<Object?> get props => [comment];
+}
+
+/// 置顶/取消置顶（视频作者）
+class CommentPinToggled extends CommentEvent {
+  final Comment comment;
+
+  const CommentPinToggled(this.comment);
 
   @override
   List<Object?> get props => [comment];
@@ -137,22 +150,30 @@ class CommentState extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [videoId, comments, total, isLoading, hasMore, sort, errorMessage];
+  List<Object?> get props => [
+    videoId,
+    comments,
+    total,
+    isLoading,
+    hasMore,
+    sort,
+    errorMessage,
+  ];
 }
 
 /// 评论业务
 class CommentBloc extends Bloc<CommentEvent, CommentState> {
   CommentBloc({CommentService? commentService, UbaService? ubaService})
-      : _service = commentService ?? CommentService(),
-        _uba = ubaService ?? UbaService(),
-        super(const CommentState()) {
+    : _service = commentService ?? CommentService(),
+      _uba = ubaService ?? UbaService(),
+      super(const CommentState()) {
     on<CommentListRequested>(_onList);
     on<CommentSortChanged>(_onSortChanged);
     on<CommentNextPageRequested>(_onNextPage);
     on<CommentLocallyInserted>(_onLocallyInserted);
     on<CommentDeleted>(_onDeleted);
     on<CommentLikeToggled>(_onLikeToggled);
+    on<CommentPinToggled>(_onPinToggled);
     on<CommentRepliesRequested>(_onReplies);
   }
 
@@ -166,12 +187,14 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     CommentListRequested event,
     Emitter<CommentState> emit,
   ) async {
-    emit(state.copyWith(
-      videoId: event.videoId,
-      sort: event.sort,
-      isLoading: true,
-      errorMessage: null,
-    ));
+    emit(
+      state.copyWith(
+        videoId: event.videoId,
+        sort: event.sort,
+        isLoading: true,
+        errorMessage: null,
+      ),
+    );
     try {
       _pageNum = 1;
       final page = await _service.list(
@@ -179,22 +202,28 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
         query: const PaginationQuery(pageNum: 1, pageSize: _pageSize),
         sort: event.sort.value,
       );
-      emit(state.copyWith(
-        comments: page.items,
-        total: page.total,
-        isLoading: false,
-        hasMore: page.items.length < page.total,
-      ));
+      emit(
+        state.copyWith(
+          comments: page.items,
+          total: page.total,
+          isLoading: false,
+          hasMore: page.items.length < page.total,
+        ),
+      );
     } on ApiStatusException catch (e) {
-      emit(state.copyWith(
-        isLoading: false,
-        errorMessage: localizedErrorText(S.current, e),
-      ));
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: localizedErrorText(S.current, e),
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        isLoading: false,
-        errorMessage: localizedErrorText(S.current, e),
-      ));
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: localizedErrorText(S.current, e),
+        ),
+      );
     }
   }
 
@@ -220,11 +249,13 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
         query: PaginationQuery(pageNum: _pageNum, pageSize: _pageSize),
         sort: state.sort.value,
       );
-      emit(state.copyWith(
-        comments: [...state.comments, ...page.items],
-        isLoading: false,
-        hasMore: state.comments.length + page.items.length < page.total,
-      ));
+      emit(
+        state.copyWith(
+          comments: [...state.comments, ...page.items],
+          isLoading: false,
+          hasMore: state.comments.length + page.items.length < page.total,
+        ),
+      );
     } catch (_) {
       _pageNum -= 1;
       emit(state.copyWith(isLoading: false));
@@ -232,19 +263,15 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
   }
 
   /// 发表评论（公开方法，UI 层可 await 完成以便提示；成功后本地插入）
-  Future<void> postComment({
-    required String content,
-    Comment? parent,
-  }) async {
+  Future<void> postComment({required String content, Comment? parent}) async {
     final created = await _service.create(
       videoId: state.videoId,
       content: content,
       parentId: parent?.id ?? 0,
     );
-    _uba.report(UbaEvent(
-      eventType: UbaEventType.commentCreate,
-      videoId: state.videoId,
-    ));
+    _uba.report(
+      UbaEvent(eventType: UbaEventType.commentCreate, videoId: state.videoId),
+    );
     add(CommentLocallyInserted(created, parent));
   }
 
@@ -257,10 +284,12 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
 
     if (parent == null) {
       // 一级评论：插到最前
-      emit(state.copyWith(
-        comments: [created, ...state.comments],
-        total: state.total + 1,
-      ));
+      emit(
+        state.copyWith(
+          comments: [created, ...state.comments],
+          total: state.total + 1,
+        ),
+      );
       return;
     }
 
@@ -297,12 +326,13 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     }
 
     await _service.delete(target.id);
-    final comments =
-        state.comments.where((c) => c.id != target.id).toList();
-    emit(state.copyWith(
-      comments: comments,
-      total: (state.total - 1).clamp(0, 1 << 31),
-    ));
+    final comments = state.comments.where((c) => c.id != target.id).toList();
+    emit(
+      state.copyWith(
+        comments: comments,
+        total: (state.total - 1).clamp(0, 1 << 31),
+      ),
+    );
   }
 
   Future<void> _onLikeToggled(
@@ -314,27 +344,28 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     // 本地乐观更新（点赞/取消各切换一次；失败时再调一次即回滚）
     void updateLocal() {
       List<Comment> mapList(List<Comment> list) => list.map((c) {
-            if (c.id == target.id) {
-              return c.copyWith(
-                liked: !c.liked,
-                likeCount:
-                    c.likeCount + (c.liked ? -1 : 1),
-              );
-            }
-            if (c.replies.any((r) => r.id == target.id)) {
-              return c.copyWith(
-                replies: c.replies
-                    .map((r) => r.id == target.id
-                        ? r.copyWith(
-                            liked: !r.liked,
-                            likeCount: r.likeCount + (r.liked ? -1 : 1),
-                          )
-                        : r)
-                    .toList(),
-              );
-            }
-            return c;
-          }).toList();
+        if (c.id == target.id) {
+          return c.copyWith(
+            liked: !c.liked,
+            likeCount: c.likeCount + (c.liked ? -1 : 1),
+          );
+        }
+        if (c.replies.any((r) => r.id == target.id)) {
+          return c.copyWith(
+            replies: c.replies
+                .map(
+                  (r) => r.id == target.id
+                      ? r.copyWith(
+                          liked: !r.liked,
+                          likeCount: r.likeCount + (r.liked ? -1 : 1),
+                        )
+                      : r,
+                )
+                .toList(),
+          );
+        }
+        return c;
+      }).toList();
 
       emit(state.copyWith(comments: mapList(state.comments)));
     }
@@ -348,6 +379,28 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       }
     } catch (_) {
       // 失败回滚
+      updateLocal();
+    }
+  }
+
+  Future<void> _onPinToggled(
+    CommentPinToggled event,
+    Emitter<CommentState> emit,
+  ) async {
+    final target = event.comment;
+
+    void updateLocal() {
+      final comments = state.comments.map((c) {
+        if (c.id == target.id) return c.copyWith(pinned: !c.pinned);
+        return c;
+      }).toList();
+      emit(state.copyWith(comments: comments));
+    }
+
+    updateLocal();
+    try {
+      await _service.pin(target.id, pinned: !target.pinned);
+    } catch (_) {
       updateLocal();
     }
   }

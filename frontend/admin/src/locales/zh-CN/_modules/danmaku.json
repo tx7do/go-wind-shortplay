@@ -1,0 +1,21 @@
+{
+  "moduleName": "弹幕",
+  "danmakuList": "弹幕列表",
+  "user": "发送人",
+  "content": "内容",
+  "videoId": "视频ID",
+  "timeOffset": "播放位置",
+  "status": "状态",
+  "statusVisible": "可见",
+  "statusHidden": "已隐藏",
+  "createdAt": "发送时间",
+  "hide": "隐藏",
+  "restore": "恢复",
+  "statusChanged": "状态已更新",
+  "statusChangeFailed": "状态更新失败",
+  "action": "操作",
+  "deleteConfirmTitle": "确认删除",
+  "deleteConfirmDesc": "删除后不可恢复，确定删除该{{moduleName}}吗？",
+  "deleteSuccess": "删除成功",
+  "deleteFailed": "删除失败"
+}

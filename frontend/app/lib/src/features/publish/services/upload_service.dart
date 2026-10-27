@@ -59,7 +59,10 @@ class UploadProgress {
   final int uploadedChunks;
   final int totalChunks;
 
-  const UploadProgress({required this.uploadedChunks, required this.totalChunks});
+  const UploadProgress({
+    required this.uploadedChunks,
+    required this.totalChunks,
+  });
 
   int get percent =>
       totalChunks <= 0 ? 0 : (uploadedChunks * 100 / totalChunks).round();
@@ -78,13 +81,15 @@ class PublishService extends BaseService {
   /// （/uploads 需 Bearer Token，缺失会导致 401 发布失败）
   Dio get _dio {
     final global = GetIt.instance<Dio>();
-    return Dio(BaseOptions(
-      baseUrl: global.options.baseUrl,
-      connectTimeout: global.options.connectTimeout,
-      sendTimeout: const Duration(minutes: 10),
-      receiveTimeout: const Duration(minutes: 10),
-      responseType: ResponseType.json,
-    ))..interceptors.addAll(global.interceptors);
+    return Dio(
+      BaseOptions(
+        baseUrl: global.options.baseUrl,
+        connectTimeout: global.options.connectTimeout,
+        sendTimeout: const Duration(minutes: 10),
+        receiveTimeout: const Duration(minutes: 10),
+        responseType: ResponseType.json,
+      ),
+    )..interceptors.addAll(global.interceptors);
   }
 
   /// 创建上传任务
@@ -146,6 +151,7 @@ class PublishService extends BaseService {
     List<String> tags = const [],
     bool asDraft = false,
     int? seriesId,
+    DateTime? scheduledAt,
     void Function(UploadProgress progress)? onProgress,
     CancelToken? cancelToken,
   }) async {
@@ -163,15 +169,10 @@ class PublishService extends BaseService {
         raf.setPositionSync(start);
         final bytes = raf.readSync(end - start);
 
-        await uploadChunk(
-          taskId: task.taskId,
-          chunkIndex: i,
-          bytes: bytes,
+        await uploadChunk(taskId: task.taskId, chunkIndex: i, bytes: bytes);
+        onProgress?.call(
+          UploadProgress(uploadedChunks: i + 1, totalChunks: task.totalChunks),
         );
-        onProgress?.call(UploadProgress(
-          uploadedChunks: i + 1,
-          totalChunks: task.totalChunks,
-        ));
       }
     } finally {
       raf.closeSync();
@@ -184,6 +185,7 @@ class PublishService extends BaseService {
       tags: tags,
       asDraft: asDraft,
       seriesId: seriesId,
+      scheduledAt: scheduledAt,
       cancelToken: cancelToken,
     );
   }
@@ -196,6 +198,7 @@ class PublishService extends BaseService {
     List<String> tags = const [],
     bool asDraft = false,
     int? seriesId,
+    DateTime? scheduledAt,
     CancelToken? cancelToken,
   }) async {
     try {
@@ -208,6 +211,9 @@ class PublishService extends BaseService {
           'asDraft': asDraft,
           // 挂靠剧集（服务端校验归属并自动排集号）
           if (seriesId != null && seriesId > 0) 'seriesId': seriesId,
+          // 定时发布（须未来时间；服务端先存草稿，到期自动转发布）
+          if (scheduledAt != null)
+            'scheduledAt': scheduledAt.toUtc().toIso8601String(),
         },
         cancelToken: cancelToken,
       );

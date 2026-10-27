@@ -12,6 +12,7 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent/api"
 	"go-wind-shortplay/app/core/service/internal/data/ent/apiauditlog"
 	"go-wind-shortplay/app/core/service/internal/data/ent/comment"
+	"go-wind-shortplay/app/core/service/internal/data/ent/danmaku"
 	"go-wind-shortplay/app/core/service/internal/data/ent/dataaccessauditlog"
 	"go-wind-shortplay/app/core/service/internal/data/ent/dictentry"
 	"go-wind-shortplay/app/core/service/internal/data/ent/dictentryi18n"
@@ -89,6 +90,7 @@ const (
 	TypeAPI                      = "Api"
 	TypeApiAuditLog              = "ApiAuditLog"
 	TypeComment                  = "Comment"
+	TypeDanmaku                  = "Danmaku"
 	TypeDataAccessAuditLog       = "DataAccessAuditLog"
 	TypeDictEntry                = "DictEntry"
 	TypeDictEntryI18n            = "DictEntryI18n"
@@ -6446,6 +6448,985 @@ func (m *CommentMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Comment edge %s", name)
+}
+
+// DanmakuMutation represents an operation that mutates the Danmaku nodes in the graph.
+type DanmakuMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *uint32
+	created_at        *time.Time
+	updated_at        *time.Time
+	deleted_at        *time.Time
+	tenant_id         *uint32
+	addtenant_id      *int32
+	video_id          *uint32
+	addvideo_id       *int32
+	user_id           *uint32
+	adduser_id        *int32
+	content           *string
+	time_offset_ms    *uint64
+	addtime_offset_ms *int64
+	status            *danmaku.Status
+	clearedFields     map[string]struct{}
+	done              bool
+	oldValue          func(context.Context) (*Danmaku, error)
+	predicates        []predicate.Danmaku
+}
+
+var _ ent.Mutation = (*DanmakuMutation)(nil)
+
+// danmakuOption allows management of the mutation configuration using functional options.
+type danmakuOption func(*DanmakuMutation)
+
+// newDanmakuMutation creates new mutation for the Danmaku entity.
+func newDanmakuMutation(c config, op Op, opts ...danmakuOption) *DanmakuMutation {
+	m := &DanmakuMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDanmaku,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDanmakuID sets the ID field of the mutation.
+func withDanmakuID(id uint32) danmakuOption {
+	return func(m *DanmakuMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Danmaku
+		)
+		m.oldValue = func(ctx context.Context) (*Danmaku, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Danmaku.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDanmaku sets the old Danmaku of the mutation.
+func withDanmaku(node *Danmaku) danmakuOption {
+	return func(m *DanmakuMutation) {
+		m.oldValue = func(context.Context) (*Danmaku, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DanmakuMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DanmakuMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Danmaku entities.
+func (m *DanmakuMutation) SetID(id uint32) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DanmakuMutation) ID() (id uint32, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *DanmakuMutation) IDs(ctx context.Context) ([]uint32, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uint32{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Danmaku.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *DanmakuMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *DanmakuMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Danmaku entity.
+// If the Danmaku object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DanmakuMutation) OldCreatedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ClearCreatedAt clears the value of the "created_at" field.
+func (m *DanmakuMutation) ClearCreatedAt() {
+	m.created_at = nil
+	m.clearedFields[danmaku.FieldCreatedAt] = struct{}{}
+}
+
+// CreatedAtCleared returns if the "created_at" field was cleared in this mutation.
+func (m *DanmakuMutation) CreatedAtCleared() bool {
+	_, ok := m.clearedFields[danmaku.FieldCreatedAt]
+	return ok
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *DanmakuMutation) ResetCreatedAt() {
+	m.created_at = nil
+	delete(m.clearedFields, danmaku.FieldCreatedAt)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *DanmakuMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *DanmakuMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Danmaku entity.
+// If the Danmaku object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DanmakuMutation) OldUpdatedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (m *DanmakuMutation) ClearUpdatedAt() {
+	m.updated_at = nil
+	m.clearedFields[danmaku.FieldUpdatedAt] = struct{}{}
+}
+
+// UpdatedAtCleared returns if the "updated_at" field was cleared in this mutation.
+func (m *DanmakuMutation) UpdatedAtCleared() bool {
+	_, ok := m.clearedFields[danmaku.FieldUpdatedAt]
+	return ok
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *DanmakuMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+	delete(m.clearedFields, danmaku.FieldUpdatedAt)
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *DanmakuMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *DanmakuMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the Danmaku entity.
+// If the Danmaku object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DanmakuMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *DanmakuMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[danmaku.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *DanmakuMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[danmaku.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *DanmakuMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, danmaku.FieldDeletedAt)
+}
+
+// SetTenantID sets the "tenant_id" field.
+func (m *DanmakuMutation) SetTenantID(u uint32) {
+	m.tenant_id = &u
+	m.addtenant_id = nil
+}
+
+// TenantID returns the value of the "tenant_id" field in the mutation.
+func (m *DanmakuMutation) TenantID() (r uint32, exists bool) {
+	v := m.tenant_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTenantID returns the old "tenant_id" field's value of the Danmaku entity.
+// If the Danmaku object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DanmakuMutation) OldTenantID(ctx context.Context) (v *uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTenantID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTenantID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTenantID: %w", err)
+	}
+	return oldValue.TenantID, nil
+}
+
+// AddTenantID adds u to the "tenant_id" field.
+func (m *DanmakuMutation) AddTenantID(u int32) {
+	if m.addtenant_id != nil {
+		*m.addtenant_id += u
+	} else {
+		m.addtenant_id = &u
+	}
+}
+
+// AddedTenantID returns the value that was added to the "tenant_id" field in this mutation.
+func (m *DanmakuMutation) AddedTenantID() (r int32, exists bool) {
+	v := m.addtenant_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearTenantID clears the value of the "tenant_id" field.
+func (m *DanmakuMutation) ClearTenantID() {
+	m.tenant_id = nil
+	m.addtenant_id = nil
+	m.clearedFields[danmaku.FieldTenantID] = struct{}{}
+}
+
+// TenantIDCleared returns if the "tenant_id" field was cleared in this mutation.
+func (m *DanmakuMutation) TenantIDCleared() bool {
+	_, ok := m.clearedFields[danmaku.FieldTenantID]
+	return ok
+}
+
+// ResetTenantID resets all changes to the "tenant_id" field.
+func (m *DanmakuMutation) ResetTenantID() {
+	m.tenant_id = nil
+	m.addtenant_id = nil
+	delete(m.clearedFields, danmaku.FieldTenantID)
+}
+
+// SetVideoID sets the "video_id" field.
+func (m *DanmakuMutation) SetVideoID(u uint32) {
+	m.video_id = &u
+	m.addvideo_id = nil
+}
+
+// VideoID returns the value of the "video_id" field in the mutation.
+func (m *DanmakuMutation) VideoID() (r uint32, exists bool) {
+	v := m.video_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVideoID returns the old "video_id" field's value of the Danmaku entity.
+// If the Danmaku object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DanmakuMutation) OldVideoID(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVideoID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVideoID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVideoID: %w", err)
+	}
+	return oldValue.VideoID, nil
+}
+
+// AddVideoID adds u to the "video_id" field.
+func (m *DanmakuMutation) AddVideoID(u int32) {
+	if m.addvideo_id != nil {
+		*m.addvideo_id += u
+	} else {
+		m.addvideo_id = &u
+	}
+}
+
+// AddedVideoID returns the value that was added to the "video_id" field in this mutation.
+func (m *DanmakuMutation) AddedVideoID() (r int32, exists bool) {
+	v := m.addvideo_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetVideoID resets all changes to the "video_id" field.
+func (m *DanmakuMutation) ResetVideoID() {
+	m.video_id = nil
+	m.addvideo_id = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *DanmakuMutation) SetUserID(u uint32) {
+	m.user_id = &u
+	m.adduser_id = nil
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *DanmakuMutation) UserID() (r uint32, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the Danmaku entity.
+// If the Danmaku object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DanmakuMutation) OldUserID(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// AddUserID adds u to the "user_id" field.
+func (m *DanmakuMutation) AddUserID(u int32) {
+	if m.adduser_id != nil {
+		*m.adduser_id += u
+	} else {
+		m.adduser_id = &u
+	}
+}
+
+// AddedUserID returns the value that was added to the "user_id" field in this mutation.
+func (m *DanmakuMutation) AddedUserID() (r int32, exists bool) {
+	v := m.adduser_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *DanmakuMutation) ResetUserID() {
+	m.user_id = nil
+	m.adduser_id = nil
+}
+
+// SetContent sets the "content" field.
+func (m *DanmakuMutation) SetContent(s string) {
+	m.content = &s
+}
+
+// Content returns the value of the "content" field in the mutation.
+func (m *DanmakuMutation) Content() (r string, exists bool) {
+	v := m.content
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContent returns the old "content" field's value of the Danmaku entity.
+// If the Danmaku object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DanmakuMutation) OldContent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContent: %w", err)
+	}
+	return oldValue.Content, nil
+}
+
+// ResetContent resets all changes to the "content" field.
+func (m *DanmakuMutation) ResetContent() {
+	m.content = nil
+}
+
+// SetTimeOffsetMs sets the "time_offset_ms" field.
+func (m *DanmakuMutation) SetTimeOffsetMs(u uint64) {
+	m.time_offset_ms = &u
+	m.addtime_offset_ms = nil
+}
+
+// TimeOffsetMs returns the value of the "time_offset_ms" field in the mutation.
+func (m *DanmakuMutation) TimeOffsetMs() (r uint64, exists bool) {
+	v := m.time_offset_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTimeOffsetMs returns the old "time_offset_ms" field's value of the Danmaku entity.
+// If the Danmaku object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DanmakuMutation) OldTimeOffsetMs(ctx context.Context) (v uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTimeOffsetMs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTimeOffsetMs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTimeOffsetMs: %w", err)
+	}
+	return oldValue.TimeOffsetMs, nil
+}
+
+// AddTimeOffsetMs adds u to the "time_offset_ms" field.
+func (m *DanmakuMutation) AddTimeOffsetMs(u int64) {
+	if m.addtime_offset_ms != nil {
+		*m.addtime_offset_ms += u
+	} else {
+		m.addtime_offset_ms = &u
+	}
+}
+
+// AddedTimeOffsetMs returns the value that was added to the "time_offset_ms" field in this mutation.
+func (m *DanmakuMutation) AddedTimeOffsetMs() (r int64, exists bool) {
+	v := m.addtime_offset_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTimeOffsetMs resets all changes to the "time_offset_ms" field.
+func (m *DanmakuMutation) ResetTimeOffsetMs() {
+	m.time_offset_ms = nil
+	m.addtime_offset_ms = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *DanmakuMutation) SetStatus(d danmaku.Status) {
+	m.status = &d
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *DanmakuMutation) Status() (r danmaku.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the Danmaku entity.
+// If the Danmaku object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DanmakuMutation) OldStatus(ctx context.Context) (v danmaku.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *DanmakuMutation) ResetStatus() {
+	m.status = nil
+}
+
+// Where appends a list predicates to the DanmakuMutation builder.
+func (m *DanmakuMutation) Where(ps ...predicate.Danmaku) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the DanmakuMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *DanmakuMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Danmaku, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *DanmakuMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *DanmakuMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Danmaku).
+func (m *DanmakuMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DanmakuMutation) Fields() []string {
+	fields := make([]string, 0, 9)
+	if m.created_at != nil {
+		fields = append(fields, danmaku.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, danmaku.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, danmaku.FieldDeletedAt)
+	}
+	if m.tenant_id != nil {
+		fields = append(fields, danmaku.FieldTenantID)
+	}
+	if m.video_id != nil {
+		fields = append(fields, danmaku.FieldVideoID)
+	}
+	if m.user_id != nil {
+		fields = append(fields, danmaku.FieldUserID)
+	}
+	if m.content != nil {
+		fields = append(fields, danmaku.FieldContent)
+	}
+	if m.time_offset_ms != nil {
+		fields = append(fields, danmaku.FieldTimeOffsetMs)
+	}
+	if m.status != nil {
+		fields = append(fields, danmaku.FieldStatus)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DanmakuMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case danmaku.FieldCreatedAt:
+		return m.CreatedAt()
+	case danmaku.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case danmaku.FieldDeletedAt:
+		return m.DeletedAt()
+	case danmaku.FieldTenantID:
+		return m.TenantID()
+	case danmaku.FieldVideoID:
+		return m.VideoID()
+	case danmaku.FieldUserID:
+		return m.UserID()
+	case danmaku.FieldContent:
+		return m.Content()
+	case danmaku.FieldTimeOffsetMs:
+		return m.TimeOffsetMs()
+	case danmaku.FieldStatus:
+		return m.Status()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DanmakuMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case danmaku.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case danmaku.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case danmaku.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case danmaku.FieldTenantID:
+		return m.OldTenantID(ctx)
+	case danmaku.FieldVideoID:
+		return m.OldVideoID(ctx)
+	case danmaku.FieldUserID:
+		return m.OldUserID(ctx)
+	case danmaku.FieldContent:
+		return m.OldContent(ctx)
+	case danmaku.FieldTimeOffsetMs:
+		return m.OldTimeOffsetMs(ctx)
+	case danmaku.FieldStatus:
+		return m.OldStatus(ctx)
+	}
+	return nil, fmt.Errorf("unknown Danmaku field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DanmakuMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case danmaku.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case danmaku.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case danmaku.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case danmaku.FieldTenantID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTenantID(v)
+		return nil
+	case danmaku.FieldVideoID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVideoID(v)
+		return nil
+	case danmaku.FieldUserID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case danmaku.FieldContent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContent(v)
+		return nil
+	case danmaku.FieldTimeOffsetMs:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTimeOffsetMs(v)
+		return nil
+	case danmaku.FieldStatus:
+		v, ok := value.(danmaku.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Danmaku field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DanmakuMutation) AddedFields() []string {
+	var fields []string
+	if m.addtenant_id != nil {
+		fields = append(fields, danmaku.FieldTenantID)
+	}
+	if m.addvideo_id != nil {
+		fields = append(fields, danmaku.FieldVideoID)
+	}
+	if m.adduser_id != nil {
+		fields = append(fields, danmaku.FieldUserID)
+	}
+	if m.addtime_offset_ms != nil {
+		fields = append(fields, danmaku.FieldTimeOffsetMs)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DanmakuMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case danmaku.FieldTenantID:
+		return m.AddedTenantID()
+	case danmaku.FieldVideoID:
+		return m.AddedVideoID()
+	case danmaku.FieldUserID:
+		return m.AddedUserID()
+	case danmaku.FieldTimeOffsetMs:
+		return m.AddedTimeOffsetMs()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DanmakuMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case danmaku.FieldTenantID:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTenantID(v)
+		return nil
+	case danmaku.FieldVideoID:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVideoID(v)
+		return nil
+	case danmaku.FieldUserID:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUserID(v)
+		return nil
+	case danmaku.FieldTimeOffsetMs:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTimeOffsetMs(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Danmaku numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DanmakuMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(danmaku.FieldCreatedAt) {
+		fields = append(fields, danmaku.FieldCreatedAt)
+	}
+	if m.FieldCleared(danmaku.FieldUpdatedAt) {
+		fields = append(fields, danmaku.FieldUpdatedAt)
+	}
+	if m.FieldCleared(danmaku.FieldDeletedAt) {
+		fields = append(fields, danmaku.FieldDeletedAt)
+	}
+	if m.FieldCleared(danmaku.FieldTenantID) {
+		fields = append(fields, danmaku.FieldTenantID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DanmakuMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DanmakuMutation) ClearField(name string) error {
+	switch name {
+	case danmaku.FieldCreatedAt:
+		m.ClearCreatedAt()
+		return nil
+	case danmaku.FieldUpdatedAt:
+		m.ClearUpdatedAt()
+		return nil
+	case danmaku.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case danmaku.FieldTenantID:
+		m.ClearTenantID()
+		return nil
+	}
+	return fmt.Errorf("unknown Danmaku nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DanmakuMutation) ResetField(name string) error {
+	switch name {
+	case danmaku.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case danmaku.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case danmaku.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case danmaku.FieldTenantID:
+		m.ResetTenantID()
+		return nil
+	case danmaku.FieldVideoID:
+		m.ResetVideoID()
+		return nil
+	case danmaku.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case danmaku.FieldContent:
+		m.ResetContent()
+		return nil
+	case danmaku.FieldTimeOffsetMs:
+		m.ResetTimeOffsetMs()
+		return nil
+	case danmaku.FieldStatus:
+		m.ResetStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown Danmaku field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DanmakuMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DanmakuMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DanmakuMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DanmakuMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DanmakuMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DanmakuMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DanmakuMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Danmaku unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DanmakuMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Danmaku edge %s", name)
 }
 
 // DataAccessAuditLogMutation represents an operation that mutates the DataAccessAuditLog nodes in the graph.
@@ -65923,6 +66904,7 @@ type SysConfigMutation struct {
 	announcement_enabled      *bool
 	announcement_text         *string
 	announcement_link         *string
+	danmaku_enabled           *bool
 	clearedFields             map[string]struct{}
 	done                      bool
 	oldValue                  func(context.Context) (*SysConfig, error)
@@ -66861,6 +67843,42 @@ func (m *SysConfigMutation) ResetAnnouncementLink() {
 	m.announcement_link = nil
 }
 
+// SetDanmakuEnabled sets the "danmaku_enabled" field.
+func (m *SysConfigMutation) SetDanmakuEnabled(b bool) {
+	m.danmaku_enabled = &b
+}
+
+// DanmakuEnabled returns the value of the "danmaku_enabled" field in the mutation.
+func (m *SysConfigMutation) DanmakuEnabled() (r bool, exists bool) {
+	v := m.danmaku_enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDanmakuEnabled returns the old "danmaku_enabled" field's value of the SysConfig entity.
+// If the SysConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SysConfigMutation) OldDanmakuEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDanmakuEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDanmakuEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDanmakuEnabled: %w", err)
+	}
+	return oldValue.DanmakuEnabled, nil
+}
+
+// ResetDanmakuEnabled resets all changes to the "danmaku_enabled" field.
+func (m *SysConfigMutation) ResetDanmakuEnabled() {
+	m.danmaku_enabled = nil
+}
+
 // Where appends a list predicates to the SysConfigMutation builder.
 func (m *SysConfigMutation) Where(ps ...predicate.SysConfig) {
 	m.predicates = append(m.predicates, ps...)
@@ -66895,7 +67913,7 @@ func (m *SysConfigMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SysConfigMutation) Fields() []string {
-	fields := make([]string, 0, 16)
+	fields := make([]string, 0, 17)
 	if m.created_at != nil {
 		fields = append(fields, sysconfig.FieldCreatedAt)
 	}
@@ -66944,6 +67962,9 @@ func (m *SysConfigMutation) Fields() []string {
 	if m.announcement_link != nil {
 		fields = append(fields, sysconfig.FieldAnnouncementLink)
 	}
+	if m.danmaku_enabled != nil {
+		fields = append(fields, sysconfig.FieldDanmakuEnabled)
+	}
 	return fields
 }
 
@@ -66984,6 +68005,8 @@ func (m *SysConfigMutation) Field(name string) (ent.Value, bool) {
 		return m.AnnouncementText()
 	case sysconfig.FieldAnnouncementLink:
 		return m.AnnouncementLink()
+	case sysconfig.FieldDanmakuEnabled:
+		return m.DanmakuEnabled()
 	}
 	return nil, false
 }
@@ -67025,6 +68048,8 @@ func (m *SysConfigMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldAnnouncementText(ctx)
 	case sysconfig.FieldAnnouncementLink:
 		return m.OldAnnouncementLink(ctx)
+	case sysconfig.FieldDanmakuEnabled:
+		return m.OldDanmakuEnabled(ctx)
 	}
 	return nil, fmt.Errorf("unknown SysConfig field %s", name)
 }
@@ -67145,6 +68170,13 @@ func (m *SysConfigMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAnnouncementLink(v)
+		return nil
+	case sysconfig.FieldDanmakuEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDanmakuEnabled(v)
 		return nil
 	}
 	return fmt.Errorf("unknown SysConfig field %s", name)
@@ -67362,6 +68394,9 @@ func (m *SysConfigMutation) ResetField(name string) error {
 		return nil
 	case sysconfig.FieldAnnouncementLink:
 		m.ResetAnnouncementLink()
+		return nil
+	case sysconfig.FieldDanmakuEnabled:
+		m.ResetDanmakuEnabled()
 		return nil
 	}
 	return fmt.Errorf("unknown SysConfig field %s", name)
@@ -83086,6 +84121,7 @@ type VideoMutation struct {
 	view_count        *uint64
 	addview_count     *int64
 	published_at      *time.Time
+	scheduled_at      *time.Time
 	clearedFields     map[string]struct{}
 	done              bool
 	oldValue          func(context.Context) (*Video, error)
@@ -84500,6 +85536,55 @@ func (m *VideoMutation) ResetPublishedAt() {
 	delete(m.clearedFields, video.FieldPublishedAt)
 }
 
+// SetScheduledAt sets the "scheduled_at" field.
+func (m *VideoMutation) SetScheduledAt(t time.Time) {
+	m.scheduled_at = &t
+}
+
+// ScheduledAt returns the value of the "scheduled_at" field in the mutation.
+func (m *VideoMutation) ScheduledAt() (r time.Time, exists bool) {
+	v := m.scheduled_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScheduledAt returns the old "scheduled_at" field's value of the Video entity.
+// If the Video object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VideoMutation) OldScheduledAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScheduledAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScheduledAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScheduledAt: %w", err)
+	}
+	return oldValue.ScheduledAt, nil
+}
+
+// ClearScheduledAt clears the value of the "scheduled_at" field.
+func (m *VideoMutation) ClearScheduledAt() {
+	m.scheduled_at = nil
+	m.clearedFields[video.FieldScheduledAt] = struct{}{}
+}
+
+// ScheduledAtCleared returns if the "scheduled_at" field was cleared in this mutation.
+func (m *VideoMutation) ScheduledAtCleared() bool {
+	_, ok := m.clearedFields[video.FieldScheduledAt]
+	return ok
+}
+
+// ResetScheduledAt resets all changes to the "scheduled_at" field.
+func (m *VideoMutation) ResetScheduledAt() {
+	m.scheduled_at = nil
+	delete(m.clearedFields, video.FieldScheduledAt)
+}
+
 // Where appends a list predicates to the VideoMutation builder.
 func (m *VideoMutation) Where(ps ...predicate.Video) {
 	m.predicates = append(m.predicates, ps...)
@@ -84534,7 +85619,7 @@ func (m *VideoMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *VideoMutation) Fields() []string {
-	fields := make([]string, 0, 24)
+	fields := make([]string, 0, 25)
 	if m.created_at != nil {
 		fields = append(fields, video.FieldCreatedAt)
 	}
@@ -84607,6 +85692,9 @@ func (m *VideoMutation) Fields() []string {
 	if m.published_at != nil {
 		fields = append(fields, video.FieldPublishedAt)
 	}
+	if m.scheduled_at != nil {
+		fields = append(fields, video.FieldScheduledAt)
+	}
 	return fields
 }
 
@@ -84663,6 +85751,8 @@ func (m *VideoMutation) Field(name string) (ent.Value, bool) {
 		return m.ViewCount()
 	case video.FieldPublishedAt:
 		return m.PublishedAt()
+	case video.FieldScheduledAt:
+		return m.ScheduledAt()
 	}
 	return nil, false
 }
@@ -84720,6 +85810,8 @@ func (m *VideoMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldViewCount(ctx)
 	case video.FieldPublishedAt:
 		return m.OldPublishedAt(ctx)
+	case video.FieldScheduledAt:
+		return m.OldScheduledAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Video field %s", name)
 }
@@ -84896,6 +85988,13 @@ func (m *VideoMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPublishedAt(v)
+		return nil
+	case video.FieldScheduledAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScheduledAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Video field %s", name)
@@ -85134,6 +86233,9 @@ func (m *VideoMutation) ClearedFields() []string {
 	if m.FieldCleared(video.FieldPublishedAt) {
 		fields = append(fields, video.FieldPublishedAt)
 	}
+	if m.FieldCleared(video.FieldScheduledAt) {
+		fields = append(fields, video.FieldScheduledAt)
+	}
 	return fields
 }
 
@@ -85183,6 +86285,9 @@ func (m *VideoMutation) ClearField(name string) error {
 		return nil
 	case video.FieldPublishedAt:
 		m.ClearPublishedAt()
+		return nil
+	case video.FieldScheduledAt:
+		m.ClearScheduledAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Video nullable field %s", name)
@@ -85263,6 +86368,9 @@ func (m *VideoMutation) ResetField(name string) error {
 		return nil
 	case video.FieldPublishedAt:
 		m.ResetPublishedAt()
+		return nil
+	case video.FieldScheduledAt:
+		m.ResetScheduledAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Video field %s", name)
@@ -86128,6 +87236,7 @@ type VideoCommentMutation struct {
 	addlike_count  *int64
 	reply_count    *uint64
 	addreply_count *int64
+	pinned         *bool
 	clearedFields  map[string]struct{}
 	done           bool
 	oldValue       func(context.Context) (*VideoComment, error)
@@ -86981,6 +88090,42 @@ func (m *VideoCommentMutation) ResetReplyCount() {
 	m.addreply_count = nil
 }
 
+// SetPinned sets the "pinned" field.
+func (m *VideoCommentMutation) SetPinned(b bool) {
+	m.pinned = &b
+}
+
+// Pinned returns the value of the "pinned" field in the mutation.
+func (m *VideoCommentMutation) Pinned() (r bool, exists bool) {
+	v := m.pinned
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPinned returns the old "pinned" field's value of the VideoComment entity.
+// If the VideoComment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VideoCommentMutation) OldPinned(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPinned is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPinned requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPinned: %w", err)
+	}
+	return oldValue.Pinned, nil
+}
+
+// ResetPinned resets all changes to the "pinned" field.
+func (m *VideoCommentMutation) ResetPinned() {
+	m.pinned = nil
+}
+
 // Where appends a list predicates to the VideoCommentMutation builder.
 func (m *VideoCommentMutation) Where(ps ...predicate.VideoComment) {
 	m.predicates = append(m.predicates, ps...)
@@ -87015,7 +88160,7 @@ func (m *VideoCommentMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *VideoCommentMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 14)
 	if m.created_at != nil {
 		fields = append(fields, videocomment.FieldCreatedAt)
 	}
@@ -87055,6 +88200,9 @@ func (m *VideoCommentMutation) Fields() []string {
 	if m.reply_count != nil {
 		fields = append(fields, videocomment.FieldReplyCount)
 	}
+	if m.pinned != nil {
+		fields = append(fields, videocomment.FieldPinned)
+	}
 	return fields
 }
 
@@ -87089,6 +88237,8 @@ func (m *VideoCommentMutation) Field(name string) (ent.Value, bool) {
 		return m.LikeCount()
 	case videocomment.FieldReplyCount:
 		return m.ReplyCount()
+	case videocomment.FieldPinned:
+		return m.Pinned()
 	}
 	return nil, false
 }
@@ -87124,6 +88274,8 @@ func (m *VideoCommentMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldLikeCount(ctx)
 	case videocomment.FieldReplyCount:
 		return m.OldReplyCount(ctx)
+	case videocomment.FieldPinned:
+		return m.OldPinned(ctx)
 	}
 	return nil, fmt.Errorf("unknown VideoComment field %s", name)
 }
@@ -87223,6 +88375,13 @@ func (m *VideoCommentMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetReplyCount(v)
+		return nil
+	case videocomment.FieldPinned:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPinned(v)
 		return nil
 	}
 	return fmt.Errorf("unknown VideoComment field %s", name)
@@ -87467,6 +88626,9 @@ func (m *VideoCommentMutation) ResetField(name string) error {
 		return nil
 	case videocomment.FieldReplyCount:
 		m.ResetReplyCount()
+		return nil
+	case videocomment.FieldPinned:
+		m.ResetPinned()
 		return nil
 	}
 	return fmt.Errorf("unknown VideoComment field %s", name)

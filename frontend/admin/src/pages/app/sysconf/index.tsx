@@ -39,6 +39,7 @@ const SysConfPage = () => {
         announcementEnabled: !!data.announcementEnabled,
         announcementText: data.announcementText ?? '',
         announcementLink: data.announcementLink ?? '',
+        danmakuEnabled: data.danmakuEnabled !== false,
       });
     }
   }, [data]);
@@ -79,6 +80,7 @@ const SysConfPage = () => {
         announcementEnabled: !!values.announcementEnabled,
         announcementText: String(values.announcementText ?? '').trim(),
         announcementLink: String(values.announcementLink ?? '').trim(),
+        danmakuEnabled: !!values.danmakuEnabled,
       });
       return true;
     } catch {
@@ -175,6 +177,11 @@ const SysConfPage = () => {
             extra={t('announcementLinkHint')}
             fieldProps={{ type: 'url', placeholder: 'https://...' }}
             rules={[{ pattern: /^https?:\/\/\S+$/, message: t('announcementLinkInvalid') }]}
+          />
+          <ProFormSwitch
+            name="danmakuEnabled"
+            label={t('danmakuEnabled')}
+            extra={t('danmakuEnabledHint')}
           />
         </ProForm>
 

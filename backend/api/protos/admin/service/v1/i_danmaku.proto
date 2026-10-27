@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package admin.service.v1;
+
+import "danmaku/service/v1/danmaku.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "pagination/v1/pagination.proto";
+
+// 弹幕管理服务（后台：列表 / 隐藏 / 恢复 / 删除）
+service DanmakuService {
+  // 弹幕列表（videoId 过滤 / status 过滤 / content 模糊）
+  rpc List (pagination.PagingRequest) returns (danmaku.service.v1.ListDanmakuResponse) {
+    option (google.api.http) = {
+      get: "/admin/v1/danmaku"
+    };
+  }
+
+  // 删除弹幕
+  rpc Delete (danmaku.service.v1.DeleteDanmakuRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/admin/v1/danmaku/{id}"
+    };
+  }
+
+  // 隐藏/恢复弹幕（不删行，可回滚）
+  rpc SetStatus (danmaku.service.v1.SetDanmakuStatusRequest) returns (danmaku.service.v1.Danmaku) {
+    option (google.api.http) = {
+      post: "/admin/v1/danmaku/{id}/status"
+      body: "*"
+    };
+  }
+}

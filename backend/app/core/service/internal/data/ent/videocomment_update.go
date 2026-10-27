@@ -269,6 +269,20 @@ func (_u *VideoCommentUpdate) AddReplyCount(v int64) *VideoCommentUpdate {
 	return _u
 }
 
+// SetPinned sets the "pinned" field.
+func (_u *VideoCommentUpdate) SetPinned(v bool) *VideoCommentUpdate {
+	_u.mutation.SetPinned(v)
+	return _u
+}
+
+// SetNillablePinned sets the "pinned" field if the given value is not nil.
+func (_u *VideoCommentUpdate) SetNillablePinned(v *bool) *VideoCommentUpdate {
+	if v != nil {
+		_u.SetPinned(*v)
+	}
+	return _u
+}
+
 // Mutation returns the VideoCommentMutation object of the builder.
 func (_u *VideoCommentUpdate) Mutation() *VideoCommentMutation {
 	return _u.mutation
@@ -393,6 +407,9 @@ func (_u *VideoCommentUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if value, ok := _u.mutation.AddedReplyCount(); ok {
 		_spec.AddField(videocomment.FieldReplyCount, field.TypeUint64, value)
+	}
+	if value, ok := _u.mutation.Pinned(); ok {
+		_spec.SetField(videocomment.FieldPinned, field.TypeBool, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -656,6 +673,20 @@ func (_u *VideoCommentUpdateOne) AddReplyCount(v int64) *VideoCommentUpdateOne {
 	return _u
 }
 
+// SetPinned sets the "pinned" field.
+func (_u *VideoCommentUpdateOne) SetPinned(v bool) *VideoCommentUpdateOne {
+	_u.mutation.SetPinned(v)
+	return _u
+}
+
+// SetNillablePinned sets the "pinned" field if the given value is not nil.
+func (_u *VideoCommentUpdateOne) SetNillablePinned(v *bool) *VideoCommentUpdateOne {
+	if v != nil {
+		_u.SetPinned(*v)
+	}
+	return _u
+}
+
 // Mutation returns the VideoCommentMutation object of the builder.
 func (_u *VideoCommentUpdateOne) Mutation() *VideoCommentMutation {
 	return _u.mutation
@@ -810,6 +841,9 @@ func (_u *VideoCommentUpdateOne) sqlSave(ctx context.Context) (_node *VideoComme
 	}
 	if value, ok := _u.mutation.AddedReplyCount(); ok {
 		_spec.AddField(videocomment.FieldReplyCount, field.TypeUint64, value)
+	}
+	if value, ok := _u.mutation.Pinned(); ok {
+		_spec.SetField(videocomment.FieldPinned, field.TypeBool, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &VideoComment{config: _u.config}

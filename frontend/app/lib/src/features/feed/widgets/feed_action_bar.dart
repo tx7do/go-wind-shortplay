@@ -29,6 +29,9 @@ class FeedActionBar extends StatefulWidget {
   final String authorAvatarUrl;
 
   final VoidCallback? onCommentTap;
+
+  /// 弹幕入口（视频详情页传入；null 则不展示按钮）
+  final VoidCallback? onDanmakuTap;
   final ValueChanged<Video>? onVideoUpdated;
 
   const FeedActionBar({
@@ -37,6 +40,7 @@ class FeedActionBar extends StatefulWidget {
     this.authorNickname = '',
     this.authorAvatarUrl = '',
     this.onCommentTap,
+    this.onDanmakuTap,
     this.onVideoUpdated,
   });
 
@@ -94,10 +98,9 @@ class _FeedActionBarState extends State<FeedActionBar> {
               targetId: widget.video.id,
             );
       if (liked && result.liked) {
-        _uba.report(UbaEvent(
-          eventType: UbaEventType.videoLike,
-          videoId: widget.video.id,
-        ));
+        _uba.report(
+          UbaEvent(eventType: UbaEventType.videoLike, videoId: widget.video.id),
+        );
       }
       _syncVideo();
     } catch (_) {
@@ -122,10 +125,12 @@ class _FeedActionBarState extends State<FeedActionBar> {
           ? await _interaction.collect(videoId: widget.video.id)
           : await _interaction.uncollect(videoId: widget.video.id);
       if (collected && result.collected) {
-        _uba.report(UbaEvent(
-          eventType: UbaEventType.videoCollect,
-          videoId: widget.video.id,
-        ));
+        _uba.report(
+          UbaEvent(
+            eventType: UbaEventType.videoCollect,
+            videoId: widget.video.id,
+          ),
+        );
       }
       _syncVideo();
     } catch (_) {
@@ -146,11 +151,13 @@ class _FeedActionBarState extends State<FeedActionBar> {
     try {
       if (following) {
         await _interaction.follow(widget.video.authorId);
-        _uba.report(UbaEvent(
-          eventType: UbaEventType.followAuthor,
-          videoId: widget.video.id,
-          targetUserId: widget.video.authorId,
-        ));
+        _uba.report(
+          UbaEvent(
+            eventType: UbaEventType.followAuthor,
+            videoId: widget.video.id,
+            targetUserId: widget.video.authorId,
+          ),
+        );
       } else {
         await _interaction.unfollow(widget.video.authorId);
       }
@@ -169,13 +176,15 @@ class _FeedActionBarState extends State<FeedActionBar> {
   }
 
   void _syncVideo() {
-    widget.onVideoUpdated?.call(widget.video.copyWith(
-      liked: _liked,
-      collected: _collected,
-      followingAuthor: _following,
-      likeCount: _likeCount,
-      collectCount: _collectCount,
-    ));
+    widget.onVideoUpdated?.call(
+      widget.video.copyWith(
+        liked: _liked,
+        collected: _collected,
+        followingAuthor: _following,
+        likeCount: _likeCount,
+        collectCount: _collectCount,
+      ),
+    );
   }
 
   @override
@@ -215,12 +224,8 @@ class _FeedActionBarState extends State<FeedActionBar> {
                       height: 20.r,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: _following
-                            ? null
-                            : BrandColor.gradient,
-                        color: _following
-                            ? theme.colorScheme.surface
-                            : null,
+                        gradient: _following ? null : BrandColor.gradient,
+                        color: _following ? theme.colorScheme.surface : null,
                         border: _following
                             ? Border.all(
                                 color: theme.colorScheme.primary,
@@ -246,8 +251,8 @@ class _FeedActionBarState extends State<FeedActionBar> {
           icon: _liked ? Icons.favorite : Icons.favorite_border,
           color: _liked
               ? (theme.brightness == Brightness.dark
-                  ? BrandColor.roseBright
-                  : BrandColor.rose)
+                    ? BrandColor.roseBright
+                    : BrandColor.rose)
               : Colors.white,
           label: NumberFormatUtils.formatCount(_likeCount),
           onTap: _toggleLike,
@@ -260,11 +265,19 @@ class _FeedActionBarState extends State<FeedActionBar> {
           onTap: () => widget.onCommentTap?.call(),
           semanticLabel: loc.comment,
         ),
+        if (widget.onDanmakuTap != null) ...[
+          SizedBox(height: 18.h),
+          _ActionButton(
+            icon: Icons.subtitles_rounded,
+            color: Colors.white,
+            label: loc.danmaku,
+            onTap: () => widget.onDanmakuTap?.call(),
+            semanticLabel: loc.danmaku,
+          ),
+        ],
         SizedBox(height: 18.h),
         _ActionButton(
-          icon: _collected
-              ? Icons.bookmark
-              : Icons.bookmark_border_rounded,
+          icon: _collected ? Icons.bookmark : Icons.bookmark_border_rounded,
           color: _collected ? BrandColor.collect : Colors.white,
           label: NumberFormatUtils.formatCount(_collectCount),
           onTap: _toggleCollect,
@@ -306,9 +319,14 @@ class _ActionButton extends StatelessWidget {
         button: true,
         child: Column(
           children: [
-            Icon(icon, size: 32.r, color: color, shadows: [
-              Shadow(color: Colors.black.withAlpha(90), blurRadius: 6),
-            ]),
+            Icon(
+              icon,
+              size: 32.r,
+              color: color,
+              shadows: [
+                Shadow(color: Colors.black.withAlpha(90), blurRadius: 6),
+              ],
+            ),
             SizedBox(height: 2.h),
             Text(
               label,

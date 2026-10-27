@@ -11,5 +11,6 @@
   "deleteConfirmDesc": "This cannot be undone. Delete this {{moduleName}}?",
   "deleteSuccess": "Deleted",
   "deleteFailed": "Delete failed",
-  "action": "Actions"
+  "action": "Actions",
+  "pinned": "Pinned"
 }

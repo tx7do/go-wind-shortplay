@@ -99,6 +99,14 @@ service VideoService {
     };
   }
 
+  // 设置/取消定时发布（作者本人；仅草稿；scheduledAt 缺省=取消）
+  rpc ScheduleVideo (video.service.v1.ScheduleVideoRequest) returns (video.service.v1.Video) {
+    option (google.api.http) = {
+      put: "/app/v1/videos/{id}/schedule"
+      body: "*"
+    };
+  }
+
   // 标签列表（发布页选择 / 搜索联想）
   rpc ListTag (pagination.PagingRequest) returns (video.service.v1.ListTagResponse) {
     option (google.api.http) = {

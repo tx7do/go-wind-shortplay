@@ -237,6 +237,38 @@ var (
 			},
 		},
 	}
+	// SpDanmakuColumns holds the columns for the "sp_danmaku" table.
+	SpDanmakuColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id"},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "tenant_id", Type: field.TypeUint32, Nullable: true, Comment: "租户ID", Default: 0},
+		{Name: "video_id", Type: field.TypeUint32, Comment: "视频ID", Default: 0},
+		{Name: "user_id", Type: field.TypeUint32, Comment: "发送人用户ID", Default: 0},
+		{Name: "content", Type: field.TypeString, Size: 2147483647, Comment: "内容（发送时经敏感词过滤，≤100 字）", Default: ""},
+		{Name: "time_offset_ms", Type: field.TypeUint64, Comment: "视频时间轴偏移（毫秒）", Default: 0},
+		{Name: "status", Type: field.TypeEnum, Comment: "状态（管理端隐藏/恢复）", Enums: []string{"DANMAKU_STATUS_VISIBLE", "DANMAKU_STATUS_HIDDEN"}, Default: "DANMAKU_STATUS_VISIBLE"},
+	}
+	// SpDanmakuTable holds the schema information for the "sp_danmaku" table.
+	SpDanmakuTable = &schema.Table{
+		Name:       "sp_danmaku",
+		Comment:    "视频弹幕表",
+		Columns:    SpDanmakuColumns,
+		PrimaryKey: []*schema.Column{SpDanmakuColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "idx_sp_danmaku_video_status",
+				Unique:  false,
+				Columns: []*schema.Column{SpDanmakuColumns[5], SpDanmakuColumns[9]},
+			},
+			{
+				Name:    "idx_sp_danmaku_user",
+				Unique:  false,
+				Columns: []*schema.Column{SpDanmakuColumns[6]},
+			},
+		},
+	}
 	// SysDataAccessAuditLogsColumns holds the columns for the "sys_data_access_audit_logs" table.
 	SysDataAccessAuditLogsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id"},
@@ -2716,6 +2748,7 @@ var (
 		{Name: "announcement_enabled", Type: field.TypeBool, Comment: "App 公告横幅开关", Default: false},
 		{Name: "announcement_text", Type: field.TypeString, Nullable: true, Size: 2147483647, Comment: "公告文案（空则不展示）"},
 		{Name: "announcement_link", Type: field.TypeString, Comment: "公告跳转链接（可空）", Default: ""},
+		{Name: "danmaku_enabled", Type: field.TypeBool, Comment: "弹幕开关（关闭则 App 隐藏弹幕层并拒绝发送）", Default: true},
 	}
 	// SpSysConfigsTable holds the schema information for the "sp_sys_configs" table.
 	SpSysConfigsTable = &schema.Table{
@@ -3409,6 +3442,7 @@ var (
 		{Name: "comment_count", Type: field.TypeUint64, Comment: "评论数（ledger 事务内增减）", Default: 0},
 		{Name: "view_count", Type: field.TypeUint64, Comment: "播放量（ledger 事务内增减）", Default: 0},
 		{Name: "published_at", Type: field.TypeTime, Nullable: true, Comment: "发布时间"},
+		{Name: "scheduled_at", Type: field.TypeTime, Nullable: true, Comment: "计划发布时间（DRAFT 定时中，到期任务自动转 PUBLISHED 并清空）"},
 	}
 	// SpVideosTable holds the schema information for the "sp_videos" table.
 	SpVideosTable = &schema.Table{
@@ -3421,6 +3455,11 @@ var (
 				Name:    "idx_sp_video_status_published_at",
 				Unique:  false,
 				Columns: []*schema.Column{SpVideosColumns[15], SpVideosColumns[24]},
+			},
+			{
+				Name:    "idx_sp_video_status_scheduled_at",
+				Unique:  false,
+				Columns: []*schema.Column{SpVideosColumns[15], SpVideosColumns[25]},
 			},
 			{
 				Name:    "idx_sp_video_author_status",
@@ -3489,6 +3528,7 @@ var (
 		{Name: "parent_id", Type: field.TypeUint32, Comment: "父评论ID（0=一级评论）", Default: 0},
 		{Name: "like_count", Type: field.TypeUint64, Comment: "点赞数（ledger 事务内增减）", Default: 0},
 		{Name: "reply_count", Type: field.TypeUint64, Comment: "回复数（仅一级评论维护）", Default: 0},
+		{Name: "pinned", Type: field.TypeBool, Comment: "作者置顶（仅一级评论；列表置顶优先）", Default: false},
 	}
 	// SpVideoCommentsTable holds the schema information for the "sp_video_comments" table.
 	SpVideoCommentsTable = &schema.Table{
@@ -3681,6 +3721,7 @@ var (
 		SysApisTable,
 		SysAPIAuditLogsTable,
 		CommentsTable,
+		SpDanmakuTable,
 		SysDataAccessAuditLogsTable,
 		SysDictEntriesTable,
 		SysDictEntryI18nTable,
@@ -3755,6 +3796,11 @@ func init() {
 	CommentsTable.ForeignKeys[0].RefTable = CommentsTable
 	CommentsTable.Annotation = &entsql.Annotation{
 		Table:     "comments",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	SpDanmakuTable.Annotation = &entsql.Annotation{
+		Table:     "sp_danmaku",
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}

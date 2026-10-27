@@ -81,6 +81,16 @@ export const shortplayRoutes: AppRouteObject[] = [
           order: 5,
         },
       },
+      {
+        name: 'danmaku',
+        path: 'danmaku',
+        element: createLazyRoute(() => import('@/pages/app/danmaku')),
+        meta: {
+          title: 'menu.shortPlay.danmaku',
+          icon: 'MessageOutlined',
+          order: 6,
+        },
+      },
     ],
   },
 ];

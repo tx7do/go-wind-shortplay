@@ -38,10 +38,8 @@ class SeriesPickerSheet extends StatefulWidget {
       isScrollControlled: true,
       showDragHandle: true,
       constraints: const BoxConstraints(maxWidth: 560),
-      builder: (_) => SeriesPickerSheet(
-        selectedId: selectedId,
-        onSelected: onSelected,
-      ),
+      builder: (_) =>
+          SeriesPickerSheet(selectedId: selectedId, onSelected: onSelected),
     );
   }
 
@@ -195,75 +193,74 @@ class _SeriesPickerSheetState extends State<SeriesPickerSheet> {
               child: _items.isEmpty && _loading
                   ? const Center(child: CircularProgressIndicator())
                   : _items.isEmpty
-                      ? EmptyState(
-                          icon: Icons.movie_outlined,
-                          title: loc.seriesEmptyMine,
-                          actionLabel: loc.newSeries,
-                          onAction: _createSeries,
-                        )
-                      : ListView.builder(
-                          controller: _scrollController,
-                          padding: EdgeInsets.only(bottom: 12.h),
-                          itemCount:
-                              _items.length + (_hasMore ? 1 : 0),
-                          itemBuilder: (context, index) {
-                            if (index >= _items.length) {
-                              return Padding(
-                                padding: EdgeInsets.all(10.h),
-                                child: Center(
-                                  child: _loading
-                                      ? const CircularProgressIndicator(
-                                          strokeWidth: 2)
-                                      : Text(
-                                          loc.allLoaded,
-                                          style: TextStyle(
-                                            fontSize: 12.sp,
-                                            color: theme
-                                                .colorScheme.onSurface
-                                                .withAlpha(110),
-                                          ),
-                                        ),
-                                ),
-                              );
-                            }
-                            final series = _items[index];
-                            final selected = series.id == widget.selectedId;
-                            return ListTile(
-                              leading: CoverImage(
-                                url: series.coverDisplayUrl,
-                                width: 56.w,
-                                height: 38.h,
-                                borderRadius: BorderRadius.circular(6.r),
-                              ),
-                              title: Text(
-                                series.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              subtitle: Text(
-                                loc.seriesUpdatedTo(
-                                  series.publishedCount,
-                                  series.episodeCount,
-                                ),
-                                style: TextStyle(fontSize: 11.sp),
-                              ),
-                              trailing: selected
-                                  ? Icon(
-                                      Icons.check_circle,
-                                      color: theme.colorScheme.primary,
+                  ? EmptyState(
+                      icon: Icons.movie_outlined,
+                      title: loc.seriesEmptyMine,
+                      actionLabel: loc.newSeries,
+                      onAction: _createSeries,
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      padding: EdgeInsets.only(bottom: 12.h),
+                      itemCount: _items.length + (_hasMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index >= _items.length) {
+                          return Padding(
+                            padding: EdgeInsets.all(10.h),
+                            child: Center(
+                              child: _loading
+                                  ? const CircularProgressIndicator(
+                                      strokeWidth: 2,
                                     )
-                                  : null,
-                              onTap: () {
-                                widget.onSelected(series);
-                                Navigator.of(context).pop();
-                              },
-                            );
+                                  : Text(
+                                      loc.allLoaded,
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        color: theme.colorScheme.onSurface
+                                            .withAlpha(110),
+                                      ),
+                                    ),
+                            ),
+                          );
+                        }
+                        final series = _items[index];
+                        final selected = series.id == widget.selectedId;
+                        return ListTile(
+                          leading: CoverImage(
+                            url: series.coverDisplayUrl,
+                            width: 56.w,
+                            height: 38.h,
+                            borderRadius: BorderRadius.circular(6.r),
+                          ),
+                          title: Text(
+                            series.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: Text(
+                            loc.seriesUpdatedTo(
+                              series.publishedCount,
+                              series.episodeCount,
+                            ),
+                            style: TextStyle(fontSize: 11.sp),
+                          ),
+                          trailing: selected
+                              ? Icon(
+                                  Icons.check_circle,
+                                  color: theme.colorScheme.primary,
+                                )
+                              : null,
+                          onTap: () {
+                            widget.onSelected(series);
+                            Navigator.of(context).pop();
                           },
-                        ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),

@@ -44,6 +44,18 @@ func (f CommentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CommentMutation", m)
 }
 
+// The DanmakuFunc type is an adapter to allow the use of ordinary
+// function as Danmaku mutator.
+type DanmakuFunc func(context.Context, *ent.DanmakuMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DanmakuFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DanmakuMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DanmakuMutation", m)
+}
+
 // The DataAccessAuditLogFunc type is an adapter to allow the use of ordinary
 // function as DataAccessAuditLog mutator.
 type DataAccessAuditLogFunc func(context.Context, *ent.DataAccessAuditLogMutation) (ent.Value, error)

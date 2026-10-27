@@ -431,6 +431,127 @@ paths:
                 "200":
                     description: OK
                     content: {}
+    /admin/v1/danmaku:
+        get:
+            tags:
+                - DanmakuService
+            description: 弹幕列表（videoId 过滤 / status 过滤 / content 模糊）
+            operationId: DanmakuService_List
+            parameters:
+                - name: page
+                  in: query
+                  description: 当前页码（从1开始，默认1）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  description: 每页条数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: offset
+                  in: query
+                  description: 跳过的记录数（从0开始，默认0）
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: 最多返回的记录数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: token
+                  in: query
+                  description: 上一页最后一条记录的游标（如ID/时间戳+ID，首次请求为空）
+                  schema:
+                    type: string
+                - name: noPaging
+                  in: query
+                  description: 是否不分页，如果为true，则page和pageSize参数无效。
+                  schema:
+                    type: boolean
+                - name: query
+                  in: query
+                  description: JSON字符串过滤条件，基础语法：{"field1":"val1", "field2___icontains":"val2"}，具体请参见：https://github.com/tx7do/go-crud/tree/main/pagination/filter/README.md
+                  schema:
+                    type: string
+                - name: filter
+                  in: query
+                  description: Google AIP规范字符串过滤条件
+                  schema:
+                    type: string
+                - name: filterExpr.type
+                  in: query
+                  description: 过滤表达式类型
+                  schema:
+                    enum:
+                        - EXPR_TYPE_UNSPECIFIED
+                        - AND
+                        - OR
+                    type: string
+                    format: enum
+                - name: orderBy
+                  in: query
+                  description: 排序条件
+                  schema:
+                    type: string
+                - name: fieldMask
+                  in: query
+                  description: 字段掩码，其作用为SELECT中的字段，其语法为使用逗号分隔字段名，例如：id,realName,userName。如果为空则选中所有字段，即SELECT *。
+                  schema:
+                    type: string
+                    format: field-mask
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/danmaku.service.v1.ListDanmakuResponse'
+    /admin/v1/danmaku/{id}:
+        delete:
+            tags:
+                - DanmakuService
+            description: 删除弹幕
+            operationId: DanmakuService_Delete
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /admin/v1/danmaku/{id}/status:
+        post:
+            tags:
+                - DanmakuService
+            description: 隐藏/恢复弹幕（不删行，可回滚）
+            operationId: DanmakuService_SetStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/danmaku.service.v1.SetDanmakuStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/danmaku.service.v1.Danmaku'
     /admin/v1/dashboard/overview:
         get:
             tags:
@@ -6786,6 +6907,56 @@ components:
                 valid:
                     type: boolean
                     description: 验证码验证结果，true表示验证成功，false表示验证失败
+        danmaku.service.v1.Danmaku:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                videoId:
+                    type: integer
+                    format: uint32
+                userId:
+                    type: integer
+                    format: uint32
+                user:
+                    $ref: '#/components/schemas/identity.service.v1.UserBrief'
+                content:
+                    type: string
+                timeOffsetMs:
+                    type: string
+                status:
+                    enum:
+                        - DANMAKU_STATUS_UNSPECIFIED
+                        - DANMAKU_STATUS_VISIBLE
+                        - DANMAKU_STATUS_HIDDEN
+                    type: string
+                    format: enum
+                createdAt:
+                    type: string
+                    format: date-time
+        danmaku.service.v1.ListDanmakuResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/danmaku.service.v1.Danmaku'
+                total:
+                    type: string
+        danmaku.service.v1.SetDanmakuStatusRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                status:
+                    enum:
+                        - DANMAKU_STATUS_UNSPECIFIED
+                        - DANMAKU_STATUS_VISIBLE
+                        - DANMAKU_STATUS_HIDDEN
+                    type: string
+                    format: enum
         dict.service.v1.BatchCreateLanguagesRequest:
             type: object
             properties:
@@ -7900,6 +8071,8 @@ components:
                     type: string
                 replyCount:
                     type: string
+                pinned:
+                    type: boolean
                 createdAt:
                     type: string
                     format: date-time
@@ -10146,6 +10319,8 @@ components:
                     type: string
                 announcementLink:
                     type: string
+                danmakuEnabled:
+                    type: boolean
                 updatedAt:
                     type: string
                     format: date-time
@@ -10178,6 +10353,8 @@ components:
                     type: string
                 announcementLink:
                     type: string
+                danmakuEnabled:
+                    type: boolean
         task.service.v1.ControlTaskRequest:
             type: object
             properties:
@@ -10499,6 +10676,9 @@ components:
                 publishedAt:
                     type: string
                     format: date-time
+                scheduledAt:
+                    type: string
+                    format: date-time
                 createdAt:
                     type: string
                     format: date-time
@@ -10533,6 +10713,8 @@ tags:
       description: 用户后台登录认证服务
     - name: CommentService
       description: "评论管理服务（后台）\r\n Phase 2：短剧业务评论管理面接管 /admin/v1/comments 路由（基座 CMS 泛型评论\r\n BFF 面与业务前端契约同路径冲突，此处按业务契约重写；基座 comment 域的\r\n gRPC 服务保持原样，仅不再被 admin BFF 消费）。"
+    - name: DanmakuService
+      description: 弹幕管理服务（后台：列表 / 隐藏 / 恢复 / 删除）
     - name: DashboardService
       description: 数据看板服务（后台）
     - name: DataAccessAuditLogService

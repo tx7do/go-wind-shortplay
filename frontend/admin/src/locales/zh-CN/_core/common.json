@@ -367,7 +367,8 @@
       "video": "视频管理",
       "comment": "评论管理",
       "report": "举报管理",
-      "sysconf": "系统配置"
+      "sysconf": "系统配置",
+      "danmaku": "弹幕管理"
     }
   },
   "page": {

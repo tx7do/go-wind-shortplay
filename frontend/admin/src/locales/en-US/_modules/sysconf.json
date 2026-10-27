@@ -29,5 +29,7 @@
   "announcementTextPlaceholder": "Announcement content (max 200 chars)",
   "announcementLink": "Announcement Link",
   "announcementLinkHint": "Optional; opened when the banner is tapped (http/https)",
-  "announcementLinkInvalid": "Link must start with http(s)://"
+  "announcementLinkInvalid": "Link must start with http(s)://",
+  "danmakuEnabled": "Danmaku",
+  "danmakuEnabledHint": "When off, the app hides the danmaku layer and rejects sending (existing danmaku hidden)"
 }

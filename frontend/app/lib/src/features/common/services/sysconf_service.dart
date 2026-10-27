@@ -15,10 +15,14 @@ class SysConf {
   /// 公告跳转链接（可空）
   final String announcementLink;
 
+  /// 弹幕开关（关闭则隐藏弹幕层并拒绝发送）
+  final bool danmakuEnabled;
+
   const SysConf({
     this.announcementEnabled = false,
     this.announcementText = '',
     this.announcementLink = '',
+    this.danmakuEnabled = true,
   });
 
   factory SysConf.fromJson(Map<String, dynamic> json) {
@@ -26,6 +30,7 @@ class SysConf {
       announcementEnabled: jsonBool(json['announcementEnabled']),
       announcementText: jsonString(json['announcementText']),
       announcementLink: jsonString(json['announcementLink']),
+      danmakuEnabled: jsonBool(json['danmakuEnabled'], fallback: true),
     );
   }
 

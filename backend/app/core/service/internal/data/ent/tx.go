@@ -18,6 +18,8 @@ type Tx struct {
 	ApiAuditLog *ApiAuditLogClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
+	// Danmaku is the client for interacting with the Danmaku builders.
+	Danmaku *DanmakuClient
 	// DataAccessAuditLog is the client for interacting with the DataAccessAuditLog builders.
 	DataAccessAuditLog *DataAccessAuditLogClient
 	// DictEntry is the client for interacting with the DictEntry builders.
@@ -266,6 +268,7 @@ func (tx *Tx) init() {
 	tx.Api = NewAPIClient(tx.config)
 	tx.ApiAuditLog = NewApiAuditLogClient(tx.config)
 	tx.Comment = NewCommentClient(tx.config)
+	tx.Danmaku = NewDanmakuClient(tx.config)
 	tx.DataAccessAuditLog = NewDataAccessAuditLogClient(tx.config)
 	tx.DictEntry = NewDictEntryClient(tx.config)
 	tx.DictEntryI18n = NewDictEntryI18nClient(tx.config)

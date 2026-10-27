@@ -34,6 +34,7 @@ const (
 	VideoService_SubmitDraft_FullMethodName        = "/app.service.v1.VideoService/SubmitDraft"
 	VideoService_UpdateVideo_FullMethodName        = "/app.service.v1.VideoService/UpdateVideo"
 	VideoService_DeleteVideo_FullMethodName        = "/app.service.v1.VideoService/DeleteVideo"
+	VideoService_ScheduleVideo_FullMethodName      = "/app.service.v1.VideoService/ScheduleVideo"
 	VideoService_ListTag_FullMethodName            = "/app.service.v1.VideoService/ListTag"
 	VideoService_GetCreatorOverview_FullMethodName = "/app.service.v1.VideoService/GetCreatorOverview"
 	VideoService_ListCreatorTrends_FullMethodName  = "/app.service.v1.VideoService/ListCreatorTrends"
@@ -68,6 +69,8 @@ type VideoServiceClient interface {
 	UpdateVideo(ctx context.Context, in *v1.UpdateVideoRequest, opts ...grpc.CallOption) (*v1.Video, error)
 	// 删除自己的视频
 	DeleteVideo(ctx context.Context, in *v1.DeleteVideoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// 设置/取消定时发布（作者本人；仅草稿；scheduledAt 缺省=取消）
+	ScheduleVideo(ctx context.Context, in *v1.ScheduleVideoRequest, opts ...grpc.CallOption) (*v1.Video, error)
 	// 标签列表（发布页选择 / 搜索联想）
 	ListTag(ctx context.Context, in *v11.PagingRequest, opts ...grpc.CallOption) (*v1.ListTagResponse, error)
 	// 创作者中心总览（我的作品聚合数据）
@@ -196,6 +199,16 @@ func (c *videoServiceClient) DeleteVideo(ctx context.Context, in *v1.DeleteVideo
 	return out, nil
 }
 
+func (c *videoServiceClient) ScheduleVideo(ctx context.Context, in *v1.ScheduleVideoRequest, opts ...grpc.CallOption) (*v1.Video, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Video)
+	err := c.cc.Invoke(ctx, VideoService_ScheduleVideo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *videoServiceClient) ListTag(ctx context.Context, in *v11.PagingRequest, opts ...grpc.CallOption) (*v1.ListTagResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.ListTagResponse)
@@ -264,6 +277,8 @@ type VideoServiceServer interface {
 	UpdateVideo(context.Context, *v1.UpdateVideoRequest) (*v1.Video, error)
 	// 删除自己的视频
 	DeleteVideo(context.Context, *v1.DeleteVideoRequest) (*emptypb.Empty, error)
+	// 设置/取消定时发布（作者本人；仅草稿；scheduledAt 缺省=取消）
+	ScheduleVideo(context.Context, *v1.ScheduleVideoRequest) (*v1.Video, error)
 	// 标签列表（发布页选择 / 搜索联想）
 	ListTag(context.Context, *v11.PagingRequest) (*v1.ListTagResponse, error)
 	// 创作者中心总览（我的作品聚合数据）
@@ -314,6 +329,9 @@ func (UnimplementedVideoServiceServer) UpdateVideo(context.Context, *v1.UpdateVi
 }
 func (UnimplementedVideoServiceServer) DeleteVideo(context.Context, *v1.DeleteVideoRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteVideo not implemented")
+}
+func (UnimplementedVideoServiceServer) ScheduleVideo(context.Context, *v1.ScheduleVideoRequest) (*v1.Video, error) {
+	return nil, status.Error(codes.Unimplemented, "method ScheduleVideo not implemented")
 }
 func (UnimplementedVideoServiceServer) ListTag(context.Context, *v11.PagingRequest) (*v1.ListTagResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListTag not implemented")
@@ -546,6 +564,24 @@ func _VideoService_DeleteVideo_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VideoService_ScheduleVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ScheduleVideoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoServiceServer).ScheduleVideo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoService_ScheduleVideo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoServiceServer).ScheduleVideo(ctx, req.(*v1.ScheduleVideoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _VideoService_ListTag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v11.PagingRequest)
 	if err := dec(in); err != nil {
@@ -668,6 +704,10 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteVideo",
 			Handler:    _VideoService_DeleteVideo_Handler,
+		},
+		{
+			MethodName: "ScheduleVideo",
+			Handler:    _VideoService_ScheduleVideo_Handler,
 		},
 		{
 			MethodName: "ListTag",

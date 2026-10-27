@@ -388,5 +388,16 @@
   "dislikeRecorded": "You will see less of this",
   "searchHistory": "Search History",
   "searchHistoryClear": "Clear",
-  "hotKeywords": "Trending Searches"
+  "hotKeywords": "Trending Searches",
+  "danmaku": "Danmaku",
+  "danmakuSendTitle": "Send Danmaku",
+  "danmakuSendHint": "Say something…",
+  "danmakuSendAction": "Send",
+  "playback": "Playback",
+  "pinnedBadge": "Pinned",
+  "pin": "Pin",
+  "unpin": "Unpin",
+  "scheduledPublishOption": "Scheduled publish (auto publish at time)",
+  "scheduledPublished": "Scheduled! Will publish automatically",
+  "scheduledTimePast": "Scheduled time must be in the future"
 }

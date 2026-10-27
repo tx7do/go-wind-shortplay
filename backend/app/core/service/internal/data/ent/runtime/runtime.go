@@ -8,6 +8,7 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent/api"
 	"go-wind-shortplay/app/core/service/internal/data/ent/apiauditlog"
 	"go-wind-shortplay/app/core/service/internal/data/ent/comment"
+	"go-wind-shortplay/app/core/service/internal/data/ent/danmaku"
 	"go-wind-shortplay/app/core/service/internal/data/ent/dataaccessauditlog"
 	"go-wind-shortplay/app/core/service/internal/data/ent/dictentry"
 	"go-wind-shortplay/app/core/service/internal/data/ent/dictentryi18n"
@@ -161,6 +162,46 @@ func init() {
 	commentDescID := commentMixinFields0[0].Descriptor()
 	// comment.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	comment.IDValidator = commentDescID.Validators[0].(func(uint32) error)
+	danmakuMixin := schema.Danmaku{}.Mixin()
+	danmaku.Policy = privacy.NewPolicies(danmakuMixin[2], schema.Danmaku{})
+	danmaku.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := danmaku.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	danmakuMixinFields0 := danmakuMixin[0].Fields()
+	_ = danmakuMixinFields0
+	danmakuMixinFields2 := danmakuMixin[2].Fields()
+	_ = danmakuMixinFields2
+	danmakuFields := schema.Danmaku{}.Fields()
+	_ = danmakuFields
+	// danmakuDescTenantID is the schema descriptor for tenant_id field.
+	danmakuDescTenantID := danmakuMixinFields2[0].Descriptor()
+	// danmaku.DefaultTenantID holds the default value on creation for the tenant_id field.
+	danmaku.DefaultTenantID = danmakuDescTenantID.Default.(uint32)
+	// danmakuDescVideoID is the schema descriptor for video_id field.
+	danmakuDescVideoID := danmakuFields[0].Descriptor()
+	// danmaku.DefaultVideoID holds the default value on creation for the video_id field.
+	danmaku.DefaultVideoID = danmakuDescVideoID.Default.(uint32)
+	// danmakuDescUserID is the schema descriptor for user_id field.
+	danmakuDescUserID := danmakuFields[1].Descriptor()
+	// danmaku.DefaultUserID holds the default value on creation for the user_id field.
+	danmaku.DefaultUserID = danmakuDescUserID.Default.(uint32)
+	// danmakuDescContent is the schema descriptor for content field.
+	danmakuDescContent := danmakuFields[2].Descriptor()
+	// danmaku.DefaultContent holds the default value on creation for the content field.
+	danmaku.DefaultContent = danmakuDescContent.Default.(string)
+	// danmakuDescTimeOffsetMs is the schema descriptor for time_offset_ms field.
+	danmakuDescTimeOffsetMs := danmakuFields[3].Descriptor()
+	// danmaku.DefaultTimeOffsetMs holds the default value on creation for the time_offset_ms field.
+	danmaku.DefaultTimeOffsetMs = danmakuDescTimeOffsetMs.Default.(uint64)
+	// danmakuDescID is the schema descriptor for id field.
+	danmakuDescID := danmakuMixinFields0[0].Descriptor()
+	// danmaku.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	danmaku.IDValidator = danmakuDescID.Validators[0].(func(uint32) error)
 	dataaccessauditlogMixin := schema.DataAccessAuditLog{}.Mixin()
 	dataaccessauditlog.Policy = privacy.NewPolicies(dataaccessauditlogMixin[2], schema.DataAccessAuditLog{})
 	dataaccessauditlog.Hooks[0] = func(next ent.Mutator) ent.Mutator {
@@ -1378,6 +1419,10 @@ func init() {
 	sysconfigDescAnnouncementLink := sysconfigFields[9].Descriptor()
 	// sysconfig.DefaultAnnouncementLink holds the default value on creation for the announcement_link field.
 	sysconfig.DefaultAnnouncementLink = sysconfigDescAnnouncementLink.Default.(string)
+	// sysconfigDescDanmakuEnabled is the schema descriptor for danmaku_enabled field.
+	sysconfigDescDanmakuEnabled := sysconfigFields[10].Descriptor()
+	// sysconfig.DefaultDanmakuEnabled holds the default value on creation for the danmaku_enabled field.
+	sysconfig.DefaultDanmakuEnabled = sysconfigDescDanmakuEnabled.Default.(bool)
 	// sysconfigDescID is the schema descriptor for id field.
 	sysconfigDescID := sysconfigMixinFields0[0].Descriptor()
 	// sysconfig.IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -1887,6 +1932,10 @@ func init() {
 	videocommentDescReplyCount := videocommentFields[5].Descriptor()
 	// videocomment.DefaultReplyCount holds the default value on creation for the reply_count field.
 	videocomment.DefaultReplyCount = videocommentDescReplyCount.Default.(uint64)
+	// videocommentDescPinned is the schema descriptor for pinned field.
+	videocommentDescPinned := videocommentFields[6].Descriptor()
+	// videocomment.DefaultPinned holds the default value on creation for the pinned field.
+	videocomment.DefaultPinned = videocommentDescPinned.Default.(bool)
 	// videocommentDescID is the schema descriptor for id field.
 	videocommentDescID := videocommentMixinFields0[0].Descriptor()
 	// videocomment.IDValidator is a validator for the "id" field. It is called by the builders before save.

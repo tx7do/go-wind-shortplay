@@ -26,6 +26,7 @@ const (
 	CommentService_ListComment_FullMethodName   = "/interaction.service.v1.CommentService/ListComment"
 	CommentService_ListReply_FullMethodName     = "/interaction.service.v1.CommentService/ListReply"
 	CommentService_AdminList_FullMethodName     = "/interaction.service.v1.CommentService/AdminList"
+	CommentService_PinComment_FullMethodName    = "/interaction.service.v1.CommentService/PinComment"
 )
 
 // CommentServiceClient is the client API for CommentService service.
@@ -46,6 +47,8 @@ type CommentServiceClient interface {
 	ListReply(ctx context.Context, in *ListReplyRequest, opts ...grpc.CallOption) (*ListCommentResponse, error)
 	// 管理端全量评论列表（admin BFF 评论管理转发入口）
 	AdminList(ctx context.Context, in *v1.PagingRequest, opts ...grpc.CallOption) (*ListCommentResponse, error)
+	// 置顶/取消置顶评论（视频作者或管理端；仅一级评论）
+	PinComment(ctx context.Context, in *PinCommentRequest, opts ...grpc.CallOption) (*Comment, error)
 }
 
 type commentServiceClient struct {
@@ -106,6 +109,16 @@ func (c *commentServiceClient) AdminList(ctx context.Context, in *v1.PagingReque
 	return out, nil
 }
 
+func (c *commentServiceClient) PinComment(ctx context.Context, in *PinCommentRequest, opts ...grpc.CallOption) (*Comment, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Comment)
+	err := c.cc.Invoke(ctx, CommentService_PinComment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CommentServiceServer is the server API for CommentService service.
 // All implementations must embed UnimplementedCommentServiceServer
 // for forward compatibility.
@@ -124,6 +137,8 @@ type CommentServiceServer interface {
 	ListReply(context.Context, *ListReplyRequest) (*ListCommentResponse, error)
 	// 管理端全量评论列表（admin BFF 评论管理转发入口）
 	AdminList(context.Context, *v1.PagingRequest) (*ListCommentResponse, error)
+	// 置顶/取消置顶评论（视频作者或管理端；仅一级评论）
+	PinComment(context.Context, *PinCommentRequest) (*Comment, error)
 	mustEmbedUnimplementedCommentServiceServer()
 }
 
@@ -148,6 +163,9 @@ func (UnimplementedCommentServiceServer) ListReply(context.Context, *ListReplyRe
 }
 func (UnimplementedCommentServiceServer) AdminList(context.Context, *v1.PagingRequest) (*ListCommentResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method AdminList not implemented")
+}
+func (UnimplementedCommentServiceServer) PinComment(context.Context, *PinCommentRequest) (*Comment, error) {
+	return nil, status.Error(codes.Unimplemented, "method PinComment not implemented")
 }
 func (UnimplementedCommentServiceServer) mustEmbedUnimplementedCommentServiceServer() {}
 func (UnimplementedCommentServiceServer) testEmbeddedByValue()                        {}
@@ -260,6 +278,24 @@ func _CommentService_AdminList_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CommentService_PinComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PinCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommentServiceServer).PinComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CommentService_PinComment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommentServiceServer).PinComment(ctx, req.(*PinCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CommentService_ServiceDesc is the grpc.ServiceDesc for CommentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -286,6 +322,10 @@ var CommentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminList",
 			Handler:    _CommentService_AdminList_Handler,
+		},
+		{
+			MethodName: "PinComment",
+			Handler:    _CommentService_PinComment_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

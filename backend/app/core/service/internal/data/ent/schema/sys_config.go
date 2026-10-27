@@ -70,6 +70,10 @@ func (SysConfig) Fields() []ent.Field {
 		field.String("announcement_link").
 			Comment("公告跳转链接（可空）").
 			Default(""),
+
+		field.Bool("danmaku_enabled").
+			Comment("弹幕开关（关闭则 App 隐藏弹幕层并拒绝发送）").
+			Default(true),
 	}
 }
 

@@ -43,7 +43,9 @@ type VideoComment struct {
 	// 点赞数（ledger 事务内增减）
 	LikeCount uint64 `json:"like_count,omitempty"`
 	// 回复数（仅一级评论维护）
-	ReplyCount   uint64 `json:"reply_count,omitempty"`
+	ReplyCount uint64 `json:"reply_count,omitempty"`
+	// 作者置顶（仅一级评论；列表置顶优先）
+	Pinned       bool `json:"pinned,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -52,6 +54,8 @@ func (*VideoComment) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case videocomment.FieldPinned:
+			values[i] = new(sql.NullBool)
 		case videocomment.FieldID, videocomment.FieldCreatedBy, videocomment.FieldUpdatedBy, videocomment.FieldDeletedBy, videocomment.FieldTenantID, videocomment.FieldVideoID, videocomment.FieldUserID, videocomment.FieldParentID, videocomment.FieldLikeCount, videocomment.FieldReplyCount:
 			values[i] = new(sql.NullInt64)
 		case videocomment.FieldContent:
@@ -164,6 +168,12 @@ func (_m *VideoComment) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ReplyCount = uint64(value.Int64)
 			}
+		case videocomment.FieldPinned:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field pinned", values[i])
+			} else if value.Valid {
+				_m.Pinned = value.Bool
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -252,6 +262,9 @@ func (_m *VideoComment) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("reply_count=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ReplyCount))
+	builder.WriteString(", ")
+	builder.WriteString("pinned=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Pinned))
 	builder.WriteByte(')')
 	return builder.String()
 }

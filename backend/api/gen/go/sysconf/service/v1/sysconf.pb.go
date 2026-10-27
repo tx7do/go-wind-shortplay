@@ -35,6 +35,7 @@ type SysConf struct {
 	AnnouncementEnabled    *bool                  `protobuf:"varint,8,opt,name=announcement_enabled,json=announcementEnabled,proto3,oneof" json:"announcement_enabled,omitempty"`            // App 公告横幅开关
 	AnnouncementText       *string                `protobuf:"bytes,9,opt,name=announcement_text,json=announcementText,proto3,oneof" json:"announcement_text,omitempty"`                      // 公告文案（空则不展示）
 	AnnouncementLink       *string                `protobuf:"bytes,10,opt,name=announcement_link,json=announcementLink,proto3,oneof" json:"announcement_link,omitempty"`                     // 公告跳转链接（可空）
+	DanmakuEnabled         *bool                  `protobuf:"varint,11,opt,name=danmaku_enabled,json=danmakuEnabled,proto3,oneof" json:"danmaku_enabled,omitempty"`                          // 弹幕开关（关闭则 App 隐藏弹幕层并拒绝发送）
 	UpdatedAt              *timestamppb.Timestamp `protobuf:"bytes,20,opt,name=updated_at,json=updatedAt,proto3,oneof" json:"updated_at,omitempty"`                                          // 更新时间
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
@@ -140,6 +141,13 @@ func (x *SysConf) GetAnnouncementLink() string {
 	return ""
 }
 
+func (x *SysConf) GetDanmakuEnabled() bool {
+	if x != nil && x.DanmakuEnabled != nil {
+		return *x.DanmakuEnabled
+	}
+	return false
+}
+
 func (x *SysConf) GetUpdatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.UpdatedAt
@@ -159,6 +167,7 @@ type UpdateSysConfRequest struct {
 	AnnouncementEnabled    *bool                  `protobuf:"varint,8,opt,name=announcement_enabled,json=announcementEnabled,proto3,oneof" json:"announcement_enabled,omitempty"`
 	AnnouncementText       *string                `protobuf:"bytes,9,opt,name=announcement_text,json=announcementText,proto3,oneof" json:"announcement_text,omitempty"`
 	AnnouncementLink       *string                `protobuf:"bytes,10,opt,name=announcement_link,json=announcementLink,proto3,oneof" json:"announcement_link,omitempty"`
+	DanmakuEnabled         *bool                  `protobuf:"varint,11,opt,name=danmaku_enabled,json=danmakuEnabled,proto3,oneof" json:"danmaku_enabled,omitempty"`
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
 }
@@ -263,11 +272,18 @@ func (x *UpdateSysConfRequest) GetAnnouncementLink() string {
 	return ""
 }
 
+func (x *UpdateSysConfRequest) GetDanmakuEnabled() bool {
+	if x != nil && x.DanmakuEnabled != nil {
+		return *x.DanmakuEnabled
+	}
+	return false
+}
+
 var File_sysconf_service_v1_sysconf_proto protoreflect.FileDescriptor
 
 const file_sysconf_service_v1_sysconf_proto_rawDesc = "" +
 	"\n" +
-	" sysconf/service/v1/sysconf.proto\x12\x12sysconf.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9f\x06\n" +
+	" sysconf/service/v1/sysconf.proto\x12\x12sysconf.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe1\x06\n" +
 	"\aSysConf\x120\n" +
 	"\x12max_upload_size_mb\x18\x01 \x01(\rH\x00R\x0fmaxUploadSizeMb\x88\x01\x01\x125\n" +
 	"\x14max_duration_seconds\x18\x02 \x01(\rH\x01R\x12maxDurationSeconds\x88\x01\x01\x127\n" +
@@ -279,9 +295,10 @@ const file_sysconf_service_v1_sysconf_proto_rawDesc = "" +
 	"\x14announcement_enabled\x18\b \x01(\bH\x05R\x13announcementEnabled\x88\x01\x01\x120\n" +
 	"\x11announcement_text\x18\t \x01(\tH\x06R\x10announcementText\x88\x01\x01\x120\n" +
 	"\x11announcement_link\x18\n" +
-	" \x01(\tH\aR\x10announcementLink\x88\x01\x01\x12>\n" +
+	" \x01(\tH\aR\x10announcementLink\x88\x01\x01\x12,\n" +
+	"\x0fdanmaku_enabled\x18\v \x01(\bH\bR\x0edanmakuEnabled\x88\x01\x01\x12>\n" +
 	"\n" +
-	"updated_at\x18\x14 \x01(\v2\x1a.google.protobuf.TimestampH\bR\tupdatedAt\x88\x01\x01B\x15\n" +
+	"updated_at\x18\x14 \x01(\v2\x1a.google.protobuf.TimestampH\tR\tupdatedAt\x88\x01\x01B\x15\n" +
 	"\x13_max_upload_size_mbB\x17\n" +
 	"\x15_max_duration_secondsB\x18\n" +
 	"\x16_manual_review_enabledB\x13\n" +
@@ -289,8 +306,9 @@ const file_sysconf_service_v1_sysconf_proto_rawDesc = "" +
 	"\x19_sensitive_filter_enabledB\x17\n" +
 	"\x15_announcement_enabledB\x14\n" +
 	"\x12_announcement_textB\x14\n" +
-	"\x12_announcement_linkB\r\n" +
-	"\v_updated_at\"\xdd\x05\n" +
+	"\x12_announcement_linkB\x12\n" +
+	"\x10_danmaku_enabledB\r\n" +
+	"\v_updated_at\"\x9f\x06\n" +
 	"\x14UpdateSysConfRequest\x120\n" +
 	"\x12max_upload_size_mb\x18\x01 \x01(\rH\x00R\x0fmaxUploadSizeMb\x88\x01\x01\x125\n" +
 	"\x14max_duration_seconds\x18\x02 \x01(\rH\x01R\x12maxDurationSeconds\x88\x01\x01\x127\n" +
@@ -302,7 +320,8 @@ const file_sysconf_service_v1_sysconf_proto_rawDesc = "" +
 	"\x14announcement_enabled\x18\b \x01(\bH\x05R\x13announcementEnabled\x88\x01\x01\x120\n" +
 	"\x11announcement_text\x18\t \x01(\tH\x06R\x10announcementText\x88\x01\x01\x120\n" +
 	"\x11announcement_link\x18\n" +
-	" \x01(\tH\aR\x10announcementLink\x88\x01\x01B\x15\n" +
+	" \x01(\tH\aR\x10announcementLink\x88\x01\x01\x12,\n" +
+	"\x0fdanmaku_enabled\x18\v \x01(\bH\bR\x0edanmakuEnabled\x88\x01\x01B\x15\n" +
 	"\x13_max_upload_size_mbB\x17\n" +
 	"\x15_max_duration_secondsB\x18\n" +
 	"\x16_manual_review_enabledB\x13\n" +
@@ -310,7 +329,8 @@ const file_sysconf_service_v1_sysconf_proto_rawDesc = "" +
 	"\x19_sensitive_filter_enabledB\x17\n" +
 	"\x15_announcement_enabledB\x14\n" +
 	"\x12_announcement_textB\x14\n" +
-	"\x12_announcement_link2\xaf\x01\n" +
+	"\x12_announcement_linkB\x12\n" +
+	"\x10_danmaku_enabled2\xaf\x01\n" +
 	"\x0eSysConfService\x12C\n" +
 	"\n" +
 	"GetSysConf\x12\x16.google.protobuf.Empty\x1a\x1b.sysconf.service.v1.SysConf\"\x00\x12X\n" +

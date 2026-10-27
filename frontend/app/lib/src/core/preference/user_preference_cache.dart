@@ -61,6 +61,7 @@ class ThemeModeMapper {
 class _StorageKey {
   static const String userPreference = 'USER_PREFERENCE';
   static const String seedColor = 'SEED_COLOR';
+  static const String danmakuEnabled = 'DANMAKU_ENABLED';
 }
 
 /// 用户偏好设置缓存
@@ -103,6 +104,13 @@ class UserPreferenceCache {
 
   Future<void> setSeedColor(Color color) async {
     await _prefs.setInt(_StorageKey.seedColor, color.toARGB32());
+  }
+
+  /// 弹幕显隐（默认开；getBool 缺省 null 视为开）
+  bool get danmakuEnabled => _prefs.getBool(_StorageKey.danmakuEnabled) ?? true;
+
+  Future<void> setDanmakuEnabled(bool value) async {
+    await _prefs.setBool(_StorageKey.danmakuEnabled, value);
   }
 
   String get language {
@@ -156,7 +164,7 @@ class UserPreferenceCache {
   UserPreference _makeDefaultUserPreference() {
     return UserPreference(
       language: 'zh_CN',
-      themeMode: 'system',  // 默认跟随系统
+      themeMode: 'system', // 默认跟随系统
       fontSize: 12,
       allowNotifications: true,
       soundEnabled: true,

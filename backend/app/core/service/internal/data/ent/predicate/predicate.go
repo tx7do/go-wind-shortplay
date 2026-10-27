@@ -15,6 +15,9 @@ type ApiAuditLog func(*sql.Selector)
 // Comment is the predicate function for comment builders.
 type Comment func(*sql.Selector)
 
+// Danmaku is the predicate function for danmaku builders.
+type Danmaku func(*sql.Selector)
+
 // DataAccessAuditLog is the predicate function for dataaccessauditlog builders.
 type DataAccessAuditLog func(*sql.Selector)
 

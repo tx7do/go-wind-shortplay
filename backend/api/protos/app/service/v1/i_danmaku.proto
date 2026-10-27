@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package app.service.v1;
+
+import "danmaku/service/v1/danmaku.proto";
+import "google/api/annotations.proto";
+
+// 弹幕服务（App 端：发送 / 视频弹幕拉取；拉取对游客开放）
+service DanmakuService {
+  // 发送弹幕（需登录；敏感词命中拒绝；sysconf 开关关闭拒绝）
+  rpc SendDanmaku (danmaku.service.v1.SendDanmakuRequest) returns (danmaku.service.v1.Danmaku) {
+    option (google.api.http) = {
+      post: "/app/v1/videos/{video_id}/danmaku"
+      body: "*"
+    };
+  }
+
+  // 视频弹幕列表（游客可访问；仅 VISIBLE，按时间轴偏移升序）
+  rpc ListVideoDanmaku (danmaku.service.v1.ListVideoDanmakuRequest) returns (danmaku.service.v1.ListDanmakuResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/videos/{video_id}/danmaku"
+    };
+  }
+}

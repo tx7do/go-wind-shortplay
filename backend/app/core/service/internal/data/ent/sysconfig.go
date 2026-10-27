@@ -51,7 +51,9 @@ type SysConfig struct {
 	AnnouncementText *string `json:"announcement_text,omitempty"`
 	// 公告跳转链接（可空）
 	AnnouncementLink string `json:"announcement_link,omitempty"`
-	selectValues     sql.SelectValues
+	// 弹幕开关（关闭则 App 隐藏弹幕层并拒绝发送）
+	DanmakuEnabled bool `json:"danmaku_enabled,omitempty"`
+	selectValues   sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -61,7 +63,7 @@ func (*SysConfig) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case sysconfig.FieldAllowedVideoTypes, sysconfig.FieldSensitiveWords:
 			values[i] = new([]byte)
-		case sysconfig.FieldManualReviewEnabled, sysconfig.FieldRegisterEnabled, sysconfig.FieldSensitiveFilterEnabled, sysconfig.FieldAnnouncementEnabled:
+		case sysconfig.FieldManualReviewEnabled, sysconfig.FieldRegisterEnabled, sysconfig.FieldSensitiveFilterEnabled, sysconfig.FieldAnnouncementEnabled, sysconfig.FieldDanmakuEnabled:
 			values[i] = new(sql.NullBool)
 		case sysconfig.FieldID, sysconfig.FieldCreatedBy, sysconfig.FieldUpdatedBy, sysconfig.FieldDeletedBy, sysconfig.FieldMaxUploadSizeMB, sysconfig.FieldMaxDurationSeconds:
 			values[i] = new(sql.NullInt64)
@@ -197,6 +199,12 @@ func (_m *SysConfig) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.AnnouncementLink = value.String
 			}
+		case sysconfig.FieldDanmakuEnabled:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field danmaku_enabled", values[i])
+			} else if value.Valid {
+				_m.DanmakuEnabled = value.Bool
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -294,6 +302,9 @@ func (_m *SysConfig) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("announcement_link=")
 	builder.WriteString(_m.AnnouncementLink)
+	builder.WriteString(", ")
+	builder.WriteString("danmaku_enabled=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DanmakuEnabled))
 	builder.WriteByte(')')
 	return builder.String()
 }

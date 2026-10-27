@@ -136,6 +136,11 @@ func (s *VideoService) ChangeStatus(ctx context.Context, req *videoV1.ChangeVide
 	return s.videoClient.ChangeVideoStatus(ctx, req)
 }
 
+// ScheduleVideo 设置/取消定时发布（转发 core，仅草稿）。
+func (s *VideoService) ScheduleVideo(ctx context.Context, req *videoV1.ScheduleVideoRequest) (*videoV1.Video, error) {
+	return s.videoClient.ScheduleVideo(ctx, req)
+}
+
 func (s *VideoService) Delete(ctx context.Context, req *videoV1.DeleteVideoRequest) (*emptypb.Empty, error) {
 	return s.videoClient.DeleteVideo(ctx, req)
 }

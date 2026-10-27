@@ -55,6 +55,10 @@ func (VideoComment) Fields() []ent.Field {
 		field.Uint64("reply_count").
 			Comment("回复数（仅一级评论维护）").
 			Default(0),
+
+		field.Bool("pinned").
+			Comment("作者置顶（仅一级评论；列表置顶优先）").
+			Default(false),
 	}
 }
 

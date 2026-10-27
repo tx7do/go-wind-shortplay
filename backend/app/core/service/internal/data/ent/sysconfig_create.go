@@ -230,6 +230,20 @@ func (_c *SysConfigCreate) SetNillableAnnouncementLink(v *string) *SysConfigCrea
 	return _c
 }
 
+// SetDanmakuEnabled sets the "danmaku_enabled" field.
+func (_c *SysConfigCreate) SetDanmakuEnabled(v bool) *SysConfigCreate {
+	_c.mutation.SetDanmakuEnabled(v)
+	return _c
+}
+
+// SetNillableDanmakuEnabled sets the "danmaku_enabled" field if the given value is not nil.
+func (_c *SysConfigCreate) SetNillableDanmakuEnabled(v *bool) *SysConfigCreate {
+	if v != nil {
+		_c.SetDanmakuEnabled(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *SysConfigCreate) SetID(v uint32) *SysConfigCreate {
 	_c.mutation.SetID(v)
@@ -299,6 +313,10 @@ func (_c *SysConfigCreate) defaults() {
 		v := sysconfig.DefaultAnnouncementLink
 		_c.mutation.SetAnnouncementLink(v)
 	}
+	if _, ok := _c.mutation.DanmakuEnabled(); !ok {
+		v := sysconfig.DefaultDanmakuEnabled
+		_c.mutation.SetDanmakuEnabled(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -323,6 +341,9 @@ func (_c *SysConfigCreate) check() error {
 	}
 	if _, ok := _c.mutation.AnnouncementLink(); !ok {
 		return &ValidationError{Name: "announcement_link", err: errors.New(`ent: missing required field "SysConfig.announcement_link"`)}
+	}
+	if _, ok := _c.mutation.DanmakuEnabled(); !ok {
+		return &ValidationError{Name: "danmaku_enabled", err: errors.New(`ent: missing required field "SysConfig.danmaku_enabled"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := sysconfig.IDValidator(v); err != nil {
@@ -425,6 +446,10 @@ func (_c *SysConfigCreate) createSpec() (*SysConfig, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.AnnouncementLink(); ok {
 		_spec.SetField(sysconfig.FieldAnnouncementLink, field.TypeString, value)
 		_node.AnnouncementLink = value
+	}
+	if value, ok := _c.mutation.DanmakuEnabled(); ok {
+		_spec.SetField(sysconfig.FieldDanmakuEnabled, field.TypeBool, value)
+		_node.DanmakuEnabled = value
 	}
 	return _node, _spec
 }
@@ -733,6 +758,18 @@ func (u *SysConfigUpsert) SetAnnouncementLink(v string) *SysConfigUpsert {
 // UpdateAnnouncementLink sets the "announcement_link" field to the value that was provided on create.
 func (u *SysConfigUpsert) UpdateAnnouncementLink() *SysConfigUpsert {
 	u.SetExcluded(sysconfig.FieldAnnouncementLink)
+	return u
+}
+
+// SetDanmakuEnabled sets the "danmaku_enabled" field.
+func (u *SysConfigUpsert) SetDanmakuEnabled(v bool) *SysConfigUpsert {
+	u.Set(sysconfig.FieldDanmakuEnabled, v)
+	return u
+}
+
+// UpdateDanmakuEnabled sets the "danmaku_enabled" field to the value that was provided on create.
+func (u *SysConfigUpsert) UpdateDanmakuEnabled() *SysConfigUpsert {
+	u.SetExcluded(sysconfig.FieldDanmakuEnabled)
 	return u
 }
 
@@ -1085,6 +1122,20 @@ func (u *SysConfigUpsertOne) SetAnnouncementLink(v string) *SysConfigUpsertOne {
 func (u *SysConfigUpsertOne) UpdateAnnouncementLink() *SysConfigUpsertOne {
 	return u.Update(func(s *SysConfigUpsert) {
 		s.UpdateAnnouncementLink()
+	})
+}
+
+// SetDanmakuEnabled sets the "danmaku_enabled" field.
+func (u *SysConfigUpsertOne) SetDanmakuEnabled(v bool) *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetDanmakuEnabled(v)
+	})
+}
+
+// UpdateDanmakuEnabled sets the "danmaku_enabled" field to the value that was provided on create.
+func (u *SysConfigUpsertOne) UpdateDanmakuEnabled() *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateDanmakuEnabled()
 	})
 }
 
@@ -1603,6 +1654,20 @@ func (u *SysConfigUpsertBulk) SetAnnouncementLink(v string) *SysConfigUpsertBulk
 func (u *SysConfigUpsertBulk) UpdateAnnouncementLink() *SysConfigUpsertBulk {
 	return u.Update(func(s *SysConfigUpsert) {
 		s.UpdateAnnouncementLink()
+	})
+}
+
+// SetDanmakuEnabled sets the "danmaku_enabled" field.
+func (u *SysConfigUpsertBulk) SetDanmakuEnabled(v bool) *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetDanmakuEnabled(v)
+	})
+}
+
+// UpdateDanmakuEnabled sets the "danmaku_enabled" field to the value that was provided on create.
+func (u *SysConfigUpsertBulk) UpdateDanmakuEnabled() *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateDanmakuEnabled()
 	})
 }
 

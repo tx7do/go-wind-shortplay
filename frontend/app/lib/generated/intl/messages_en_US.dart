@@ -107,6 +107,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Aggregated daily (plays/likes from UBA events, publishes by approval time)",
     ),
     "creatorStatsTitle": MessageLookupByLibrary.simpleMessage("Creator Stats"),
+    "danmaku": MessageLookupByLibrary.simpleMessage("Danmaku"),
+    "danmakuSendAction": MessageLookupByLibrary.simpleMessage("Send"),
+    "danmakuSendHint": MessageLookupByLibrary.simpleMessage("Say something…"),
+    "danmakuSendTitle": MessageLookupByLibrary.simpleMessage("Send Danmaku"),
     "dark": MessageLookupByLibrary.simpleMessage("Dark"),
     "darkMode": MessageLookupByLibrary.simpleMessage("Dark Mode"),
     "delete": MessageLookupByLibrary.simpleMessage("Delete"),
@@ -418,7 +422,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "pickVideoFirst": MessageLookupByLibrary.simpleMessage(
       "Pick a video first",
     ),
+    "pin": MessageLookupByLibrary.simpleMessage("Pin"),
+    "pinnedBadge": MessageLookupByLibrary.simpleMessage("Pinned"),
     "playNow": MessageLookupByLibrary.simpleMessage("Now Playing"),
+    "playback": MessageLookupByLibrary.simpleMessage("Playback"),
     "profileSaved": MessageLookupByLibrary.simpleMessage("Profile updated"),
     "publish": MessageLookupByLibrary.simpleMessage("Create"),
     "publishFailed": MessageLookupByLibrary.simpleMessage(
@@ -475,6 +482,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "save": MessageLookupByLibrary.simpleMessage("Save"),
     "saveDraft": MessageLookupByLibrary.simpleMessage("Save draft"),
     "saveProfile": MessageLookupByLibrary.simpleMessage("Save"),
+    "scheduledPublishOption": MessageLookupByLibrary.simpleMessage(
+      "Scheduled publish (auto publish at time)",
+    ),
+    "scheduledPublished": MessageLookupByLibrary.simpleMessage(
+      "Scheduled! Will publish automatically",
+    ),
+    "scheduledTimePast": MessageLookupByLibrary.simpleMessage(
+      "Scheduled time must be in the future",
+    ),
     "search": MessageLookupByLibrary.simpleMessage("Search"),
     "searchEmpty": m7,
     "searchHint": MessageLookupByLibrary.simpleMessage("Search videos, tags"),
@@ -541,6 +557,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "unfollowConfirm": MessageLookupByLibrary.simpleMessage(
       "Stop following this user?",
     ),
+    "unpin": MessageLookupByLibrary.simpleMessage("Unpin"),
     "unreadOnly": MessageLookupByLibrary.simpleMessage("Unread only"),
     "uploading": MessageLookupByLibrary.simpleMessage("Uploading"),
     "uploadingPercent": m14,

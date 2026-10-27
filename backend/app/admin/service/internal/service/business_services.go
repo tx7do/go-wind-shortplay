@@ -10,6 +10,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	adminV1 "go-wind-shortplay/api/gen/go/admin/service/v1"
+	danmakuV1 "go-wind-shortplay/api/gen/go/danmaku/service/v1"
 	interactionV1 "go-wind-shortplay/api/gen/go/interaction/service/v1"
 	reportV1 "go-wind-shortplay/api/gen/go/report/service/v1"
 	statsV1 "go-wind-shortplay/api/gen/go/stats/service/v1"
@@ -119,6 +120,35 @@ func (s *SysConfService) Get(ctx context.Context, req *emptypb.Empty) (*sysconfV
 
 func (s *SysConfService) Update(ctx context.Context, req *sysconfV1.UpdateSysConfRequest) (*sysconfV1.SysConf, error) {
 	return s.sysConfClient.UpdateSysConf(ctx, req)
+}
+
+// ── 弹幕管理（admin BFF 薄转发）──
+
+type DanmakuService struct {
+	adminV1.DanmakuServiceHTTPServer
+
+	danmakuClient danmakuV1.DanmakuServiceClient
+	log           *log.Helper
+}
+
+func NewDanmakuService(ctx *bootstrap.Context, danmakuClient danmakuV1.DanmakuServiceClient) *DanmakuService {
+	return &DanmakuService{
+		log:           ctx.NewLoggerHelper("danmaku/service/admin-service"),
+		danmakuClient: danmakuClient,
+	}
+}
+
+// List 弹幕列表（转发 core AdminList）。
+func (s *DanmakuService) List(ctx context.Context, req *paginationV1.PagingRequest) (*danmakuV1.ListDanmakuResponse, error) {
+	return s.danmakuClient.AdminList(ctx, req)
+}
+
+func (s *DanmakuService) Delete(ctx context.Context, req *danmakuV1.DeleteDanmakuRequest) (*emptypb.Empty, error) {
+	return s.danmakuClient.DeleteDanmaku(ctx, req)
+}
+
+func (s *DanmakuService) SetStatus(ctx context.Context, req *danmakuV1.SetDanmakuStatusRequest) (*danmakuV1.Danmaku, error) {
+	return s.danmakuClient.SetDanmakuStatus(ctx, req)
 }
 
 // ── 评论管理（admin BFF 薄转发，业务评论经 interaction 域）──

@@ -11,7 +11,12 @@ import 'package:shortplay_app/src/app_router/app_router.dart'
     show AppRoutePath, RouteNames;
 import 'package:shortplay_app/src/core/repositories/user_auth_cache.dart';
 import 'package:shortplay_app/src/core/widgets/empty_state.dart';
+import 'package:shortplay_app/src/core/preference/user_preference_cache.dart';
 import 'package:shortplay_app/src/features/comment/widgets/comment_sheet.dart';
+import 'package:shortplay_app/src/features/common/services/sysconf_service.dart';
+import 'package:shortplay_app/src/features/danmaku/services/danmaku_service.dart';
+import 'package:shortplay_app/src/features/danmaku/widgets/danmaku_overlay.dart';
+import 'package:shortplay_app/src/features/danmaku/widgets/danmaku_send_sheet.dart';
 import 'package:shortplay_app/src/core/transport/http/index.dart'
     show ApiStatusException, localizedErrorText;
 import 'package:shortplay_app/src/features/common/data/models.dart';
@@ -55,6 +60,11 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
   SeriesDetail? _seriesCtx;
   bool _advancing = false;
 
+  // 弹幕（列表 + 本地开关 + 服务端开关；均尽力而为，失败静默隐藏）
+  List<DanmakuItem> _danmaku = const [];
+  bool _danmakuOn = true;
+  bool _danmakuServerOn = true;
+
   @override
   void dispose() {
     _burst.dispose();
@@ -64,7 +74,18 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
   @override
   void initState() {
     super.initState();
+    _danmakuOn = GetIt.instance<UserPreferenceCache>().danmakuEnabled;
     _load();
+    // 服务端弹幕开关（sysconf 游客可读，失败按开启处理）
+    SysConfService().getSysConf().then((conf) {
+      if (mounted) setState(() => _danmakuServerOn = conf.danmakuEnabled);
+    });
+  }
+
+  /// 拉取弹幕（尽力而为；_load 复用刷新场景）
+  Future<void> _loadDanmaku() async {
+    final items = await DanmakuService().list(widget.videoId);
+    if (mounted) setState(() => _danmaku = items);
   }
 
   Future<void> _load() async {
@@ -90,6 +111,7 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
         _seriesCtx = seriesCtx;
         _loading = false;
       });
+      unawaited(_loadDanmaku());
     } on ApiStatusException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -147,6 +169,7 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
     await showCommentSheet(
       context,
       videoId: video.id,
+      videoAuthorId: video.authorId,
       onCommentCountChanged: (delta) {
         if (!mounted || _current == null) return;
         setState(() {
@@ -364,11 +387,34 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
             authorNickname: detail.author?.nickname ?? '',
             authorAvatarUrl: detail.author?.avatarDisplayUrl ?? '',
             onCommentTap: _openComments,
+            onDanmakuTap: (_danmakuServerOn && _player != null)
+                ? () => showDanmakuSendSheet(
+                    context,
+                    player: _player!,
+                    videoId: video.id,
+                    onSent: (item) {
+                      // 即时上屏：插入时间轴并按偏移升序保持
+                      setState(() {
+                        _danmaku = [..._danmaku, item]
+                          ..sort(
+                            (a, b) => a.timeOffsetMs.compareTo(b.timeOffsetMs),
+                          );
+                      });
+                    },
+                  )
+                : null,
             onVideoUpdated: (updated) {
               if (mounted) setState(() => _current = updated);
             },
           ),
         ),
+        // 弹幕层（开关关 / 列表空时不渲染；盖在播放器上、信息层下）
+        if (_player != null && _danmakuOn && _danmaku.isNotEmpty)
+          Positioned.fill(
+            top: 0,
+            bottom: 120.h,
+            child: DanmakuOverlay(player: _player!, items: _danmaku),
+          ),
         // 底部细进度条（拖动 seek + 时间气泡）
         if (_player != null)
           FeedProgressBar(player: _player!, bottomInset: 16.h),

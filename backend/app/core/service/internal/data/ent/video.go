@@ -65,7 +65,9 @@ type Video struct {
 	// 播放量（ledger 事务内增减）
 	ViewCount uint64 `json:"view_count,omitempty"`
 	// 发布时间
-	PublishedAt  *time.Time `json:"published_at,omitempty"`
+	PublishedAt *time.Time `json:"published_at,omitempty"`
+	// 计划发布时间（DRAFT 定时中，到期任务自动转 PUBLISHED 并清空）
+	ScheduledAt  *time.Time `json:"scheduled_at,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -78,7 +80,7 @@ func (*Video) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case video.FieldTitle, video.FieldDescription, video.FieldCoverURL, video.FieldVideoURL, video.FieldStatus, video.FieldRejectReason:
 			values[i] = new(sql.NullString)
-		case video.FieldCreatedAt, video.FieldUpdatedAt, video.FieldDeletedAt, video.FieldPublishedAt:
+		case video.FieldCreatedAt, video.FieldUpdatedAt, video.FieldDeletedAt, video.FieldPublishedAt, video.FieldScheduledAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -257,6 +259,13 @@ func (_m *Video) assignValues(columns []string, values []any) error {
 				_m.PublishedAt = new(time.Time)
 				*_m.PublishedAt = value.Time
 			}
+		case video.FieldScheduledAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field scheduled_at", values[i])
+			} else if value.Valid {
+				_m.ScheduledAt = new(time.Time)
+				*_m.ScheduledAt = value.Time
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -386,6 +395,11 @@ func (_m *Video) String() string {
 	builder.WriteString(", ")
 	if v := _m.PublishedAt; v != nil {
 		builder.WriteString("published_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.ScheduledAt; v != nil {
+		builder.WriteString("scheduled_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteByte(')')

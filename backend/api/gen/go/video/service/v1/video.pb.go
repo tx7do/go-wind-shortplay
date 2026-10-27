@@ -206,6 +206,7 @@ type Video struct {
 	RejectReason  *string                `protobuf:"bytes,30,opt,name=reject_reason,json=rejectReason,proto3,oneof" json:"reject_reason,omitempty"`  // 驳回原因
 	SeriesTitle   *string                `protobuf:"bytes,31,opt,name=series_title,json=seriesTitle,proto3,oneof" json:"series_title,omitempty"`     // 所属剧名（展示冗余，服务端回填）
 	PublishedAt   *timestamppb.Timestamp `protobuf:"bytes,40,opt,name=published_at,json=publishedAt,proto3,oneof" json:"published_at,omitempty"`     // 发布时间
+	ScheduledAt   *timestamppb.Timestamp `protobuf:"bytes,43,opt,name=scheduled_at,json=scheduledAt,proto3,oneof" json:"scheduled_at,omitempty"`     // 计划发布时间（DRAFT 定时中；到期自动转 PUBLISHED 并清空）
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,41,opt,name=created_at,json=createdAt,proto3,oneof" json:"created_at,omitempty"`           // 创建时间
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,42,opt,name=updated_at,json=updatedAt,proto3,oneof" json:"updated_at,omitempty"`           // 更新时间
 	unknownFields protoimpl.UnknownFields
@@ -378,6 +379,13 @@ func (x *Video) GetSeriesTitle() string {
 func (x *Video) GetPublishedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.PublishedAt
+	}
+	return nil
+}
+
+func (x *Video) GetScheduledAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ScheduledAt
 	}
 	return nil
 }
@@ -1262,6 +1270,8 @@ type CompleteUploadRequest struct {
 	SeriesId *uint32 `protobuf:"varint,10,opt,name=series_id,json=seriesId,proto3,oneof" json:"series_id,omitempty"`
 	// 剧内集号（缺省=服务端排到当前最大集号+1）
 	EpisodeNumber *uint32 `protobuf:"varint,11,opt,name=episode_number,json=episodeNumber,proto3,oneof" json:"episode_number,omitempty"`
+	// 定时发布（须为未来时间；人工审核关的直发路径生效：视频先存 DRAFT，到期自动转 PUBLISHED）
+	ScheduledAt   *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=scheduled_at,json=scheduledAt,proto3,oneof" json:"scheduled_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1371,6 +1381,13 @@ func (x *CompleteUploadRequest) GetEpisodeNumber() uint32 {
 		return *x.EpisodeNumber
 	}
 	return 0
+}
+
+func (x *CompleteUploadRequest) GetScheduledAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ScheduledAt
+	}
+	return nil
 }
 
 type GetUploadTaskRequest struct {
@@ -1689,16 +1706,71 @@ func (x *DeleteDraftRequest) GetId() uint32 {
 	return 0
 }
 
+type ScheduleVideoRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Id    uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"` // 视频ID
+	// 计划发布时间（须为未来时间；缺省=取消定时）
+	ScheduledAt   *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=scheduled_at,json=scheduledAt,proto3,oneof" json:"scheduled_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ScheduleVideoRequest) Reset() {
+	*x = ScheduleVideoRequest{}
+	mi := &file_video_service_v1_video_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ScheduleVideoRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ScheduleVideoRequest) ProtoMessage() {}
+
+func (x *ScheduleVideoRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_video_service_v1_video_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ScheduleVideoRequest.ProtoReflect.Descriptor instead.
+func (*ScheduleVideoRequest) Descriptor() ([]byte, []int) {
+	return file_video_service_v1_video_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ScheduleVideoRequest) GetId() uint32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ScheduleVideoRequest) GetScheduledAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ScheduledAt
+	}
+	return nil
+}
+
 type SubmitDraftRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"` // 草稿ID
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Id    uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"` // 草稿ID
+	// 定时发布（须为未来时间；人工审核关时生效：先存 DRAFT，到期自动转 PUBLISHED）
+	ScheduledAt   *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=scheduled_at,json=scheduledAt,proto3,oneof" json:"scheduled_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *SubmitDraftRequest) Reset() {
 	*x = SubmitDraftRequest{}
-	mi := &file_video_service_v1_video_proto_msgTypes[20]
+	mi := &file_video_service_v1_video_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1710,7 +1782,7 @@ func (x *SubmitDraftRequest) String() string {
 func (*SubmitDraftRequest) ProtoMessage() {}
 
 func (x *SubmitDraftRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_video_service_v1_video_proto_msgTypes[20]
+	mi := &file_video_service_v1_video_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1723,7 +1795,7 @@ func (x *SubmitDraftRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitDraftRequest.ProtoReflect.Descriptor instead.
 func (*SubmitDraftRequest) Descriptor() ([]byte, []int) {
-	return file_video_service_v1_video_proto_rawDescGZIP(), []int{20}
+	return file_video_service_v1_video_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *SubmitDraftRequest) GetId() uint32 {
@@ -1731,6 +1803,13 @@ func (x *SubmitDraftRequest) GetId() uint32 {
 		return x.Id
 	}
 	return 0
+}
+
+func (x *SubmitDraftRequest) GetScheduledAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ScheduledAt
+	}
+	return nil
 }
 
 type ListTagResponse struct {
@@ -1743,7 +1822,7 @@ type ListTagResponse struct {
 
 func (x *ListTagResponse) Reset() {
 	*x = ListTagResponse{}
-	mi := &file_video_service_v1_video_proto_msgTypes[21]
+	mi := &file_video_service_v1_video_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1755,7 +1834,7 @@ func (x *ListTagResponse) String() string {
 func (*ListTagResponse) ProtoMessage() {}
 
 func (x *ListTagResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_video_service_v1_video_proto_msgTypes[21]
+	mi := &file_video_service_v1_video_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1768,7 +1847,7 @@ func (x *ListTagResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTagResponse.ProtoReflect.Descriptor instead.
 func (*ListTagResponse) Descriptor() ([]byte, []int) {
-	return file_video_service_v1_video_proto_rawDescGZIP(), []int{21}
+	return file_video_service_v1_video_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *ListTagResponse) GetItems() []*Tag {
@@ -1792,7 +1871,7 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"\x1cvideo/service/v1/video.proto\x12\x10video.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1epagination/v1/pagination.proto\";\n" +
 	"\x14ListHotVideosRequest\x12\x19\n" +
 	"\x05limit\x18\x01 \x01(\rH\x00R\x05limit\x88\x01\x01B\b\n" +
-	"\x06_limit\"\x9a\t\n" +
+	"\x06_limit\"\xef\t\n" +
 	"\x05Video\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\rH\x00R\x02id\x88\x01\x01\x12\x19\n" +
 	"\x05title\x18\x02 \x01(\tH\x01R\x05title\x88\x01\x01\x12%\n" +
@@ -1817,11 +1896,12 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"view_count\x18\x17 \x01(\x04H\x0fR\tviewCount\x88\x01\x01\x12(\n" +
 	"\rreject_reason\x18\x1e \x01(\tH\x10R\frejectReason\x88\x01\x01\x12&\n" +
 	"\fseries_title\x18\x1f \x01(\tH\x11R\vseriesTitle\x88\x01\x01\x12B\n" +
-	"\fpublished_at\x18( \x01(\v2\x1a.google.protobuf.TimestampH\x12R\vpublishedAt\x88\x01\x01\x12>\n" +
+	"\fpublished_at\x18( \x01(\v2\x1a.google.protobuf.TimestampH\x12R\vpublishedAt\x88\x01\x01\x12B\n" +
+	"\fscheduled_at\x18+ \x01(\v2\x1a.google.protobuf.TimestampH\x13R\vscheduledAt\x88\x01\x01\x12>\n" +
 	"\n" +
-	"created_at\x18) \x01(\v2\x1a.google.protobuf.TimestampH\x13R\tcreatedAt\x88\x01\x01\x12>\n" +
+	"created_at\x18) \x01(\v2\x1a.google.protobuf.TimestampH\x14R\tcreatedAt\x88\x01\x01\x12>\n" +
 	"\n" +
-	"updated_at\x18* \x01(\v2\x1a.google.protobuf.TimestampH\x14R\tupdatedAt\x88\x01\x01B\x05\n" +
+	"updated_at\x18* \x01(\v2\x1a.google.protobuf.TimestampH\x15R\tupdatedAt\x88\x01\x01B\x05\n" +
 	"\x03_idB\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\f\n" +
@@ -1844,7 +1924,8 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"\v_view_countB\x10\n" +
 	"\x0e_reject_reasonB\x0f\n" +
 	"\r_series_titleB\x0f\n" +
-	"\r_published_atB\r\n" +
+	"\r_published_atB\x0f\n" +
+	"\r_scheduled_atB\r\n" +
 	"\v_created_atB\r\n" +
 	"\v_updated_at\"y\n" +
 	"\x03Tag\x12\x13\n" +
@@ -1967,7 +2048,7 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"chunkIndex\x12\x12\n" +
 	"\x04data\x18\x03 \x01(\fR\x04data\">\n" +
 	"\x13UploadChunkResponse\x12'\n" +
-	"\x0fuploaded_chunks\x18\x01 \x03(\rR\x0euploadedChunks\"\xe7\x03\n" +
+	"\x0fuploaded_chunks\x18\x01 \x03(\rR\x0euploadedChunks\"\xbc\x04\n" +
 	"\x15CompleteUploadRequest\x12\x17\n" +
 	"\atask_id\x18\x01 \x01(\tR\x06taskId\x12\x19\n" +
 	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12%\n" +
@@ -1980,7 +2061,8 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"\bas_draft\x18\t \x01(\bH\x06R\aasDraft\x88\x01\x01\x12 \n" +
 	"\tseries_id\x18\n" +
 	" \x01(\rH\aR\bseriesId\x88\x01\x01\x12*\n" +
-	"\x0eepisode_number\x18\v \x01(\rH\bR\repisodeNumber\x88\x01\x01B\b\n" +
+	"\x0eepisode_number\x18\v \x01(\rH\bR\repisodeNumber\x88\x01\x01\x12B\n" +
+	"\fscheduled_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampH\tR\vscheduledAt\x88\x01\x01B\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\f\n" +
 	"\n" +
@@ -1991,7 +2073,8 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"\t_as_draftB\f\n" +
 	"\n" +
 	"_series_idB\x11\n" +
-	"\x0f_episode_number\"/\n" +
+	"\x0f_episode_numberB\x0f\n" +
+	"\r_scheduled_at\"/\n" +
 	"\x14GetUploadTaskRequest\x12\x17\n" +
 	"\atask_id\x18\x01 \x01(\tR\x06taskId\"\xa6\x04\n" +
 	"\x10SaveDraftRequest\x12\x13\n" +
@@ -2030,9 +2113,15 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"\x05total\x18\x02 \x01(\x03H\x00R\x05total\x88\x01\x01B\b\n" +
 	"\x06_total\"$\n" +
 	"\x12DeleteDraftRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\rR\x02id\"$\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\"{\n" +
+	"\x14ScheduleVideoRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12B\n" +
+	"\fscheduled_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\vscheduledAt\x88\x01\x01B\x0f\n" +
+	"\r_scheduled_at\"y\n" +
 	"\x12SubmitDraftRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\rR\x02id\"c\n" +
+	"\x02id\x18\x01 \x01(\rR\x02id\x12B\n" +
+	"\fscheduled_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\vscheduledAt\x88\x01\x01B\x0f\n" +
+	"\r_scheduled_at\"c\n" +
 	"\x0fListTagResponse\x12+\n" +
 	"\x05items\x18\x01 \x03(\v2\x15.video.service.v1.TagR\x05items\x12\x19\n" +
 	"\x05total\x18\x02 \x01(\x03H\x00R\x05total\x88\x01\x01B\b\n" +
@@ -2049,14 +2138,15 @@ const file_video_service_v1_video_proto_rawDesc = "" +
 	"\x1cUPLOAD_TASK_STATUS_UPLOADING\x10\x01\x12\x1e\n" +
 	"\x1aUPLOAD_TASK_STATUS_MERGING\x10\x02\x12 \n" +
 	"\x1cUPLOAD_TASK_STATUS_COMPLETED\x10\x03\x12\x1d\n" +
-	"\x19UPLOAD_TASK_STATUS_FAILED\x10\x042\xac\v\n" +
+	"\x19UPLOAD_TASK_STATUS_FAILED\x10\x042\x80\f\n" +
 	"\fVideoService\x12H\n" +
 	"\bGetVideo\x12!.video.service.v1.GetVideoRequest\x1a\x17.video.service.v1.Video\"\x00\x12M\n" +
 	"\tListVideo\x12\x19.pagination.PagingRequest\x1a#.video.service.v1.ListVideoResponse\"\x00\x12^\n" +
 	"\rListUserVideo\x12&.video.service.v1.ListUserVideoRequest\x1a#.video.service.v1.ListVideoResponse\"\x00\x12N\n" +
 	"\vUpdateVideo\x12$.video.service.v1.UpdateVideoRequest\x1a\x17.video.service.v1.Video\"\x00\x12M\n" +
 	"\vDeleteVideo\x12$.video.service.v1.DeleteVideoRequest\x1a\x16.google.protobuf.Empty\"\x00\x12Z\n" +
-	"\x11ChangeVideoStatus\x12*.video.service.v1.ChangeVideoStatusRequest\x1a\x17.video.service.v1.Video\"\x00\x12]\n" +
+	"\x11ChangeVideoStatus\x12*.video.service.v1.ChangeVideoStatusRequest\x1a\x17.video.service.v1.Video\"\x00\x12R\n" +
+	"\rScheduleVideo\x12&.video.service.v1.ScheduleVideoRequest\x1a\x17.video.service.v1.Video\"\x00\x12]\n" +
 	"\x10CreateUploadTask\x12).video.service.v1.CreateUploadTaskRequest\x1a\x1c.video.service.v1.UploadTask\"\x00\x12\\\n" +
 	"\vUploadChunk\x12$.video.service.v1.UploadChunkRequest\x1a%.video.service.v1.UploadChunkResponse\"\x00\x12Y\n" +
 	"\x0eCompleteUpload\x12'.video.service.v1.CompleteUploadRequest\x1a\x1c.video.service.v1.UploadTask\"\x00\x12W\n" +
@@ -2084,7 +2174,7 @@ func file_video_service_v1_video_proto_rawDescGZIP() []byte {
 }
 
 var file_video_service_v1_video_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_video_service_v1_video_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
+var file_video_service_v1_video_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
 var file_video_service_v1_video_proto_goTypes = []any{
 	(VideoStatus)(0),                 // 0: video.service.v1.VideoStatus
 	(UploadTaskStatus)(0),            // 1: video.service.v1.UploadTaskStatus
@@ -2108,64 +2198,71 @@ var file_video_service_v1_video_proto_goTypes = []any{
 	(*GetDraftRequest)(nil),          // 19: video.service.v1.GetDraftRequest
 	(*ListDraftResponse)(nil),        // 20: video.service.v1.ListDraftResponse
 	(*DeleteDraftRequest)(nil),       // 21: video.service.v1.DeleteDraftRequest
-	(*SubmitDraftRequest)(nil),       // 22: video.service.v1.SubmitDraftRequest
-	(*ListTagResponse)(nil),          // 23: video.service.v1.ListTagResponse
-	(*timestamppb.Timestamp)(nil),    // 24: google.protobuf.Timestamp
-	(*v1.PagingRequest)(nil),         // 25: pagination.PagingRequest
-	(*emptypb.Empty)(nil),            // 26: google.protobuf.Empty
+	(*ScheduleVideoRequest)(nil),     // 22: video.service.v1.ScheduleVideoRequest
+	(*SubmitDraftRequest)(nil),       // 23: video.service.v1.SubmitDraftRequest
+	(*ListTagResponse)(nil),          // 24: video.service.v1.ListTagResponse
+	(*timestamppb.Timestamp)(nil),    // 25: google.protobuf.Timestamp
+	(*v1.PagingRequest)(nil),         // 26: pagination.PagingRequest
+	(*emptypb.Empty)(nil),            // 27: google.protobuf.Empty
 }
 var file_video_service_v1_video_proto_depIdxs = []int32{
 	0,  // 0: video.service.v1.Video.status:type_name -> video.service.v1.VideoStatus
-	24, // 1: video.service.v1.Video.published_at:type_name -> google.protobuf.Timestamp
-	24, // 2: video.service.v1.Video.created_at:type_name -> google.protobuf.Timestamp
-	24, // 3: video.service.v1.Video.updated_at:type_name -> google.protobuf.Timestamp
-	1,  // 4: video.service.v1.UploadTask.status:type_name -> video.service.v1.UploadTaskStatus
-	24, // 5: video.service.v1.UploadTask.created_at:type_name -> google.protobuf.Timestamp
-	24, // 6: video.service.v1.VideoDraft.created_at:type_name -> google.protobuf.Timestamp
-	24, // 7: video.service.v1.VideoDraft.updated_at:type_name -> google.protobuf.Timestamp
-	3,  // 8: video.service.v1.ListVideoResponse.items:type_name -> video.service.v1.Video
-	0,  // 9: video.service.v1.ChangeVideoStatusRequest.status:type_name -> video.service.v1.VideoStatus
-	6,  // 10: video.service.v1.ListDraftResponse.items:type_name -> video.service.v1.VideoDraft
-	4,  // 11: video.service.v1.ListTagResponse.items:type_name -> video.service.v1.Tag
-	7,  // 12: video.service.v1.VideoService.GetVideo:input_type -> video.service.v1.GetVideoRequest
-	25, // 13: video.service.v1.VideoService.ListVideo:input_type -> pagination.PagingRequest
-	8,  // 14: video.service.v1.VideoService.ListUserVideo:input_type -> video.service.v1.ListUserVideoRequest
-	10, // 15: video.service.v1.VideoService.UpdateVideo:input_type -> video.service.v1.UpdateVideoRequest
-	11, // 16: video.service.v1.VideoService.DeleteVideo:input_type -> video.service.v1.DeleteVideoRequest
-	12, // 17: video.service.v1.VideoService.ChangeVideoStatus:input_type -> video.service.v1.ChangeVideoStatusRequest
-	13, // 18: video.service.v1.VideoService.CreateUploadTask:input_type -> video.service.v1.CreateUploadTaskRequest
-	14, // 19: video.service.v1.VideoService.UploadChunk:input_type -> video.service.v1.UploadChunkRequest
-	16, // 20: video.service.v1.VideoService.CompleteUpload:input_type -> video.service.v1.CompleteUploadRequest
-	17, // 21: video.service.v1.VideoService.GetUploadTask:input_type -> video.service.v1.GetUploadTaskRequest
-	18, // 22: video.service.v1.VideoService.SaveDraft:input_type -> video.service.v1.SaveDraftRequest
-	19, // 23: video.service.v1.VideoService.GetDraft:input_type -> video.service.v1.GetDraftRequest
-	25, // 24: video.service.v1.VideoService.ListDraft:input_type -> pagination.PagingRequest
-	21, // 25: video.service.v1.VideoService.DeleteDraft:input_type -> video.service.v1.DeleteDraftRequest
-	22, // 26: video.service.v1.VideoService.SubmitDraft:input_type -> video.service.v1.SubmitDraftRequest
-	25, // 27: video.service.v1.VideoService.ListTag:input_type -> pagination.PagingRequest
-	2,  // 28: video.service.v1.VideoService.ListHotVideos:input_type -> video.service.v1.ListHotVideosRequest
-	3,  // 29: video.service.v1.VideoService.GetVideo:output_type -> video.service.v1.Video
-	9,  // 30: video.service.v1.VideoService.ListVideo:output_type -> video.service.v1.ListVideoResponse
-	9,  // 31: video.service.v1.VideoService.ListUserVideo:output_type -> video.service.v1.ListVideoResponse
-	3,  // 32: video.service.v1.VideoService.UpdateVideo:output_type -> video.service.v1.Video
-	26, // 33: video.service.v1.VideoService.DeleteVideo:output_type -> google.protobuf.Empty
-	3,  // 34: video.service.v1.VideoService.ChangeVideoStatus:output_type -> video.service.v1.Video
-	5,  // 35: video.service.v1.VideoService.CreateUploadTask:output_type -> video.service.v1.UploadTask
-	15, // 36: video.service.v1.VideoService.UploadChunk:output_type -> video.service.v1.UploadChunkResponse
-	5,  // 37: video.service.v1.VideoService.CompleteUpload:output_type -> video.service.v1.UploadTask
-	5,  // 38: video.service.v1.VideoService.GetUploadTask:output_type -> video.service.v1.UploadTask
-	6,  // 39: video.service.v1.VideoService.SaveDraft:output_type -> video.service.v1.VideoDraft
-	6,  // 40: video.service.v1.VideoService.GetDraft:output_type -> video.service.v1.VideoDraft
-	20, // 41: video.service.v1.VideoService.ListDraft:output_type -> video.service.v1.ListDraftResponse
-	26, // 42: video.service.v1.VideoService.DeleteDraft:output_type -> google.protobuf.Empty
-	3,  // 43: video.service.v1.VideoService.SubmitDraft:output_type -> video.service.v1.Video
-	23, // 44: video.service.v1.VideoService.ListTag:output_type -> video.service.v1.ListTagResponse
-	9,  // 45: video.service.v1.VideoService.ListHotVideos:output_type -> video.service.v1.ListVideoResponse
-	29, // [29:46] is the sub-list for method output_type
-	12, // [12:29] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	25, // 1: video.service.v1.Video.published_at:type_name -> google.protobuf.Timestamp
+	25, // 2: video.service.v1.Video.scheduled_at:type_name -> google.protobuf.Timestamp
+	25, // 3: video.service.v1.Video.created_at:type_name -> google.protobuf.Timestamp
+	25, // 4: video.service.v1.Video.updated_at:type_name -> google.protobuf.Timestamp
+	1,  // 5: video.service.v1.UploadTask.status:type_name -> video.service.v1.UploadTaskStatus
+	25, // 6: video.service.v1.UploadTask.created_at:type_name -> google.protobuf.Timestamp
+	25, // 7: video.service.v1.VideoDraft.created_at:type_name -> google.protobuf.Timestamp
+	25, // 8: video.service.v1.VideoDraft.updated_at:type_name -> google.protobuf.Timestamp
+	3,  // 9: video.service.v1.ListVideoResponse.items:type_name -> video.service.v1.Video
+	0,  // 10: video.service.v1.ChangeVideoStatusRequest.status:type_name -> video.service.v1.VideoStatus
+	25, // 11: video.service.v1.CompleteUploadRequest.scheduled_at:type_name -> google.protobuf.Timestamp
+	6,  // 12: video.service.v1.ListDraftResponse.items:type_name -> video.service.v1.VideoDraft
+	25, // 13: video.service.v1.ScheduleVideoRequest.scheduled_at:type_name -> google.protobuf.Timestamp
+	25, // 14: video.service.v1.SubmitDraftRequest.scheduled_at:type_name -> google.protobuf.Timestamp
+	4,  // 15: video.service.v1.ListTagResponse.items:type_name -> video.service.v1.Tag
+	7,  // 16: video.service.v1.VideoService.GetVideo:input_type -> video.service.v1.GetVideoRequest
+	26, // 17: video.service.v1.VideoService.ListVideo:input_type -> pagination.PagingRequest
+	8,  // 18: video.service.v1.VideoService.ListUserVideo:input_type -> video.service.v1.ListUserVideoRequest
+	10, // 19: video.service.v1.VideoService.UpdateVideo:input_type -> video.service.v1.UpdateVideoRequest
+	11, // 20: video.service.v1.VideoService.DeleteVideo:input_type -> video.service.v1.DeleteVideoRequest
+	12, // 21: video.service.v1.VideoService.ChangeVideoStatus:input_type -> video.service.v1.ChangeVideoStatusRequest
+	22, // 22: video.service.v1.VideoService.ScheduleVideo:input_type -> video.service.v1.ScheduleVideoRequest
+	13, // 23: video.service.v1.VideoService.CreateUploadTask:input_type -> video.service.v1.CreateUploadTaskRequest
+	14, // 24: video.service.v1.VideoService.UploadChunk:input_type -> video.service.v1.UploadChunkRequest
+	16, // 25: video.service.v1.VideoService.CompleteUpload:input_type -> video.service.v1.CompleteUploadRequest
+	17, // 26: video.service.v1.VideoService.GetUploadTask:input_type -> video.service.v1.GetUploadTaskRequest
+	18, // 27: video.service.v1.VideoService.SaveDraft:input_type -> video.service.v1.SaveDraftRequest
+	19, // 28: video.service.v1.VideoService.GetDraft:input_type -> video.service.v1.GetDraftRequest
+	26, // 29: video.service.v1.VideoService.ListDraft:input_type -> pagination.PagingRequest
+	21, // 30: video.service.v1.VideoService.DeleteDraft:input_type -> video.service.v1.DeleteDraftRequest
+	23, // 31: video.service.v1.VideoService.SubmitDraft:input_type -> video.service.v1.SubmitDraftRequest
+	26, // 32: video.service.v1.VideoService.ListTag:input_type -> pagination.PagingRequest
+	2,  // 33: video.service.v1.VideoService.ListHotVideos:input_type -> video.service.v1.ListHotVideosRequest
+	3,  // 34: video.service.v1.VideoService.GetVideo:output_type -> video.service.v1.Video
+	9,  // 35: video.service.v1.VideoService.ListVideo:output_type -> video.service.v1.ListVideoResponse
+	9,  // 36: video.service.v1.VideoService.ListUserVideo:output_type -> video.service.v1.ListVideoResponse
+	3,  // 37: video.service.v1.VideoService.UpdateVideo:output_type -> video.service.v1.Video
+	27, // 38: video.service.v1.VideoService.DeleteVideo:output_type -> google.protobuf.Empty
+	3,  // 39: video.service.v1.VideoService.ChangeVideoStatus:output_type -> video.service.v1.Video
+	3,  // 40: video.service.v1.VideoService.ScheduleVideo:output_type -> video.service.v1.Video
+	5,  // 41: video.service.v1.VideoService.CreateUploadTask:output_type -> video.service.v1.UploadTask
+	15, // 42: video.service.v1.VideoService.UploadChunk:output_type -> video.service.v1.UploadChunkResponse
+	5,  // 43: video.service.v1.VideoService.CompleteUpload:output_type -> video.service.v1.UploadTask
+	5,  // 44: video.service.v1.VideoService.GetUploadTask:output_type -> video.service.v1.UploadTask
+	6,  // 45: video.service.v1.VideoService.SaveDraft:output_type -> video.service.v1.VideoDraft
+	6,  // 46: video.service.v1.VideoService.GetDraft:output_type -> video.service.v1.VideoDraft
+	20, // 47: video.service.v1.VideoService.ListDraft:output_type -> video.service.v1.ListDraftResponse
+	27, // 48: video.service.v1.VideoService.DeleteDraft:output_type -> google.protobuf.Empty
+	3,  // 49: video.service.v1.VideoService.SubmitDraft:output_type -> video.service.v1.Video
+	24, // 50: video.service.v1.VideoService.ListTag:output_type -> video.service.v1.ListTagResponse
+	9,  // 51: video.service.v1.VideoService.ListHotVideos:output_type -> video.service.v1.ListVideoResponse
+	34, // [34:52] is the sub-list for method output_type
+	16, // [16:34] is the sub-list for method input_type
+	16, // [16:16] is the sub-list for extension type_name
+	16, // [16:16] is the sub-list for extension extendee
+	0,  // [0:16] is the sub-list for field type_name
 }
 
 func init() { file_video_service_v1_video_proto_init() }
@@ -2186,14 +2283,16 @@ func file_video_service_v1_video_proto_init() {
 	file_video_service_v1_video_proto_msgTypes[14].OneofWrappers = []any{}
 	file_video_service_v1_video_proto_msgTypes[16].OneofWrappers = []any{}
 	file_video_service_v1_video_proto_msgTypes[18].OneofWrappers = []any{}
+	file_video_service_v1_video_proto_msgTypes[20].OneofWrappers = []any{}
 	file_video_service_v1_video_proto_msgTypes[21].OneofWrappers = []any{}
+	file_video_service_v1_video_proto_msgTypes[22].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_video_service_v1_video_proto_rawDesc), len(file_video_service_v1_video_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   22,
+			NumMessages:   23,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

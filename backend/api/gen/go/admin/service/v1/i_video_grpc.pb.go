@@ -22,11 +22,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	VideoService_List_FullMethodName         = "/admin.service.v1.VideoService/List"
-	VideoService_Get_FullMethodName          = "/admin.service.v1.VideoService/Get"
-	VideoService_Update_FullMethodName       = "/admin.service.v1.VideoService/Update"
-	VideoService_ChangeStatus_FullMethodName = "/admin.service.v1.VideoService/ChangeStatus"
-	VideoService_Delete_FullMethodName       = "/admin.service.v1.VideoService/Delete"
+	VideoService_List_FullMethodName          = "/admin.service.v1.VideoService/List"
+	VideoService_Get_FullMethodName           = "/admin.service.v1.VideoService/Get"
+	VideoService_Update_FullMethodName        = "/admin.service.v1.VideoService/Update"
+	VideoService_ChangeStatus_FullMethodName  = "/admin.service.v1.VideoService/ChangeStatus"
+	VideoService_Delete_FullMethodName        = "/admin.service.v1.VideoService/Delete"
+	VideoService_ScheduleVideo_FullMethodName = "/admin.service.v1.VideoService/ScheduleVideo"
 )
 
 // VideoServiceClient is the client API for VideoService service.
@@ -45,6 +46,8 @@ type VideoServiceClient interface {
 	ChangeStatus(ctx context.Context, in *v11.ChangeVideoStatusRequest, opts ...grpc.CallOption) (*v11.Video, error)
 	// 删除视频
 	Delete(ctx context.Context, in *v11.DeleteVideoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// 设置/取消定时发布（仅草稿；scheduledAt 缺省=取消）
+	ScheduleVideo(ctx context.Context, in *v11.ScheduleVideoRequest, opts ...grpc.CallOption) (*v11.Video, error)
 }
 
 type videoServiceClient struct {
@@ -105,6 +108,16 @@ func (c *videoServiceClient) Delete(ctx context.Context, in *v11.DeleteVideoRequ
 	return out, nil
 }
 
+func (c *videoServiceClient) ScheduleVideo(ctx context.Context, in *v11.ScheduleVideoRequest, opts ...grpc.CallOption) (*v11.Video, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v11.Video)
+	err := c.cc.Invoke(ctx, VideoService_ScheduleVideo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // VideoServiceServer is the server API for VideoService service.
 // All implementations must embed UnimplementedVideoServiceServer
 // for forward compatibility.
@@ -121,6 +134,8 @@ type VideoServiceServer interface {
 	ChangeStatus(context.Context, *v11.ChangeVideoStatusRequest) (*v11.Video, error)
 	// 删除视频
 	Delete(context.Context, *v11.DeleteVideoRequest) (*emptypb.Empty, error)
+	// 设置/取消定时发布（仅草稿；scheduledAt 缺省=取消）
+	ScheduleVideo(context.Context, *v11.ScheduleVideoRequest) (*v11.Video, error)
 	mustEmbedUnimplementedVideoServiceServer()
 }
 
@@ -145,6 +160,9 @@ func (UnimplementedVideoServiceServer) ChangeStatus(context.Context, *v11.Change
 }
 func (UnimplementedVideoServiceServer) Delete(context.Context, *v11.DeleteVideoRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedVideoServiceServer) ScheduleVideo(context.Context, *v11.ScheduleVideoRequest) (*v11.Video, error) {
+	return nil, status.Error(codes.Unimplemented, "method ScheduleVideo not implemented")
 }
 func (UnimplementedVideoServiceServer) mustEmbedUnimplementedVideoServiceServer() {}
 func (UnimplementedVideoServiceServer) testEmbeddedByValue()                      {}
@@ -257,6 +275,24 @@ func _VideoService_Delete_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VideoService_ScheduleVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v11.ScheduleVideoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoServiceServer).ScheduleVideo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoService_ScheduleVideo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoServiceServer).ScheduleVideo(ctx, req.(*v11.ScheduleVideoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // VideoService_ServiceDesc is the grpc.ServiceDesc for VideoService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -283,6 +319,10 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _VideoService_Delete_Handler,
+		},
+		{
+			MethodName: "ScheduleVideo",
+			Handler:    _VideoService_ScheduleVideo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

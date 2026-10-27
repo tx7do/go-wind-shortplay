@@ -13,6 +13,10 @@ class Comment {
   final int parentId;
   final int likeCount;
   final int replyCount;
+
+  /// 作者置顶（仅一级评论；列表置顶优先）
+  final bool pinned;
+
   final DateTime? createdAt;
 
   /// 本地点赞状态（列表接口不回传，点赞操作后本地维护）
@@ -30,6 +34,7 @@ class Comment {
     this.parentId = 0,
     this.likeCount = 0,
     this.replyCount = 0,
+    this.pinned = false,
     this.createdAt,
     this.liked = false,
     this.replies = const [],
@@ -41,11 +46,14 @@ class Comment {
       id: jsonInt(json['id']),
       videoId: jsonInt(json['videoId']),
       userId: jsonInt(json['userId']),
-      user: user is Map<String, dynamic> ? UserBrief.fromJson(user) : const UserBrief(id: 0),
+      user: user is Map<String, dynamic>
+          ? UserBrief.fromJson(user)
+          : const UserBrief(id: 0),
       content: jsonString(json['content']),
       parentId: jsonInt(json['parentId']),
       likeCount: jsonInt(json['likeCount']),
       replyCount: jsonInt(json['replyCount']),
+      pinned: jsonBool(json['pinned']),
       createdAt: parseTime(json['createdAt']),
     );
   }
@@ -57,6 +65,7 @@ class Comment {
     bool? liked,
     List<Comment>? replies,
     int? replyCount,
+    bool? pinned,
   }) {
     return Comment(
       id: id,
@@ -67,6 +76,7 @@ class Comment {
       parentId: parentId,
       likeCount: likeCount ?? this.likeCount,
       replyCount: replyCount ?? this.replyCount,
+      pinned: pinned ?? this.pinned,
       createdAt: createdAt,
       liked: liked ?? this.liked,
       replies: replies ?? this.replies,

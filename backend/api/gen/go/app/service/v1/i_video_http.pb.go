@@ -35,6 +35,7 @@ const OperationVideoServiceListDraft = "/app.service.v1.VideoService/ListDraft"
 const OperationVideoServiceListHotVideos = "/app.service.v1.VideoService/ListHotVideos"
 const OperationVideoServiceListTag = "/app.service.v1.VideoService/ListTag"
 const OperationVideoServiceSaveDraft = "/app.service.v1.VideoService/SaveDraft"
+const OperationVideoServiceScheduleVideo = "/app.service.v1.VideoService/ScheduleVideo"
 const OperationVideoServiceSubmitDraft = "/app.service.v1.VideoService/SubmitDraft"
 const OperationVideoServiceUpdateVideo = "/app.service.v1.VideoService/UpdateVideo"
 const OperationVideoServiceUploadChunk = "/app.service.v1.VideoService/UploadChunk"
@@ -64,6 +65,8 @@ type VideoServiceHTTPServer interface {
 	ListTag(context.Context, *v11.PagingRequest) (*v1.ListTagResponse, error)
 	// SaveDraft 保存草稿（upsert）
 	SaveDraft(context.Context, *v1.SaveDraftRequest) (*v1.VideoDraft, error)
+	// ScheduleVideo 设置/取消定时发布（作者本人；仅草稿；scheduledAt 缺省=取消）
+	ScheduleVideo(context.Context, *v1.ScheduleVideoRequest) (*v1.Video, error)
 	// SubmitDraft 提交草稿发布（进入审核队列或直接发布）
 	SubmitDraft(context.Context, *v1.SubmitDraftRequest) (*v1.Video, error)
 	// UpdateVideo 编辑自己的视频（标题 / 简介 / 封面 / 标签）
@@ -85,6 +88,7 @@ func RegisterVideoServiceHTTPServer(s *http.Server, srv VideoServiceHTTPServer) 
 	r.POST("/app/v1/drafts/{id}/submit", _VideoService_SubmitDraft0_HTTP_Handler(srv))
 	r.PUT("/app/v1/videos/{id}", _VideoService_UpdateVideo0_HTTP_Handler(srv))
 	r.DELETE("/app/v1/videos/{id}", _VideoService_DeleteVideo0_HTTP_Handler(srv))
+	r.PUT("/app/v1/videos/{id}/schedule", _VideoService_ScheduleVideo0_HTTP_Handler(srv))
 	r.GET("/app/v1/tags", _VideoService_ListTag0_HTTP_Handler(srv))
 	r.GET("/app/v1/creator/overview", _VideoService_GetCreatorOverview0_HTTP_Handler(srv))
 	r.GET("/app/v1/creator/trends", _VideoService_ListCreatorTrends0_HTTP_Handler(srv))
@@ -342,6 +346,31 @@ func _VideoService_DeleteVideo0_HTTP_Handler(srv VideoServiceHTTPServer) func(ct
 	}
 }
 
+func _VideoService_ScheduleVideo0_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ScheduleVideoRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationVideoServiceScheduleVideo)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ScheduleVideo(ctx, req.(*v1.ScheduleVideoRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.Video)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _VideoService_ListTag0_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v11.PagingRequest
@@ -443,6 +472,8 @@ type VideoServiceHTTPClient interface {
 	ListTag(ctx context.Context, req *v11.PagingRequest, opts ...http.CallOption) (rsp *v1.ListTagResponse, err error)
 	// SaveDraft 保存草稿（upsert）
 	SaveDraft(ctx context.Context, req *v1.SaveDraftRequest, opts ...http.CallOption) (rsp *v1.VideoDraft, err error)
+	// ScheduleVideo 设置/取消定时发布（作者本人；仅草稿；scheduledAt 缺省=取消）
+	ScheduleVideo(ctx context.Context, req *v1.ScheduleVideoRequest, opts ...http.CallOption) (rsp *v1.Video, err error)
 	// SubmitDraft 提交草稿发布（进入审核队列或直接发布）
 	SubmitDraft(ctx context.Context, req *v1.SubmitDraftRequest, opts ...http.CallOption) (rsp *v1.Video, err error)
 	// UpdateVideo 编辑自己的视频（标题 / 简介 / 封面 / 标签）
@@ -621,6 +652,20 @@ func (c *VideoServiceHTTPClientImpl) SaveDraft(ctx context.Context, in *v1.SaveD
 	opts = append(opts, http.Operation(OperationVideoServiceSaveDraft))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ScheduleVideo 设置/取消定时发布（作者本人；仅草稿；scheduledAt 缺省=取消）
+func (c *VideoServiceHTTPClientImpl) ScheduleVideo(ctx context.Context, in *v1.ScheduleVideoRequest, opts ...http.CallOption) (*v1.Video, error) {
+	var out v1.Video
+	pattern := "/app/v1/videos/{id}/schedule"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationVideoServiceScheduleVideo))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

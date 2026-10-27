@@ -24,8 +24,7 @@ import 'package:shortplay_app/src/core/utilities/platform.dart';
 import 'package:shortplay_app/src/features/common/services/tag_service.dart';
 import 'package:shortplay_app/src/features/common/widgets/cover_image.dart';
 import 'package:shortplay_app/src/features/publish/services/draft_service.dart';
-import 'package:shortplay_app/src/features/common/data/models.dart'
-    show Series;
+import 'package:shortplay_app/src/features/common/data/models.dart' show Series;
 import 'package:shortplay_app/src/features/publish/services/upload_service.dart';
 import 'package:shortplay_app/src/features/publish/widgets/series_picker_sheet.dart';
 import 'package:get_it/get_it.dart' show GetIt;
@@ -69,6 +68,9 @@ class _PublishPageState extends State<PublishPage>
   Series? _attachedSeries;
 
   bool _asDraft = false;
+
+  /// 定时发布时间（仅直发生效；null=立即发布）
+  DateTime? _scheduledAt;
   bool _uploading = false;
   int _uploadPercent = 0;
 
@@ -331,6 +333,13 @@ class _PublishPageState extends State<PublishPage>
       final ok = await _ensureLoginOrExit();
       if (!ok) return;
     }
+    // 定时发布仅直发生效：时间须在未来
+    final scheduledAt =
+        (!asDraft &&
+            _scheduledAt != null &&
+            _scheduledAt!.isAfter(DateTime.now()))
+        ? _scheduledAt
+        : null;
 
     setState(() {
       _uploading = true;
@@ -351,6 +360,7 @@ class _PublishPageState extends State<PublishPage>
         tags: _tags,
         asDraft: asDraft,
         seriesId: _attachedSeries?.id,
+        scheduledAt: scheduledAt,
         onProgress: (progress) {
           if (!mounted) return;
           setState(() => _uploadPercent = progress.percent);
@@ -370,6 +380,8 @@ class _PublishPageState extends State<PublishPage>
       }
       if (asDraft) {
         EasyLoading.showToast(loc.draftSaved);
+      } else if (scheduledAt != null) {
+        EasyLoading.showToast(loc.scheduledPublished);
       } else {
         EasyLoading.showToast(loc.publishSuccess);
       }
@@ -381,6 +393,7 @@ class _PublishPageState extends State<PublishPage>
       setState(() {
         _tags.clear();
         _attachedSeries = null;
+        _scheduledAt = null;
       });
     } on ApiStatusException catch (e) {
       EasyLoading.dismiss();
@@ -989,6 +1002,41 @@ class _PublishPageState extends State<PublishPage>
     );
   }
 
+  /// 选择定时发布时间（日期 + 时间两步；须未来时刻）
+  Future<DateTime?> _pickScheduledTime() async {
+    final loc = S.of(context);
+    final now = DateTime.now();
+    final date = await showDatePicker(
+      context: context,
+      initialDate: now.add(const Duration(days: 1)),
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 60)),
+    );
+    if (date == null || !mounted) return null;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 12, minute: 0),
+    );
+    if (time == null || !mounted) return null;
+    final picked = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
+    if (!picked.isAfter(now)) {
+      EasyLoading.showToast(loc.scheduledTimePast);
+      return null;
+    }
+    return picked;
+  }
+
+  String _formatScheduled(DateTime dt) {
+    String two(int v) => v.toString().padLeft(2, '0');
+    return '${dt.year}-${two(dt.month)}-${two(dt.day)} ${two(dt.hour)}:${two(dt.minute)}';
+  }
+
   Widget _buildAdvancedCard(ThemeData theme, S loc) {
     return Container(
       width: double.infinity,
@@ -1026,6 +1074,37 @@ class _PublishPageState extends State<PublishPage>
                 loc.asDraftOption,
                 style: TextStyle(fontSize: 13.5.sp),
               ),
+            ),
+            // 定时发布（与存草稿互斥：草稿没有定时语义）
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
+              value: _scheduledAt != null,
+              onChanged: _uploading || _asDraft
+                  ? null
+                  : (on) async {
+                      if (!on) {
+                        setState(() => _scheduledAt = null);
+                        return;
+                      }
+                      final picked = await _pickScheduledTime();
+                      if (mounted) {
+                        setState(() => _scheduledAt = picked);
+                      }
+                    },
+              title: Text(
+                loc.scheduledPublishOption,
+                style: TextStyle(fontSize: 13.5.sp),
+              ),
+              subtitle: _scheduledAt != null
+                  ? Text(
+                      _formatScheduled(_scheduledAt!),
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: theme.colorScheme.primary,
+                      ),
+                    )
+                  : null,
             ),
           ],
         ),

@@ -119,6 +119,11 @@ func ReplyCount(v uint64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldReplyCount, v))
 }
 
+// Pinned applies equality check predicate on the "pinned" field. It's identical to PinnedEQ.
+func Pinned(v bool) predicate.VideoComment {
+	return predicate.VideoComment(sql.FieldEQ(FieldPinned, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldCreatedAt, v))
@@ -732,6 +737,16 @@ func ReplyCountLT(v uint64) predicate.VideoComment {
 // ReplyCountLTE applies the LTE predicate on the "reply_count" field.
 func ReplyCountLTE(v uint64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLTE(FieldReplyCount, v))
+}
+
+// PinnedEQ applies the EQ predicate on the "pinned" field.
+func PinnedEQ(v bool) predicate.VideoComment {
+	return predicate.VideoComment(sql.FieldEQ(FieldPinned, v))
+}
+
+// PinnedNEQ applies the NEQ predicate on the "pinned" field.
+func PinnedNEQ(v bool) predicate.VideoComment {
+	return predicate.VideoComment(sql.FieldNEQ(FieldPinned, v))
 }
 
 // And groups predicates with the AND operator between them.

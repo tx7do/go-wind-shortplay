@@ -259,6 +259,14 @@ const VideoList = () => {
       render: (_, record) => String(record.commentCount ?? '0'),
     },
     {
+      title: t('scheduledAt'),
+      dataIndex: 'scheduledAt',
+      search: false,
+      width: 150,
+      render: (_, record) =>
+        record.scheduledAt ? dayjs(record.scheduledAt).format('MM-DD HH:mm') : '',
+    },
+    {
       title: t('createdAt'),
       dataIndex: 'createdAt',
       search: false,
@@ -315,6 +323,23 @@ const VideoList = () => {
             >
               <DownCircleOutlined /> {t('offline')}
             </a>,
+          );
+        }
+        // 草稿（含定时中）→ 立即发布（定时视频可提前人工发布）
+        if (status === VIDEO_STATUS.DRAFT) {
+          actions.push(
+            <Popconfirm
+              key="publish"
+              title={t('approveConfirmTitle')}
+              description={t('approveConfirmDesc')}
+              onConfirm={() => handleApprove(record)}
+              okText={t('common:button.ok')}
+              cancelText={t('common:button.cancel')}
+            >
+              <a style={{ color: 'var(--ant-color-success)' }}>
+                <PlayCircleOutlined /> {t('publishNow')}
+              </a>
+            </Popconfirm>,
           );
         }
         // 已下架 / 已驳回 → 恢复发布

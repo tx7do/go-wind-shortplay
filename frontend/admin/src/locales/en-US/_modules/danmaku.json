@@ -1,0 +1,21 @@
+{
+  "moduleName": "danmaku",
+  "danmakuList": "Danmaku List",
+  "user": "Sender",
+  "content": "Content",
+  "videoId": "Video ID",
+  "timeOffset": "Position",
+  "status": "Status",
+  "statusVisible": "Visible",
+  "statusHidden": "Hidden",
+  "createdAt": "Sent At",
+  "hide": "Hide",
+  "restore": "Restore",
+  "statusChanged": "Status updated",
+  "statusChangeFailed": "Failed to update status",
+  "action": "Actions",
+  "deleteConfirmTitle": "Confirm Delete",
+  "deleteConfirmDesc": "This cannot be undone. Delete this {{moduleName}}?",
+  "deleteSuccess": "Deleted",
+  "deleteFailed": "Delete failed"
+}

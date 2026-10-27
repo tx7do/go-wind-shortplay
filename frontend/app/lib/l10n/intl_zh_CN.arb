@@ -388,5 +388,16 @@
   "dislikeRecorded": "将减少此类内容推荐",
   "searchHistory": "搜索历史",
   "searchHistoryClear": "清空",
-  "hotKeywords": "热搜词"
+  "hotKeywords": "热搜词",
+  "danmaku": "弹幕",
+  "danmakuSendTitle": "发送弹幕",
+  "danmakuSendHint": "说点什么…",
+  "danmakuSendAction": "发送",
+  "playback": "播放",
+  "pinnedBadge": "置顶",
+  "pin": "置顶",
+  "unpin": "取消置顶",
+  "scheduledPublishOption": "定时发布（到点自动上线）",
+  "scheduledPublished": "已设为定时发布",
+  "scheduledTimePast": "定时时间须晚于当前"
 }

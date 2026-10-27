@@ -11,5 +11,6 @@
   "deleteConfirmDesc": "删除后不可恢复，确定删除该{{moduleName}}吗？",
   "deleteSuccess": "删除成功",
   "deleteFailed": "删除失败",
-  "action": "操作"
+  "action": "操作",
+  "pinned": "置顶"
 }

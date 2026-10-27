@@ -191,6 +191,11 @@ func (s *CommentService) ListReply(ctx context.Context, req *interactionV1.ListR
 	return s.commentClient.ListReply(ctx, req)
 }
 
+// PinComment 置顶/取消置顶评论（视频作者本人，转发 core）。
+func (s *CommentService) PinComment(ctx context.Context, req *interactionV1.PinCommentRequest) (*interactionV1.Comment, error) {
+	return s.commentClient.PinComment(ctx, req)
+}
+
 // ── 举报 / 埋点（app BFF 薄转发）──
 
 type ReportService struct {
@@ -301,6 +306,11 @@ func (s *VideoService) UpdateVideo(ctx context.Context, req *videoV1.UpdateVideo
 
 func (s *VideoService) DeleteVideo(ctx context.Context, req *videoV1.DeleteVideoRequest) (*emptypb.Empty, error) {
 	return s.videoClient.DeleteVideo(ctx, req)
+}
+
+// ScheduleVideo 设置/取消定时发布（作者本人，转发 core）。
+func (s *VideoService) ScheduleVideo(ctx context.Context, req *videoV1.ScheduleVideoRequest) (*videoV1.Video, error) {
+	return s.videoClient.ScheduleVideo(ctx, req)
 }
 
 // ListCreatorTrends 创作者近 N 日趋势（本人，转发 core）。

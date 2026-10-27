@@ -46,15 +46,15 @@ type NotificationRuleServiceHTTPServer interface {
 
 func RegisterNotificationRuleServiceHTTPServer(s *http.Server, srv NotificationRuleServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/v1/notification-rules", _NotificationRuleService_List14_HTTP_Handler(srv))
+	r.GET("/admin/v1/notification-rules", _NotificationRuleService_List15_HTTP_Handler(srv))
 	r.GET("/admin/v1/notification-rules/{id}", _NotificationRuleService_Get13_HTTP_Handler(srv))
 	r.POST("/admin/v1/notification-rules", _NotificationRuleService_Create10_HTTP_Handler(srv))
 	r.PUT("/admin/v1/notification-rules/{id}", _NotificationRuleService_Update10_HTTP_Handler(srv))
-	r.DELETE("/admin/v1/notification-rules/{id}", _NotificationRuleService_Delete11_HTTP_Handler(srv))
+	r.DELETE("/admin/v1/notification-rules/{id}", _NotificationRuleService_Delete12_HTTP_Handler(srv))
 	r.POST("/admin/v1/notification-rules/{id}/test-dispatch", _NotificationRuleService_TestDispatch0_HTTP_Handler(srv))
 }
 
-func _NotificationRuleService_List14_HTTP_Handler(srv NotificationRuleServiceHTTPServer) func(ctx http.Context) error {
+func _NotificationRuleService_List15_HTTP_Handler(srv NotificationRuleServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v1.PagingRequest
 		if err := ctx.BindQuery(&in); err != nil {
@@ -142,7 +142,7 @@ func _NotificationRuleService_Update10_HTTP_Handler(srv NotificationRuleServiceH
 	}
 }
 
-func _NotificationRuleService_Delete11_HTTP_Handler(srv NotificationRuleServiceHTTPServer) func(ctx http.Context) error {
+func _NotificationRuleService_Delete12_HTTP_Handler(srv NotificationRuleServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v11.DeleteNotificationRuleRequest
 		if err := ctx.BindQuery(&in); err != nil {

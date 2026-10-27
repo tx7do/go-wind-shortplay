@@ -113,6 +113,10 @@ func (m *Comment) validate(all bool) error {
 		// no validation rules for ReplyCount
 	}
 
+	if m.Pinned != nil {
+		// no validation rules for Pinned
+	}
+
 	if m.CreatedAt != nil {
 
 		if all {
@@ -436,6 +440,112 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DeleteCommentRequestValidationError{}
+
+// Validate checks the field values on PinCommentRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *PinCommentRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on PinCommentRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// PinCommentRequestMultiError, or nil if none found.
+func (m *PinCommentRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *PinCommentRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Pinned
+
+	if len(errors) > 0 {
+		return PinCommentRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// PinCommentRequestMultiError is an error wrapping multiple validation errors
+// returned by PinCommentRequest.ValidateAll() if the designated constraints
+// aren't met.
+type PinCommentRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PinCommentRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PinCommentRequestMultiError) AllErrors() []error { return m }
+
+// PinCommentRequestValidationError is the validation error returned by
+// PinCommentRequest.Validate if the designated constraints aren't met.
+type PinCommentRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PinCommentRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PinCommentRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PinCommentRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PinCommentRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PinCommentRequestValidationError) ErrorName() string {
+	return "PinCommentRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e PinCommentRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPinCommentRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PinCommentRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PinCommentRequestValidationError{}
 
 // Validate checks the field values on ListCommentRequest with the rules
 // defined in the proto definition for this message. If any rules are

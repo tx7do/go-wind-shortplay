@@ -6,7 +6,7 @@
 import { useRef } from 'react';
 import type { ProColumns, ActionType } from '@ant-design/pro-components';
 import ListTable from '@/components/common/ListTable';
-import { Avatar, Popconfirm, App } from 'antd';
+import { Avatar, Popconfirm, App, Tag } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -66,7 +66,17 @@ const CommentList = () => {
       ellipsis: true,
       render: (_, record) => {
         const text = String(record.content ?? '');
-        return text.length > 60 ? `${text.slice(0, 60)}...` : text;
+        const clipped = text.length > 60 ? `${text.slice(0, 60)}...` : text;
+        return record.pinned ? (
+          <span>
+            <Tag color="warning" style={{ marginInlineEnd: 4 }}>
+              {t('pinned')}
+            </Tag>
+            {clipped}
+          </span>
+        ) : (
+          clipped
+        );
       },
     },
     {

@@ -41,12 +41,14 @@ const file_app_service_v1_i_interaction_proto_rawDesc = "" +
 	"\x06Follow\x12%.interaction.service.v1.FollowRequest\x1a&.interaction.service.v1.FollowResponse\")\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/app/v1/users/{user_id}/follow\x12\x81\x01\n" +
 	"\bUnfollow\x12%.interaction.service.v1.FollowRequest\x1a&.interaction.service.v1.FollowResponse\"&\x82\xd3\xe4\x93\x02 *\x1e/app/v1/users/{user_id}/follow\x12q\n" +
 	"\rListFollowing\x12\x19.pagination.PagingRequest\x1a*.interaction.service.v1.ListFollowResponse\"\x19\x82\xd3\xe4\x93\x02\x13\x12\x11/app/v1/following\x12q\n" +
-	"\rListFollowers\x12\x19.pagination.PagingRequest\x1a*.interaction.service.v1.ListFollowResponse\"\x19\x82\xd3\xe4\x93\x02\x13\x12\x11/app/v1/followers2\xbf\x04\n" +
+	"\rListFollowers\x12\x19.pagination.PagingRequest\x1a*.interaction.service.v1.ListFollowResponse\"\x19\x82\xd3\xe4\x93\x02\x13\x12\x11/app/v1/followers2\xbf\x05\n" +
 	"\x0eCommentService\x12\x8d\x01\n" +
 	"\rCreateComment\x12,.interaction.service.v1.CreateCommentRequest\x1a\x1f.interaction.service.v1.Comment\"-\x82\xd3\xe4\x93\x02':\x01*\"\"/app/v1/videos/{video_id}/comments\x12t\n" +
 	"\rDeleteComment\x12,.interaction.service.v1.DeleteCommentRequest\x1a\x16.google.protobuf.Empty\"\x1d\x82\xd3\xe4\x93\x02\x17*\x15/app/v1/comments/{id}\x12\x92\x01\n" +
 	"\vListComment\x12*.interaction.service.v1.ListCommentRequest\x1a+.interaction.service.v1.ListCommentResponse\"*\x82\xd3\xe4\x93\x02$\x12\"/app/v1/videos/{video_id}/comments\x12\x91\x01\n" +
-	"\tListReply\x12(.interaction.service.v1.ListReplyRequest\x1a+.interaction.service.v1.ListCommentResponse\"-\x82\xd3\xe4\x93\x02'\x12%/app/v1/comments/{comment_id}/repliesB\xb8\x01\n" +
+	"\tListReply\x12(.interaction.service.v1.ListReplyRequest\x1a+.interaction.service.v1.ListCommentResponse\"-\x82\xd3\xe4\x93\x02'\x12%/app/v1/comments/{comment_id}/replies\x12~\n" +
+	"\n" +
+	"PinComment\x12).interaction.service.v1.PinCommentRequest\x1a\x1f.interaction.service.v1.Comment\"$\x82\xd3\xe4\x93\x02\x1e:\x01*\x1a\x19/app/v1/comments/{id}/pinB\xb8\x01\n" +
 	"\x12com.app.service.v1B\x11IInteractionProtoP\x01Z5go-wind-shortplay/api/gen/go/app/service/v1;servicev1\xa2\x02\x03ASX\xaa\x02\x0eApp.Service.V1\xca\x02\x0eApp\\Service\\V1\xe2\x02\x1aApp\\Service\\V1\\GPBMetadata\xea\x02\x10App::Service::V1b\x06proto3"
 
 var file_app_service_v1_i_interaction_proto_goTypes = []any{
@@ -59,15 +61,16 @@ var file_app_service_v1_i_interaction_proto_goTypes = []any{
 	(*v1.DeleteCommentRequest)(nil),         // 6: interaction.service.v1.DeleteCommentRequest
 	(*v1.ListCommentRequest)(nil),           // 7: interaction.service.v1.ListCommentRequest
 	(*v1.ListReplyRequest)(nil),             // 8: interaction.service.v1.ListReplyRequest
-	(*v1.LikeResponse)(nil),                 // 9: interaction.service.v1.LikeResponse
-	(*v1.CollectResponse)(nil),              // 10: interaction.service.v1.CollectResponse
-	(*v1.GetInteractionStatusResponse)(nil), // 11: interaction.service.v1.GetInteractionStatusResponse
-	(*v12.ListVideoResponse)(nil),           // 12: video.service.v1.ListVideoResponse
-	(*v1.FollowResponse)(nil),               // 13: interaction.service.v1.FollowResponse
-	(*v1.ListFollowResponse)(nil),           // 14: interaction.service.v1.ListFollowResponse
-	(*v1.Comment)(nil),                      // 15: interaction.service.v1.Comment
-	(*emptypb.Empty)(nil),                   // 16: google.protobuf.Empty
-	(*v1.ListCommentResponse)(nil),          // 17: interaction.service.v1.ListCommentResponse
+	(*v1.PinCommentRequest)(nil),            // 9: interaction.service.v1.PinCommentRequest
+	(*v1.LikeResponse)(nil),                 // 10: interaction.service.v1.LikeResponse
+	(*v1.CollectResponse)(nil),              // 11: interaction.service.v1.CollectResponse
+	(*v1.GetInteractionStatusResponse)(nil), // 12: interaction.service.v1.GetInteractionStatusResponse
+	(*v12.ListVideoResponse)(nil),           // 13: video.service.v1.ListVideoResponse
+	(*v1.FollowResponse)(nil),               // 14: interaction.service.v1.FollowResponse
+	(*v1.ListFollowResponse)(nil),           // 15: interaction.service.v1.ListFollowResponse
+	(*v1.Comment)(nil),                      // 16: interaction.service.v1.Comment
+	(*emptypb.Empty)(nil),                   // 17: google.protobuf.Empty
+	(*v1.ListCommentResponse)(nil),          // 18: interaction.service.v1.ListCommentResponse
 }
 var file_app_service_v1_i_interaction_proto_depIdxs = []int32{
 	0,  // 0: app.service.v1.InteractionService.Like:input_type -> interaction.service.v1.LikeRequest
@@ -84,22 +87,24 @@ var file_app_service_v1_i_interaction_proto_depIdxs = []int32{
 	6,  // 11: app.service.v1.CommentService.DeleteComment:input_type -> interaction.service.v1.DeleteCommentRequest
 	7,  // 12: app.service.v1.CommentService.ListComment:input_type -> interaction.service.v1.ListCommentRequest
 	8,  // 13: app.service.v1.CommentService.ListReply:input_type -> interaction.service.v1.ListReplyRequest
-	9,  // 14: app.service.v1.InteractionService.Like:output_type -> interaction.service.v1.LikeResponse
-	9,  // 15: app.service.v1.InteractionService.Unlike:output_type -> interaction.service.v1.LikeResponse
-	10, // 16: app.service.v1.InteractionService.Collect:output_type -> interaction.service.v1.CollectResponse
-	10, // 17: app.service.v1.InteractionService.Uncollect:output_type -> interaction.service.v1.CollectResponse
-	11, // 18: app.service.v1.InteractionService.GetInteractionStatus:output_type -> interaction.service.v1.GetInteractionStatusResponse
-	12, // 19: app.service.v1.InteractionService.ListCollectedVideos:output_type -> video.service.v1.ListVideoResponse
-	13, // 20: app.service.v1.InteractionService.Follow:output_type -> interaction.service.v1.FollowResponse
-	13, // 21: app.service.v1.InteractionService.Unfollow:output_type -> interaction.service.v1.FollowResponse
-	14, // 22: app.service.v1.InteractionService.ListFollowing:output_type -> interaction.service.v1.ListFollowResponse
-	14, // 23: app.service.v1.InteractionService.ListFollowers:output_type -> interaction.service.v1.ListFollowResponse
-	15, // 24: app.service.v1.CommentService.CreateComment:output_type -> interaction.service.v1.Comment
-	16, // 25: app.service.v1.CommentService.DeleteComment:output_type -> google.protobuf.Empty
-	17, // 26: app.service.v1.CommentService.ListComment:output_type -> interaction.service.v1.ListCommentResponse
-	17, // 27: app.service.v1.CommentService.ListReply:output_type -> interaction.service.v1.ListCommentResponse
-	14, // [14:28] is the sub-list for method output_type
-	0,  // [0:14] is the sub-list for method input_type
+	9,  // 14: app.service.v1.CommentService.PinComment:input_type -> interaction.service.v1.PinCommentRequest
+	10, // 15: app.service.v1.InteractionService.Like:output_type -> interaction.service.v1.LikeResponse
+	10, // 16: app.service.v1.InteractionService.Unlike:output_type -> interaction.service.v1.LikeResponse
+	11, // 17: app.service.v1.InteractionService.Collect:output_type -> interaction.service.v1.CollectResponse
+	11, // 18: app.service.v1.InteractionService.Uncollect:output_type -> interaction.service.v1.CollectResponse
+	12, // 19: app.service.v1.InteractionService.GetInteractionStatus:output_type -> interaction.service.v1.GetInteractionStatusResponse
+	13, // 20: app.service.v1.InteractionService.ListCollectedVideos:output_type -> video.service.v1.ListVideoResponse
+	14, // 21: app.service.v1.InteractionService.Follow:output_type -> interaction.service.v1.FollowResponse
+	14, // 22: app.service.v1.InteractionService.Unfollow:output_type -> interaction.service.v1.FollowResponse
+	15, // 23: app.service.v1.InteractionService.ListFollowing:output_type -> interaction.service.v1.ListFollowResponse
+	15, // 24: app.service.v1.InteractionService.ListFollowers:output_type -> interaction.service.v1.ListFollowResponse
+	16, // 25: app.service.v1.CommentService.CreateComment:output_type -> interaction.service.v1.Comment
+	17, // 26: app.service.v1.CommentService.DeleteComment:output_type -> google.protobuf.Empty
+	18, // 27: app.service.v1.CommentService.ListComment:output_type -> interaction.service.v1.ListCommentResponse
+	18, // 28: app.service.v1.CommentService.ListReply:output_type -> interaction.service.v1.ListCommentResponse
+	16, // 29: app.service.v1.CommentService.PinComment:output_type -> interaction.service.v1.Comment
+	15, // [15:30] is the sub-list for method output_type
+	0,  // [0:15] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name

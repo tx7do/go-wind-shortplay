@@ -116,4 +116,12 @@ service CommentService {
       get: "/app/v1/comments/{comment_id}/replies"
     };
   }
+
+  // 置顶/取消置顶评论（视频作者本人）
+  rpc PinComment (interaction.service.v1.PinCommentRequest) returns (interaction.service.v1.Comment) {
+    option (google.api.http) = {
+      put: "/app/v1/comments/{id}/pin"
+      body: "*"
+    };
+  }
 }

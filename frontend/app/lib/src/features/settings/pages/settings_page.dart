@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:get_it/get_it.dart' show GetIt;
 
 import 'package:shortplay_app/generated/l10n.dart';
+import 'package:shortplay_app/src/core/preference/user_preference_cache.dart';
 import 'package:shortplay_app/src/core/themes/app_colors.dart';
 import 'package:shortplay_app/src/core/themes/cubit/app_theme_cubit.dart';
 
@@ -22,10 +24,19 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   String _version = '';
 
+  /// 弹幕显隐（本地偏好，默认开）
+  bool _danmakuOn = true;
+
   @override
   void initState() {
     super.initState();
+    _danmakuOn = GetIt.instance<UserPreferenceCache>().danmakuEnabled;
     _loadVersion();
+  }
+
+  Future<void> _toggleDanmaku(bool value) async {
+    setState(() => _danmakuOn = value);
+    await GetIt.instance<UserPreferenceCache>().setDanmakuEnabled(value);
   }
 
   /// 版本号读取失败不阻塞页面，留空兜底展示占位
@@ -92,6 +103,22 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
               SizedBox(height: 14.h),
+              // 播放：弹幕
+              _SettingsSection(
+                icon: Icons.subtitles_outlined,
+                title: loc.playback,
+                children: [
+                  _SettingsRow(
+                    icon: Icons.subtitles_rounded,
+                    label: loc.danmaku,
+                    trailing: Switch(
+                      value: _danmakuOn,
+                      onChanged: _toggleDanmaku,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 14.h),
               // 关于：版本
               _SettingsSection(
                 icon: Icons.info_outline,
@@ -104,10 +131,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withAlpha(200),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withAlpha(200),
                       ),
                     ),
                   ),
@@ -125,6 +151,7 @@ class _SettingsPageState extends State<SettingsPage> {
     const labels = <String, String>{
       'zh_CN': '中文(中国)',
       'en_US': 'English',
+      'ja_JP': '日本語',
     };
     final key = locale.countryCode == null || locale.countryCode!.isEmpty
         ? locale.languageCode
@@ -195,11 +222,7 @@ class _SettingsRow extends StatelessWidget {
   final String label;
   final Widget trailing;
 
-  const _SettingsRow({
-    this.icon,
-    required this.label,
-    required this.trailing,
-  });
+  const _SettingsRow({this.icon, required this.label, required this.trailing});
 
   @override
   Widget build(BuildContext context) {
@@ -207,7 +230,11 @@ class _SettingsRow extends StatelessWidget {
     return Row(
       children: [
         if (icon != null) ...[
-          Icon(icon, size: 18.sp, color: theme.colorScheme.onSurface.withAlpha(180)),
+          Icon(
+            icon,
+            size: 18.sp,
+            color: theme.colorScheme.onSurface.withAlpha(180),
+          ),
           SizedBox(width: 8.w),
         ],
         // Flexible：长文案语言（如英文）下标签收缩省略，不把右侧控件挤出卡片
@@ -263,8 +290,7 @@ class _SegmentedSwitch<T> extends StatelessWidget {
                 duration: const Duration(milliseconds: 200),
                 padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 7.h),
                 decoration: BoxDecoration(
-                  gradient:
-                      entry.key == selected ? BrandColor.gradient : null,
+                  gradient: entry.key == selected ? BrandColor.gradient : null,
                   borderRadius: BorderRadius.circular(15.r),
                 ),
                 child: Row(
