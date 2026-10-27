@@ -66,7 +66,7 @@
 ### 公告运营位
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/sysconf` | 系统配置（游客可访问）：App 消费 `announcementEnabled/announcementText/announcementLink/danmakuEnabled`——开关开且文案非空时首页顶部展示公告横幅，可关闭；链接非空点击外跳 |
+| GET | `/sysconf` | 系统配置（游客可访问）：App 消费 `announcementEnabled/announcementText/announcementLink/danmakuEnabled/imEnabled`——开关开且文案非空时首页顶部展示公告横幅，可关闭；链接非空点击外跳 |
 
 ### 剧集（详情/列表游客可访问）
 | 方法 | 路径 | 说明 |
@@ -94,6 +94,18 @@
 |---|---|---|
 | — | `POST /uploads/{taskId}/complete` 增 `scheduledAt` | 定时发布（须未来时间；人工审核关的直发路径生效：视频先存 DRAFT，到期 asynq 任务自动转 PUBLISHED 并清空 scheduledAt；`POST /drafts/{id}/submit` 同参同语义） |
 | PUT | `/videos/{id}/schedule` | `{scheduledAt?}` 设置/取消定时（作者本人或管理端；仅 DRAFT 可定时，scheduledAt 缺省=取消）；到期任务丢失有补偿语义：任务自校验状态，非 DRAFT 跳过 |
+
+### 私信（IM，全部需登录；实时送达走 SSE 通道）
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/im/messages` | `{receiverId, content(≤500字)}` → Message（不能发给自己；sysconf `imEnabled` 关闭 → 403 IM_DISABLED；自动建会话） |
+| GET | `/im/conversations?page=` | 会话列表（最近消息倒序）：`{items[]{Conversation}, total}`；`Conversation{id, peerId, peer(UserBrief), lastMessagePreview, lastMessageAt, unreadCount(viewer侧), createdAt}` |
+| POST | `/im/conversations` | `{peerUserId}` → Conversation（与指定用户建会话，存在即返回既有；聊天页从他人主页进入用） |
+| GET | `/im/conversations/{id}/messages?pageNum=` | 会话消息（须为参与方；ID 倒序分页，最新一页在前）：`{items[]{Message}, total}`；`Message{id, conversationId, senderId, receiverId, sender, content, createdAt}` |
+| PUT | `/im/conversations/{id}/read` | 标记已读（清零 viewer 侧未读，幂等） |
+| GET | `/im/unread-count` | 全部会话未读总数 → `{count}` |
+
+**IM 实时通道（SSE）**：core 发消息落库后发布 `go-wind-shortplay:im:v1` Redis 事件（`ImEvent{receiverUserId, senderUserId, conversationId, messageId, preview}`，只推 ID+预览），app 服务订阅（`sse_im_bridge`）经 `GetAccessTokens` 定向推送收件人全部在线会话——SSE 事件名 `im-message`，载荷 `{conversationId, messageId, senderUserId, preview}`。连接：`GET :7701/events?streamId=<accessToken>&token=<accessToken>`（streamID 约定 = access token，与 admin 面同构）。**落库为准**：事件丢失只影响实时性，客户端重连/进会话页以 REST 拉取对账。`conversationId`/`messageId` proto 为 uint32，protojson 直传数字。
 
 ### 评论置顶
 | 方法 | 路径 | 说明 |

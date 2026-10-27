@@ -25,6 +25,8 @@ import 'package:shortplay_app/src/features/search/pages/search_page.dart';
 import 'package:shortplay_app/src/features/hot/pages/hot_page.dart';
 import 'package:shortplay_app/src/features/profile/pages/creator_stats_page.dart';
 import 'package:shortplay_app/src/features/series/pages/series_detail_page.dart';
+import 'package:shortplay_app/src/features/im/pages/chat_page.dart';
+import 'package:shortplay_app/src/features/im/pages/conversations_page.dart';
 import 'package:shortplay_app/src/features/settings/pages/settings_page.dart';
 import 'package:shortplay_app/src/features/video_detail/pages/video_detail_page.dart';
 import 'package:get_it/get_it.dart' show GetIt;
@@ -96,9 +98,8 @@ class AppRouter {
       GoRoute(
         path: constants.AppRoutePath.search,
         name: RouteNames.search,
-        builder: (context, state) => SearchPage(
-          initialKeyword: state.uri.queryParameters['keyword'],
-        ),
+        builder: (context, state) =>
+            SearchPage(initialKeyword: state.uri.queryParameters['keyword']),
       ),
       // 登录/注册（全屏）
       GoRoute(
@@ -136,8 +137,9 @@ class AppRouter {
           final seriesId =
               int.tryParse(state.pathParameters['seriesId'] ?? '') ?? 0;
           // from：来源视频（选集列表高亮当前播放集）
-          final fromVideo =
-              int.tryParse(state.uri.queryParameters['from'] ?? '');
+          final fromVideo = int.tryParse(
+            state.uri.queryParameters['from'] ?? '',
+          );
           return SeriesDetailPage(
             seriesId: seriesId,
             currentVideoId: fromVideo,
@@ -165,6 +167,29 @@ class AppRouter {
         path: constants.AppRoutePath.settings,
         name: RouteNames.settings,
         builder: (context, state) => const SettingsPage(),
+      ),
+      // 私信会话列表（需登录；未登录由入口处引导）
+      GoRoute(
+        path: constants.AppRoutePath.imConversations,
+        name: RouteNames.imConversations,
+        builder: (context, state) => const ConversationsPage(),
+      ),
+      // 聊天页（需登录；peerId 必填，conversationId/nickname 走 query）
+      GoRoute(
+        path: constants.AppRoutePath.imChat,
+        name: RouteNames.imChat,
+        builder: (context, state) {
+          final peerId =
+              int.tryParse(state.pathParameters['peerId'] ?? '') ?? 0;
+          final conversationId = int.tryParse(
+            state.uri.queryParameters['conversationId'] ?? '',
+          );
+          return ChatPage(
+            peerId: peerId,
+            peerNickname: state.uri.queryParameters['nickname'] ?? '',
+            conversationId: conversationId,
+          );
+        },
       ),
     ],
   );
@@ -238,9 +263,6 @@ class _HomeShell extends StatelessWidget {
       shell.goBranch(index, initialLocation: shell.currentIndex == index);
       return;
     }
-    shell.goBranch(
-      index,
-      initialLocation: index == shell.currentIndex,
-    );
+    shell.goBranch(index, initialLocation: index == shell.currentIndex);
   }
 }

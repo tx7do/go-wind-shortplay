@@ -605,6 +605,75 @@ var (
 			},
 		},
 	}
+	// SpImConversationsColumns holds the columns for the "sp_im_conversations" table.
+	SpImConversationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id"},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "tenant_id", Type: field.TypeUint32, Nullable: true, Comment: "租户ID", Default: 0},
+		{Name: "participant_a_id", Type: field.TypeUint32, Comment: "参与方A（较小用户ID）", Default: 0},
+		{Name: "participant_b_id", Type: field.TypeUint32, Comment: "参与方B（较大用户ID）", Default: 0},
+		{Name: "last_message_preview", Type: field.TypeString, Comment: "最近一条消息预览（列表展示冗余）", Default: ""},
+		{Name: "last_message_at", Type: field.TypeTime, Nullable: true, Comment: "最近消息时间（空会话为空）"},
+		{Name: "a_unread_count", Type: field.TypeUint64, Comment: "A 侧未读数（B 发消息递增，A 已读清零）", Default: 0},
+		{Name: "b_unread_count", Type: field.TypeUint64, Comment: "B 侧未读数（A 发消息递增，B 已读清零）", Default: 0},
+	}
+	// SpImConversationsTable holds the schema information for the "sp_im_conversations" table.
+	SpImConversationsTable = &schema.Table{
+		Name:       "sp_im_conversations",
+		Comment:    "私信会话表",
+		Columns:    SpImConversationsColumns,
+		PrimaryKey: []*schema.Column{SpImConversationsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "uix_sp_im_conversation_pair",
+				Unique:  true,
+				Columns: []*schema.Column{SpImConversationsColumns[5], SpImConversationsColumns[6]},
+			},
+			{
+				Name:    "idx_sp_im_conversation_a",
+				Unique:  false,
+				Columns: []*schema.Column{SpImConversationsColumns[5], SpImConversationsColumns[8]},
+			},
+			{
+				Name:    "idx_sp_im_conversation_b",
+				Unique:  false,
+				Columns: []*schema.Column{SpImConversationsColumns[6], SpImConversationsColumns[8]},
+			},
+		},
+	}
+	// SpImMessagesColumns holds the columns for the "sp_im_messages" table.
+	SpImMessagesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id"},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "tenant_id", Type: field.TypeUint32, Nullable: true, Comment: "租户ID", Default: 0},
+		{Name: "conversation_id", Type: field.TypeUint32, Comment: "会话ID", Default: 0},
+		{Name: "sender_id", Type: field.TypeUint32, Comment: "发送人用户ID", Default: 0},
+		{Name: "receiver_id", Type: field.TypeUint32, Comment: "接收人用户ID（冗余，按人查询/审计用）", Default: 0},
+		{Name: "content", Type: field.TypeString, Size: 2147483647, Comment: "内容（发送时经长度校验，≤500 字）", Default: ""},
+	}
+	// SpImMessagesTable holds the schema information for the "sp_im_messages" table.
+	SpImMessagesTable = &schema.Table{
+		Name:       "sp_im_messages",
+		Comment:    "私信消息表",
+		Columns:    SpImMessagesColumns,
+		PrimaryKey: []*schema.Column{SpImMessagesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "idx_sp_im_message_conversation",
+				Unique:  false,
+				Columns: []*schema.Column{SpImMessagesColumns[5], SpImMessagesColumns[0]},
+			},
+			{
+				Name:    "idx_sp_im_message_receiver",
+				Unique:  false,
+				Columns: []*schema.Column{SpImMessagesColumns[7]},
+			},
+		},
+	}
 	// InternalMessagesColumns holds the columns for the "internal_messages" table.
 	InternalMessagesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id"},
@@ -2749,6 +2818,7 @@ var (
 		{Name: "announcement_text", Type: field.TypeString, Nullable: true, Size: 2147483647, Comment: "公告文案（空则不展示）"},
 		{Name: "announcement_link", Type: field.TypeString, Comment: "公告跳转链接（可空）", Default: ""},
 		{Name: "danmaku_enabled", Type: field.TypeBool, Comment: "弹幕开关（关闭则 App 隐藏弹幕层并拒绝发送）", Default: true},
+		{Name: "im_enabled", Type: field.TypeBool, Comment: "私信开关（关闭则拒绝发送，存量会话仍可读）", Default: true},
 	}
 	// SpSysConfigsTable holds the schema information for the "sp_sys_configs" table.
 	SpSysConfigsTable = &schema.Table{
@@ -3727,6 +3797,8 @@ var (
 		SysDictEntryI18nTable,
 		SysDictTypesTable,
 		FilesTable,
+		SpImConversationsTable,
+		SpImMessagesTable,
 		InternalMessagesTable,
 		InternalMessageCategoriesTable,
 		InternalMessageRecipientsTable,
@@ -3828,6 +3900,16 @@ func init() {
 	}
 	FilesTable.Annotation = &entsql.Annotation{
 		Table:     "files",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	SpImConversationsTable.Annotation = &entsql.Annotation{
+		Table:     "sp_im_conversations",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	SpImMessagesTable.Annotation = &entsql.Annotation{
+		Table:     "sp_im_messages",
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}

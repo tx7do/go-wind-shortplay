@@ -158,6 +158,7 @@ func NewRestServer(
 	spUserService *service.UserService,
 	spSysConfService *service.SysConfService,
 	spDanmakuService *service.DanmakuService,
+	spImService *service.ImService,
 	notificationService *service.NotificationService,
 
 	// register:param ── 新模块服务形参在此行后注册(make register 工具锚点,勿删)
@@ -236,6 +237,9 @@ func NewRestServer(
 
 	// 弹幕（发送需登录不入白名单；列表游客白名单）
 	appV1.RegisterDanmakuServiceHTTPServer(srv, spDanmakuService)
+
+	// 私信（全部需登录，不入游客白名单）
+	appV1.RegisterImServiceHTTPServer(srv, spImService)
 
 	// 视频创作服务：分片字节路由必须先于生成路由注册（kratos mux 同 pattern
 	// 先注册者优先；body=application/octet-stream 原始字节，生成层只能按

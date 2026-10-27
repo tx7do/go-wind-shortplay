@@ -3,8 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:get_it/get_it.dart' show GetIt;
+
 import 'package:shortplay_app/generated/l10n.dart';
-import 'package:shortplay_app/src/app_router/app_router.dart' show RouteNames;
+import 'package:shortplay_app/src/app_router/app_router.dart'
+    show AppRoutePath, RouteNames;
+import 'package:shortplay_app/src/core/repositories/user_auth_cache.dart';
 import 'package:shortplay_app/src/core/themes/app_colors.dart';
 import 'package:shortplay_app/src/core/widgets/empty_state.dart';
 import 'package:shortplay_app/src/features/common/widgets/login_guard.dart';
@@ -66,6 +70,17 @@ class _NotifyPageState extends State<NotifyPage>
       appBar: AppBar(
         title: Text(loc.message),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.chat_bubble_outline_rounded),
+            tooltip: loc.imConversations,
+            onPressed: () {
+              if (GetIt.instance<UserAuthCache>().hasLogin) {
+                context.push(AppRoutePath.imConversations);
+              } else {
+                ensureLogin(context);
+              }
+            },
+          ),
           BlocBuilder<NotifyBloc, NotifyState>(
             builder: (context, state) {
               if (state.unreadCount <= 0) return const SizedBox.shrink();
@@ -107,9 +122,9 @@ class _NotifyPageState extends State<NotifyPage>
               icon: Icons.wifi_off_rounded,
               title: state.errorMessage!,
               actionLabel: loc.retry,
-              onAction: () => context
-                  .read<NotifyBloc>()
-                  .add(NotifyRefreshed(unreadOnly: state.unreadOnly)),
+              onAction: () => context.read<NotifyBloc>().add(
+                NotifyRefreshed(unreadOnly: state.unreadOnly),
+              ),
             );
           }
 
@@ -127,8 +142,8 @@ class _NotifyPageState extends State<NotifyPage>
           return RefreshIndicator(
             onRefresh: () async {
               context.read<NotifyBloc>().add(
-                    NotifyRefreshed(unreadOnly: state.unreadOnly),
-                  );
+                NotifyRefreshed(unreadOnly: state.unreadOnly),
+              );
             },
             child: Center(
               child: ConstrainedBox(
@@ -136,8 +151,10 @@ class _NotifyPageState extends State<NotifyPage>
                 child: ListView.separated(
                   controller: _scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 8.h,
+                  ),
                   itemCount: state.items.length + (state.hasMore ? 1 : 0),
                   separatorBuilder: (_, _) => SizedBox(height: 6.h),
                   itemBuilder: (context, index) {
@@ -177,9 +194,7 @@ class _NotifyTile extends StatelessWidget {
     final unread = !item.isRead;
 
     return Material(
-      color: unread
-          ? BrandColor.rose.withAlpha(10)
-          : theme.colorScheme.surface,
+      color: unread ? BrandColor.rose.withAlpha(10) : theme.colorScheme.surface,
       borderRadius: BorderRadius.circular(14.r),
       child: InkWell(
         onTap: onTap,
@@ -208,8 +223,8 @@ class _NotifyTile extends StatelessWidget {
                       size: 18.r,
                       color: unread
                           ? (theme.brightness == Brightness.dark
-                              ? BrandColor.roseBright
-                              : BrandColor.roseDeep)
+                                ? BrandColor.roseBright
+                                : BrandColor.roseDeep)
                           : theme.colorScheme.onSurface.withAlpha(140),
                     ),
                   ),
@@ -257,8 +272,9 @@ class _NotifyTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 13.sp,
                         height: 1.45,
-                        color: theme.colorScheme.onSurface
-                            .withAlpha(unread ? 190 : 150),
+                        color: theme.colorScheme.onSurface.withAlpha(
+                          unread ? 190 : 150,
+                        ),
                       ),
                     ),
                   ],

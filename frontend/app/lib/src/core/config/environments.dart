@@ -51,6 +51,21 @@ class Environments {
     return '$root/app/v1';
   }
 
+  /// SSE 推送服务地址（app BFF SSE 面，:7701，`GET /events`）
+  ///
+  /// 与 API 网关同 host 换端口；可用 SSE_BASE 覆盖（含协议与端口）。
+  static const String _sseBaseDefine = String.fromEnvironment('SSE_BASE');
+
+  static String get sseBaseUrl {
+    if (_sseBaseDefine.isNotEmpty) return _sseBaseDefine;
+    final fromEnv = dotenv.maybeGet('SSE_BASE_URL');
+    if (fromEnv != null && fromEnv.isNotEmpty) return fromEnv;
+    final api = Uri.tryParse(apiBaseUrl);
+    if (api == null || api.host.isEmpty) return 'http://127.0.0.1:7701';
+    // 与 API 网关同 host，SSE 面固定 :7701
+    return '${api.scheme}://${api.host}:7701';
+  }
+
   /// 媒体（MinIO）公开访问地址
   ///
   /// 后端返回的 videoUrl/coverUrl/avatarUrl 是对象键（如 videos/2026/10/x.mp4），
@@ -68,8 +83,7 @@ class Environments {
   /// 密码传输加密 AES 密钥（同时用作 IV，16 字节）
   ///
   /// 与后端 `crypto.DefaultAESKey` 保持一致；可用 AES_KEY 环境变量覆盖。
-  static String get aesKey =>
-      dotenv.maybeGet('AES_KEY') ?? 'f51d66a73d8a0927';
+  static String get aesKey => dotenv.maybeGet('AES_KEY') ?? 'f51d66a73d8a0927';
 
   /// 连接超时时间（秒）
   static Duration get connectionTimeout =>

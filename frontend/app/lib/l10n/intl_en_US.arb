@@ -399,5 +399,11 @@
   "unpin": "Unpin",
   "scheduledPublishOption": "Scheduled publish (auto publish at time)",
   "scheduledPublished": "Scheduled! Will publish automatically",
-  "scheduledTimePast": "Scheduled time must be in the future"
+  "scheduledTimePast": "Scheduled time must be in the future",
+  "imConversations": "Messages",
+  "imChat": "Message",
+  "imEmpty": "No conversations yet. Start one from a profile",
+  "imUserFallback": "User",
+  "imConversationEmpty": "No messages yet",
+  "imInputHint": "Type a message…"
 }

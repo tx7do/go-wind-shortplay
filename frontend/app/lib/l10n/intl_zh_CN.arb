@@ -399,5 +399,11 @@
   "unpin": "取消置顶",
   "scheduledPublishOption": "定时发布（到点自动上线）",
   "scheduledPublished": "已设为定时发布",
-  "scheduledTimePast": "定时时间须晚于当前"
+  "scheduledTimePast": "定时时间须晚于当前",
+  "imConversations": "私信",
+  "imChat": "发消息",
+  "imEmpty": "暂无私信，从他人主页发起对话吧",
+  "imUserFallback": "用户",
+  "imConversationEmpty": "还没有消息",
+  "imInputHint": "输入消息…"
 }

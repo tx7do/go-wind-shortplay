@@ -31,5 +31,7 @@
   "announcementLinkHint": "可选；App 端点击横幅时打开（http/https）",
   "announcementLinkInvalid": "链接需以 http(s):// 开头",
   "danmakuEnabled": "弹幕",
-  "danmakuEnabledHint": "关闭后 App 端隐藏弹幕层并拒绝发送（存量弹幕不再下发）"
+  "danmakuEnabledHint": "关闭后 App 端隐藏弹幕层并拒绝发送（存量弹幕不再下发）",
+  "imEnabled": "私信",
+  "imEnabledHint": "关闭后拒绝发送私信（存量会话仍可读）"
 }

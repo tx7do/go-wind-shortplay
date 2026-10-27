@@ -33,6 +33,12 @@ type DictType func(*sql.Selector)
 // File is the predicate function for file builders.
 type File func(*sql.Selector)
 
+// ImConversation is the predicate function for imconversation builders.
+type ImConversation func(*sql.Selector)
+
+// ImMessage is the predicate function for immessage builders.
+type ImMessage func(*sql.Selector)
+
 // InternalMessage is the predicate function for internalmessage builders.
 type InternalMessage func(*sql.Selector)
 

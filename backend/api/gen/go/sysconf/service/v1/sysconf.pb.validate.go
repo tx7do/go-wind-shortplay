@@ -92,6 +92,10 @@ func (m *SysConf) validate(all bool) error {
 		// no validation rules for DanmakuEnabled
 	}
 
+	if m.ImEnabled != nil {
+		// no validation rules for ImEnabled
+	}
+
 	if m.UpdatedAt != nil {
 
 		if all {
@@ -258,6 +262,10 @@ func (m *UpdateSysConfRequest) validate(all bool) error {
 
 	if m.DanmakuEnabled != nil {
 		// no validation rules for DanmakuEnabled
+	}
+
+	if m.ImEnabled != nil {
+		// no validation rules for ImEnabled
 	}
 
 	if len(errors) > 0 {

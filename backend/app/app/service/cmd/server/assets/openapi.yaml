@@ -216,6 +216,32 @@ paths:
                 "200":
                     description: OK
                     content: {}
+    /app/v1/comments/{id}/pin:
+        put:
+            tags:
+                - CommentService
+            description: 置顶/取消置顶评论（视频作者本人）
+            operationId: CommentService_PinComment
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/interaction.service.v1.PinCommentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/interaction.service.v1.Comment'
     /app/v1/creator/overview:
         get:
             tags:
@@ -707,6 +733,179 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/video.service.v1.ListVideoResponse'
+    /app/v1/im/conversations:
+        get:
+            tags:
+                - ImService
+            description: 会话列表（最近消息倒序）
+            operationId: ImService_ListConversations
+            parameters:
+                - name: page
+                  in: query
+                  description: 当前页码（从1开始，默认1）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  description: 每页条数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: offset
+                  in: query
+                  description: 跳过的记录数（从0开始，默认0）
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  description: 最多返回的记录数（默认10，建议设置上限如100）
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: token
+                  in: query
+                  description: 上一页最后一条记录的游标（如ID/时间戳+ID，首次请求为空）
+                  schema:
+                    type: string
+                - name: noPaging
+                  in: query
+                  description: 是否不分页，如果为true，则page和pageSize参数无效。
+                  schema:
+                    type: boolean
+                - name: query
+                  in: query
+                  description: JSON字符串过滤条件，基础语法：{"field1":"val1", "field2___icontains":"val2"}，具体请参见：https://github.com/tx7do/go-crud/tree/main/pagination/filter/README.md
+                  schema:
+                    type: string
+                - name: filter
+                  in: query
+                  description: Google AIP规范字符串过滤条件
+                  schema:
+                    type: string
+                - name: filterExpr.type
+                  in: query
+                  description: 过滤表达式类型
+                  schema:
+                    enum:
+                        - EXPR_TYPE_UNSPECIFIED
+                        - AND
+                        - OR
+                    type: string
+                    format: enum
+                - name: orderBy
+                  in: query
+                  description: 排序条件
+                  schema:
+                    type: string
+                - name: fieldMask
+                  in: query
+                  description: 字段掩码，其作用为SELECT中的字段，其语法为使用逗号分隔字段名，例如：id,realName,userName。如果为空则选中所有字段，即SELECT *。
+                  schema:
+                    type: string
+                    format: field-mask
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/im.service.v1.ListConversationsResponse'
+        post:
+            tags:
+                - ImService
+            description: 与指定用户建会话（存在即返回既有）
+            operationId: ImService_EnsureConversation
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/im.service.v1.EnsureConversationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/im.service.v1.Conversation'
+    /app/v1/im/conversations/{conversationId}/messages:
+        get:
+            tags:
+                - ImService
+            description: 会话消息（ID 倒序分页）
+            operationId: ImService_ListMessages
+            parameters:
+                - name: conversationId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: pageNum
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: uint32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/im.service.v1.ListMessagesResponse'
+    /app/v1/im/conversations/{conversationId}/read:
+        put:
+            tags:
+                - ImService
+            description: 标记会话已读
+            operationId: ImService_MarkConversationRead
+            parameters:
+                - name: conversationId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /app/v1/im/messages:
+        post:
+            tags:
+                - ImService
+            description: 发送私信（自动建会话）
+            operationId: ImService_SendMessage
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/im.service.v1.SendMessageRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/im.service.v1.Message'
+    /app/v1/im/unread-count:
+        get:
+            tags:
+                - ImService
+            description: 全部会话未读总数（角标）
+            operationId: ImService_CountUnread
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/im.service.v1.CountUnreadResponse'
     /app/v1/interactions/status:
         post:
             tags:
@@ -1714,6 +1913,32 @@ paths:
                 "200":
                     description: OK
                     content: {}
+    /app/v1/videos/{id}/schedule:
+        put:
+            tags:
+                - VideoService
+            description: 设置/取消定时发布（作者本人；仅草稿；scheduledAt 缺省=取消）
+            operationId: VideoService_ScheduleVideo
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/video.service.v1.ScheduleVideoRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.Video'
     /app/v1/videos/{videoId}:
         get:
             tags:
@@ -2551,6 +2776,83 @@ components:
                 verificationId:
                     type: string
                     description: 服务端生成的验证码会话ID（可选）
+        im.service.v1.Conversation:
+            type: object
+            properties:
+                id:
+                    type: string
+                peerId:
+                    type: integer
+                    format: uint32
+                peer:
+                    $ref: '#/components/schemas/identity.service.v1.UserBrief'
+                lastMessagePreview:
+                    type: string
+                lastMessageAt:
+                    type: string
+                    format: date-time
+                unreadCount:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+        im.service.v1.CountUnreadResponse:
+            type: object
+            properties:
+                count:
+                    type: string
+        im.service.v1.EnsureConversationRequest:
+            type: object
+            properties:
+                peerUserId:
+                    type: integer
+                    format: uint32
+        im.service.v1.ListConversationsResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/im.service.v1.Conversation'
+                total:
+                    type: string
+        im.service.v1.ListMessagesResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/im.service.v1.Message'
+                total:
+                    type: string
+        im.service.v1.Message:
+            type: object
+            properties:
+                id:
+                    type: string
+                conversationId:
+                    type: string
+                senderId:
+                    type: integer
+                    format: uint32
+                receiverId:
+                    type: integer
+                    format: uint32
+                sender:
+                    $ref: '#/components/schemas/identity.service.v1.UserBrief'
+                content:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+        im.service.v1.SendMessageRequest:
+            type: object
+            properties:
+                receiverId:
+                    type: integer
+                    format: uint32
+                content:
+                    type: string
         interaction.service.v1.CollectRequest:
             type: object
             properties:
@@ -2682,6 +2984,14 @@ components:
                         $ref: '#/components/schemas/interaction.service.v1.FollowItem'
                 total:
                     type: string
+        interaction.service.v1.PinCommentRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                pinned:
+                    type: boolean
         internal_message.service.v1.InternalMessageRecipient:
             type: object
             properties:
@@ -3182,6 +3492,8 @@ components:
                     type: string
                 danmakuEnabled:
                     type: boolean
+                imEnabled:
+                    type: boolean
                 updatedAt:
                     type: string
                     format: date-time
@@ -3358,6 +3670,16 @@ components:
                 episodeNumber:
                     type: integer
                     format: uint32
+        video.service.v1.ScheduleVideoRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                scheduledAt:
+                    type: string
+                    description: 计划发布时间（须为未来时间；缺省=取消定时）
+                    format: date-time
         video.service.v1.SubmitDraftRequest:
             type: object
             properties:
@@ -3590,6 +3912,8 @@ tags:
       description: Feed 流服务（App 首页沉浸式上下滑）
     - name: FileTransferService
       description: 文件传输服务
+    - name: ImService
+      description: 私信服务（App 端；全部需登录，不入游客白名单）
     - name: InteractionService
       description: 互动服务（App 端：点赞 / 收藏 / 关注 / 评论）
     - name: MediaAssetService

@@ -74,6 +74,10 @@ func (SysConfig) Fields() []ent.Field {
 		field.Bool("danmaku_enabled").
 			Comment("弹幕开关（关闭则 App 隐藏弹幕层并拒绝发送）").
 			Default(true),
+
+		field.Bool("im_enabled").
+			Comment("私信开关（关闭则拒绝发送，存量会话仍可读）").
+			Default(true),
 	}
 }
 

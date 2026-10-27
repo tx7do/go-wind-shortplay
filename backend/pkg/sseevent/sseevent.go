@@ -18,3 +18,21 @@ type NotifyEvent struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
 }
+
+// EventImMessage 私信新消息事件（前端聊天页/会话列表消费）。
+const EventImMessage = "im-message"
+
+// RedisChannelIm 私信事件的 Redis Pub/Sub 频道：core 落库后发出，
+// app 服务订阅后转 SSE 定向推送收件人全部在线会话。
+// 落库为准：频道丢失只影响实时性，不影响到达（客户端 REST 拉取对账）。
+const RedisChannelIm = "go-wind-shortplay:im:v1"
+
+// ImEvent 跨服务私信事件载荷（Redis 内 JSON 序列化）。
+// 只推 ID 与预览，客户端收到后按需 REST 拉全文（信封不随消息内容演进膨胀）。
+type ImEvent struct {
+	ReceiverUserID uint32 `json:"receiver_user_id"`
+	SenderUserID   uint32 `json:"sender_user_id"`
+	ConversationID uint32 `json:"conversation_id"`
+	MessageID      uint32 `json:"message_id"`
+	Preview        string `json:"preview"`
+}

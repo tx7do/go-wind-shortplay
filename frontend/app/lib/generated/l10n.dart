@@ -2108,6 +2108,41 @@ class S {
       args: [],
     );
   }
+
+  /// `私信`
+  String get imConversations {
+    return Intl.message('私信', name: 'imConversations', desc: '', args: []);
+  }
+
+  /// `发消息`
+  String get imChat {
+    return Intl.message('发消息', name: 'imChat', desc: '', args: []);
+  }
+
+  /// `暂无私信，从他人主页发起对话吧`
+  String get imEmpty {
+    return Intl.message('暂无私信，从他人主页发起对话吧', name: 'imEmpty', desc: '', args: []);
+  }
+
+  /// `用户`
+  String get imUserFallback {
+    return Intl.message('用户', name: 'imUserFallback', desc: '', args: []);
+  }
+
+  /// `还没有消息`
+  String get imConversationEmpty {
+    return Intl.message(
+      '还没有消息',
+      name: 'imConversationEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `输入消息…`
+  String get imInputHint {
+    return Intl.message('输入消息…', name: 'imInputHint', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

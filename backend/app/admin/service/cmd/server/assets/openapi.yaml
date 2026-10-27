@@ -5843,6 +5843,32 @@ paths:
                 "200":
                     description: OK
                     content: {}
+    /admin/v1/videos/{id}/schedule:
+        put:
+            tags:
+                - VideoService
+            description: 设置/取消定时发布（仅草稿；scheduledAt 缺省=取消）
+            operationId: VideoService_ScheduleVideo
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: uint32
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/video.service.v1.ScheduleVideoRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/video.service.v1.Video'
     /admin/v1/videos/{id}/status:
         put:
             tags:
@@ -10321,6 +10347,8 @@ components:
                     type: string
                 danmakuEnabled:
                     type: boolean
+                imEnabled:
+                    type: boolean
                 updatedAt:
                     type: string
                     format: date-time
@@ -10354,6 +10382,8 @@ components:
                 announcementLink:
                     type: string
                 danmakuEnabled:
+                    type: boolean
+                imEnabled:
                     type: boolean
         task.service.v1.ControlTaskRequest:
             type: object
@@ -10590,6 +10620,16 @@ components:
                         $ref: '#/components/schemas/video.service.v1.Video'
                 total:
                     type: string
+        video.service.v1.ScheduleVideoRequest:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: uint32
+                scheduledAt:
+                    type: string
+                    description: 计划发布时间（须为未来时间；缺省=取消定时）
+                    format: date-time
         video.service.v1.UpdateVideoRequest:
             type: object
             properties:

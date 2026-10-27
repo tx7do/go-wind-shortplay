@@ -327,6 +327,54 @@ func (f FileMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) 
 	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.FileMutation", m)
 }
 
+// The ImConversationQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type ImConversationQueryRuleFunc func(context.Context, *ent.ImConversationQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f ImConversationQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.ImConversationQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.ImConversationQuery", q)
+}
+
+// The ImConversationMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type ImConversationMutationRuleFunc func(context.Context, *ent.ImConversationMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f ImConversationMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.ImConversationMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.ImConversationMutation", m)
+}
+
+// The ImMessageQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type ImMessageQueryRuleFunc func(context.Context, *ent.ImMessageQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f ImMessageQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.ImMessageQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.ImMessageQuery", q)
+}
+
+// The ImMessageMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type ImMessageMutationRuleFunc func(context.Context, *ent.ImMessageMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f ImMessageMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.ImMessageMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.ImMessageMutation", m)
+}
+
 // The InternalMessageQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type InternalMessageQueryRuleFunc func(context.Context, *ent.InternalMessageQuery) error
@@ -1628,6 +1676,10 @@ func queryFilter(q ent.Query) (Filter, error) {
 		return q.Filter(), nil
 	case *ent.FileQuery:
 		return q.Filter(), nil
+	case *ent.ImConversationQuery:
+		return q.Filter(), nil
+	case *ent.ImMessageQuery:
+		return q.Filter(), nil
 	case *ent.InternalMessageQuery:
 		return q.Filter(), nil
 	case *ent.InternalMessageCategoryQuery:
@@ -1756,6 +1808,10 @@ func mutationFilter(m ent.Mutation) (Filter, error) {
 	case *ent.DictTypeMutation:
 		return m.Filter(), nil
 	case *ent.FileMutation:
+		return m.Filter(), nil
+	case *ent.ImConversationMutation:
+		return m.Filter(), nil
+	case *ent.ImMessageMutation:
 		return m.Filter(), nil
 	case *ent.InternalMessageMutation:
 		return m.Filter(), nil

@@ -40,6 +40,7 @@ const SysConfPage = () => {
         announcementText: data.announcementText ?? '',
         announcementLink: data.announcementLink ?? '',
         danmakuEnabled: data.danmakuEnabled !== false,
+        imEnabled: data.imEnabled !== false,
       });
     }
   }, [data]);
@@ -81,6 +82,7 @@ const SysConfPage = () => {
         announcementText: String(values.announcementText ?? '').trim(),
         announcementLink: String(values.announcementLink ?? '').trim(),
         danmakuEnabled: !!values.danmakuEnabled,
+        imEnabled: !!values.imEnabled,
       });
       return true;
     } catch {
@@ -182,6 +184,11 @@ const SysConfPage = () => {
             name="danmakuEnabled"
             label={t('danmakuEnabled')}
             extra={t('danmakuEnabledHint')}
+          />
+          <ProFormSwitch
+            name="imEnabled"
+            label={t('imEnabled')}
+            extra={t('imEnabledHint')}
           />
         </ProForm>
 

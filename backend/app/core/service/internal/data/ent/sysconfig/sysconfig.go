@@ -45,6 +45,8 @@ const (
 	FieldAnnouncementLink = "announcement_link"
 	// FieldDanmakuEnabled holds the string denoting the danmaku_enabled field in the database.
 	FieldDanmakuEnabled = "danmaku_enabled"
+	// FieldImEnabled holds the string denoting the im_enabled field in the database.
+	FieldImEnabled = "im_enabled"
 	// Table holds the table name of the sysconfig in the database.
 	Table = "sp_sys_configs"
 )
@@ -69,6 +71,7 @@ var Columns = []string{
 	FieldAnnouncementText,
 	FieldAnnouncementLink,
 	FieldDanmakuEnabled,
+	FieldImEnabled,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -98,6 +101,8 @@ var (
 	DefaultAnnouncementLink string
 	// DefaultDanmakuEnabled holds the default value on creation for the "danmaku_enabled" field.
 	DefaultDanmakuEnabled bool
+	// DefaultImEnabled holds the default value on creation for the "im_enabled" field.
+	DefaultImEnabled bool
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
@@ -183,4 +188,9 @@ func ByAnnouncementLink(opts ...sql.OrderTermOption) OrderOption {
 // ByDanmakuEnabled orders the results by the danmaku_enabled field.
 func ByDanmakuEnabled(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDanmakuEnabled, opts...).ToFunc()
+}
+
+// ByImEnabled orders the results by the im_enabled field.
+func ByImEnabled(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImEnabled, opts...).ToFunc()
 }

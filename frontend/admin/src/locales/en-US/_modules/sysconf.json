@@ -31,5 +31,7 @@
   "announcementLinkHint": "Optional; opened when the banner is tapped (http/https)",
   "announcementLinkInvalid": "Link must start with http(s)://",
   "danmakuEnabled": "Danmaku",
-  "danmakuEnabledHint": "When off, the app hides the danmaku layer and rejects sending (existing danmaku hidden)"
+  "danmakuEnabledHint": "When off, the app hides the danmaku layer and rejects sending (existing danmaku hidden)",
+  "imEnabled": "Direct Messages",
+  "imEnabledHint": "When off, sending messages is rejected (existing conversations stay readable)"
 }

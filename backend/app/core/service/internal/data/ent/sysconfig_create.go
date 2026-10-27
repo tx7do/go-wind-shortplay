@@ -244,6 +244,20 @@ func (_c *SysConfigCreate) SetNillableDanmakuEnabled(v *bool) *SysConfigCreate {
 	return _c
 }
 
+// SetImEnabled sets the "im_enabled" field.
+func (_c *SysConfigCreate) SetImEnabled(v bool) *SysConfigCreate {
+	_c.mutation.SetImEnabled(v)
+	return _c
+}
+
+// SetNillableImEnabled sets the "im_enabled" field if the given value is not nil.
+func (_c *SysConfigCreate) SetNillableImEnabled(v *bool) *SysConfigCreate {
+	if v != nil {
+		_c.SetImEnabled(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *SysConfigCreate) SetID(v uint32) *SysConfigCreate {
 	_c.mutation.SetID(v)
@@ -317,6 +331,10 @@ func (_c *SysConfigCreate) defaults() {
 		v := sysconfig.DefaultDanmakuEnabled
 		_c.mutation.SetDanmakuEnabled(v)
 	}
+	if _, ok := _c.mutation.ImEnabled(); !ok {
+		v := sysconfig.DefaultImEnabled
+		_c.mutation.SetImEnabled(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -344,6 +362,9 @@ func (_c *SysConfigCreate) check() error {
 	}
 	if _, ok := _c.mutation.DanmakuEnabled(); !ok {
 		return &ValidationError{Name: "danmaku_enabled", err: errors.New(`ent: missing required field "SysConfig.danmaku_enabled"`)}
+	}
+	if _, ok := _c.mutation.ImEnabled(); !ok {
+		return &ValidationError{Name: "im_enabled", err: errors.New(`ent: missing required field "SysConfig.im_enabled"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := sysconfig.IDValidator(v); err != nil {
@@ -450,6 +471,10 @@ func (_c *SysConfigCreate) createSpec() (*SysConfig, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.DanmakuEnabled(); ok {
 		_spec.SetField(sysconfig.FieldDanmakuEnabled, field.TypeBool, value)
 		_node.DanmakuEnabled = value
+	}
+	if value, ok := _c.mutation.ImEnabled(); ok {
+		_spec.SetField(sysconfig.FieldImEnabled, field.TypeBool, value)
+		_node.ImEnabled = value
 	}
 	return _node, _spec
 }
@@ -770,6 +795,18 @@ func (u *SysConfigUpsert) SetDanmakuEnabled(v bool) *SysConfigUpsert {
 // UpdateDanmakuEnabled sets the "danmaku_enabled" field to the value that was provided on create.
 func (u *SysConfigUpsert) UpdateDanmakuEnabled() *SysConfigUpsert {
 	u.SetExcluded(sysconfig.FieldDanmakuEnabled)
+	return u
+}
+
+// SetImEnabled sets the "im_enabled" field.
+func (u *SysConfigUpsert) SetImEnabled(v bool) *SysConfigUpsert {
+	u.Set(sysconfig.FieldImEnabled, v)
+	return u
+}
+
+// UpdateImEnabled sets the "im_enabled" field to the value that was provided on create.
+func (u *SysConfigUpsert) UpdateImEnabled() *SysConfigUpsert {
+	u.SetExcluded(sysconfig.FieldImEnabled)
 	return u
 }
 
@@ -1136,6 +1173,20 @@ func (u *SysConfigUpsertOne) SetDanmakuEnabled(v bool) *SysConfigUpsertOne {
 func (u *SysConfigUpsertOne) UpdateDanmakuEnabled() *SysConfigUpsertOne {
 	return u.Update(func(s *SysConfigUpsert) {
 		s.UpdateDanmakuEnabled()
+	})
+}
+
+// SetImEnabled sets the "im_enabled" field.
+func (u *SysConfigUpsertOne) SetImEnabled(v bool) *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetImEnabled(v)
+	})
+}
+
+// UpdateImEnabled sets the "im_enabled" field to the value that was provided on create.
+func (u *SysConfigUpsertOne) UpdateImEnabled() *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateImEnabled()
 	})
 }
 
@@ -1668,6 +1719,20 @@ func (u *SysConfigUpsertBulk) SetDanmakuEnabled(v bool) *SysConfigUpsertBulk {
 func (u *SysConfigUpsertBulk) UpdateDanmakuEnabled() *SysConfigUpsertBulk {
 	return u.Update(func(s *SysConfigUpsert) {
 		s.UpdateDanmakuEnabled()
+	})
+}
+
+// SetImEnabled sets the "im_enabled" field.
+func (u *SysConfigUpsertBulk) SetImEnabled(v bool) *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetImEnabled(v)
+	})
+}
+
+// UpdateImEnabled sets the "im_enabled" field to the value that was provided on create.
+func (u *SysConfigUpsertBulk) UpdateImEnabled() *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateImEnabled()
 	})
 }
 

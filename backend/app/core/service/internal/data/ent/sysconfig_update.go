@@ -333,6 +333,20 @@ func (_u *SysConfigUpdate) SetNillableDanmakuEnabled(v *bool) *SysConfigUpdate {
 	return _u
 }
 
+// SetImEnabled sets the "im_enabled" field.
+func (_u *SysConfigUpdate) SetImEnabled(v bool) *SysConfigUpdate {
+	_u.mutation.SetImEnabled(v)
+	return _u
+}
+
+// SetNillableImEnabled sets the "im_enabled" field if the given value is not nil.
+func (_u *SysConfigUpdate) SetNillableImEnabled(v *bool) *SysConfigUpdate {
+	if v != nil {
+		_u.SetImEnabled(*v)
+	}
+	return _u
+}
+
 // Mutation returns the SysConfigMutation object of the builder.
 func (_u *SysConfigUpdate) Mutation() *SysConfigMutation {
 	return _u.mutation
@@ -479,6 +493,9 @@ func (_u *SysConfigUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.DanmakuEnabled(); ok {
 		_spec.SetField(sysconfig.FieldDanmakuEnabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.ImEnabled(); ok {
+		_spec.SetField(sysconfig.FieldImEnabled, field.TypeBool, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -805,6 +822,20 @@ func (_u *SysConfigUpdateOne) SetNillableDanmakuEnabled(v *bool) *SysConfigUpdat
 	return _u
 }
 
+// SetImEnabled sets the "im_enabled" field.
+func (_u *SysConfigUpdateOne) SetImEnabled(v bool) *SysConfigUpdateOne {
+	_u.mutation.SetImEnabled(v)
+	return _u
+}
+
+// SetNillableImEnabled sets the "im_enabled" field if the given value is not nil.
+func (_u *SysConfigUpdateOne) SetNillableImEnabled(v *bool) *SysConfigUpdateOne {
+	if v != nil {
+		_u.SetImEnabled(*v)
+	}
+	return _u
+}
+
 // Mutation returns the SysConfigMutation object of the builder.
 func (_u *SysConfigUpdateOne) Mutation() *SysConfigMutation {
 	return _u.mutation
@@ -981,6 +1012,9 @@ func (_u *SysConfigUpdateOne) sqlSave(ctx context.Context) (_node *SysConfig, er
 	}
 	if value, ok := _u.mutation.DanmakuEnabled(); ok {
 		_spec.SetField(sysconfig.FieldDanmakuEnabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.ImEnabled(); ok {
+		_spec.SetField(sysconfig.FieldImEnabled, field.TypeBool, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &SysConfig{config: _u.config}

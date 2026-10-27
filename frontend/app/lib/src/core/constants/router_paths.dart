@@ -47,6 +47,12 @@ class AppRoutePath {
   /// 系统设置
   static const settings = '/settings';
 
+  /// 私信会话列表
+  static const imConversations = '/im/conversations';
+
+  /// 聊天页（对端用户 ID 作路径参数）
+  static const imChat = '/im/chat/:peerId';
+
   /// 未找到
   static const notFound = '/not_found';
 }

@@ -15,6 +15,8 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent/dictentryi18n"
 	"go-wind-shortplay/app/core/service/internal/data/ent/dicttype"
 	"go-wind-shortplay/app/core/service/internal/data/ent/file"
+	"go-wind-shortplay/app/core/service/internal/data/ent/imconversation"
+	"go-wind-shortplay/app/core/service/internal/data/ent/immessage"
 	"go-wind-shortplay/app/core/service/internal/data/ent/internalmessage"
 	"go-wind-shortplay/app/core/service/internal/data/ent/internalmessagecategory"
 	"go-wind-shortplay/app/core/service/internal/data/ent/internalmessagerecipient"
@@ -142,6 +144,8 @@ func checkColumn(t, c string) error {
 			dictentryi18n.Table:            dictentryi18n.ValidColumn,
 			dicttype.Table:                 dicttype.ValidColumn,
 			file.Table:                     file.ValidColumn,
+			imconversation.Table:           imconversation.ValidColumn,
+			immessage.Table:                immessage.ValidColumn,
 			internalmessage.Table:          internalmessage.ValidColumn,
 			internalmessagecategory.Table:  internalmessagecategory.ValidColumn,
 			internalmessagerecipient.Table: internalmessagerecipient.ValidColumn,

@@ -42,4 +42,10 @@ class RouteNames {
 
   /// 系统设置
   static const String settings = 'settings';
+
+  /// 私信会话列表
+  static const String imConversations = 'im_conversations';
+
+  /// 聊天页
+  static const String imChat = 'im_chat';
 }

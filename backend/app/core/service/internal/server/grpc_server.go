@@ -14,6 +14,7 @@ import (
 	authenticationV1 "go-wind-shortplay/api/gen/go/authentication/service/v1"
 	commentV1 "go-wind-shortplay/api/gen/go/comment/service/v1"
 	danmakuV1 "go-wind-shortplay/api/gen/go/danmaku/service/v1"
+	imV1 "go-wind-shortplay/api/gen/go/im/service/v1"
 	feedV1 "go-wind-shortplay/api/gen/go/feed/service/v1"
 	interactionV1 "go-wind-shortplay/api/gen/go/interaction/service/v1"
 	reportV1 "go-wind-shortplay/api/gen/go/report/service/v1"
@@ -100,6 +101,7 @@ func NewGrpcServer(
 	ubaService *service.UbaService,
 	dashboardService *service.DashboardService,
 	danmakuService *service.DanmakuService,
+	imService *service.ImService,
 
 	// register:param ── 新模块服务形参在此行后注册(make register 工具锚点,勿删)
 ) (*grpc.Server, error) {
@@ -170,6 +172,7 @@ func NewGrpcServer(
 	ubaV1.RegisterUbaServiceServer(srv, ubaService)
 	statsV1.RegisterDashboardServiceServer(srv, dashboardService)
 	danmakuV1.RegisterDanmakuServiceServer(srv, danmakuService)
+	imV1.RegisterImServiceServer(srv, imService)
 
 	// register:route ── 新模块路由在此行后注册(make register 工具锚点,勿删)
 

@@ -360,6 +360,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "Nothing on the hot list yet",
     ),
     "hotTags": MessageLookupByLibrary.simpleMessage("Hot tags"),
+    "imChat": MessageLookupByLibrary.simpleMessage("Message"),
+    "imConversationEmpty": MessageLookupByLibrary.simpleMessage(
+      "No messages yet",
+    ),
+    "imConversations": MessageLookupByLibrary.simpleMessage("Messages"),
+    "imEmpty": MessageLookupByLibrary.simpleMessage(
+      "No conversations yet. Start one from a profile",
+    ),
+    "imInputHint": MessageLookupByLibrary.simpleMessage("Type a message…"),
+    "imUserFallback": MessageLookupByLibrary.simpleMessage("User"),
     "language": MessageLookupByLibrary.simpleMessage("Language"),
     "light": MessageLookupByLibrary.simpleMessage("Light"),
     "likeReceived": MessageLookupByLibrary.simpleMessage("Likes"),

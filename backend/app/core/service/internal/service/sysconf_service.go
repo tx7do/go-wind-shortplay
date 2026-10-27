@@ -52,6 +52,7 @@ func sysconfEntityToDTO(e *ent.SysConfig) *sysconfV1.SysConf {
 		AnnouncementText:       e.AnnouncementText,
 		AnnouncementLink:       trans.Ptr(e.AnnouncementLink),
 		DanmakuEnabled:         trans.Ptr(e.DanmakuEnabled),
+		ImEnabled:              trans.Ptr(e.ImEnabled),
 		UpdatedAt:              timeutil.TimeToTimestamppb(e.UpdatedAt),
 	}
 }
@@ -82,6 +83,7 @@ func (s *SysConfService) UpdateSysConf(ctx context.Context, req *sysconfV1.Updat
 		AnnouncementText:    req.AnnouncementText,
 		AnnouncementLink:    req.AnnouncementLink,
 		DanmakuEnabled:      req.DanmakuEnabled,
+		ImEnabled:           req.ImEnabled,
 	})
 	if err != nil {
 		return nil, err

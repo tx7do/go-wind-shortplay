@@ -116,6 +116,30 @@ func (f FileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FileMutation", m)
 }
 
+// The ImConversationFunc type is an adapter to allow the use of ordinary
+// function as ImConversation mutator.
+type ImConversationFunc func(context.Context, *ent.ImConversationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ImConversationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ImConversationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ImConversationMutation", m)
+}
+
+// The ImMessageFunc type is an adapter to allow the use of ordinary
+// function as ImMessage mutator.
+type ImMessageFunc func(context.Context, *ent.ImMessageMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ImMessageFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ImMessageMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ImMessageMutation", m)
+}
+
 // The InternalMessageFunc type is an adapter to allow the use of ordinary
 // function as InternalMessage mutator.
 type InternalMessageFunc func(context.Context, *ent.InternalMessageMutation) (ent.Value, error)

@@ -26,6 +26,7 @@ import (
 	statsV1 "go-wind-shortplay/api/gen/go/stats/service/v1"
 	sysconfV1 "go-wind-shortplay/api/gen/go/sysconf/service/v1"
 	danmakuV1 "go-wind-shortplay/api/gen/go/danmaku/service/v1"
+	imV1 "go-wind-shortplay/api/gen/go/im/service/v1"
 	ubaV1 "go-wind-shortplay/api/gen/go/uba/service/v1"
 	seriesV1 "go-wind-shortplay/api/gen/go/series/service/v1"
 	videoV1 "go-wind-shortplay/api/gen/go/video/service/v1"
@@ -226,6 +227,15 @@ func NewSpReportServiceClient(ctx *bootstrap.Context, r registry.Discovery) repo
 	}
 
 	return reportV1.NewReportServiceClient(cli)
+}
+
+func NewSpImServiceClient(ctx *bootstrap.Context, r registry.Discovery) imV1.ImServiceClient {
+	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())
+	if err != nil {
+		return nil
+	}
+
+	return imV1.NewImServiceClient(cli)
 }
 
 func NewSpDanmakuServiceClient(ctx *bootstrap.Context, r registry.Discovery) danmakuV1.DanmakuServiceClient {

@@ -324,6 +324,7 @@ export interface SysConf {
   announcementText?: string;
   announcementLink?: string;
   danmakuEnabled?: boolean;
+  imEnabled?: boolean;
   updatedAt?: ProtoTimestamp;
 }
 
@@ -339,6 +340,7 @@ export interface UpdateSysConfRequest {
   announcementText?: string;
   announcementLink?: string;
   danmakuEnabled?: boolean;
+  imEnabled?: boolean;
 }
 
 // ========== 组织与权限（基座 RBAC 契约：cms i_role/i_menu/i_api/i_department） ==========

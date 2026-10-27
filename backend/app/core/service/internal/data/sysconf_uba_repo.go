@@ -75,6 +75,7 @@ type SysConfUpdate struct {
 	AnnouncementText    *string
 	AnnouncementLink    *string
 	DanmakuEnabled      *bool
+	ImEnabled           *bool
 }
 
 func (r *SysConfRepo) Update(ctx context.Context, u *SysConfUpdate) (*ent.SysConfig, error) {
@@ -115,6 +116,9 @@ func (r *SysConfRepo) Update(ctx context.Context, u *SysConfUpdate) (*ent.SysCon
 		}
 		if u.DanmakuEnabled != nil {
 			builder.SetDanmakuEnabled(*u.DanmakuEnabled)
+		}
+		if u.ImEnabled != nil {
+			builder.SetImEnabled(*u.ImEnabled)
 		}
 	}
 	e, err := builder.Save(ctx)

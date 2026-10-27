@@ -129,6 +129,11 @@ func DanmakuEnabled(v bool) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldEQ(FieldDanmakuEnabled, v))
 }
 
+// ImEnabled applies equality check predicate on the "im_enabled" field. It's identical to ImEnabledEQ.
+func ImEnabled(v bool) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldImEnabled, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldEQ(FieldCreatedAt, v))
@@ -717,6 +722,16 @@ func DanmakuEnabledEQ(v bool) predicate.SysConfig {
 // DanmakuEnabledNEQ applies the NEQ predicate on the "danmaku_enabled" field.
 func DanmakuEnabledNEQ(v bool) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldNEQ(FieldDanmakuEnabled, v))
+}
+
+// ImEnabledEQ applies the EQ predicate on the "im_enabled" field.
+func ImEnabledEQ(v bool) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldImEnabled, v))
+}
+
+// ImEnabledNEQ applies the NEQ predicate on the "im_enabled" field.
+func ImEnabledNEQ(v bool) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNEQ(FieldImEnabled, v))
 }
 
 // And groups predicates with the AND operator between them.

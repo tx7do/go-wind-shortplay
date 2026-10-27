@@ -296,5 +296,11 @@
   "unpin": "ピン留め解除",
   "scheduledPublishOption": "予約投稿（指定時刻に自動公開）",
   "scheduledPublished": "予約投稿に設定しました",
-  "scheduledTimePast": "予約時刻は現在より後にしてください"
+  "scheduledTimePast": "予約時刻は現在より後にしてください",
+  "imConversations": "メッセージ",
+  "imChat": "メッセージを送る",
+  "imEmpty": "まだ会話がありません。プロフィールから始めよう",
+  "imUserFallback": "ユーザー",
+  "imConversationEmpty": "メッセージはまだありません",
+  "imInputHint": "メッセージを入力…"
 }

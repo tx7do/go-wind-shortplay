@@ -53,7 +53,9 @@ type SysConfig struct {
 	AnnouncementLink string `json:"announcement_link,omitempty"`
 	// 弹幕开关（关闭则 App 隐藏弹幕层并拒绝发送）
 	DanmakuEnabled bool `json:"danmaku_enabled,omitempty"`
-	selectValues   sql.SelectValues
+	// 私信开关（关闭则拒绝发送，存量会话仍可读）
+	ImEnabled    bool `json:"im_enabled,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -63,7 +65,7 @@ func (*SysConfig) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case sysconfig.FieldAllowedVideoTypes, sysconfig.FieldSensitiveWords:
 			values[i] = new([]byte)
-		case sysconfig.FieldManualReviewEnabled, sysconfig.FieldRegisterEnabled, sysconfig.FieldSensitiveFilterEnabled, sysconfig.FieldAnnouncementEnabled, sysconfig.FieldDanmakuEnabled:
+		case sysconfig.FieldManualReviewEnabled, sysconfig.FieldRegisterEnabled, sysconfig.FieldSensitiveFilterEnabled, sysconfig.FieldAnnouncementEnabled, sysconfig.FieldDanmakuEnabled, sysconfig.FieldImEnabled:
 			values[i] = new(sql.NullBool)
 		case sysconfig.FieldID, sysconfig.FieldCreatedBy, sysconfig.FieldUpdatedBy, sysconfig.FieldDeletedBy, sysconfig.FieldMaxUploadSizeMB, sysconfig.FieldMaxDurationSeconds:
 			values[i] = new(sql.NullInt64)
@@ -205,6 +207,12 @@ func (_m *SysConfig) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.DanmakuEnabled = value.Bool
 			}
+		case sysconfig.FieldImEnabled:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field im_enabled", values[i])
+			} else if value.Valid {
+				_m.ImEnabled = value.Bool
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -305,6 +313,9 @@ func (_m *SysConfig) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("danmaku_enabled=")
 	builder.WriteString(fmt.Sprintf("%v", _m.DanmakuEnabled))
+	builder.WriteString(", ")
+	builder.WriteString("im_enabled=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ImEnabled))
 	builder.WriteByte(')')
 	return builder.String()
 }

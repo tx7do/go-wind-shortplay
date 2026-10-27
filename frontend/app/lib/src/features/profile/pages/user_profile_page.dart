@@ -3,6 +3,8 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:shortplay_app/generated/l10n.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shortplay_app/src/app_router/app_router.dart' show RouteNames;
 import 'package:shortplay_app/src/core/themes/app_colors.dart';
 import 'package:shortplay_app/src/core/transport/http/index.dart';
 import 'package:shortplay_app/src/core/utilities/number_format.dart';
@@ -250,38 +252,73 @@ class _UserProfilePageState extends State<UserProfilePage> {
                               ],
                             ),
                             SizedBox(height: 18.h),
-                            // 关注按钮（已关注为浅底描边）
-                            _following
-                                ? OutlinedButton(
-                                    onPressed: _confirmUnfollow,
-                                    style: OutlinedButton.styleFrom(
-                                      minimumSize: Size(160.w, 42.h),
-                                      side: BorderSide(
-                                        color: theme.colorScheme.onSurface
-                                            .withAlpha(60),
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          100,
+                            // 关注 + 私信（同排；关注已关注为浅底描边）
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _following
+                                    ? OutlinedButton(
+                                        onPressed: _confirmUnfollow,
+                                        style: OutlinedButton.styleFrom(
+                                          minimumSize: Size(128.w, 42.h),
+                                          side: BorderSide(
+                                            color: theme.colorScheme.onSurface
+                                                .withAlpha(60),
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              100,
+                                            ),
+                                          ),
                                         ),
+                                        child: Text(
+                                          loc.followed,
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: theme.colorScheme.onSurface,
+                                          ),
+                                        ),
+                                      )
+                                    : GradientButton(
+                                        label: loc.follow,
+                                        onPressed: _toggleFollow,
+                                        height: 42,
+                                        fontSize: 14,
+                                        width: 128,
                                       ),
-                                    ),
-                                    child: Text(
-                                      loc.followed,
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  )
-                                : GradientButton(
-                                    label: loc.follow,
-                                    onPressed: _toggleFollow,
-                                    height: 42,
-                                    fontSize: 14,
-                                    width: 160,
+                                SizedBox(width: 12.w),
+                                OutlinedButton.icon(
+                                  onPressed: () => context.pushNamed(
+                                    RouteNames.imChat,
+                                    pathParameters: {
+                                      'peerId': '${widget.userId}',
+                                    },
                                   ),
+                                  style: OutlinedButton.styleFrom(
+                                    minimumSize: Size(96.w, 42.h),
+                                    side: BorderSide(
+                                      color: theme.colorScheme.onSurface
+                                          .withAlpha(60),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(100),
+                                    ),
+                                  ),
+                                  icon: const Icon(
+                                    Icons.chat_bubble_outline,
+                                    size: 16,
+                                  ),
+                                  label: Text(
+                                    loc.imChat,
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                             SizedBox(height: 8.h),
                           ],
                         ),

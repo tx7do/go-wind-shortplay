@@ -14,6 +14,8 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent/dictentryi18n"
 	"go-wind-shortplay/app/core/service/internal/data/ent/dicttype"
 	"go-wind-shortplay/app/core/service/internal/data/ent/file"
+	"go-wind-shortplay/app/core/service/internal/data/ent/imconversation"
+	"go-wind-shortplay/app/core/service/internal/data/ent/immessage"
 	"go-wind-shortplay/app/core/service/internal/data/ent/internalmessage"
 	"go-wind-shortplay/app/core/service/internal/data/ent/internalmessagecategory"
 	"go-wind-shortplay/app/core/service/internal/data/ent/internalmessagerecipient"
@@ -372,6 +374,90 @@ func init() {
 	fileDescID := fileMixinFields0[0].Descriptor()
 	// file.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	file.IDValidator = fileDescID.Validators[0].(func(uint32) error)
+	imconversationMixin := schema.ImConversation{}.Mixin()
+	imconversation.Policy = privacy.NewPolicies(imconversationMixin[2], schema.ImConversation{})
+	imconversation.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := imconversation.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	imconversationMixinFields0 := imconversationMixin[0].Fields()
+	_ = imconversationMixinFields0
+	imconversationMixinFields2 := imconversationMixin[2].Fields()
+	_ = imconversationMixinFields2
+	imconversationFields := schema.ImConversation{}.Fields()
+	_ = imconversationFields
+	// imconversationDescTenantID is the schema descriptor for tenant_id field.
+	imconversationDescTenantID := imconversationMixinFields2[0].Descriptor()
+	// imconversation.DefaultTenantID holds the default value on creation for the tenant_id field.
+	imconversation.DefaultTenantID = imconversationDescTenantID.Default.(uint32)
+	// imconversationDescParticipantAID is the schema descriptor for participant_a_id field.
+	imconversationDescParticipantAID := imconversationFields[0].Descriptor()
+	// imconversation.DefaultParticipantAID holds the default value on creation for the participant_a_id field.
+	imconversation.DefaultParticipantAID = imconversationDescParticipantAID.Default.(uint32)
+	// imconversationDescParticipantBID is the schema descriptor for participant_b_id field.
+	imconversationDescParticipantBID := imconversationFields[1].Descriptor()
+	// imconversation.DefaultParticipantBID holds the default value on creation for the participant_b_id field.
+	imconversation.DefaultParticipantBID = imconversationDescParticipantBID.Default.(uint32)
+	// imconversationDescLastMessagePreview is the schema descriptor for last_message_preview field.
+	imconversationDescLastMessagePreview := imconversationFields[2].Descriptor()
+	// imconversation.DefaultLastMessagePreview holds the default value on creation for the last_message_preview field.
+	imconversation.DefaultLastMessagePreview = imconversationDescLastMessagePreview.Default.(string)
+	// imconversationDescAUnreadCount is the schema descriptor for a_unread_count field.
+	imconversationDescAUnreadCount := imconversationFields[4].Descriptor()
+	// imconversation.DefaultAUnreadCount holds the default value on creation for the a_unread_count field.
+	imconversation.DefaultAUnreadCount = imconversationDescAUnreadCount.Default.(uint64)
+	// imconversationDescBUnreadCount is the schema descriptor for b_unread_count field.
+	imconversationDescBUnreadCount := imconversationFields[5].Descriptor()
+	// imconversation.DefaultBUnreadCount holds the default value on creation for the b_unread_count field.
+	imconversation.DefaultBUnreadCount = imconversationDescBUnreadCount.Default.(uint64)
+	// imconversationDescID is the schema descriptor for id field.
+	imconversationDescID := imconversationMixinFields0[0].Descriptor()
+	// imconversation.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	imconversation.IDValidator = imconversationDescID.Validators[0].(func(uint32) error)
+	immessageMixin := schema.ImMessage{}.Mixin()
+	immessage.Policy = privacy.NewPolicies(immessageMixin[2], schema.ImMessage{})
+	immessage.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := immessage.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	immessageMixinFields0 := immessageMixin[0].Fields()
+	_ = immessageMixinFields0
+	immessageMixinFields2 := immessageMixin[2].Fields()
+	_ = immessageMixinFields2
+	immessageFields := schema.ImMessage{}.Fields()
+	_ = immessageFields
+	// immessageDescTenantID is the schema descriptor for tenant_id field.
+	immessageDescTenantID := immessageMixinFields2[0].Descriptor()
+	// immessage.DefaultTenantID holds the default value on creation for the tenant_id field.
+	immessage.DefaultTenantID = immessageDescTenantID.Default.(uint32)
+	// immessageDescConversationID is the schema descriptor for conversation_id field.
+	immessageDescConversationID := immessageFields[0].Descriptor()
+	// immessage.DefaultConversationID holds the default value on creation for the conversation_id field.
+	immessage.DefaultConversationID = immessageDescConversationID.Default.(uint32)
+	// immessageDescSenderID is the schema descriptor for sender_id field.
+	immessageDescSenderID := immessageFields[1].Descriptor()
+	// immessage.DefaultSenderID holds the default value on creation for the sender_id field.
+	immessage.DefaultSenderID = immessageDescSenderID.Default.(uint32)
+	// immessageDescReceiverID is the schema descriptor for receiver_id field.
+	immessageDescReceiverID := immessageFields[2].Descriptor()
+	// immessage.DefaultReceiverID holds the default value on creation for the receiver_id field.
+	immessage.DefaultReceiverID = immessageDescReceiverID.Default.(uint32)
+	// immessageDescContent is the schema descriptor for content field.
+	immessageDescContent := immessageFields[3].Descriptor()
+	// immessage.DefaultContent holds the default value on creation for the content field.
+	immessage.DefaultContent = immessageDescContent.Default.(string)
+	// immessageDescID is the schema descriptor for id field.
+	immessageDescID := immessageMixinFields0[0].Descriptor()
+	// immessage.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	immessage.IDValidator = immessageDescID.Validators[0].(func(uint32) error)
 	internalmessageMixin := schema.InternalMessage{}.Mixin()
 	internalmessage.Policy = privacy.NewPolicies(internalmessageMixin[3], schema.InternalMessage{})
 	internalmessage.Hooks[0] = func(next ent.Mutator) ent.Mutator {
@@ -1423,6 +1509,10 @@ func init() {
 	sysconfigDescDanmakuEnabled := sysconfigFields[10].Descriptor()
 	// sysconfig.DefaultDanmakuEnabled holds the default value on creation for the danmaku_enabled field.
 	sysconfig.DefaultDanmakuEnabled = sysconfigDescDanmakuEnabled.Default.(bool)
+	// sysconfigDescImEnabled is the schema descriptor for im_enabled field.
+	sysconfigDescImEnabled := sysconfigFields[11].Descriptor()
+	// sysconfig.DefaultImEnabled holds the default value on creation for the im_enabled field.
+	sysconfig.DefaultImEnabled = sysconfigDescImEnabled.Default.(bool)
 	// sysconfigDescID is the schema descriptor for id field.
 	sysconfigDescID := sysconfigMixinFields0[0].Descriptor()
 	// sysconfig.IDValidator is a validator for the "id" field. It is called by the builders before save.

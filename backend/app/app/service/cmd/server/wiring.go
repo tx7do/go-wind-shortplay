@@ -82,6 +82,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 	spReportServiceClient := data.NewSpReportServiceClient(ctx, discovery)
 	spUbaServiceClient := data.NewSpUbaServiceClient(ctx, discovery)
 	spDanmakuServiceClient := data.NewSpDanmakuServiceClient(ctx, discovery)
+	spImServiceClient := data.NewSpImServiceClient(ctx, discovery)
 	spDashboardServiceClient := data.NewSpDashboardServiceClient(ctx, discovery)
 	spSysConfServiceClient := data.NewSpSysConfServiceClient(ctx, discovery)
 
@@ -113,6 +114,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 	spReportService := service.NewReportService(ctx, spReportServiceClient)
 	spUbaService := service.NewUbaService(ctx, spUbaServiceClient)
 	spDanmakuService := service.NewDanmakuService(ctx, spDanmakuServiceClient)
+	spImService := service.NewImService(ctx, spImServiceClient)
 	spUserService := service.NewUserService(ctx, userServiceClient, spDashboardServiceClient, spVideoServiceClient)
 	spSysConfService := service.NewSysConfService(ctx, spSysConfServiceClient)
 
@@ -134,7 +136,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 		commentService,
 		spFeedService, spVideoService, spSeriesService, spInteractionService,
 		spReportService, spUbaService, spUserService, spSysConfService,
-		spDanmakuService,
+		spDanmakuService, spImService,
 		notificationService,
 		// register:rest-arg ── 新模块服务实参在此行后追加(make register 工具锚点,勿删)
 	)
@@ -147,6 +149,10 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 	}
 
 	sseServer := server.NewSseServer(ctx, authenticationServiceClient)
+
+	// 私信实时事件桥接：Redis Pub/Sub → SSE 定向推送（落库为准，尽力而为）
+	stopImBridge := server.StartImEventSubscriber(ctx.Context(), redisClient, sseServer, authenticationServiceClient, ctx.NewLoggerHelper("im-sse-bridge/app-service"))
+	cleanups = append(cleanups, stopImBridge)
 
 	return newApp(ctx, httpServer, grpcServer, sseServer), rollback, nil
 }

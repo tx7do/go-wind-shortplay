@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package app.service.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "im/service/v1/im.proto";
+import "pagination/v1/pagination.proto";
+
+// 私信服务（App 端；全部需登录，不入游客白名单）
+service ImService {
+  // 发送私信（自动建会话）
+  rpc SendMessage (im.service.v1.SendMessageRequest) returns (im.service.v1.Message) {
+    option (google.api.http) = {
+      post: "/app/v1/im/messages"
+      body: "*"
+    };
+  }
+
+  // 会话列表（最近消息倒序）
+  rpc ListConversations (pagination.PagingRequest) returns (im.service.v1.ListConversationsResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/im/conversations"
+    };
+  }
+
+  // 与指定用户建会话（存在即返回既有）
+  rpc EnsureConversation (im.service.v1.EnsureConversationRequest) returns (im.service.v1.Conversation) {
+    option (google.api.http) = {
+      post: "/app/v1/im/conversations"
+      body: "*"
+    };
+  }
+
+  // 会话消息（ID 倒序分页）
+  rpc ListMessages (im.service.v1.ListMessagesRequest) returns (im.service.v1.ListMessagesResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/im/conversations/{conversation_id}/messages"
+    };
+  }
+
+  // 标记会话已读
+  rpc MarkConversationRead (im.service.v1.MarkConversationReadRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      put: "/app/v1/im/conversations/{conversation_id}/read"
+    };
+  }
+
+  // 全部会话未读总数（角标）
+  rpc CountUnread (google.protobuf.Empty) returns (im.service.v1.CountUnreadResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/im/unread-count"
+    };
+  }
+}

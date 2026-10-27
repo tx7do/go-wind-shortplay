@@ -20,6 +20,8 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent/dictentryi18n"
 	"go-wind-shortplay/app/core/service/internal/data/ent/dicttype"
 	"go-wind-shortplay/app/core/service/internal/data/ent/file"
+	"go-wind-shortplay/app/core/service/internal/data/ent/imconversation"
+	"go-wind-shortplay/app/core/service/internal/data/ent/immessage"
 	"go-wind-shortplay/app/core/service/internal/data/ent/internalmessage"
 	"go-wind-shortplay/app/core/service/internal/data/ent/internalmessagecategory"
 	"go-wind-shortplay/app/core/service/internal/data/ent/internalmessagerecipient"
@@ -102,6 +104,10 @@ type Client struct {
 	DictType *DictTypeClient
 	// File is the client for interacting with the File builders.
 	File *FileClient
+	// ImConversation is the client for interacting with the ImConversation builders.
+	ImConversation *ImConversationClient
+	// ImMessage is the client for interacting with the ImMessage builders.
+	ImMessage *ImMessageClient
 	// InternalMessage is the client for interacting with the InternalMessage builders.
 	InternalMessage *InternalMessageClient
 	// InternalMessageCategory is the client for interacting with the InternalMessageCategory builders.
@@ -226,6 +232,8 @@ func (c *Client) init() {
 	c.DictEntryI18n = NewDictEntryI18nClient(c.config)
 	c.DictType = NewDictTypeClient(c.config)
 	c.File = NewFileClient(c.config)
+	c.ImConversation = NewImConversationClient(c.config)
+	c.ImMessage = NewImMessageClient(c.config)
 	c.InternalMessage = NewInternalMessageClient(c.config)
 	c.InternalMessageCategory = NewInternalMessageCategoryClient(c.config)
 	c.InternalMessageRecipient = NewInternalMessageRecipientClient(c.config)
@@ -379,6 +387,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		DictEntryI18n:            NewDictEntryI18nClient(cfg),
 		DictType:                 NewDictTypeClient(cfg),
 		File:                     NewFileClient(cfg),
+		ImConversation:           NewImConversationClient(cfg),
+		ImMessage:                NewImMessageClient(cfg),
 		InternalMessage:          NewInternalMessageClient(cfg),
 		InternalMessageCategory:  NewInternalMessageCategoryClient(cfg),
 		InternalMessageRecipient: NewInternalMessageRecipientClient(cfg),
@@ -459,6 +469,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		DictEntryI18n:            NewDictEntryI18nClient(cfg),
 		DictType:                 NewDictTypeClient(cfg),
 		File:                     NewFileClient(cfg),
+		ImConversation:           NewImConversationClient(cfg),
+		ImMessage:                NewImMessageClient(cfg),
 		InternalMessage:          NewInternalMessageClient(cfg),
 		InternalMessageCategory:  NewInternalMessageCategoryClient(cfg),
 		InternalMessageRecipient: NewInternalMessageRecipientClient(cfg),
@@ -541,19 +553,19 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Api, c.ApiAuditLog, c.Comment, c.Danmaku, c.DataAccessAuditLog, c.DictEntry,
-		c.DictEntryI18n, c.DictType, c.File, c.InternalMessage,
-		c.InternalMessageCategory, c.InternalMessageRecipient, c.Language,
-		c.LoginAuditLog, c.LoginPolicy, c.MediaAsset, c.MediaVariant, c.Membership,
-		c.MembershipOrgUnit, c.MembershipPosition, c.MembershipRole, c.Menu,
-		c.NotificationChannel, c.NotificationDelivery, c.NotificationPreference,
-		c.NotificationRule, c.NotificationTemplate, c.OperationAuditLog, c.OrgUnit,
-		c.Permission, c.PermissionApi, c.PermissionAuditLog, c.PermissionGroup,
-		c.PermissionMenu, c.PermissionPolicy, c.PolicyEvaluationLog, c.Position,
-		c.Role, c.RoleMetadata, c.RolePermission, c.Series, c.SeriesFollow,
-		c.SysConfig, c.Task, c.Tenant, c.UbaEvent, c.UploadTask, c.User,
-		c.UserCredential, c.UserFollow, c.UserOrgUnit, c.UserPosition, c.UserRole,
-		c.Video, c.VideoCollect, c.VideoComment, c.VideoDraft, c.VideoLike,
-		c.VideoReport, c.VideoTag, c.VideoTagRel,
+		c.DictEntryI18n, c.DictType, c.File, c.ImConversation, c.ImMessage,
+		c.InternalMessage, c.InternalMessageCategory, c.InternalMessageRecipient,
+		c.Language, c.LoginAuditLog, c.LoginPolicy, c.MediaAsset, c.MediaVariant,
+		c.Membership, c.MembershipOrgUnit, c.MembershipPosition, c.MembershipRole,
+		c.Menu, c.NotificationChannel, c.NotificationDelivery,
+		c.NotificationPreference, c.NotificationRule, c.NotificationTemplate,
+		c.OperationAuditLog, c.OrgUnit, c.Permission, c.PermissionApi,
+		c.PermissionAuditLog, c.PermissionGroup, c.PermissionMenu, c.PermissionPolicy,
+		c.PolicyEvaluationLog, c.Position, c.Role, c.RoleMetadata, c.RolePermission,
+		c.Series, c.SeriesFollow, c.SysConfig, c.Task, c.Tenant, c.UbaEvent,
+		c.UploadTask, c.User, c.UserCredential, c.UserFollow, c.UserOrgUnit,
+		c.UserPosition, c.UserRole, c.Video, c.VideoCollect, c.VideoComment,
+		c.VideoDraft, c.VideoLike, c.VideoReport, c.VideoTag, c.VideoTagRel,
 	} {
 		n.Use(hooks...)
 	}
@@ -564,19 +576,19 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Api, c.ApiAuditLog, c.Comment, c.Danmaku, c.DataAccessAuditLog, c.DictEntry,
-		c.DictEntryI18n, c.DictType, c.File, c.InternalMessage,
-		c.InternalMessageCategory, c.InternalMessageRecipient, c.Language,
-		c.LoginAuditLog, c.LoginPolicy, c.MediaAsset, c.MediaVariant, c.Membership,
-		c.MembershipOrgUnit, c.MembershipPosition, c.MembershipRole, c.Menu,
-		c.NotificationChannel, c.NotificationDelivery, c.NotificationPreference,
-		c.NotificationRule, c.NotificationTemplate, c.OperationAuditLog, c.OrgUnit,
-		c.Permission, c.PermissionApi, c.PermissionAuditLog, c.PermissionGroup,
-		c.PermissionMenu, c.PermissionPolicy, c.PolicyEvaluationLog, c.Position,
-		c.Role, c.RoleMetadata, c.RolePermission, c.Series, c.SeriesFollow,
-		c.SysConfig, c.Task, c.Tenant, c.UbaEvent, c.UploadTask, c.User,
-		c.UserCredential, c.UserFollow, c.UserOrgUnit, c.UserPosition, c.UserRole,
-		c.Video, c.VideoCollect, c.VideoComment, c.VideoDraft, c.VideoLike,
-		c.VideoReport, c.VideoTag, c.VideoTagRel,
+		c.DictEntryI18n, c.DictType, c.File, c.ImConversation, c.ImMessage,
+		c.InternalMessage, c.InternalMessageCategory, c.InternalMessageRecipient,
+		c.Language, c.LoginAuditLog, c.LoginPolicy, c.MediaAsset, c.MediaVariant,
+		c.Membership, c.MembershipOrgUnit, c.MembershipPosition, c.MembershipRole,
+		c.Menu, c.NotificationChannel, c.NotificationDelivery,
+		c.NotificationPreference, c.NotificationRule, c.NotificationTemplate,
+		c.OperationAuditLog, c.OrgUnit, c.Permission, c.PermissionApi,
+		c.PermissionAuditLog, c.PermissionGroup, c.PermissionMenu, c.PermissionPolicy,
+		c.PolicyEvaluationLog, c.Position, c.Role, c.RoleMetadata, c.RolePermission,
+		c.Series, c.SeriesFollow, c.SysConfig, c.Task, c.Tenant, c.UbaEvent,
+		c.UploadTask, c.User, c.UserCredential, c.UserFollow, c.UserOrgUnit,
+		c.UserPosition, c.UserRole, c.Video, c.VideoCollect, c.VideoComment,
+		c.VideoDraft, c.VideoLike, c.VideoReport, c.VideoTag, c.VideoTagRel,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -603,6 +615,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.DictType.mutate(ctx, m)
 	case *FileMutation:
 		return c.File.mutate(ctx, m)
+	case *ImConversationMutation:
+		return c.ImConversation.mutate(ctx, m)
+	case *ImMessageMutation:
+		return c.ImMessage.mutate(ctx, m)
 	case *InternalMessageMutation:
 		return c.InternalMessage.mutate(ctx, m)
 	case *InternalMessageCategoryMutation:
@@ -2011,6 +2027,274 @@ func (c *FileClient) mutate(ctx context.Context, m *FileMutation) (Value, error)
 		return (&FileDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown File mutation op: %q", m.Op())
+	}
+}
+
+// ImConversationClient is a client for the ImConversation schema.
+type ImConversationClient struct {
+	config
+}
+
+// NewImConversationClient returns a client for the ImConversation from the given config.
+func NewImConversationClient(c config) *ImConversationClient {
+	return &ImConversationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `imconversation.Hooks(f(g(h())))`.
+func (c *ImConversationClient) Use(hooks ...Hook) {
+	c.hooks.ImConversation = append(c.hooks.ImConversation, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `imconversation.Intercept(f(g(h())))`.
+func (c *ImConversationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ImConversation = append(c.inters.ImConversation, interceptors...)
+}
+
+// Create returns a builder for creating a ImConversation entity.
+func (c *ImConversationClient) Create() *ImConversationCreate {
+	mutation := newImConversationMutation(c.config, OpCreate)
+	return &ImConversationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ImConversation entities.
+func (c *ImConversationClient) CreateBulk(builders ...*ImConversationCreate) *ImConversationCreateBulk {
+	return &ImConversationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ImConversationClient) MapCreateBulk(slice any, setFunc func(*ImConversationCreate, int)) *ImConversationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ImConversationCreateBulk{err: fmt.Errorf("calling to ImConversationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ImConversationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ImConversationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ImConversation.
+func (c *ImConversationClient) Update() *ImConversationUpdate {
+	mutation := newImConversationMutation(c.config, OpUpdate)
+	return &ImConversationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ImConversationClient) UpdateOne(_m *ImConversation) *ImConversationUpdateOne {
+	mutation := newImConversationMutation(c.config, OpUpdateOne, withImConversation(_m))
+	return &ImConversationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ImConversationClient) UpdateOneID(id uint32) *ImConversationUpdateOne {
+	mutation := newImConversationMutation(c.config, OpUpdateOne, withImConversationID(id))
+	return &ImConversationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ImConversation.
+func (c *ImConversationClient) Delete() *ImConversationDelete {
+	mutation := newImConversationMutation(c.config, OpDelete)
+	return &ImConversationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ImConversationClient) DeleteOne(_m *ImConversation) *ImConversationDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ImConversationClient) DeleteOneID(id uint32) *ImConversationDeleteOne {
+	builder := c.Delete().Where(imconversation.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ImConversationDeleteOne{builder}
+}
+
+// Query returns a query builder for ImConversation.
+func (c *ImConversationClient) Query() *ImConversationQuery {
+	return &ImConversationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeImConversation},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ImConversation entity by its id.
+func (c *ImConversationClient) Get(ctx context.Context, id uint32) (*ImConversation, error) {
+	return c.Query().Where(imconversation.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ImConversationClient) GetX(ctx context.Context, id uint32) *ImConversation {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ImConversationClient) Hooks() []Hook {
+	hooks := c.hooks.ImConversation
+	return append(hooks[:len(hooks):len(hooks)], imconversation.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *ImConversationClient) Interceptors() []Interceptor {
+	return c.inters.ImConversation
+}
+
+func (c *ImConversationClient) mutate(ctx context.Context, m *ImConversationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ImConversationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ImConversationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ImConversationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ImConversationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ImConversation mutation op: %q", m.Op())
+	}
+}
+
+// ImMessageClient is a client for the ImMessage schema.
+type ImMessageClient struct {
+	config
+}
+
+// NewImMessageClient returns a client for the ImMessage from the given config.
+func NewImMessageClient(c config) *ImMessageClient {
+	return &ImMessageClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `immessage.Hooks(f(g(h())))`.
+func (c *ImMessageClient) Use(hooks ...Hook) {
+	c.hooks.ImMessage = append(c.hooks.ImMessage, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `immessage.Intercept(f(g(h())))`.
+func (c *ImMessageClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ImMessage = append(c.inters.ImMessage, interceptors...)
+}
+
+// Create returns a builder for creating a ImMessage entity.
+func (c *ImMessageClient) Create() *ImMessageCreate {
+	mutation := newImMessageMutation(c.config, OpCreate)
+	return &ImMessageCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ImMessage entities.
+func (c *ImMessageClient) CreateBulk(builders ...*ImMessageCreate) *ImMessageCreateBulk {
+	return &ImMessageCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ImMessageClient) MapCreateBulk(slice any, setFunc func(*ImMessageCreate, int)) *ImMessageCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ImMessageCreateBulk{err: fmt.Errorf("calling to ImMessageClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ImMessageCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ImMessageCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ImMessage.
+func (c *ImMessageClient) Update() *ImMessageUpdate {
+	mutation := newImMessageMutation(c.config, OpUpdate)
+	return &ImMessageUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ImMessageClient) UpdateOne(_m *ImMessage) *ImMessageUpdateOne {
+	mutation := newImMessageMutation(c.config, OpUpdateOne, withImMessage(_m))
+	return &ImMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ImMessageClient) UpdateOneID(id uint32) *ImMessageUpdateOne {
+	mutation := newImMessageMutation(c.config, OpUpdateOne, withImMessageID(id))
+	return &ImMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ImMessage.
+func (c *ImMessageClient) Delete() *ImMessageDelete {
+	mutation := newImMessageMutation(c.config, OpDelete)
+	return &ImMessageDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ImMessageClient) DeleteOne(_m *ImMessage) *ImMessageDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ImMessageClient) DeleteOneID(id uint32) *ImMessageDeleteOne {
+	builder := c.Delete().Where(immessage.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ImMessageDeleteOne{builder}
+}
+
+// Query returns a query builder for ImMessage.
+func (c *ImMessageClient) Query() *ImMessageQuery {
+	return &ImMessageQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeImMessage},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ImMessage entity by its id.
+func (c *ImMessageClient) Get(ctx context.Context, id uint32) (*ImMessage, error) {
+	return c.Query().Where(immessage.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ImMessageClient) GetX(ctx context.Context, id uint32) *ImMessage {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ImMessageClient) Hooks() []Hook {
+	hooks := c.hooks.ImMessage
+	return append(hooks[:len(hooks):len(hooks)], immessage.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *ImMessageClient) Interceptors() []Interceptor {
+	return c.inters.ImMessage
+}
+
+func (c *ImMessageClient) mutate(ctx context.Context, m *ImMessageMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ImMessageCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ImMessageUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ImMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ImMessageDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ImMessage mutation op: %q", m.Op())
 	}
 }
 
@@ -9106,30 +9390,32 @@ func (c *VideoTagRelClient) mutate(ctx context.Context, m *VideoTagRelMutation) 
 type (
 	hooks struct {
 		Api, ApiAuditLog, Comment, Danmaku, DataAccessAuditLog, DictEntry,
-		DictEntryI18n, DictType, File, InternalMessage, InternalMessageCategory,
-		InternalMessageRecipient, Language, LoginAuditLog, LoginPolicy, MediaAsset,
-		MediaVariant, Membership, MembershipOrgUnit, MembershipPosition,
-		MembershipRole, Menu, NotificationChannel, NotificationDelivery,
-		NotificationPreference, NotificationRule, NotificationTemplate,
-		OperationAuditLog, OrgUnit, Permission, PermissionApi, PermissionAuditLog,
-		PermissionGroup, PermissionMenu, PermissionPolicy, PolicyEvaluationLog,
-		Position, Role, RoleMetadata, RolePermission, Series, SeriesFollow, SysConfig,
-		Task, Tenant, UbaEvent, UploadTask, User, UserCredential, UserFollow,
-		UserOrgUnit, UserPosition, UserRole, Video, VideoCollect, VideoComment,
-		VideoDraft, VideoLike, VideoReport, VideoTag, VideoTagRel []ent.Hook
+		DictEntryI18n, DictType, File, ImConversation, ImMessage, InternalMessage,
+		InternalMessageCategory, InternalMessageRecipient, Language, LoginAuditLog,
+		LoginPolicy, MediaAsset, MediaVariant, Membership, MembershipOrgUnit,
+		MembershipPosition, MembershipRole, Menu, NotificationChannel,
+		NotificationDelivery, NotificationPreference, NotificationRule,
+		NotificationTemplate, OperationAuditLog, OrgUnit, Permission, PermissionApi,
+		PermissionAuditLog, PermissionGroup, PermissionMenu, PermissionPolicy,
+		PolicyEvaluationLog, Position, Role, RoleMetadata, RolePermission, Series,
+		SeriesFollow, SysConfig, Task, Tenant, UbaEvent, UploadTask, User,
+		UserCredential, UserFollow, UserOrgUnit, UserPosition, UserRole, Video,
+		VideoCollect, VideoComment, VideoDraft, VideoLike, VideoReport, VideoTag,
+		VideoTagRel []ent.Hook
 	}
 	inters struct {
 		Api, ApiAuditLog, Comment, Danmaku, DataAccessAuditLog, DictEntry,
-		DictEntryI18n, DictType, File, InternalMessage, InternalMessageCategory,
-		InternalMessageRecipient, Language, LoginAuditLog, LoginPolicy, MediaAsset,
-		MediaVariant, Membership, MembershipOrgUnit, MembershipPosition,
-		MembershipRole, Menu, NotificationChannel, NotificationDelivery,
-		NotificationPreference, NotificationRule, NotificationTemplate,
-		OperationAuditLog, OrgUnit, Permission, PermissionApi, PermissionAuditLog,
-		PermissionGroup, PermissionMenu, PermissionPolicy, PolicyEvaluationLog,
-		Position, Role, RoleMetadata, RolePermission, Series, SeriesFollow, SysConfig,
-		Task, Tenant, UbaEvent, UploadTask, User, UserCredential, UserFollow,
-		UserOrgUnit, UserPosition, UserRole, Video, VideoCollect, VideoComment,
-		VideoDraft, VideoLike, VideoReport, VideoTag, VideoTagRel []ent.Interceptor
+		DictEntryI18n, DictType, File, ImConversation, ImMessage, InternalMessage,
+		InternalMessageCategory, InternalMessageRecipient, Language, LoginAuditLog,
+		LoginPolicy, MediaAsset, MediaVariant, Membership, MembershipOrgUnit,
+		MembershipPosition, MembershipRole, Menu, NotificationChannel,
+		NotificationDelivery, NotificationPreference, NotificationRule,
+		NotificationTemplate, OperationAuditLog, OrgUnit, Permission, PermissionApi,
+		PermissionAuditLog, PermissionGroup, PermissionMenu, PermissionPolicy,
+		PolicyEvaluationLog, Position, Role, RoleMetadata, RolePermission, Series,
+		SeriesFollow, SysConfig, Task, Tenant, UbaEvent, UploadTask, User,
+		UserCredential, UserFollow, UserOrgUnit, UserPosition, UserRole, Video,
+		VideoCollect, VideoComment, VideoDraft, VideoLike, VideoReport, VideoTag,
+		VideoTagRel []ent.Interceptor
 	}
 )
