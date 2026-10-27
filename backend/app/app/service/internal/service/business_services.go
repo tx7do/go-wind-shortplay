@@ -313,6 +313,11 @@ func (s *VideoService) ScheduleVideo(ctx context.Context, req *videoV1.ScheduleV
 	return s.videoClient.ScheduleVideo(ctx, req)
 }
 
+// ListCreatorVideoStats 创作者单视频数据（本人，转发 core）。
+func (s *VideoService) ListCreatorVideoStats(ctx context.Context, req *statsV1.ListCreatorVideoStatsRequest) (*statsV1.ListCreatorVideoStatsResponse, error) {
+	return s.dashboardClient.ListCreatorVideoStats(ctx, req)
+}
+
 // ListCreatorTrends 创作者近 N 日趋势（本人，转发 core）。
 func (s *VideoService) ListCreatorTrends(ctx context.Context, req *statsV1.ListCreatorTrendsRequest) (*statsV1.ListTrendsResponse, error) {
 	return s.dashboardClient.ListCreatorTrends(ctx, req)

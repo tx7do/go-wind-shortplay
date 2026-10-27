@@ -24,5 +24,9 @@
   "dataSource": "Data Source",
   "tableName": "Table",
   "accessType": "Access Type",
-  "affectedRows": "Affected Rows"
+  "affectedRows": "Affected Rows",
+  "export": "Export",
+  "exportSuccess": "Exported",
+  "exportFailed": "Export failed",
+  "exporting": "Exporting"
 }

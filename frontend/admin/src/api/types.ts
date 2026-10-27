@@ -173,6 +173,8 @@ export interface Video {
   publishedAt?: ProtoTimestamp;
   /** 计划发布时间（草稿定时中；到期自动转已发布并清空） */
   scheduledAt?: ProtoTimestamp;
+  /** 计划下架时间（已发布定时下架中；到期自动转下架并清空） */
+  scheduledOffAt?: ProtoTimestamp;
   createdAt?: ProtoTimestamp;
   updatedAt?: ProtoTimestamp;
 }
@@ -223,6 +225,18 @@ export interface Danmaku {
   /** 时间轴偏移（毫秒） */
   timeOffsetMs?: Int64;
   status?: ProtoEnum;
+  createdAt?: ProtoTimestamp;
+}
+
+// ========== 私信监管 ==========
+
+export interface ImAdminMessage {
+  id?: number;
+  conversationId?: number;
+  senderId?: number;
+  receiverId?: number;
+  sender?: UserBrief;
+  content?: string;
   createdAt?: ProtoTimestamp;
 }
 

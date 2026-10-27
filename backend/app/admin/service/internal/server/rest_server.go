@@ -155,6 +155,7 @@ func NewRestServer(
 
 	spVideoService *service.VideoService,
 	spDanmakuService *service.DanmakuService,
+	spImService *service.ImService,
 	spSeriesService *service.SeriesService,
 	spReportService *service.ReportService,
 	spDashboardService *service.DashboardService,
@@ -223,6 +224,7 @@ func NewRestServer(
 	adminV1.RegisterCommentServiceHTTPServer(srv, commentService)
 	adminV1.RegisterVideoServiceHTTPServer(srv, spVideoService)
 	adminV1.RegisterDanmakuServiceHTTPServer(srv, spDanmakuService)
+	adminV1.RegisterImServiceHTTPServer(srv, spImService)
 	adminV1.RegisterSeriesServiceHTTPServer(srv, spSeriesService)
 	adminV1.RegisterReportServiceHTTPServer(srv, spReportService)
 	adminV1.RegisterDashboardServiceHTTPServer(srv, spDashboardService)

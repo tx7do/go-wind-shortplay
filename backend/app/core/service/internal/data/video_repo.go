@@ -7,9 +7,9 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/tx7do/kratos-bootstrap/bootstrap"
 	"github.com/tx7do/go-utils/timeutil"
 	"github.com/tx7do/go-utils/trans"
+	"github.com/tx7do/kratos-bootstrap/bootstrap"
 
 	paginationV1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
 	entCrud "github.com/tx7do/go-crud/entgo"
@@ -66,25 +66,26 @@ func videoEntityToDTO(e *ent.Video, tags []string) *videoV1.Video {
 		return nil
 	}
 	dto := &videoV1.Video{
-		Id:           trans.Ptr(e.ID),
-		Title:        trans.Ptr(e.Title),
-		Description:  e.Description,
-		CoverUrl:     e.CoverURL,
-		VideoUrl:     e.VideoURL,
-		Duration:     trans.Ptr(e.Duration),
-		Width:        trans.Ptr(e.Width),
-		Height:       trans.Ptr(e.Height),
-		Status:       statusDTOOfVideo(e.Status).Enum(),
-		AuthorId:     trans.Ptr(e.AuthorID),
-		LikeCount:    trans.Ptr(e.LikeCount),
-		CollectCount: trans.Ptr(e.CollectCount),
-		CommentCount: trans.Ptr(e.CommentCount),
-		ViewCount:    trans.Ptr(e.ViewCount),
-		RejectReason: e.RejectReason,
-		PublishedAt:  timeutil.TimeToTimestamppb(e.PublishedAt),
-		ScheduledAt:  timeutil.TimeToTimestamppb(e.ScheduledAt),
-		CreatedAt:    timeutil.TimeToTimestamppb(e.CreatedAt),
-		UpdatedAt:    timeutil.TimeToTimestamppb(e.UpdatedAt),
+		Id:             trans.Ptr(e.ID),
+		Title:          trans.Ptr(e.Title),
+		Description:    e.Description,
+		CoverUrl:       e.CoverURL,
+		VideoUrl:       e.VideoURL,
+		Duration:       trans.Ptr(e.Duration),
+		Width:          trans.Ptr(e.Width),
+		Height:         trans.Ptr(e.Height),
+		Status:         statusDTOOfVideo(e.Status).Enum(),
+		AuthorId:       trans.Ptr(e.AuthorID),
+		LikeCount:      trans.Ptr(e.LikeCount),
+		CollectCount:   trans.Ptr(e.CollectCount),
+		CommentCount:   trans.Ptr(e.CommentCount),
+		ViewCount:      trans.Ptr(e.ViewCount),
+		RejectReason:   e.RejectReason,
+		PublishedAt:    timeutil.TimeToTimestamppb(e.PublishedAt),
+		ScheduledAt:    timeutil.TimeToTimestamppb(e.ScheduledAt),
+		ScheduledOffAt: timeutil.TimeToTimestamppb(e.ScheduledOffAt),
+		CreatedAt:      timeutil.TimeToTimestamppb(e.CreatedAt),
+		UpdatedAt:      timeutil.TimeToTimestamppb(e.UpdatedAt),
 	}
 	if tags != nil {
 		dto.Tags = tags
@@ -496,6 +497,26 @@ func (r *VideoRepo) ScheduledDueVideos(ctx context.Context, due time.Time, limit
 		Order(ent.Asc(video.FieldScheduledAt)).
 		Limit(limit).
 		All(ctx)
+}
+
+// SetScheduledOffAt 设置/清空计划下架时间（定时下架排程用；at=nil 取消）
+func (r *VideoRepo) SetScheduledOffAt(ctx context.Context, id uint32, at *time.Time) (*ent.Video, error) {
+	builder := r.entClient.Client().Video.UpdateOneID(id)
+	if at == nil {
+		builder.ClearScheduledOffAt()
+	} else {
+		builder.SetScheduledOffAt(*at)
+	}
+	builder.SetUpdatedAt(time.Now())
+	e, err := builder.Save(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, videoV1.ErrorVideoNotFound("video not found")
+		}
+		r.log.Errorf("set scheduled off at failed: %s", err.Error())
+		return nil, videoV1.ErrorInternalServerError("set scheduled off at failed")
+	}
+	return e, nil
 }
 
 func (r *VideoRepo) Update(ctx context.Context, id uint32, dto *videoV1.Video, tags []string) (*videoV1.Video, error) {

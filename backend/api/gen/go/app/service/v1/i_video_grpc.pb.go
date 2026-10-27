@@ -23,22 +23,23 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	VideoService_CreateUploadTask_FullMethodName   = "/app.service.v1.VideoService/CreateUploadTask"
-	VideoService_UploadChunk_FullMethodName        = "/app.service.v1.VideoService/UploadChunk"
-	VideoService_CompleteUpload_FullMethodName     = "/app.service.v1.VideoService/CompleteUpload"
-	VideoService_GetUploadTask_FullMethodName      = "/app.service.v1.VideoService/GetUploadTask"
-	VideoService_SaveDraft_FullMethodName          = "/app.service.v1.VideoService/SaveDraft"
-	VideoService_ListDraft_FullMethodName          = "/app.service.v1.VideoService/ListDraft"
-	VideoService_GetDraft_FullMethodName           = "/app.service.v1.VideoService/GetDraft"
-	VideoService_DeleteDraft_FullMethodName        = "/app.service.v1.VideoService/DeleteDraft"
-	VideoService_SubmitDraft_FullMethodName        = "/app.service.v1.VideoService/SubmitDraft"
-	VideoService_UpdateVideo_FullMethodName        = "/app.service.v1.VideoService/UpdateVideo"
-	VideoService_DeleteVideo_FullMethodName        = "/app.service.v1.VideoService/DeleteVideo"
-	VideoService_ScheduleVideo_FullMethodName      = "/app.service.v1.VideoService/ScheduleVideo"
-	VideoService_ListTag_FullMethodName            = "/app.service.v1.VideoService/ListTag"
-	VideoService_GetCreatorOverview_FullMethodName = "/app.service.v1.VideoService/GetCreatorOverview"
-	VideoService_ListCreatorTrends_FullMethodName  = "/app.service.v1.VideoService/ListCreatorTrends"
-	VideoService_ListHotVideos_FullMethodName      = "/app.service.v1.VideoService/ListHotVideos"
+	VideoService_CreateUploadTask_FullMethodName      = "/app.service.v1.VideoService/CreateUploadTask"
+	VideoService_UploadChunk_FullMethodName           = "/app.service.v1.VideoService/UploadChunk"
+	VideoService_CompleteUpload_FullMethodName        = "/app.service.v1.VideoService/CompleteUpload"
+	VideoService_GetUploadTask_FullMethodName         = "/app.service.v1.VideoService/GetUploadTask"
+	VideoService_SaveDraft_FullMethodName             = "/app.service.v1.VideoService/SaveDraft"
+	VideoService_ListDraft_FullMethodName             = "/app.service.v1.VideoService/ListDraft"
+	VideoService_GetDraft_FullMethodName              = "/app.service.v1.VideoService/GetDraft"
+	VideoService_DeleteDraft_FullMethodName           = "/app.service.v1.VideoService/DeleteDraft"
+	VideoService_SubmitDraft_FullMethodName           = "/app.service.v1.VideoService/SubmitDraft"
+	VideoService_UpdateVideo_FullMethodName           = "/app.service.v1.VideoService/UpdateVideo"
+	VideoService_DeleteVideo_FullMethodName           = "/app.service.v1.VideoService/DeleteVideo"
+	VideoService_ScheduleVideo_FullMethodName         = "/app.service.v1.VideoService/ScheduleVideo"
+	VideoService_ListTag_FullMethodName               = "/app.service.v1.VideoService/ListTag"
+	VideoService_GetCreatorOverview_FullMethodName    = "/app.service.v1.VideoService/GetCreatorOverview"
+	VideoService_ListCreatorTrends_FullMethodName     = "/app.service.v1.VideoService/ListCreatorTrends"
+	VideoService_ListCreatorVideoStats_FullMethodName = "/app.service.v1.VideoService/ListCreatorVideoStats"
+	VideoService_ListHotVideos_FullMethodName         = "/app.service.v1.VideoService/ListHotVideos"
 )
 
 // VideoServiceClient is the client API for VideoService service.
@@ -77,6 +78,8 @@ type VideoServiceClient interface {
 	GetCreatorOverview(ctx context.Context, in *v12.GetCreatorOverviewRequest, opts ...grpc.CallOption) (*v12.CreatorOverview, error)
 	// 创作者近 N 日趋势（本人口径，需登录）
 	ListCreatorTrends(ctx context.Context, in *v12.ListCreatorTrendsRequest, opts ...grpc.CallOption) (*v12.ListTrendsResponse, error)
+	// 创作者单视频数据（本人作品逐条：播放/点赞/收藏/评论）
+	ListCreatorVideoStats(ctx context.Context, in *v12.ListCreatorVideoStatsRequest, opts ...grpc.CallOption) (*v12.ListCreatorVideoStatsResponse, error)
 	// 热榜（游客可访问）
 	ListHotVideos(ctx context.Context, in *v1.ListHotVideosRequest, opts ...grpc.CallOption) (*v1.ListVideoResponse, error)
 }
@@ -239,6 +242,16 @@ func (c *videoServiceClient) ListCreatorTrends(ctx context.Context, in *v12.List
 	return out, nil
 }
 
+func (c *videoServiceClient) ListCreatorVideoStats(ctx context.Context, in *v12.ListCreatorVideoStatsRequest, opts ...grpc.CallOption) (*v12.ListCreatorVideoStatsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v12.ListCreatorVideoStatsResponse)
+	err := c.cc.Invoke(ctx, VideoService_ListCreatorVideoStats_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *videoServiceClient) ListHotVideos(ctx context.Context, in *v1.ListHotVideosRequest, opts ...grpc.CallOption) (*v1.ListVideoResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.ListVideoResponse)
@@ -285,6 +298,8 @@ type VideoServiceServer interface {
 	GetCreatorOverview(context.Context, *v12.GetCreatorOverviewRequest) (*v12.CreatorOverview, error)
 	// 创作者近 N 日趋势（本人口径，需登录）
 	ListCreatorTrends(context.Context, *v12.ListCreatorTrendsRequest) (*v12.ListTrendsResponse, error)
+	// 创作者单视频数据（本人作品逐条：播放/点赞/收藏/评论）
+	ListCreatorVideoStats(context.Context, *v12.ListCreatorVideoStatsRequest) (*v12.ListCreatorVideoStatsResponse, error)
 	// 热榜（游客可访问）
 	ListHotVideos(context.Context, *v1.ListHotVideosRequest) (*v1.ListVideoResponse, error)
 	mustEmbedUnimplementedVideoServiceServer()
@@ -341,6 +356,9 @@ func (UnimplementedVideoServiceServer) GetCreatorOverview(context.Context, *v12.
 }
 func (UnimplementedVideoServiceServer) ListCreatorTrends(context.Context, *v12.ListCreatorTrendsRequest) (*v12.ListTrendsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListCreatorTrends not implemented")
+}
+func (UnimplementedVideoServiceServer) ListCreatorVideoStats(context.Context, *v12.ListCreatorVideoStatsRequest) (*v12.ListCreatorVideoStatsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListCreatorVideoStats not implemented")
 }
 func (UnimplementedVideoServiceServer) ListHotVideos(context.Context, *v1.ListHotVideosRequest) (*v1.ListVideoResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListHotVideos not implemented")
@@ -636,6 +654,24 @@ func _VideoService_ListCreatorTrends_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VideoService_ListCreatorVideoStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v12.ListCreatorVideoStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoServiceServer).ListCreatorVideoStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoService_ListCreatorVideoStats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoServiceServer).ListCreatorVideoStats(ctx, req.(*v12.ListCreatorVideoStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _VideoService_ListHotVideos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v1.ListHotVideosRequest)
 	if err := dec(in); err != nil {
@@ -720,6 +756,10 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListCreatorTrends",
 			Handler:    _VideoService_ListCreatorTrends_Handler,
+		},
+		{
+			MethodName: "ListCreatorVideoStats",
+			Handler:    _VideoService_ListCreatorVideoStats_Handler,
 		},
 		{
 			MethodName: "ListHotVideos",

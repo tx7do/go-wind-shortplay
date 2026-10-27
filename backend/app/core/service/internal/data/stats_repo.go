@@ -201,6 +201,59 @@ ORDER BY s.day`, days, authorID)
 }
 
 // AuthorAggregates 作者作品聚合（publishedOnly=true 仅统计已发布）
+// CreatorVideoStatRow 单视频数据行（uba 聚合 + video 计数列）
+type CreatorVideoStatRow struct {
+	VideoID  uint32 `json:"video_id"`
+	Title    string `json:"title"`
+	CoverURL string `json:"cover_url"`
+	Plays    uint64 `json:"plays"`
+	Likes    uint64 `json:"likes"`
+	Collects uint64 `json:"collects"`
+	Comments uint64 `json:"comments"`
+}
+
+// CreatorVideoStats 创作者本人作品逐条数据（播放优先取 uba PLAY 聚合，
+// 兜底 view_count；点赞/收藏/评论取计数列；播放量倒序）。
+func (r *StatsRepo) CreatorVideoStats(ctx context.Context, authorID uint32, limit int) ([]*CreatorVideoStatRow, error) {
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 50 {
+		limit = 50
+	}
+	rows := make([]*CreatorVideoStatRow, 0, limit)
+	dbRows, err := r.entClient.DB().QueryContext(ctx, `
+SELECT v.id AS video_id,
+       v.title AS title,
+       COALESCE(v.cover_url, '') AS cover_url,
+       COALESCE(play.cnt, v.view_count) AS plays,
+       v.like_count AS likes,
+       v.collect_count AS collects,
+       v.comment_count AS comments
+FROM sp_videos v
+LEFT JOIN (
+	SELECT video_id, COUNT(*)::bigint AS cnt
+	FROM sp_uba_events
+	WHERE event_type = 'VIDEO_PLAY'
+	GROUP BY video_id
+) play ON play.video_id = v.id
+WHERE v.author_id = $1
+ORDER BY plays DESC
+LIMIT $2`, authorID, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = dbRows.Close() }()
+	for dbRows.Next() {
+		var row CreatorVideoStatRow
+		if err := dbRows.Scan(&row.VideoID, &row.Title, &row.CoverURL, &row.Plays, &row.Likes, &row.Collects, &row.Comments); err != nil {
+			return nil, err
+		}
+		rows = append(rows, &row)
+	}
+	return rows, dbRows.Err()
+}
+
 func (r *StatsRepo) AuthorAggregates(ctx context.Context, authorID uint32, publishedOnly bool) (*AuthorAggRow, error) {
 	cond := ""
 	if publishedOnly {

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package admin.service.v1;
+
+import "google/api/annotations.proto";
+import "im/service/v1/im.proto";
+import "pagination/v1/pagination.proto";
+
+// 私信监管服务（后台：只读列表，内容合规用；不提供处置，删除能力暂不开放）
+service ImService {
+  // 私信列表（senderId / receiverId / content 模糊过滤）
+  rpc List (pagination.PagingRequest) returns (im.service.v1.ListMessagesResponse) {
+    option (google.api.http) = {
+      get: "/admin/v1/im/messages"
+    };
+  }
+}

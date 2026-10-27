@@ -158,21 +158,22 @@ class _ChatPageState extends State<ChatPage> {
       final known = _messages.map((m) => m.id).toSet();
       final older = page.items.where((m) => !known.contains(m.id)).toList()
         ..sort((a, b) => a.id.compareTo(b.id));
-      final pos = _scrollController.hasClients
-          ? _scrollController.position.pixels
+      // reverse 列表：更早消息追加在视觉上方，插入后把像素差补回 offset
+      final before = _scrollController.hasClients
+          ? _scrollController.position.maxScrollExtent
           : 0.0;
       setState(() {
         _messages.insertAll(0, older);
         _hasMoreOlder = page.hasMore;
         _loadingOlder = false;
       });
-      if (_scrollController.hasClients) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_scrollController.hasClients) {
-            _scrollController.jumpTo(_scrollController.position.pixels - pos);
-          }
-        });
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_scrollController.hasClients) return;
+        final delta = _scrollController.position.maxScrollExtent - before;
+        if (delta > 0) {
+          _scrollController.jumpTo(_scrollController.position.pixels + delta);
+        }
+      });
     } catch (_) {
       if (!mounted) return;
       _pageNum -= 1;

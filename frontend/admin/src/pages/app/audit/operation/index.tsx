@@ -20,7 +20,9 @@ const OperationAuditLogPage = () => {
   { title: t('createdAt'), dataIndex: 'createdAt', width: 160, render: (_, r) => (r.createdAt ? dayjs(r.createdAt).format('YYYY-MM-DD HH:mm:ss') : '-') },
   ];
 
-  return <AuditLogTable<OperationAuditLog> columns={columns} headerTitle={t('operationTitle')} fetcher={fetchListOperationAuditLogs} />;
+  return <AuditLogTable<OperationAuditLog> columns={columns} headerTitle={t('operationTitle')} fetcher={fetchListOperationAuditLogs}   searchKey="path___contains"
+    exportType="operation"
+  />;
 };
 
 export default OperationAuditLogPage;

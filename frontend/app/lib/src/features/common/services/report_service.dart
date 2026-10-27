@@ -10,6 +10,7 @@ class ReportTargetType {
   static const video = 'REPORT_TARGET_TYPE_VIDEO';
   static const comment = 'REPORT_TARGET_TYPE_COMMENT';
   static const user = 'REPORT_TARGET_TYPE_USER';
+  static const danmaku = 'REPORT_TARGET_TYPE_DANMAKU';
 }
 
 /// 举报服务：提交举报工单

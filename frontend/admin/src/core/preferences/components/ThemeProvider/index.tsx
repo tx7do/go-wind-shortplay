@@ -3,7 +3,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { ConfigProvider, Watermark, theme as antdTheme, type ThemeConfig } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import enUS from 'antd/locale/en_US';
-// import jaJP from 'antd/locale/ja_JP';
+import jaJP from 'antd/locale/ja_JP';
 import { ProConfigProvider, enUSIntl, zhCNIntl } from '@ant-design/pro-components';
 import i18n from 'i18next';
 
@@ -27,6 +27,7 @@ export interface ThemeProviderProps {
 const localeMap: Record<SupportedLanguagesType, any> = {
   'zh-CN': zhCN,
   'en-US': enUS,
+  'ja-JP': jaJP,
 };
 
 /**

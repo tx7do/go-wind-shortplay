@@ -1,7 +1,7 @@
 import { useRef, useState, type Key } from 'react';
 import type { ProColumns, ActionType } from '@ant-design/pro-components';
 import ListTable from '@/components/common/ListTable';
-import { Button, Image, Popconfirm, Space, Tabs, Tag, App } from 'antd';
+import { Button, DatePicker, Image, Modal, Popconfirm, Space, Tabs, Tag, App } from 'antd';
 import {
   CheckOutlined,
   CloseOutlined,
@@ -10,6 +10,7 @@ import {
   EditOutlined,
   EyeOutlined,
   PlayCircleOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +21,7 @@ import { useProTableScrollY } from '@/hooks/useProTableScrollY';
 import {
   fetchListVideos,
   useChangeVideoStatus,
+  useScheduleVideo,
   useDeleteVideo,
 } from '@/api/hooks';
 import { VIDEO_STATUS } from '@/api/types';
@@ -101,6 +103,20 @@ const VideoList = () => {
       }
       setReasonAction(null);
       setPendingRow(null);
+      refresh();
+    },
+    onError: (error: Error) => {
+      message.error(error.message || t('operationFailed'));
+    },
+  });
+
+  // 定时下架弹层
+  const [scheduleOffRow, setScheduleOffRow] = useState<Video | null>(null);
+  const [scheduleOffTime, setScheduleOffTime] = useState<dayjs.Dayjs | null>(null);
+  const scheduleOffMutation = useScheduleVideo({
+    onSuccess: () => {
+      message.success(t('scheduleOffSuccess'));
+      setScheduleOffRow(null);
       refresh();
     },
     onError: (error: Error) => {
@@ -267,6 +283,14 @@ const VideoList = () => {
         record.scheduledAt ? dayjs(record.scheduledAt).format('MM-DD HH:mm') : '',
     },
     {
+      title: t('scheduledOffAt'),
+      dataIndex: 'scheduledOffAt',
+      search: false,
+      width: 150,
+      render: (_, record) =>
+        record.scheduledOffAt ? dayjs(record.scheduledOffAt).format('MM-DD HH:mm') : '',
+    },
+    {
       title: t('createdAt'),
       dataIndex: 'createdAt',
       search: false,
@@ -313,7 +337,7 @@ const VideoList = () => {
             </a>,
           );
         }
-        // 已发布 → 下架
+        // 已发布 → 下架 / 定时下架
         if (status === VIDEO_STATUS.PUBLISHED) {
           actions.push(
             <a
@@ -322,6 +346,15 @@ const VideoList = () => {
               onClick={() => openReasonModal('offline', record)}
             >
               <DownCircleOutlined /> {t('offline')}
+            </a>,
+            <a
+              key="schedule-off"
+              onClick={() => {
+                setScheduleOffRow(record);
+                setScheduleOffTime(null);
+              }}
+            >
+              <ClockCircleOutlined /> {t('scheduleOff')}
             </a>,
           );
         }
@@ -594,6 +627,44 @@ const VideoList = () => {
           setPendingRow(null);
         }}
       />
+
+      {/* 定时下架弹层：选择未来时间，到点自动转下架 */}
+      <Modal
+        title={t('scheduleOff')}
+        open={scheduleOffRow != null}
+        confirmLoading={scheduleOffMutation.isPending}
+        onOk={() => {
+          if (!scheduleOffRow?.id || !scheduleOffTime) return;
+          scheduleOffMutation.mutate({
+            id: scheduleOffRow.id,
+            scheduledOffAt: scheduleOffTime.toISOString(),
+          });
+        }}
+        onCancel={() => setScheduleOffRow(null)}
+        okButtonProps={{ disabled: !scheduleOffTime }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 8 }}>
+          <DatePicker
+            showTime
+            value={scheduleOffTime}
+            onChange={(v) => setScheduleOffTime(v)}
+            placeholder={t('scheduleOffPickHint')}
+            style={{ width: '100%' }}
+            disabledDate={(d) => d.isBefore(dayjs().startOf('day'))}
+          />
+          {scheduleOffRow?.scheduledOffAt && (
+            <Button
+              size="small"
+              onClick={() => {
+                if (!scheduleOffRow?.id) return;
+                scheduleOffMutation.mutate({ id: scheduleOffRow.id, scheduledOffAt: null });
+              }}
+            >
+              {t('cancelScheduleOff')}
+            </Button>
+          )}
+        </div>
+      </Modal>
     </>
   );
 };

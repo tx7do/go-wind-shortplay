@@ -46,7 +46,7 @@ type NotificationTemplateServiceHTTPServer interface {
 
 func RegisterNotificationTemplateServiceHTTPServer(s *http.Server, srv NotificationTemplateServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/v1/notification-templates", _NotificationTemplateService_List16_HTTP_Handler(srv))
+	r.GET("/admin/v1/notification-templates", _NotificationTemplateService_List17_HTTP_Handler(srv))
 	r.GET("/admin/v1/notification-templates/{id}", _NotificationTemplateService_Get14_HTTP_Handler(srv))
 	r.POST("/admin/v1/notification-templates", _NotificationTemplateService_Create11_HTTP_Handler(srv))
 	r.PUT("/admin/v1/notification-templates/{id}", _NotificationTemplateService_Update11_HTTP_Handler(srv))
@@ -54,7 +54,7 @@ func RegisterNotificationTemplateServiceHTTPServer(s *http.Server, srv Notificat
 	r.POST("/admin/v1/notification-templates/{id}/render", _NotificationTemplateService_Render0_HTTP_Handler(srv))
 }
 
-func _NotificationTemplateService_List16_HTTP_Handler(srv NotificationTemplateServiceHTTPServer) func(ctx http.Context) error {
+func _NotificationTemplateService_List17_HTTP_Handler(srv NotificationTemplateServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v1.PagingRequest
 		if err := ctx.BindQuery(&in); err != nil {

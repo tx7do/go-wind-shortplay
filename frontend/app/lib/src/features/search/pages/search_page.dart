@@ -39,6 +39,9 @@ class _SearchPageState extends State<SearchPage> {
   /// 本地搜索历史（[SearchHistoryStore] 内存镜像，setState 驱动）
   List<String> _history = const [];
 
+  /// 搜索联想（热搜词 + 热门标签本地前缀过滤，cap 8）
+  List<String> _suggestions = const [];
+
   @override
   void initState() {
     super.initState();
@@ -106,11 +109,33 @@ class _SearchPageState extends State<SearchPage> {
     _debounce = Timer(const Duration(milliseconds: 400), () {
       final kw = value.trim();
       if (!mounted) return;
-      setState(() => _keyword = kw);
+      setState(() {
+        _keyword = kw;
+        _updateSuggestions(kw);
+      });
       if (kw.isNotEmpty && !kw.startsWith('#')) {
         unawaited(_recordHistory(kw));
       }
     });
+  }
+
+  /// 联想 = 热搜词/热门标签中包含输入串的条目（大小写不敏感，cap 8）
+  void _updateSuggestions(String kw) {
+    if (kw.isEmpty) {
+      _suggestions = const [];
+      return;
+    }
+    final lower = kw.toLowerCase();
+    final seen = <String>{};
+    final out = <String>[];
+    for (final candidate in [..._hotKeywords, ..._hotTags]) {
+      final c = candidate.toLowerCase();
+      if (c.contains(lower) && seen.add(candidate)) {
+        out.add(candidate);
+      }
+      if (out.length >= 8) break;
+    }
+    _suggestions = out;
   }
 
   /// 剧集搜索（剧名模糊；# 标签开头不出剧集结果）
@@ -195,6 +220,64 @@ class _SearchPageState extends State<SearchPage> {
               length: 2,
               child: Column(
                 children: [
+                  // 搜索联想（输入尚未回车/未与提交词一致时展示）
+                  if (_suggestions.isNotEmpty &&
+                      _keyword != _controller.text.trim())
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Wrap(
+                          spacing: 8.w,
+                          runSpacing: 6.h,
+                          children: _suggestions
+                              .map(
+                                (s) => InkWell(
+                                  onTap: () {
+                                    _controller.text = s;
+                                    setState(() {
+                                      _keyword = s;
+                                      _suggestions = const [];
+                                    });
+                                  },
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 10.w,
+                                      vertical: 4.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.onSurface
+                                          .withAlpha(14),
+                                      borderRadius: BorderRadius.circular(100),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.search,
+                                          size: 12.sp,
+                                          color: theme.colorScheme.onSurface
+                                              .withAlpha(120),
+                                        ),
+                                        SizedBox(width: 4.w),
+                                        Text(
+                                          s,
+                                          style: TextStyle(
+                                            fontSize: 12.sp,
+                                            color: theme.colorScheme.onSurface
+                                                .withAlpha(200),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ),
+                    ),
                   TabBar(
                     tabs: [
                       Tab(text: loc.videosTab),

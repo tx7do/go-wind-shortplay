@@ -1645,31 +1645,32 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Video",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			video.FieldCreatedAt:     {Type: field.TypeTime, Column: video.FieldCreatedAt},
-			video.FieldUpdatedAt:     {Type: field.TypeTime, Column: video.FieldUpdatedAt},
-			video.FieldDeletedAt:     {Type: field.TypeTime, Column: video.FieldDeletedAt},
-			video.FieldCreatedBy:     {Type: field.TypeUint32, Column: video.FieldCreatedBy},
-			video.FieldUpdatedBy:     {Type: field.TypeUint32, Column: video.FieldUpdatedBy},
-			video.FieldDeletedBy:     {Type: field.TypeUint32, Column: video.FieldDeletedBy},
-			video.FieldTenantID:      {Type: field.TypeUint32, Column: video.FieldTenantID},
-			video.FieldTitle:         {Type: field.TypeString, Column: video.FieldTitle},
-			video.FieldDescription:   {Type: field.TypeString, Column: video.FieldDescription},
-			video.FieldCoverURL:      {Type: field.TypeString, Column: video.FieldCoverURL},
-			video.FieldVideoURL:      {Type: field.TypeString, Column: video.FieldVideoURL},
-			video.FieldDuration:      {Type: field.TypeUint32, Column: video.FieldDuration},
-			video.FieldWidth:         {Type: field.TypeUint32, Column: video.FieldWidth},
-			video.FieldHeight:        {Type: field.TypeUint32, Column: video.FieldHeight},
-			video.FieldStatus:        {Type: field.TypeEnum, Column: video.FieldStatus},
-			video.FieldAuthorID:      {Type: field.TypeUint32, Column: video.FieldAuthorID},
-			video.FieldSeriesID:      {Type: field.TypeUint32, Column: video.FieldSeriesID},
-			video.FieldEpisodeNumber: {Type: field.TypeUint32, Column: video.FieldEpisodeNumber},
-			video.FieldRejectReason:  {Type: field.TypeString, Column: video.FieldRejectReason},
-			video.FieldLikeCount:     {Type: field.TypeUint64, Column: video.FieldLikeCount},
-			video.FieldCollectCount:  {Type: field.TypeUint64, Column: video.FieldCollectCount},
-			video.FieldCommentCount:  {Type: field.TypeUint64, Column: video.FieldCommentCount},
-			video.FieldViewCount:     {Type: field.TypeUint64, Column: video.FieldViewCount},
-			video.FieldPublishedAt:   {Type: field.TypeTime, Column: video.FieldPublishedAt},
-			video.FieldScheduledAt:   {Type: field.TypeTime, Column: video.FieldScheduledAt},
+			video.FieldCreatedAt:      {Type: field.TypeTime, Column: video.FieldCreatedAt},
+			video.FieldUpdatedAt:      {Type: field.TypeTime, Column: video.FieldUpdatedAt},
+			video.FieldDeletedAt:      {Type: field.TypeTime, Column: video.FieldDeletedAt},
+			video.FieldCreatedBy:      {Type: field.TypeUint32, Column: video.FieldCreatedBy},
+			video.FieldUpdatedBy:      {Type: field.TypeUint32, Column: video.FieldUpdatedBy},
+			video.FieldDeletedBy:      {Type: field.TypeUint32, Column: video.FieldDeletedBy},
+			video.FieldTenantID:       {Type: field.TypeUint32, Column: video.FieldTenantID},
+			video.FieldTitle:          {Type: field.TypeString, Column: video.FieldTitle},
+			video.FieldDescription:    {Type: field.TypeString, Column: video.FieldDescription},
+			video.FieldCoverURL:       {Type: field.TypeString, Column: video.FieldCoverURL},
+			video.FieldVideoURL:       {Type: field.TypeString, Column: video.FieldVideoURL},
+			video.FieldDuration:       {Type: field.TypeUint32, Column: video.FieldDuration},
+			video.FieldWidth:          {Type: field.TypeUint32, Column: video.FieldWidth},
+			video.FieldHeight:         {Type: field.TypeUint32, Column: video.FieldHeight},
+			video.FieldStatus:         {Type: field.TypeEnum, Column: video.FieldStatus},
+			video.FieldAuthorID:       {Type: field.TypeUint32, Column: video.FieldAuthorID},
+			video.FieldSeriesID:       {Type: field.TypeUint32, Column: video.FieldSeriesID},
+			video.FieldEpisodeNumber:  {Type: field.TypeUint32, Column: video.FieldEpisodeNumber},
+			video.FieldRejectReason:   {Type: field.TypeString, Column: video.FieldRejectReason},
+			video.FieldLikeCount:      {Type: field.TypeUint64, Column: video.FieldLikeCount},
+			video.FieldCollectCount:   {Type: field.TypeUint64, Column: video.FieldCollectCount},
+			video.FieldCommentCount:   {Type: field.TypeUint64, Column: video.FieldCommentCount},
+			video.FieldViewCount:      {Type: field.TypeUint64, Column: video.FieldViewCount},
+			video.FieldPublishedAt:    {Type: field.TypeTime, Column: video.FieldPublishedAt},
+			video.FieldScheduledAt:    {Type: field.TypeTime, Column: video.FieldScheduledAt},
+			video.FieldScheduledOffAt: {Type: field.TypeTime, Column: video.FieldScheduledOffAt},
 		},
 	}
 	graph.Nodes[56] = &sqlgraph.Node{
@@ -8786,6 +8787,11 @@ func (f *VideoFilter) WherePublishedAt(p entql.TimeP) {
 // WhereScheduledAt applies the entql time.Time predicate on the scheduled_at field.
 func (f *VideoFilter) WhereScheduledAt(p entql.TimeP) {
 	f.Where(p.Field(video.FieldScheduledAt))
+}
+
+// WhereScheduledOffAt applies the entql time.Time predicate on the scheduled_off_at field.
+func (f *VideoFilter) WhereScheduledOffAt(p entql.TimeP) {
+	f.Where(p.Field(video.FieldScheduledOffAt))
 }
 
 // addPredicate implements the predicateAdder interface.

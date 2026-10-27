@@ -68,6 +68,11 @@ func NewAsynqServer(ctx *bootstrap.Context, taskService *service.TaskService, in
 		log.Error(err)
 	}
 
+	// shortplay 定时下架（到期 PUBLISHED → OFFLINE）
+	if err = asynq.RegisterSubscriber(srv, task.VideoScheduledUnpublishTaskType, videoService.AsyncScheduledUnpublish); err != nil {
+		log.Error(err)
+	}
+
 	// 启动所有的任务
 	_, _ = taskService.StartAllTask(appViewer.NewSystemViewerContext(ctx.Context()), nil)
 

@@ -122,6 +122,7 @@ message Video {
   optional string series_title = 31 [json_name = "seriesTitle"];   // 所属剧名（展示冗余，服务端回填）
   optional google.protobuf.Timestamp published_at = 40 [json_name = "publishedAt"]; // 发布时间
   optional google.protobuf.Timestamp scheduled_at = 43 [json_name = "scheduledAt"]; // 计划发布时间（DRAFT 定时中；到期自动转 PUBLISHED 并清空）
+  optional google.protobuf.Timestamp scheduled_off_at = 44 [json_name = "scheduledOffAt"]; // 计划下架时间（PUBLISHED 定时下架中；到期自动转 OFFLINE 并清空）
   optional google.protobuf.Timestamp created_at = 41 [json_name = "createdAt"];     // 创建时间
   optional google.protobuf.Timestamp updated_at = 42 [json_name = "updatedAt"];     // 更新时间
 }
@@ -269,8 +270,10 @@ message DeleteDraftRequest {
 
 message ScheduleVideoRequest {
   uint32 id = 1 [json_name = "id"]; // 视频ID
-  // 计划发布时间（须为未来时间；缺省=取消定时）
+  // 计划发布时间（须为未来时间；缺省=取消定时；仅 DRAFT）
   optional google.protobuf.Timestamp scheduled_at = 2 [json_name = "scheduledAt"];
+  // 计划下架时间（须为未来时间；缺省=取消定时；仅 PUBLISHED）
+  optional google.protobuf.Timestamp scheduled_off_at = 3 [json_name = "scheduledOffAt"];
 }
 
 message SubmitDraftRequest {

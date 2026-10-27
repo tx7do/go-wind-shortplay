@@ -31,6 +31,9 @@ service ImService {
 
   // viewer 全部会话未读总数（角标）
   rpc CountUnread (google.protobuf.Empty) returns (CountUnreadResponse) {}
+
+  // 管理端全量私信列表（内容合规监管只读；senderId/receiverId/content 过滤）
+  rpc AdminList (pagination.PagingRequest) returns (ListMessagesResponse) {}
 }
 
 message Conversation {

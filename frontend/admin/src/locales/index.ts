@@ -1,5 +1,6 @@
 import {zhCN, type ZhCNResources, allNamespaces as zhCNNamespaces} from './zh-CN';
 import {enUS, type EnUSResources} from './en-US';
+import {jaJP} from './ja-JP';
 
 // 所有命名空间列表（供 i18next ns 配置）
 const allNamespaces = zhCNNamespaces;
@@ -8,10 +9,11 @@ const allNamespaces = zhCNNamespaces;
 export const resources = {
     'zh-CN': zhCN,
     'en-US': enUS,
+    'ja-JP': jaJP,
 } as const;
 
 // 支持的语言
-export const supportedLocales = ['zh-CN', 'en-US'] as const;
+export const supportedLocales = ['zh-CN', 'en-US', 'ja-JP'] as const;
 export type SupportedLocale = typeof supportedLocales[number];
 
 // 核心资源类型联合（用于 t() 类型推导）

@@ -62,6 +62,10 @@ class _StorageKey {
   static const String userPreference = 'USER_PREFERENCE';
   static const String seedColor = 'SEED_COLOR';
   static const String danmakuEnabled = 'DANMAKU_ENABLED';
+  static const String danmakuTracks = 'DANMAKU_TRACKS';
+  static const String teenMode = 'TEEN_MODE';
+  static const String teenTodayMinutes = 'TEEN_TODAY_MINUTES';
+  static const String teenDayStamp = 'TEEN_DAY_STAMP';
 }
 
 /// 用户偏好设置缓存
@@ -111,6 +115,34 @@ class UserPreferenceCache {
 
   Future<void> setDanmakuEnabled(bool value) async {
     await _prefs.setBool(_StorageKey.danmakuEnabled, value);
+  }
+
+  /// 弹幕轨道数（显示区域：1=1/4 屏，2=半屏，4=全屏；缺省 4）
+  int get danmakuTracks => _prefs.getInt(_StorageKey.danmakuTracks) ?? 4;
+
+  Future<void> setDanmakuTracks(int value) async {
+    await _prefs.setInt(_StorageKey.danmakuTracks, value.clamp(1, 4));
+  }
+
+  /// 青少年模式（开启后每日累计观看达上限弹休息提醒）
+  bool get teenModeEnabled => _prefs.getBool(_StorageKey.teenMode) ?? false;
+
+  Future<void> setTeenModeEnabled(bool value) async {
+    await _prefs.setBool(_StorageKey.teenMode, value);
+  }
+
+  /// 当日已看分钟数（青少年模式计时；跨日由调用方重置）
+  int get teenTodayMinutes => _prefs.getInt(_StorageKey.teenTodayMinutes) ?? 0;
+
+  Future<void> setTeenTodayMinutes(int value) async {
+    await _prefs.setInt(_StorageKey.teenTodayMinutes, value);
+  }
+
+  /// 计时归属日（YYYY-MM-DD；换日自动重置分钟数）
+  String get teenDayStamp => _prefs.getString(_StorageKey.teenDayStamp) ?? '';
+
+  Future<void> setTeenDayStamp(String value) async {
+    await _prefs.setString(_StorageKey.teenDayStamp, value);
   }
 
   String get language {

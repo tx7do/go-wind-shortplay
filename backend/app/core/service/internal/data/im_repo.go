@@ -2,7 +2,10 @@ package data
 
 import (
 	"context"
+	"encoding/json"
 	"time"
+
+	paginationV1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/tx7do/kratos-bootstrap/bootstrap"
@@ -173,6 +176,51 @@ func (r *ImRepo) ListMessagesPage(ctx context.Context, convID uint32, offset, li
 		Order(ent.Desc(immessage.FieldID)).
 		Offset(offset).Limit(limit).
 		All(ctx)
+	if err != nil {
+		r.log.Errorf("list im messages failed: %s", err.Error())
+		return nil, 0, imV1.ErrorInternalServerError("list messages failed")
+	}
+	return items, total, nil
+}
+
+// spImAdminFilter 管理端私信列表过滤
+type spImAdminFilter struct {
+	Content   *string `json:"content___icontains"`
+	SenderID  *uint32 `json:"sender_id"`
+	ReceiverID *uint32 `json:"receiver_id"`
+}
+
+// ListAdmin 管理端全量私信列表（分页 + 内容/发送人/接收人过滤，ID 倒序）
+func (r *ImRepo) ListAdmin(ctx context.Context, req *paginationV1.PagingRequest) ([]*ent.ImMessage, int, error) {
+	page, pageSize := pageArgsOf(req)
+
+	var ps []predicate.ImMessage
+	if req.GetQuery() != "" {
+		var f spImAdminFilter
+		if err := json.Unmarshal([]byte(req.GetQuery()), &f); err == nil {
+			if f.Content != nil && *f.Content != "" {
+				ps = append(ps, immessage.ContentContainsFold(*f.Content))
+			}
+			if f.SenderID != nil && *f.SenderID > 0 {
+				ps = append(ps, immessage.SenderIDEQ(*f.SenderID))
+			}
+			if f.ReceiverID != nil && *f.ReceiverID > 0 {
+				ps = append(ps, immessage.ReceiverIDEQ(*f.ReceiverID))
+			}
+		}
+	}
+
+	q := r.entClient.Client().ImMessage.Query()
+	if len(ps) > 0 {
+		q.Where(ps...)
+	}
+	total, err := q.Count(ctx)
+	if err != nil {
+		r.log.Errorf("count im messages failed: %s", err.Error())
+		return nil, 0, imV1.ErrorInternalServerError("count messages failed")
+	}
+	items, err := q.Order(ent.Desc(immessage.FieldID)).
+		Offset(page).Limit(pageSize).All(ctx)
 	if err != nil {
 		r.log.Errorf("list im messages failed: %s", err.Error())
 		return nil, 0, imV1.ErrorInternalServerError("list messages failed")

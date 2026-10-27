@@ -300,6 +300,39 @@ func (m *Video) validate(all bool) error {
 
 	}
 
+	if m.ScheduledOffAt != nil {
+
+		if all {
+			switch v := interface{}(m.GetScheduledOffAt()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, VideoValidationError{
+						field:  "ScheduledOffAt",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, VideoValidationError{
+						field:  "ScheduledOffAt",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetScheduledOffAt()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return VideoValidationError{
+					field:  "ScheduledOffAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
 	if m.CreatedAt != nil {
 
 		if all {
@@ -2758,6 +2791,39 @@ func (m *ScheduleVideoRequest) validate(all bool) error {
 			if err := v.Validate(); err != nil {
 				return ScheduleVideoRequestValidationError{
 					field:  "ScheduledAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if m.ScheduledOffAt != nil {
+
+		if all {
+			switch v := interface{}(m.GetScheduledOffAt()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ScheduleVideoRequestValidationError{
+						field:  "ScheduledOffAt",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ScheduleVideoRequestValidationError{
+						field:  "ScheduledOffAt",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetScheduledOffAt()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ScheduleVideoRequestValidationError{
+					field:  "ScheduledOffAt",
 					reason: "embedded message failed validation",
 					cause:  err,
 				}

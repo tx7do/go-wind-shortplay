@@ -21,12 +21,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DashboardService_GetOverview_FullMethodName        = "/stats.service.v1.DashboardService/GetOverview"
-	DashboardService_ListTrends_FullMethodName         = "/stats.service.v1.DashboardService/ListTrends"
-	DashboardService_ListTopVideos_FullMethodName      = "/stats.service.v1.DashboardService/ListTopVideos"
-	DashboardService_GetCreatorOverview_FullMethodName = "/stats.service.v1.DashboardService/GetCreatorOverview"
-	DashboardService_ListCreatorTrends_FullMethodName  = "/stats.service.v1.DashboardService/ListCreatorTrends"
-	DashboardService_GetUserStats_FullMethodName       = "/stats.service.v1.DashboardService/GetUserStats"
+	DashboardService_GetOverview_FullMethodName           = "/stats.service.v1.DashboardService/GetOverview"
+	DashboardService_ListTrends_FullMethodName            = "/stats.service.v1.DashboardService/ListTrends"
+	DashboardService_ListTopVideos_FullMethodName         = "/stats.service.v1.DashboardService/ListTopVideos"
+	DashboardService_GetCreatorOverview_FullMethodName    = "/stats.service.v1.DashboardService/GetCreatorOverview"
+	DashboardService_ListCreatorTrends_FullMethodName     = "/stats.service.v1.DashboardService/ListCreatorTrends"
+	DashboardService_GetUserStats_FullMethodName          = "/stats.service.v1.DashboardService/GetUserStats"
+	DashboardService_ListCreatorVideoStats_FullMethodName = "/stats.service.v1.DashboardService/ListCreatorVideoStats"
 )
 
 // DashboardServiceClient is the client API for DashboardService service.
@@ -47,6 +48,8 @@ type DashboardServiceClient interface {
 	ListCreatorTrends(ctx context.Context, in *ListCreatorTrendsRequest, opts ...grpc.CallOption) (*ListTrendsResponse, error)
 	// 用户统计（作品 / 粉丝 / 关注 / 获赞；用户主页用）
 	GetUserStats(ctx context.Context, in *v11.GetUserStatsRequest, opts ...grpc.CallOption) (*v11.UserStats, error)
+	// 创作者单视频数据（viewer 本人作品逐条：播放/点赞/收藏/评论，热度倒序）
+	ListCreatorVideoStats(ctx context.Context, in *ListCreatorVideoStatsRequest, opts ...grpc.CallOption) (*ListCreatorVideoStatsResponse, error)
 }
 
 type dashboardServiceClient struct {
@@ -117,6 +120,16 @@ func (c *dashboardServiceClient) GetUserStats(ctx context.Context, in *v11.GetUs
 	return out, nil
 }
 
+func (c *dashboardServiceClient) ListCreatorVideoStats(ctx context.Context, in *ListCreatorVideoStatsRequest, opts ...grpc.CallOption) (*ListCreatorVideoStatsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListCreatorVideoStatsResponse)
+	err := c.cc.Invoke(ctx, DashboardService_ListCreatorVideoStats_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DashboardServiceServer is the server API for DashboardService service.
 // All implementations must embed UnimplementedDashboardServiceServer
 // for forward compatibility.
@@ -135,6 +148,8 @@ type DashboardServiceServer interface {
 	ListCreatorTrends(context.Context, *ListCreatorTrendsRequest) (*ListTrendsResponse, error)
 	// 用户统计（作品 / 粉丝 / 关注 / 获赞；用户主页用）
 	GetUserStats(context.Context, *v11.GetUserStatsRequest) (*v11.UserStats, error)
+	// 创作者单视频数据（viewer 本人作品逐条：播放/点赞/收藏/评论，热度倒序）
+	ListCreatorVideoStats(context.Context, *ListCreatorVideoStatsRequest) (*ListCreatorVideoStatsResponse, error)
 	mustEmbedUnimplementedDashboardServiceServer()
 }
 
@@ -162,6 +177,9 @@ func (UnimplementedDashboardServiceServer) ListCreatorTrends(context.Context, *L
 }
 func (UnimplementedDashboardServiceServer) GetUserStats(context.Context, *v11.GetUserStatsRequest) (*v11.UserStats, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUserStats not implemented")
+}
+func (UnimplementedDashboardServiceServer) ListCreatorVideoStats(context.Context, *ListCreatorVideoStatsRequest) (*ListCreatorVideoStatsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListCreatorVideoStats not implemented")
 }
 func (UnimplementedDashboardServiceServer) mustEmbedUnimplementedDashboardServiceServer() {}
 func (UnimplementedDashboardServiceServer) testEmbeddedByValue()                          {}
@@ -292,6 +310,24 @@ func _DashboardService_GetUserStats_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DashboardService_ListCreatorVideoStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListCreatorVideoStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DashboardServiceServer).ListCreatorVideoStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DashboardService_ListCreatorVideoStats_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DashboardServiceServer).ListCreatorVideoStats(ctx, req.(*ListCreatorVideoStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DashboardService_ServiceDesc is the grpc.ServiceDesc for DashboardService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -322,6 +358,10 @@ var DashboardService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserStats",
 			Handler:    _DashboardService_GetUserStats_Handler,
+		},
+		{
+			MethodName: "ListCreatorVideoStats",
+			Handler:    _DashboardService_ListCreatorVideoStats_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

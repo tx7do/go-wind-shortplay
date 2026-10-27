@@ -2143,6 +2143,56 @@ class S {
   String get imInputHint {
     return Intl.message('输入消息…', name: 'imInputHint', desc: '', args: []);
   }
+
+  /// `单视频数据`
+  String get creatorVideoStatsTitle {
+    return Intl.message(
+      '单视频数据',
+      name: 'creatorVideoStatsTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `弹幕显示区域`
+  String get danmakuArea {
+    return Intl.message('弹幕显示区域', name: 'danmakuArea', desc: '', args: []);
+  }
+
+  /// `青少年模式`
+  String get teenMode {
+    return Intl.message('青少年模式', name: 'teenMode', desc: '', args: []);
+  }
+
+  /// `开启后每日累计观看满 40 分钟将提醒休息。现在开启？`
+  String get teenModeConfirm {
+    return Intl.message(
+      '开启后每日累计观看满 40 分钟将提醒休息。现在开启？',
+      name: 'teenModeConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `休息一下`
+  String get teenRestTitle {
+    return Intl.message('休息一下', name: 'teenRestTitle', desc: '', args: []);
+  }
+
+  /// `今天已连续观看 40 分钟，休息一下再继续吧`
+  String get teenRestMessage {
+    return Intl.message(
+      '今天已连续观看 40 分钟，休息一下再继续吧',
+      name: 'teenRestMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `分享海报`
+  String get sharePoster {
+    return Intl.message('分享海报', name: 'sharePoster', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -622,14 +622,15 @@ const file_im_service_v1_im_proto_rawDesc = "" +
 	"\x06_total\":\n" +
 	"\x13CountUnreadResponse\x12\x19\n" +
 	"\x05count\x18\x01 \x01(\x04H\x00R\x05count\x88\x01\x01B\b\n" +
-	"\x06_count2\x98\x04\n" +
+	"\x06_count2\xe7\x04\n" +
 	"\tImService\x12J\n" +
 	"\vSendMessage\x12!.im.service.v1.SendMessageRequest\x1a\x16.im.service.v1.Message\"\x00\x12Z\n" +
 	"\x11ListConversations\x12\x19.pagination.PagingRequest\x1a(.im.service.v1.ListConversationsResponse\"\x00\x12Y\n" +
 	"\fListMessages\x12\".im.service.v1.ListMessagesRequest\x1a#.im.service.v1.ListMessagesResponse\"\x00\x12\\\n" +
 	"\x14MarkConversationRead\x12*.im.service.v1.MarkConversationReadRequest\x1a\x16.google.protobuf.Empty\"\x00\x12]\n" +
 	"\x12EnsureConversation\x12(.im.service.v1.EnsureConversationRequest\x1a\x1b.im.service.v1.Conversation\"\x00\x12K\n" +
-	"\vCountUnread\x12\x16.google.protobuf.Empty\x1a\".im.service.v1.CountUnreadResponse\"\x00B\xa8\x01\n" +
+	"\vCountUnread\x12\x16.google.protobuf.Empty\x1a\".im.service.v1.CountUnreadResponse\"\x00\x12M\n" +
+	"\tAdminList\x12\x19.pagination.PagingRequest\x1a#.im.service.v1.ListMessagesResponse\"\x00B\xa8\x01\n" +
 	"\x11com.im.service.v1B\aImProtoP\x01Z4go-wind-shortplay/api/gen/go/im/service/v1;servicev1\xa2\x02\x03ISX\xaa\x02\rIm.Service.V1\xca\x02\rIm\\Service\\V1\xe2\x02\x19Im\\Service\\V1\\GPBMetadata\xea\x02\x0fIm::Service::V1b\x06proto3"
 
 var (
@@ -674,14 +675,16 @@ var file_im_service_v1_im_proto_depIdxs = []int32{
 	4,  // 10: im.service.v1.ImService.MarkConversationRead:input_type -> im.service.v1.MarkConversationReadRequest
 	5,  // 11: im.service.v1.ImService.EnsureConversation:input_type -> im.service.v1.EnsureConversationRequest
 	12, // 12: im.service.v1.ImService.CountUnread:input_type -> google.protobuf.Empty
-	1,  // 13: im.service.v1.ImService.SendMessage:output_type -> im.service.v1.Message
-	6,  // 14: im.service.v1.ImService.ListConversations:output_type -> im.service.v1.ListConversationsResponse
-	7,  // 15: im.service.v1.ImService.ListMessages:output_type -> im.service.v1.ListMessagesResponse
-	12, // 16: im.service.v1.ImService.MarkConversationRead:output_type -> google.protobuf.Empty
-	0,  // 17: im.service.v1.ImService.EnsureConversation:output_type -> im.service.v1.Conversation
-	8,  // 18: im.service.v1.ImService.CountUnread:output_type -> im.service.v1.CountUnreadResponse
-	13, // [13:19] is the sub-list for method output_type
-	7,  // [7:13] is the sub-list for method input_type
+	11, // 13: im.service.v1.ImService.AdminList:input_type -> pagination.PagingRequest
+	1,  // 14: im.service.v1.ImService.SendMessage:output_type -> im.service.v1.Message
+	6,  // 15: im.service.v1.ImService.ListConversations:output_type -> im.service.v1.ListConversationsResponse
+	7,  // 16: im.service.v1.ImService.ListMessages:output_type -> im.service.v1.ListMessagesResponse
+	12, // 17: im.service.v1.ImService.MarkConversationRead:output_type -> google.protobuf.Empty
+	0,  // 18: im.service.v1.ImService.EnsureConversation:output_type -> im.service.v1.Conversation
+	8,  // 19: im.service.v1.ImService.CountUnread:output_type -> im.service.v1.CountUnreadResponse
+	7,  // 20: im.service.v1.ImService.AdminList:output_type -> im.service.v1.ListMessagesResponse
+	14, // [14:21] is the sub-list for method output_type
+	7,  // [7:14] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name
 	7,  // [7:7] is the sub-list for extension extendee
 	0,  // [0:7] is the sub-list for field type_name

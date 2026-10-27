@@ -16,7 +16,7 @@ export type AccessModeType = "backend" | "frontend";
  * 支持的语言类型
  * 与应用使用的语言值保持一致
  */
-export type SupportedLanguagesType = "zh-CN" | "en-US";
+export type SupportedLanguagesType = "zh-CN" | "en-US" | "ja-JP";
 
 /**
  * 布局方式

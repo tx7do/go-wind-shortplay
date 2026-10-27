@@ -128,7 +128,9 @@ Flutter App ──▶ app-service   (BFF :7700) ──────────�
 |:--------|:------------|
 | Likes / Favorites | Like videos and comments, favorite videos |
 | Follows | Follow / fan lists, personal profile |
+| Comments | Video comments (nested), comment likes, author pinning, hot/latest sorting |
 | Comments | Video comments (nested-reply fields reserved) |
+| Notifications | Like / comment / follower / system notices, inbox + SSE realtime push |
 | Notifications | Like / comment / follower / system notifications |
 | Report loop | User report tickets; approval triggers handling of the target content (offline / delete) |
 | UBA tracking | Watch / completion / swipe-away events feeding feed ranking |

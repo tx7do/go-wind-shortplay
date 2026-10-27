@@ -14,7 +14,8 @@ import 'package:shortplay_app/src/core/widgets/empty_state.dart';
 import 'package:shortplay_app/src/core/preference/user_preference_cache.dart';
 import 'package:shortplay_app/src/features/comment/widgets/comment_sheet.dart';
 import 'package:shortplay_app/src/features/common/services/sysconf_service.dart';
-import 'package:shortplay_app/src/features/danmaku/services/danmaku_service.dart';
+import 'package:shortplay_app/src/features/danmaku/services/danmaku_service.dart'
+    show DanmakuItem, DanmakuService;
 import 'package:shortplay_app/src/features/danmaku/widgets/danmaku_overlay.dart';
 import 'package:shortplay_app/src/features/danmaku/widgets/danmaku_send_sheet.dart';
 import 'package:shortplay_app/src/core/transport/http/index.dart'
@@ -80,6 +81,51 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
     SysConfService().getSysConf().then((conf) {
       if (mounted) setState(() => _danmakuServerOn = conf.danmakuEnabled);
     });
+  }
+
+  /// 弹幕操作面板：举报（处置联动：举报通过自动隐藏该弹幕）
+  void _showDanmakuActions(DanmakuItem item) {
+    final loc = S.of(context);
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      constraints: const BoxConstraints(maxWidth: 480),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                child: Text(
+                  item.content,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: Theme.of(
+                      sheetContext,
+                    ).colorScheme.onSurface.withAlpha(160),
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.flag_outlined),
+                title: Text(loc.report),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  showReportSheet(
+                    context,
+                    targetType: ReportTargetType.danmaku,
+                    targetId: item.id,
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   /// 拉取弹幕（尽力而为；_load 复用刷新场景）
@@ -413,7 +459,11 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
           Positioned.fill(
             top: 0,
             bottom: 120.h,
-            child: DanmakuOverlay(player: _player!, items: _danmaku),
+            child: DanmakuOverlay(
+              player: _player!,
+              items: _danmaku,
+              onDanmakuTap: _showDanmakuActions,
+            ),
           ),
         // 底部细进度条（拖动 seek + 时间气泡）
         if (_player != null)

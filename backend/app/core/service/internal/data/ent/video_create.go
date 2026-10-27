@@ -364,6 +364,20 @@ func (_c *VideoCreate) SetNillableScheduledAt(v *time.Time) *VideoCreate {
 	return _c
 }
 
+// SetScheduledOffAt sets the "scheduled_off_at" field.
+func (_c *VideoCreate) SetScheduledOffAt(v time.Time) *VideoCreate {
+	_c.mutation.SetScheduledOffAt(v)
+	return _c
+}
+
+// SetNillableScheduledOffAt sets the "scheduled_off_at" field if the given value is not nil.
+func (_c *VideoCreate) SetNillableScheduledOffAt(v *time.Time) *VideoCreate {
+	if v != nil {
+		_c.SetScheduledOffAt(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *VideoCreate) SetID(v uint32) *VideoCreate {
 	_c.mutation.SetID(v)
@@ -643,6 +657,10 @@ func (_c *VideoCreate) createSpec() (*Video, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ScheduledAt(); ok {
 		_spec.SetField(video.FieldScheduledAt, field.TypeTime, value)
 		_node.ScheduledAt = &value
+	}
+	if value, ok := _c.mutation.ScheduledOffAt(); ok {
+		_spec.SetField(video.FieldScheduledOffAt, field.TypeTime, value)
+		_node.ScheduledOffAt = &value
 	}
 	return _node, _spec
 }
@@ -1113,6 +1131,24 @@ func (u *VideoUpsert) UpdateScheduledAt() *VideoUpsert {
 // ClearScheduledAt clears the value of the "scheduled_at" field.
 func (u *VideoUpsert) ClearScheduledAt() *VideoUpsert {
 	u.SetNull(video.FieldScheduledAt)
+	return u
+}
+
+// SetScheduledOffAt sets the "scheduled_off_at" field.
+func (u *VideoUpsert) SetScheduledOffAt(v time.Time) *VideoUpsert {
+	u.Set(video.FieldScheduledOffAt, v)
+	return u
+}
+
+// UpdateScheduledOffAt sets the "scheduled_off_at" field to the value that was provided on create.
+func (u *VideoUpsert) UpdateScheduledOffAt() *VideoUpsert {
+	u.SetExcluded(video.FieldScheduledOffAt)
+	return u
+}
+
+// ClearScheduledOffAt clears the value of the "scheduled_off_at" field.
+func (u *VideoUpsert) ClearScheduledOffAt() *VideoUpsert {
+	u.SetNull(video.FieldScheduledOffAt)
 	return u
 }
 
@@ -1657,6 +1693,27 @@ func (u *VideoUpsertOne) UpdateScheduledAt() *VideoUpsertOne {
 func (u *VideoUpsertOne) ClearScheduledAt() *VideoUpsertOne {
 	return u.Update(func(s *VideoUpsert) {
 		s.ClearScheduledAt()
+	})
+}
+
+// SetScheduledOffAt sets the "scheduled_off_at" field.
+func (u *VideoUpsertOne) SetScheduledOffAt(v time.Time) *VideoUpsertOne {
+	return u.Update(func(s *VideoUpsert) {
+		s.SetScheduledOffAt(v)
+	})
+}
+
+// UpdateScheduledOffAt sets the "scheduled_off_at" field to the value that was provided on create.
+func (u *VideoUpsertOne) UpdateScheduledOffAt() *VideoUpsertOne {
+	return u.Update(func(s *VideoUpsert) {
+		s.UpdateScheduledOffAt()
+	})
+}
+
+// ClearScheduledOffAt clears the value of the "scheduled_off_at" field.
+func (u *VideoUpsertOne) ClearScheduledOffAt() *VideoUpsertOne {
+	return u.Update(func(s *VideoUpsert) {
+		s.ClearScheduledOffAt()
 	})
 }
 
@@ -2367,6 +2424,27 @@ func (u *VideoUpsertBulk) UpdateScheduledAt() *VideoUpsertBulk {
 func (u *VideoUpsertBulk) ClearScheduledAt() *VideoUpsertBulk {
 	return u.Update(func(s *VideoUpsert) {
 		s.ClearScheduledAt()
+	})
+}
+
+// SetScheduledOffAt sets the "scheduled_off_at" field.
+func (u *VideoUpsertBulk) SetScheduledOffAt(v time.Time) *VideoUpsertBulk {
+	return u.Update(func(s *VideoUpsert) {
+		s.SetScheduledOffAt(v)
+	})
+}
+
+// UpdateScheduledOffAt sets the "scheduled_off_at" field to the value that was provided on create.
+func (u *VideoUpsertBulk) UpdateScheduledOffAt() *VideoUpsertBulk {
+	return u.Update(func(s *VideoUpsert) {
+		s.UpdateScheduledOffAt()
+	})
+}
+
+// ClearScheduledOffAt clears the value of the "scheduled_off_at" field.
+func (u *VideoUpsertBulk) ClearScheduledOffAt() *VideoUpsertBulk {
+	return u.Update(func(s *VideoUpsert) {
+		s.ClearScheduledOffAt()
 	})
 }
 

@@ -96,6 +96,31 @@ func (s *DashboardService) ListCreatorTrends(ctx context.Context, req *statsV1.L
 	return resp, nil
 }
 
+// ListCreatorVideoStats 创作者单视频数据（viewer 本人口径）。
+func (s *DashboardService) ListCreatorVideoStats(ctx context.Context, req *statsV1.ListCreatorVideoStatsRequest) (*statsV1.ListCreatorVideoStatsResponse, error) {
+	uid := spViewerUserID(ctx)
+	if uid == 0 {
+		return nil, statsV1.ErrorUnauthorized("login required")
+	}
+	rows, err := s.statsRepo.CreatorVideoStats(ctx, uid, int(req.GetLimit()))
+	if err != nil {
+		return nil, statsV1.ErrorInternalServerError("creator video stats failed")
+	}
+	resp := &statsV1.ListCreatorVideoStatsResponse{}
+	for _, row := range rows {
+		resp.Items = append(resp.Items, &statsV1.CreatorVideoStat{
+			VideoId:   trans.Ptr(row.VideoID),
+			Title:     trans.Ptr(row.Title),
+			CoverUrl:  trans.Ptr(row.CoverURL),
+			Plays:     trans.Ptr(row.Plays),
+			Likes:     trans.Ptr(row.Likes),
+			Collects:  trans.Ptr(row.Collects),
+			Comments:  trans.Ptr(row.Comments),
+		})
+	}
+	return resp, nil
+}
+
 // ListTopVideos 视频 TOP 排行。
 func (s *DashboardService) ListTopVideos(ctx context.Context, req *statsV1.ListTopVideosRequest) (*videoV1.ListVideoResponse, error) {
 	metric := data.TopMetricView

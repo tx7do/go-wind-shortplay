@@ -39,6 +39,7 @@ const (
 	// BizSeriesManagePermissionCode 剧集管理权限代码
 	BizSeriesManagePermissionCode = DefaultBizPermissionModule + ":series_manage"
 	BizDanmakuManagePermissionCode = DefaultBizPermissionModule + ":danmaku_manage"
+	BizImManagePermissionCode = DefaultBizPermissionModule + ":im_manage"
 
 	// DefaultBizPermissionModule 业务权限模块标识
 	DefaultBizPermissionModule = "biz"

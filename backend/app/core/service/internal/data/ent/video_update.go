@@ -508,6 +508,26 @@ func (_u *VideoUpdate) ClearScheduledAt() *VideoUpdate {
 	return _u
 }
 
+// SetScheduledOffAt sets the "scheduled_off_at" field.
+func (_u *VideoUpdate) SetScheduledOffAt(v time.Time) *VideoUpdate {
+	_u.mutation.SetScheduledOffAt(v)
+	return _u
+}
+
+// SetNillableScheduledOffAt sets the "scheduled_off_at" field if the given value is not nil.
+func (_u *VideoUpdate) SetNillableScheduledOffAt(v *time.Time) *VideoUpdate {
+	if v != nil {
+		_u.SetScheduledOffAt(*v)
+	}
+	return _u
+}
+
+// ClearScheduledOffAt clears the value of the "scheduled_off_at" field.
+func (_u *VideoUpdate) ClearScheduledOffAt() *VideoUpdate {
+	_u.mutation.ClearScheduledOffAt()
+	return _u
+}
+
 // Mutation returns the VideoMutation object of the builder.
 func (_u *VideoUpdate) Mutation() *VideoMutation {
 	return _u.mutation
@@ -719,6 +739,12 @@ func (_u *VideoUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.ScheduledAtCleared() {
 		_spec.ClearField(video.FieldScheduledAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ScheduledOffAt(); ok {
+		_spec.SetField(video.FieldScheduledOffAt, field.TypeTime, value)
+	}
+	if _u.mutation.ScheduledOffAtCleared() {
+		_spec.ClearField(video.FieldScheduledOffAt, field.TypeTime)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -1221,6 +1247,26 @@ func (_u *VideoUpdateOne) ClearScheduledAt() *VideoUpdateOne {
 	return _u
 }
 
+// SetScheduledOffAt sets the "scheduled_off_at" field.
+func (_u *VideoUpdateOne) SetScheduledOffAt(v time.Time) *VideoUpdateOne {
+	_u.mutation.SetScheduledOffAt(v)
+	return _u
+}
+
+// SetNillableScheduledOffAt sets the "scheduled_off_at" field if the given value is not nil.
+func (_u *VideoUpdateOne) SetNillableScheduledOffAt(v *time.Time) *VideoUpdateOne {
+	if v != nil {
+		_u.SetScheduledOffAt(*v)
+	}
+	return _u
+}
+
+// ClearScheduledOffAt clears the value of the "scheduled_off_at" field.
+func (_u *VideoUpdateOne) ClearScheduledOffAt() *VideoUpdateOne {
+	_u.mutation.ClearScheduledOffAt()
+	return _u
+}
+
 // Mutation returns the VideoMutation object of the builder.
 func (_u *VideoUpdateOne) Mutation() *VideoMutation {
 	return _u.mutation
@@ -1462,6 +1508,12 @@ func (_u *VideoUpdateOne) sqlSave(ctx context.Context) (_node *Video, err error)
 	}
 	if _u.mutation.ScheduledAtCleared() {
 		_spec.ClearField(video.FieldScheduledAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ScheduledOffAt(); ok {
+		_spec.SetField(video.FieldScheduledOffAt, field.TypeTime, value)
+	}
+	if _u.mutation.ScheduledOffAtCleared() {
+		_spec.ClearField(video.FieldScheduledOffAt, field.TypeTime)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Video{config: _u.config}

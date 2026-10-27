@@ -35,6 +35,378 @@ var (
 	_ = sort.Sort
 )
 
+// Validate checks the field values on ListCreatorVideoStatsRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ListCreatorVideoStatsRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListCreatorVideoStatsRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ListCreatorVideoStatsRequestMultiError, or nil if none found.
+func (m *ListCreatorVideoStatsRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListCreatorVideoStatsRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.Limit != nil {
+		// no validation rules for Limit
+	}
+
+	if len(errors) > 0 {
+		return ListCreatorVideoStatsRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListCreatorVideoStatsRequestMultiError is an error wrapping multiple
+// validation errors returned by ListCreatorVideoStatsRequest.ValidateAll() if
+// the designated constraints aren't met.
+type ListCreatorVideoStatsRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListCreatorVideoStatsRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListCreatorVideoStatsRequestMultiError) AllErrors() []error { return m }
+
+// ListCreatorVideoStatsRequestValidationError is the validation error returned
+// by ListCreatorVideoStatsRequest.Validate if the designated constraints
+// aren't met.
+type ListCreatorVideoStatsRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListCreatorVideoStatsRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListCreatorVideoStatsRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListCreatorVideoStatsRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListCreatorVideoStatsRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListCreatorVideoStatsRequestValidationError) ErrorName() string {
+	return "ListCreatorVideoStatsRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListCreatorVideoStatsRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListCreatorVideoStatsRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListCreatorVideoStatsRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListCreatorVideoStatsRequestValidationError{}
+
+// Validate checks the field values on CreatorVideoStat with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *CreatorVideoStat) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreatorVideoStat with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// CreatorVideoStatMultiError, or nil if none found.
+func (m *CreatorVideoStat) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreatorVideoStat) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.VideoId != nil {
+		// no validation rules for VideoId
+	}
+
+	if m.Title != nil {
+		// no validation rules for Title
+	}
+
+	if m.CoverUrl != nil {
+		// no validation rules for CoverUrl
+	}
+
+	if m.Plays != nil {
+		// no validation rules for Plays
+	}
+
+	if m.Likes != nil {
+		// no validation rules for Likes
+	}
+
+	if m.Collects != nil {
+		// no validation rules for Collects
+	}
+
+	if m.Comments != nil {
+		// no validation rules for Comments
+	}
+
+	if len(errors) > 0 {
+		return CreatorVideoStatMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreatorVideoStatMultiError is an error wrapping multiple validation errors
+// returned by CreatorVideoStat.ValidateAll() if the designated constraints
+// aren't met.
+type CreatorVideoStatMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreatorVideoStatMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreatorVideoStatMultiError) AllErrors() []error { return m }
+
+// CreatorVideoStatValidationError is the validation error returned by
+// CreatorVideoStat.Validate if the designated constraints aren't met.
+type CreatorVideoStatValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreatorVideoStatValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreatorVideoStatValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreatorVideoStatValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreatorVideoStatValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreatorVideoStatValidationError) ErrorName() string { return "CreatorVideoStatValidationError" }
+
+// Error satisfies the builtin error interface
+func (e CreatorVideoStatValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreatorVideoStat.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreatorVideoStatValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreatorVideoStatValidationError{}
+
+// Validate checks the field values on ListCreatorVideoStatsResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ListCreatorVideoStatsResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListCreatorVideoStatsResponse with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// ListCreatorVideoStatsResponseMultiError, or nil if none found.
+func (m *ListCreatorVideoStatsResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListCreatorVideoStatsResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ListCreatorVideoStatsResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ListCreatorVideoStatsResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ListCreatorVideoStatsResponseValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return ListCreatorVideoStatsResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListCreatorVideoStatsResponseMultiError is an error wrapping multiple
+// validation errors returned by ListCreatorVideoStatsResponse.ValidateAll()
+// if the designated constraints aren't met.
+type ListCreatorVideoStatsResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListCreatorVideoStatsResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListCreatorVideoStatsResponseMultiError) AllErrors() []error { return m }
+
+// ListCreatorVideoStatsResponseValidationError is the validation error
+// returned by ListCreatorVideoStatsResponse.Validate if the designated
+// constraints aren't met.
+type ListCreatorVideoStatsResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListCreatorVideoStatsResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListCreatorVideoStatsResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListCreatorVideoStatsResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListCreatorVideoStatsResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListCreatorVideoStatsResponseValidationError) ErrorName() string {
+	return "ListCreatorVideoStatsResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListCreatorVideoStatsResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListCreatorVideoStatsResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListCreatorVideoStatsResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListCreatorVideoStatsResponseValidationError{}
+
 // Validate checks the field values on GetCreatorOverviewRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.

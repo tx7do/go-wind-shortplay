@@ -24,5 +24,9 @@
   "dataSource": "数据源",
   "tableName": "表名",
   "accessType": "访问类型",
-  "affectedRows": "影响行数"
+  "affectedRows": "影响行数",
+  "export": "导出",
+  "exportSuccess": "导出成功",
+  "exportFailed": "导出失败",
+  "exporting": "导出中"
 }

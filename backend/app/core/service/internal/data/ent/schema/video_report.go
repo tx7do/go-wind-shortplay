@@ -40,6 +40,7 @@ func (VideoReport) Fields() []ent.Field {
 				"Video", "VIDEO",
 				"Comment", "COMMENT",
 				"User", "USER",
+				"Danmaku", "DANMAKU",
 			).
 			Default("VIDEO"),
 

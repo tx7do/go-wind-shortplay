@@ -32,6 +32,7 @@ const (
 	ReportTargetType_REPORT_TARGET_TYPE_VIDEO       ReportTargetType = 1 // 举报视频
 	ReportTargetType_REPORT_TARGET_TYPE_COMMENT     ReportTargetType = 2 // 举报评论
 	ReportTargetType_REPORT_TARGET_TYPE_USER        ReportTargetType = 3 // 举报用户
+	ReportTargetType_REPORT_TARGET_TYPE_DANMAKU     ReportTargetType = 4 // 举报弹幕（处置=隐藏）
 )
 
 // Enum value maps for ReportTargetType.
@@ -41,12 +42,14 @@ var (
 		1: "REPORT_TARGET_TYPE_VIDEO",
 		2: "REPORT_TARGET_TYPE_COMMENT",
 		3: "REPORT_TARGET_TYPE_USER",
+		4: "REPORT_TARGET_TYPE_DANMAKU",
 	}
 	ReportTargetType_value = map[string]int32{
 		"REPORT_TARGET_TYPE_UNSPECIFIED": 0,
 		"REPORT_TARGET_TYPE_VIDEO":       1,
 		"REPORT_TARGET_TYPE_COMMENT":     2,
 		"REPORT_TARGET_TYPE_USER":        3,
+		"REPORT_TARGET_TYPE_DANMAKU":     4,
 	}
 )
 
@@ -591,12 +594,13 @@ const file_report_service_v1_report_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\rR\x02id\x127\n" +
 	"\x06action\x18\x02 \x01(\x0e2\x1f.report.service.v1.HandleActionR\x06action\x12\x17\n" +
 	"\x04note\x18\x03 \x01(\tH\x00R\x04note\x88\x01\x01B\a\n" +
-	"\x05_note*\x91\x01\n" +
+	"\x05_note*\xb1\x01\n" +
 	"\x10ReportTargetType\x12\"\n" +
 	"\x1eREPORT_TARGET_TYPE_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18REPORT_TARGET_TYPE_VIDEO\x10\x01\x12\x1e\n" +
 	"\x1aREPORT_TARGET_TYPE_COMMENT\x10\x02\x12\x1b\n" +
-	"\x17REPORT_TARGET_TYPE_USER\x10\x03*\x81\x01\n" +
+	"\x17REPORT_TARGET_TYPE_USER\x10\x03\x12\x1e\n" +
+	"\x1aREPORT_TARGET_TYPE_DANMAKU\x10\x04*\x81\x01\n" +
 	"\fReportStatus\x12\x1d\n" +
 	"\x19REPORT_STATUS_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15REPORT_STATUS_PENDING\x10\x01\x12\x1a\n" +

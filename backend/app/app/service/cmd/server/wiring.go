@@ -150,9 +150,9 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 
 	sseServer := server.NewSseServer(ctx, authenticationServiceClient)
 
-	// 私信实时事件桥接：Redis Pub/Sub → SSE 定向推送（落库为准，尽力而为）
-	stopImBridge := server.StartImEventSubscriber(ctx.Context(), redisClient, sseServer, authenticationServiceClient, ctx.NewLoggerHelper("im-sse-bridge/app-service"))
-	cleanups = append(cleanups, stopImBridge)
+	// 实时事件桥接（私信+系统通知）：Redis Pub/Sub → SSE 定向推送（落库为准，尽力而为）
+	stopSseBridge := server.StartSseEventBridge(ctx.Context(), redisClient, sseServer, authenticationServiceClient, ctx.NewLoggerHelper("sse-bridge/app-service"))
+	cleanups = append(cleanups, stopSseBridge)
 
 	return newApp(ctx, httpServer, grpcServer, sseServer), rollback, nil
 }

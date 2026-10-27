@@ -19,7 +19,9 @@ const ApiAuditLogPage = () => {
   { title: t('createdAt'), dataIndex: 'createdAt', width: 160, render: (_, r) => (r.createdAt ? dayjs(r.createdAt).format('YYYY-MM-DD HH:mm:ss') : '-') },
   ];
 
-  return <AuditLogTable<ApiAuditLog> columns={columns} headerTitle={t('apiTitle')} fetcher={fetchListApiAuditLogs} />;
+  return <AuditLogTable<ApiAuditLog> columns={columns} headerTitle={t('apiTitle')} fetcher={fetchListApiAuditLogs}   searchKey="path___contains"
+    exportType="api"
+  />;
 };
 
 export default ApiAuditLogPage;

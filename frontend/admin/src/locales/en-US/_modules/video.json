@@ -71,5 +71,10 @@
   "batchRejectTitle": "Batch Reject",
   "batchDone": "Batch done: {{ok}} succeeded, {{fail}} failed",
   "scheduledAt": "Scheduled",
-  "publishNow": "Publish"
+  "publishNow": "Publish",
+  "scheduledOffAt": "Scheduled Off",
+  "scheduleOff": "Schedule Offline",
+  "scheduleOffPickHint": "Pick offline time (must be in the future)",
+  "cancelScheduleOff": "Cancel scheduled offline",
+  "scheduleOffSuccess": "Scheduled offline set"
 }

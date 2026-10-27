@@ -302,6 +302,24 @@ func (s *ImService) MarkConversationRead(ctx context.Context, req *imV1.MarkConv
 	return &emptypb.Empty{}, nil
 }
 
+// AdminList 管理端全量私信列表（内容合规监管只读；批量补发送人简况）
+func (s *ImService) AdminList(ctx context.Context, req *paginationV1.PagingRequest) (*imV1.ListMessagesResponse, error) {
+	items, total, err := s.imRepo.ListAdmin(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	senderIDs := make([]uint32, 0, len(items))
+	for _, e := range items {
+		senderIDs = append(senderIDs, e.SenderID)
+	}
+	senders := s.userBriefsOf(ctx, senderIDs)
+	resp := &imV1.ListMessagesResponse{Total: trans.Ptr(int64(total))}
+	for _, e := range items {
+		resp.Items = append(resp.Items, messageToDTO(e, senders[e.SenderID]))
+	}
+	return resp, nil
+}
+
 // EnsureConversation 与指定用户建会话（存在即返回既有）
 func (s *ImService) EnsureConversation(ctx context.Context, req *imV1.EnsureConversationRequest) (*imV1.Conversation, error) {
 	uid := spViewerUserID(ctx)

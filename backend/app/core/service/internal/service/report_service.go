@@ -19,6 +19,7 @@ import (
 
 	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
 	reportV1 "go-wind-shortplay/api/gen/go/report/service/v1"
+	danmakuV1 "go-wind-shortplay/api/gen/go/danmaku/service/v1"
 	videoV1 "go-wind-shortplay/api/gen/go/video/service/v1"
 
 	appViewer "go-wind-shortplay/pkg/entgo/viewer"
@@ -50,6 +51,7 @@ type ReportService struct {
 	userRepo    data.UserRepo
 	videoRepo   *data.VideoRepo
 	commentRepo *data.VideoCommentRepo
+	danmakuRepo *data.DanmakuRepo
 
 	internalMessage InternalMessageNotifier
 	superAdmins     SuperAdminResolver
@@ -62,6 +64,7 @@ func NewReportService(
 	userRepo data.UserRepo,
 	videoRepo *data.VideoRepo,
 	commentRepo *data.VideoCommentRepo,
+	danmakuRepo *data.DanmakuRepo,
 ) *ReportService {
 	return &ReportService{
 		log:         ctx.NewLoggerHelper("report/service/core-service"),
@@ -69,6 +72,7 @@ func NewReportService(
 		userRepo:    userRepo,
 		videoRepo:   videoRepo,
 		commentRepo: commentRepo,
+		danmakuRepo: danmakuRepo,
 	}
 }
 
@@ -260,6 +264,11 @@ func (s *ReportService) disposeTarget(ctx context.Context, e *ent.VideoReport, r
 	case videoreport.TargetTypeComment:
 		if c, err := s.commentRepo.Get(ctx, e.TargetID); err == nil {
 			_ = s.commentRepo.DeleteWithCounter(ctx, c)
+		}
+	case videoreport.TargetTypeDanmaku:
+		// 弹幕处置=隐藏（不删行，可回滚）
+		if _, err := s.danmakuRepo.SetStatus(ctx, e.TargetID, danmakuV1.DanmakuStatus_DANMAKU_STATUS_HIDDEN); err != nil {
+			s.log.Warnf("dispose report target danmaku %d skipped: %s", e.TargetID, err.Error())
 		}
 	}
 }

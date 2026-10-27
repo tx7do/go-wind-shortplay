@@ -19,7 +19,9 @@ const LoginAuditLogPage = () => {
   { title: t('createdAt'), dataIndex: 'createdAt', width: 160, render: (_, r) => (r.createdAt ? dayjs(r.createdAt).format('YYYY-MM-DD HH:mm:ss') : '-') },
   ];
 
-  return <AuditLogTable<LoginAuditLog> columns={columns} headerTitle={t('loginTitle')} fetcher={fetchListLoginAuditLogs} />;
+  return <AuditLogTable<LoginAuditLog> columns={columns} headerTitle={t('loginTitle')} fetcher={fetchListLoginAuditLogs}   searchKey="username___contains"
+    exportType="login"
+  />;
 };
 
 export default LoginAuditLogPage;

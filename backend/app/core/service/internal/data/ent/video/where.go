@@ -174,6 +174,11 @@ func ScheduledAt(v time.Time) predicate.Video {
 	return predicate.Video(sql.FieldEQ(FieldScheduledAt, v))
 }
 
+// ScheduledOffAt applies equality check predicate on the "scheduled_off_at" field. It's identical to ScheduledOffAtEQ.
+func ScheduledOffAt(v time.Time) predicate.Video {
+	return predicate.Video(sql.FieldEQ(FieldScheduledOffAt, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Video {
 	return predicate.Video(sql.FieldEQ(FieldCreatedAt, v))
@@ -1407,6 +1412,56 @@ func ScheduledAtIsNil() predicate.Video {
 // ScheduledAtNotNil applies the NotNil predicate on the "scheduled_at" field.
 func ScheduledAtNotNil() predicate.Video {
 	return predicate.Video(sql.FieldNotNull(FieldScheduledAt))
+}
+
+// ScheduledOffAtEQ applies the EQ predicate on the "scheduled_off_at" field.
+func ScheduledOffAtEQ(v time.Time) predicate.Video {
+	return predicate.Video(sql.FieldEQ(FieldScheduledOffAt, v))
+}
+
+// ScheduledOffAtNEQ applies the NEQ predicate on the "scheduled_off_at" field.
+func ScheduledOffAtNEQ(v time.Time) predicate.Video {
+	return predicate.Video(sql.FieldNEQ(FieldScheduledOffAt, v))
+}
+
+// ScheduledOffAtIn applies the In predicate on the "scheduled_off_at" field.
+func ScheduledOffAtIn(vs ...time.Time) predicate.Video {
+	return predicate.Video(sql.FieldIn(FieldScheduledOffAt, vs...))
+}
+
+// ScheduledOffAtNotIn applies the NotIn predicate on the "scheduled_off_at" field.
+func ScheduledOffAtNotIn(vs ...time.Time) predicate.Video {
+	return predicate.Video(sql.FieldNotIn(FieldScheduledOffAt, vs...))
+}
+
+// ScheduledOffAtGT applies the GT predicate on the "scheduled_off_at" field.
+func ScheduledOffAtGT(v time.Time) predicate.Video {
+	return predicate.Video(sql.FieldGT(FieldScheduledOffAt, v))
+}
+
+// ScheduledOffAtGTE applies the GTE predicate on the "scheduled_off_at" field.
+func ScheduledOffAtGTE(v time.Time) predicate.Video {
+	return predicate.Video(sql.FieldGTE(FieldScheduledOffAt, v))
+}
+
+// ScheduledOffAtLT applies the LT predicate on the "scheduled_off_at" field.
+func ScheduledOffAtLT(v time.Time) predicate.Video {
+	return predicate.Video(sql.FieldLT(FieldScheduledOffAt, v))
+}
+
+// ScheduledOffAtLTE applies the LTE predicate on the "scheduled_off_at" field.
+func ScheduledOffAtLTE(v time.Time) predicate.Video {
+	return predicate.Video(sql.FieldLTE(FieldScheduledOffAt, v))
+}
+
+// ScheduledOffAtIsNil applies the IsNil predicate on the "scheduled_off_at" field.
+func ScheduledOffAtIsNil() predicate.Video {
+	return predicate.Video(sql.FieldIsNull(FieldScheduledOffAt))
+}
+
+// ScheduledOffAtNotNil applies the NotNil predicate on the "scheduled_off_at" field.
+func ScheduledOffAtNotNil() predicate.Video {
+	return predicate.Video(sql.FieldNotNull(FieldScheduledOffAt))
 }
 
 // And groups predicates with the AND operator between them.

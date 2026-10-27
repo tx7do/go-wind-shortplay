@@ -19,7 +19,9 @@ const PermissionAuditLogPage = () => {
   { title: t('createdAt'), dataIndex: 'createdAt', width: 160, render: (_, r) => (r.createdAt ? dayjs(r.createdAt).format('YYYY-MM-DD HH:mm:ss') : '-') },
   ];
 
-  return <AuditLogTable<PermissionAuditLog> columns={columns} headerTitle={t('permissionTitle')} fetcher={fetchListPermissionAuditLogs} />;
+  return <AuditLogTable<PermissionAuditLog> columns={columns} headerTitle={t('permissionTitle')} fetcher={fetchListPermissionAuditLogs}   searchKey="username___contains"
+    exportType="permission"
+  />;
 };
 
 export default PermissionAuditLogPage;

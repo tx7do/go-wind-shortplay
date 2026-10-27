@@ -25,6 +25,27 @@ service DashboardService {
 
   // 用户统计（作品 / 粉丝 / 关注 / 获赞；用户主页用）
   rpc GetUserStats (identity.service.v1.GetUserStatsRequest) returns (identity.service.v1.UserStats) {}
+
+  // 创作者单视频数据（viewer 本人作品逐条：播放/点赞/收藏/评论，热度倒序）
+  rpc ListCreatorVideoStats (ListCreatorVideoStatsRequest) returns (ListCreatorVideoStatsResponse) {}
+}
+
+message ListCreatorVideoStatsRequest {
+  optional uint32 limit = 1 [json_name = "limit"]; // 条数（缺省 20，上限 50）
+}
+
+message CreatorVideoStat {
+  optional uint32 video_id = 1 [json_name = "videoId"]; // 视频ID
+  optional string title = 2 [json_name = "title"];      // 标题
+  optional string cover_url = 3 [json_name = "coverUrl"]; // 封面
+  optional uint64 plays = 4 [json_name = "plays"];      // 播放
+  optional uint64 likes = 5 [json_name = "likes"];      // 点赞
+  optional uint64 collects = 6 [json_name = "collects"]; // 收藏
+  optional uint64 comments = 7 [json_name = "comments"]; // 评论
+}
+
+message ListCreatorVideoStatsResponse {
+  repeated CreatorVideoStat items = 1 [json_name = "items"]; // 单视频数据
 }
 
 message GetCreatorOverviewRequest {

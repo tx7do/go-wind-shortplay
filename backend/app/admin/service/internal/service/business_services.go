@@ -10,6 +10,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	adminV1 "go-wind-shortplay/api/gen/go/admin/service/v1"
+	imV1 "go-wind-shortplay/api/gen/go/im/service/v1"
 	danmakuV1 "go-wind-shortplay/api/gen/go/danmaku/service/v1"
 	interactionV1 "go-wind-shortplay/api/gen/go/interaction/service/v1"
 	reportV1 "go-wind-shortplay/api/gen/go/report/service/v1"
@@ -149,6 +150,27 @@ func (s *DanmakuService) Delete(ctx context.Context, req *danmakuV1.DeleteDanmak
 
 func (s *DanmakuService) SetStatus(ctx context.Context, req *danmakuV1.SetDanmakuStatusRequest) (*danmakuV1.Danmaku, error) {
 	return s.danmakuClient.SetDanmakuStatus(ctx, req)
+}
+
+// ── 私信监管（admin BFF 薄转发，只读）──
+
+type ImService struct {
+	adminV1.ImServiceHTTPServer
+
+	imClient imV1.ImServiceClient
+	log      *log.Helper
+}
+
+func NewImService(ctx *bootstrap.Context, imClient imV1.ImServiceClient) *ImService {
+	return &ImService{
+		log:      ctx.NewLoggerHelper("im/service/admin-service"),
+		imClient: imClient,
+	}
+}
+
+// List 私信列表（转发 core AdminList）。
+func (s *ImService) List(ctx context.Context, req *paginationV1.PagingRequest) (*imV1.ListMessagesResponse, error) {
+	return s.imClient.AdminList(ctx, req)
 }
 
 // ── 评论管理（admin BFF 薄转发，业务评论经 interaction 域）──

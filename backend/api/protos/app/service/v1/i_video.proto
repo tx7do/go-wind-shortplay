@@ -128,6 +128,13 @@ service VideoService {
     };
   }
 
+  // 创作者单视频数据（本人作品逐条：播放/点赞/收藏/评论）
+  rpc ListCreatorVideoStats (stats.service.v1.ListCreatorVideoStatsRequest) returns (stats.service.v1.ListCreatorVideoStatsResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/creator/video-stats"
+    };
+  }
+
   // 热榜（游客可访问）
   rpc ListHotVideos (video.service.v1.ListHotVideosRequest) returns (video.service.v1.ListVideoResponse) {
     option (google.api.http) = {

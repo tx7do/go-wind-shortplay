@@ -86190,6 +86190,7 @@ type VideoMutation struct {
 	addview_count     *int64
 	published_at      *time.Time
 	scheduled_at      *time.Time
+	scheduled_off_at  *time.Time
 	clearedFields     map[string]struct{}
 	done              bool
 	oldValue          func(context.Context) (*Video, error)
@@ -87653,6 +87654,55 @@ func (m *VideoMutation) ResetScheduledAt() {
 	delete(m.clearedFields, video.FieldScheduledAt)
 }
 
+// SetScheduledOffAt sets the "scheduled_off_at" field.
+func (m *VideoMutation) SetScheduledOffAt(t time.Time) {
+	m.scheduled_off_at = &t
+}
+
+// ScheduledOffAt returns the value of the "scheduled_off_at" field in the mutation.
+func (m *VideoMutation) ScheduledOffAt() (r time.Time, exists bool) {
+	v := m.scheduled_off_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScheduledOffAt returns the old "scheduled_off_at" field's value of the Video entity.
+// If the Video object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VideoMutation) OldScheduledOffAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScheduledOffAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScheduledOffAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScheduledOffAt: %w", err)
+	}
+	return oldValue.ScheduledOffAt, nil
+}
+
+// ClearScheduledOffAt clears the value of the "scheduled_off_at" field.
+func (m *VideoMutation) ClearScheduledOffAt() {
+	m.scheduled_off_at = nil
+	m.clearedFields[video.FieldScheduledOffAt] = struct{}{}
+}
+
+// ScheduledOffAtCleared returns if the "scheduled_off_at" field was cleared in this mutation.
+func (m *VideoMutation) ScheduledOffAtCleared() bool {
+	_, ok := m.clearedFields[video.FieldScheduledOffAt]
+	return ok
+}
+
+// ResetScheduledOffAt resets all changes to the "scheduled_off_at" field.
+func (m *VideoMutation) ResetScheduledOffAt() {
+	m.scheduled_off_at = nil
+	delete(m.clearedFields, video.FieldScheduledOffAt)
+}
+
 // Where appends a list predicates to the VideoMutation builder.
 func (m *VideoMutation) Where(ps ...predicate.Video) {
 	m.predicates = append(m.predicates, ps...)
@@ -87687,7 +87737,7 @@ func (m *VideoMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *VideoMutation) Fields() []string {
-	fields := make([]string, 0, 25)
+	fields := make([]string, 0, 26)
 	if m.created_at != nil {
 		fields = append(fields, video.FieldCreatedAt)
 	}
@@ -87763,6 +87813,9 @@ func (m *VideoMutation) Fields() []string {
 	if m.scheduled_at != nil {
 		fields = append(fields, video.FieldScheduledAt)
 	}
+	if m.scheduled_off_at != nil {
+		fields = append(fields, video.FieldScheduledOffAt)
+	}
 	return fields
 }
 
@@ -87821,6 +87874,8 @@ func (m *VideoMutation) Field(name string) (ent.Value, bool) {
 		return m.PublishedAt()
 	case video.FieldScheduledAt:
 		return m.ScheduledAt()
+	case video.FieldScheduledOffAt:
+		return m.ScheduledOffAt()
 	}
 	return nil, false
 }
@@ -87880,6 +87935,8 @@ func (m *VideoMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldPublishedAt(ctx)
 	case video.FieldScheduledAt:
 		return m.OldScheduledAt(ctx)
+	case video.FieldScheduledOffAt:
+		return m.OldScheduledOffAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Video field %s", name)
 }
@@ -88063,6 +88120,13 @@ func (m *VideoMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetScheduledAt(v)
+		return nil
+	case video.FieldScheduledOffAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScheduledOffAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Video field %s", name)
@@ -88304,6 +88368,9 @@ func (m *VideoMutation) ClearedFields() []string {
 	if m.FieldCleared(video.FieldScheduledAt) {
 		fields = append(fields, video.FieldScheduledAt)
 	}
+	if m.FieldCleared(video.FieldScheduledOffAt) {
+		fields = append(fields, video.FieldScheduledOffAt)
+	}
 	return fields
 }
 
@@ -88356,6 +88423,9 @@ func (m *VideoMutation) ClearField(name string) error {
 		return nil
 	case video.FieldScheduledAt:
 		m.ClearScheduledAt()
+		return nil
+	case video.FieldScheduledOffAt:
+		m.ClearScheduledOffAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Video nullable field %s", name)
@@ -88439,6 +88509,9 @@ func (m *VideoMutation) ResetField(name string) error {
 		return nil
 	case video.FieldScheduledAt:
 		m.ResetScheduledAt()
+		return nil
+	case video.FieldScheduledOffAt:
+		m.ResetScheduledOffAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Video field %s", name)

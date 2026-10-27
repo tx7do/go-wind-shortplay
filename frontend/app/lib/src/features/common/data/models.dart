@@ -431,6 +431,42 @@ class TrendPoint {
   }
 }
 
+/// 创作者单视频数据行（stats.service.v1.CreatorVideoStat）
+class CreatorVideoStat {
+  final int videoId;
+  final String title;
+  final String coverUrl;
+  final int plays;
+  final int likes;
+  final int collects;
+  final int comments;
+
+  const CreatorVideoStat({
+    required this.videoId,
+    this.title = '',
+    this.coverUrl = '',
+    this.plays = 0,
+    this.likes = 0,
+    this.collects = 0,
+    this.comments = 0,
+  });
+
+  factory CreatorVideoStat.fromJson(Map<String, dynamic> json) {
+    return CreatorVideoStat(
+      videoId: jsonInt(json['videoId']),
+      title: jsonString(json['title']),
+      coverUrl: jsonString(json['coverUrl']),
+      plays: jsonInt(json['plays']),
+      likes: jsonInt(json['likes']),
+      collects: jsonInt(json['collects']),
+      comments: jsonInt(json['comments']),
+    );
+  }
+
+  /// 封面地址（对象键 → 媒体网关 URL）
+  String get coverDisplayUrl => MediaUrl.resolve(coverUrl);
+}
+
 /// 解析 protojson 时间戳（RFC3339 字符串）
 DateTime? parseTime(dynamic value) {
   if (value is! String || value.isEmpty) return null;

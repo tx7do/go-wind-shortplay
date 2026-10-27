@@ -26,12 +26,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final UserService _userService = UserService();
   final ImagePicker _picker = ImagePicker();
 
-  late final TextEditingController _nicknameController =
-      TextEditingController(text: _auth.userNickname);
-  late final TextEditingController _avatarController =
-      TextEditingController(text: _auth.userAvatarUrl);
-  late final TextEditingController _bioController =
-      TextEditingController(text: _auth.userBio);
+  late final TextEditingController _nicknameController = TextEditingController(
+    text: _auth.userNickname,
+  );
+  late final TextEditingController _avatarController = TextEditingController(
+    text: _auth.userAvatarUrl,
+  );
+  late final TextEditingController _bioController = TextEditingController(
+    text: _auth.userBio,
+  );
 
   bool _saving = false;
 
@@ -97,10 +100,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
       if (!mounted) return;
       setState(() => _avatarController.text = url);
       EasyLoading.showToast(loc.profileSaved);
-      } on ApiStatusException catch (e) {
-        EasyLoading.dismiss();
-        EasyLoading.showToast(localizedErrorText(loc, e));
-      } catch (_) {
+    } on ApiStatusException catch (e) {
+      EasyLoading.dismiss();
+      EasyLoading.showToast(localizedErrorText(loc, e));
+    } catch (_) {
       // 选图取消之外的未知异常：统一按上传失败提示（与发布页 _pickVideo 同策略）
       EasyLoading.dismiss();
       EasyLoading.showToast(loc.errorUploadFailed);
@@ -153,10 +156,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             onPressed: _saving ? null : _save,
             child: Text(
               loc.saveProfile,
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -215,9 +215,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               controller: _avatarController,
               onChanged: (_) => setState(() {}),
               style: TextStyle(fontSize: 14.sp),
-              decoration: const InputDecoration(
-                hintText: 'https://…',
-              ),
+              decoration: const InputDecoration(hintText: 'https://…'),
             ),
             SizedBox(height: 14.h),
             _buildLabel(theme, loc.nicknameLabel),

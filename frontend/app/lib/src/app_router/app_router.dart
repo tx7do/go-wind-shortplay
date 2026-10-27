@@ -16,6 +16,7 @@ import 'package:shortplay_app/src/features/common/widgets/login_guard.dart';
 import 'package:shortplay_app/src/features/feed/bloc/feed_bloc.dart';
 import 'package:shortplay_app/src/features/feed/pages/feed_page.dart';
 import 'package:shortplay_app/src/features/notify/bloc/notify_bloc.dart';
+import 'package:shortplay_app/src/core/transport/sse/global_sse_bridge.dart';
 import 'package:shortplay_app/src/features/notify/pages/notify_page.dart';
 import 'package:shortplay_app/src/features/profile/pages/edit_profile_page.dart';
 import 'package:shortplay_app/src/features/profile/pages/profile_page.dart';
@@ -207,47 +208,49 @@ class _HomeShell extends StatelessWidget {
 
     return BlocProvider<NotifyBloc>(
       create: (_) => NotifyBloc(),
-      child: BlocBuilder<NotifyBloc, NotifyState>(
-        builder: (context, notifyState) {
-          return Scaffold(
-            body: shell,
-            // 底栏为实体栏（抖音口径：仅顶部沉浸），body 不延伸到栏后
-            bottomNavigationBar: ValueListenableBuilder<bool>(
-              valueListenable:
-                  GetIt.instance<UserAuthCache>().loginStateNotifier,
-              builder: (context, hasLogin, _) {
-                return AppBottomNavBar(
-                  selectedIndex: shell.currentIndex,
-                  onDestinationSelected: (index) =>
-                      _onDestinationSelected(context, index),
-                  items: [
-                    BottomNavItem(
-                      icon: Icons.home_outlined,
-                      activeIcon: Icons.home,
-                      label: loc.home,
-                    ),
-                    BottomNavItem(
-                      icon: Icons.add_box_outlined,
-                      activeIcon: Icons.add_box,
-                      label: loc.publish,
-                    ),
-                    BottomNavItem(
-                      icon: Icons.notifications_none,
-                      activeIcon: Icons.notifications,
-                      label: loc.message,
-                      badgeCount: hasLogin ? notifyState.unreadCount : 0,
-                    ),
-                    BottomNavItem(
-                      icon: Icons.person_outline,
-                      activeIcon: Icons.person,
-                      label: loc.me,
-                    ),
-                  ],
-                );
-              },
-            ),
-          );
-        },
+      child: GlobalSseBridge(
+        child: BlocBuilder<NotifyBloc, NotifyState>(
+          builder: (context, notifyState) {
+            return Scaffold(
+              body: shell,
+              // 底栏为实体栏（抖音口径：仅顶部沉浸），body 不延伸到栏后
+              bottomNavigationBar: ValueListenableBuilder<bool>(
+                valueListenable:
+                    GetIt.instance<UserAuthCache>().loginStateNotifier,
+                builder: (context, hasLogin, _) {
+                  return AppBottomNavBar(
+                    selectedIndex: shell.currentIndex,
+                    onDestinationSelected: (index) =>
+                        _onDestinationSelected(context, index),
+                    items: [
+                      BottomNavItem(
+                        icon: Icons.home_outlined,
+                        activeIcon: Icons.home,
+                        label: loc.home,
+                      ),
+                      BottomNavItem(
+                        icon: Icons.add_box_outlined,
+                        activeIcon: Icons.add_box,
+                        label: loc.publish,
+                      ),
+                      BottomNavItem(
+                        icon: Icons.notifications_none,
+                        activeIcon: Icons.notifications,
+                        label: loc.message,
+                        badgeCount: hasLogin ? notifyState.unreadCount : 0,
+                      ),
+                      BottomNavItem(
+                        icon: Icons.person_outline,
+                        activeIcon: Icons.person,
+                        label: loc.me,
+                      ),
+                    ],
+                  );
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }

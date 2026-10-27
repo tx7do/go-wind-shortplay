@@ -1,0 +1,13 @@
+{
+  "moduleName": "message",
+  "messageList": "Message List",
+  "sender": "Sender",
+  "receiver": "Receiver",
+  "receiverId": "Receiver ID",
+  "content": "Content",
+  "conversationId": "Conversation ID",
+  "createdAt": "Sent At",
+  "searchContent": "Content keyword",
+  "searchSenderId": "Sender ID",
+  "searchReceiverId": "Receiver ID"
+}

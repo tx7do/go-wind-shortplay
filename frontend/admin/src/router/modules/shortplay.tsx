@@ -91,6 +91,16 @@ export const shortplayRoutes: AppRouteObject[] = [
           order: 6,
         },
       },
+      {
+        name: 'im',
+        path: 'im',
+        element: createLazyRoute(() => import('@/pages/app/im')),
+        meta: {
+          title: 'menu.shortPlay.im',
+          icon: 'ForumOutlined',
+          order: 7,
+        },
+      },
     ],
   },
 ];

@@ -20,7 +20,9 @@ const DataAccessAuditLogPage = () => {
   { title: t('createdAt'), dataIndex: 'createdAt', width: 160, render: (_, r) => (r.createdAt ? dayjs(r.createdAt).format('YYYY-MM-DD HH:mm:ss') : '-') },
   ];
 
-  return <AuditLogTable<DataAccessAuditLog> columns={columns} headerTitle={t('dataAccessTitle')} fetcher={fetchDataAccessAuditLogs} />;
+  return <AuditLogTable<DataAccessAuditLog> columns={columns} headerTitle={t('dataAccessTitle')} fetcher={fetchDataAccessAuditLogs}   searchKey="resource___contains"
+    exportType="data-access"
+  />;
 };
 
 export default DataAccessAuditLogPage;

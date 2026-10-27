@@ -3513,6 +3513,7 @@ var (
 		{Name: "view_count", Type: field.TypeUint64, Comment: "播放量（ledger 事务内增减）", Default: 0},
 		{Name: "published_at", Type: field.TypeTime, Nullable: true, Comment: "发布时间"},
 		{Name: "scheduled_at", Type: field.TypeTime, Nullable: true, Comment: "计划发布时间（DRAFT 定时中，到期任务自动转 PUBLISHED 并清空）"},
+		{Name: "scheduled_off_at", Type: field.TypeTime, Nullable: true, Comment: "计划下架时间（PUBLISHED 定时下架中，到期任务自动转 OFFLINE 并清空）"},
 	}
 	// SpVideosTable holds the schema information for the "sp_videos" table.
 	SpVideosTable = &schema.Table{
@@ -3530,6 +3531,11 @@ var (
 				Name:    "idx_sp_video_status_scheduled_at",
 				Unique:  false,
 				Columns: []*schema.Column{SpVideosColumns[15], SpVideosColumns[25]},
+			},
+			{
+				Name:    "idx_sp_video_status_scheduled_off_at",
+				Unique:  false,
+				Columns: []*schema.Column{SpVideosColumns[15], SpVideosColumns[26]},
 			},
 			{
 				Name:    "idx_sp_video_author_status",
@@ -3697,7 +3703,7 @@ var (
 		{Name: "deleted_by", Type: field.TypeUint32, Nullable: true, Comment: "删除者ID"},
 		{Name: "tenant_id", Type: field.TypeUint32, Nullable: true, Comment: "租户ID", Default: 0},
 		{Name: "reporter_id", Type: field.TypeUint32, Comment: "举报人用户ID", Default: 0},
-		{Name: "target_type", Type: field.TypeEnum, Comment: "目标类型", Enums: []string{"VIDEO", "COMMENT", "USER"}, Default: "VIDEO"},
+		{Name: "target_type", Type: field.TypeEnum, Comment: "目标类型", Enums: []string{"VIDEO", "COMMENT", "USER", "DANMAKU"}, Default: "VIDEO"},
 		{Name: "target_id", Type: field.TypeUint32, Comment: "目标ID", Default: 0},
 		{Name: "reason", Type: field.TypeString, Comment: "举报原因（枚举码）"},
 		{Name: "description", Type: field.TypeString, Nullable: true, Comment: "补充说明"},

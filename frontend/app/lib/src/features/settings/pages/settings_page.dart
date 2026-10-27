@@ -27,11 +27,51 @@ class _SettingsPageState extends State<SettingsPage> {
   /// 弹幕显隐（本地偏好，默认开）
   bool _danmakuOn = true;
 
+  /// 弹幕轨道数（1=1/4 屏，2=半屏，4=全屏）
+  int _danmakuTracks = 4;
+
+  /// 青少年模式
+  bool _teenMode = false;
+
   @override
   void initState() {
     super.initState();
-    _danmakuOn = GetIt.instance<UserPreferenceCache>().danmakuEnabled;
+    final prefs = GetIt.instance<UserPreferenceCache>();
+    _danmakuOn = prefs.danmakuEnabled;
+    _danmakuTracks = prefs.danmakuTracks;
+    _teenMode = prefs.teenModeEnabled;
     _loadVersion();
+  }
+
+  Future<void> _setDanmakuTracks(int value) async {
+    setState(() => _danmakuTracks = value);
+    await GetIt.instance<UserPreferenceCache>().setDanmakuTracks(value);
+  }
+
+  Future<void> _setTeenMode(bool value) async {
+    final loc = S.of(context);
+    if (value) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(loc.teenMode),
+          content: Text(loc.teenModeConfirm),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(loc.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(loc.confirm),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !mounted) return;
+    }
+    setState(() => _teenMode = value);
+    await GetIt.instance<UserPreferenceCache>().setTeenModeEnabled(value);
   }
 
   Future<void> _toggleDanmaku(bool value) async {
@@ -103,7 +143,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
               SizedBox(height: 14.h),
-              // 播放：弹幕
+              // 播放：弹幕 + 显示区域 + 青少年模式
               _SettingsSection(
                 icon: Icons.subtitles_outlined,
                 title: loc.playback,
@@ -114,6 +154,28 @@ class _SettingsPageState extends State<SettingsPage> {
                     trailing: Switch(
                       value: _danmakuOn,
                       onChanged: _toggleDanmaku,
+                    ),
+                  ),
+                  if (_danmakuOn)
+                    _SettingsRow(
+                      icon: Icons.aspect_ratio_rounded,
+                      label: loc.danmakuArea,
+                      trailing: _SegmentedSwitch<int>(
+                        items: const {
+                          1: '1/4',
+                          2: '1/2',
+                          4: 'FULL',
+                        },
+                        selected: _danmakuTracks,
+                        onChanged: _setDanmakuTracks,
+                      ),
+                    ),
+                  _SettingsRow(
+                    icon: Icons.child_care_rounded,
+                    label: loc.teenMode,
+                    trailing: Switch(
+                      value: _teenMode,
+                      onChanged: _setTeenMode,
                     ),
                   ),
                 ],

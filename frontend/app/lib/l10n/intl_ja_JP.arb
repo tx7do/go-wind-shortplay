@@ -302,5 +302,12 @@
   "imEmpty": "まだ会話がありません。プロフィールから始めよう",
   "imUserFallback": "ユーザー",
   "imConversationEmpty": "メッセージはまだありません",
-  "imInputHint": "メッセージを入力…"
+  "imInputHint": "メッセージを入力…",
+  "creatorVideoStatsTitle": "動画別データ",
+  "danmakuArea": "コメント表示領域",
+  "teenMode": "ティーンモード",
+  "teenModeConfirm": "オンにすると、1 日の視聴が 40 分を超えたら休憩を促します。有効にしますか？",
+  "teenRestTitle": "休憩しましょう",
+  "teenRestMessage": "今日 40 分視聴しました。少し休みましょう",
+  "sharePoster": "ポスターをシェア"
 }

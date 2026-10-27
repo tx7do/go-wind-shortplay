@@ -1,12 +1,8 @@
-import 'dart:async' show unawaited;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show Clipboard, ClipboardData;
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:shortplay_app/generated/l10n.dart';
-import 'package:shortplay_app/src/core/config/environments.dart';
 import 'package:shortplay_app/src/core/repositories/user_auth_cache.dart';
 import 'package:shortplay_app/src/core/themes/app_colors.dart';
 import 'package:shortplay_app/src/core/utilities/number_format.dart';
@@ -19,6 +15,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:shortplay_app/src/app_router/app_router.dart' show RouteNames;
 import 'package:shortplay_app/src/features/common/data/models.dart';
+import 'package:shortplay_app/src/features/common/widgets/share_poster_sheet.dart';
 
 /// 右侧操作栏：作者头像+关注、点赞、评论、收藏、分享
 class FeedActionBar extends StatefulWidget {
@@ -168,11 +165,7 @@ class _FeedActionBarState extends State<FeedActionBar> {
 
   /// 复制分享链接：`http://<API_BASE 域名>/s/{videoId}`
   void _share() {
-    final loc = S.of(context);
-    // 分享链接：http://<API_BASE 域名>/s/{videoId}（H5 分享页与网关同源）
-    final link = '${Environments.shareBaseUrl}/s/${widget.video.id}';
-    unawaited(Clipboard.setData(ClipboardData(text: link)));
-    EasyLoading.showToast(loc.shareCopied);
+    showShareSheet(context, widget.video);
   }
 
   void _syncVideo() {

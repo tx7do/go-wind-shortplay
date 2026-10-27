@@ -2,6 +2,7 @@ import {useCallback, useMemo} from 'react';
 
 import zhCN from 'antd/locale/zh_CN';
 import enUS from 'antd/locale/en_US';
+import jaJP from 'antd/locale/ja_JP';
 import type {Locale} from 'antd/es/locale';
 import {useTranslation} from 'react-i18next';
 
@@ -15,6 +16,7 @@ import type {SupportedLanguagesType} from '../types/layout';
 const antdLocales: Record<SupportedLanguagesType, Locale> = {
     'zh-CN': zhCN,
     'en-US': enUS,
+    'ja-JP': jaJP,
 };
 
 /**
@@ -69,6 +71,7 @@ export function useLocale() {
         const names: Record<SupportedLanguagesType, string> = {
             'zh-CN': t('langZhCN'),
             'en-US': t('langEnUS'),
+            'ja-JP': t('langJaJP'),
         };
         return names[lang];
     }, [t]);

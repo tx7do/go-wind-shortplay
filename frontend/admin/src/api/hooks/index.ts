@@ -37,6 +37,7 @@ import type {
   UpdateVideoRequest,
   Video,
   Danmaku,
+  ImAdminMessage,
 } from '@/api/types';
 import { queryClient, type PaginationQuery } from '@/core';
 
@@ -127,11 +128,18 @@ export function useGetVideo(id: number | undefined, options?: UseQueryOptions<Vi
 }
 
 export function useScheduleVideo(
-  options?: UseMutationOptions<Video, Error, { id: number; scheduledAt?: string | null }>,
+  options?: UseMutationOptions<
+    Video,
+    Error,
+    { id: number; scheduledAt?: string | null; scheduledOffAt?: string | null }
+  >,
 ) {
-  return useMutation<Video, Error, { id: number; scheduledAt?: string | null }>({
-    mutationFn: ({ id, scheduledAt }) =>
-      adminHttp.put<Video>(`videos/${id}/schedule`, { scheduledAt: scheduledAt ?? null }),
+  return useMutation<Video, Error, { id: number; scheduledAt?: string | null; scheduledOffAt?: string | null }>({
+    mutationFn: ({ id, scheduledAt, scheduledOffAt }) =>
+      adminHttp.put<Video>(`videos/${id}/schedule`, {
+        scheduledAt: scheduledAt ?? null,
+        scheduledOffAt: scheduledOffAt ?? null,
+      }),
     ...options,
   });
 }
@@ -294,6 +302,18 @@ export function useSetDanmakuStatus(
   return useMutation<Danmaku, Error, { id: number; status: string }>({
     mutationFn: ({ id, status }) => adminHttp.post<Danmaku>(`danmaku/${id}/status`, { status }),
     ...options,
+  });
+}
+
+// ==============================
+// 私信监管
+// ==============================
+
+export async function fetchListImMessages(params: ListParams) {
+  return queryClient.fetchQuery({
+    queryKey: ['listImMessages', params],
+    queryFn: () => adminHttp.get<ListResponse<ImAdminMessage>>('im/messages', cleanParams(params)),
+    retry: 0,
   });
 }
 

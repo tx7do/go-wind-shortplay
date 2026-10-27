@@ -53,8 +53,7 @@ class UserService extends BaseService {
   /// 用户统计（游客可访问）
   Future<UserStats> getStats(int userId) async {
     try {
-      final res =
-          await _dio.get<Map<String, dynamic>>('/users/$userId/stats');
+      final res = await _dio.get<Map<String, dynamic>>('/users/$userId/stats');
       final data = res.data;
       if (data == null) {
         throw ApiStatusException(Status(message: 'empty response'));
@@ -82,10 +81,25 @@ class UserService extends BaseService {
     }
   }
 
+  /// 创作者单视频数据（本人作品逐条：播放/点赞/收藏/评论，播放量倒序）
+  Future<List<CreatorVideoStat>> creatorVideoStats({int limit = 20}) async {
+    try {
+      final res = await _dio.get<Map<String, dynamic>>(
+        '/creator/video-stats',
+        queryParameters: {'limit': limit},
+      );
+      return (res.data?['items'] as List<dynamic>? ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(CreatorVideoStat.fromJson)
+          .toList();
+    } on DioException catch (e) {
+      throw ApiStatusException(handleDioError(e));
+    }
+  }
+
   Future<CreatorOverview> creatorOverview() async {
     try {
-      final res =
-          await _dio.get<Map<String, dynamic>>('/creator/overview');
+      final res = await _dio.get<Map<String, dynamic>>('/creator/overview');
       final data = res.data;
       if (data == null) {
         throw ApiStatusException(Status(message: 'empty response'));
@@ -196,11 +210,7 @@ class UserService extends BaseService {
     try {
       final res = await _dio.put<Map<String, dynamic>>(
         '/profile',
-        data: {
-          'nickname': ?nickname,
-          'avatarUrl': ?avatarUrl,
-          'bio': ?bio,
-        },
+        data: {'nickname': ?nickname, 'avatarUrl': ?avatarUrl, 'bio': ?bio},
       );
       final data = res.data;
       if (data == null) {

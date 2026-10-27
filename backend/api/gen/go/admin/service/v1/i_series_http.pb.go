@@ -40,13 +40,13 @@ type SeriesServiceHTTPServer interface {
 
 func RegisterSeriesServiceHTTPServer(s *http.Server, srv SeriesServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/v1/series", _SeriesService_List26_HTTP_Handler(srv))
+	r.GET("/admin/v1/series", _SeriesService_List27_HTTP_Handler(srv))
 	r.GET("/admin/v1/series/{id}", _SeriesService_Get24_HTTP_Handler(srv))
 	r.PUT("/admin/v1/series/{id}", _SeriesService_Update17_HTTP_Handler(srv))
 	r.DELETE("/admin/v1/series/{id}", _SeriesService_Delete19_HTTP_Handler(srv))
 }
 
-func _SeriesService_List26_HTTP_Handler(srv SeriesServiceHTTPServer) func(ctx http.Context) error {
+func _SeriesService_List27_HTTP_Handler(srv SeriesServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v1.PagingRequest
 		if err := ctx.BindQuery(&in); err != nil {

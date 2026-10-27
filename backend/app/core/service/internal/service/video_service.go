@@ -285,6 +285,12 @@ func (s *VideoService) ChangeVideoStatus(ctx context.Context, req *videoV1.Chang
 			}
 		}
 	}
+	if to == videoV1.VideoStatus_VIDEO_STATUS_OFFLINE && cur.GetScheduledOffAt() != nil {
+		// 已手工下架：清空定时下架排程
+		if _, serr := s.videoRepo.SetScheduledOffAt(ctx, req.GetId(), nil); serr != nil {
+			s.log.Errorf("clear scheduled_off_at on offline failed: %s", serr.Error())
+		}
+	}
 	if to == videoV1.VideoStatus_VIDEO_STATUS_REJECTED || to == videoV1.VideoStatus_VIDEO_STATUS_OFFLINE {
 		reason := req.GetReason()
 		if strings.TrimSpace(reason) == "" {
@@ -320,7 +326,9 @@ func (s *VideoService) ChangeVideoStatus(ctx context.Context, req *videoV1.Chang
 	return updated, nil
 }
 
-// ScheduleVideo 设置/取消定时发布（作者本人或管理端；仅 DRAFT 可定时）
+// ScheduleVideo 设置/取消定时发布与定时下架（作者本人或管理端）。
+// scheduledAt 仅 DRAFT（到期转 PUBLISHED）；scheduledOffAt 仅 PUBLISHED
+//（到期转 OFFLINE）；各自缺省=取消对应排程。
 func (s *VideoService) ScheduleVideo(ctx context.Context, req *videoV1.ScheduleVideoRequest) (*videoV1.Video, error) {
 	if req == nil || req.GetId() == 0 {
 		return nil, videoV1.ErrorBadRequest("invalid parameter")
@@ -333,22 +341,37 @@ func (s *VideoService) ScheduleVideo(ctx context.Context, req *videoV1.ScheduleV
 	if !spIsAdminCaller(ctx) && cur.GetAuthorId() != uid {
 		return nil, videoV1.ErrorForbidden("not video owner")
 	}
-	if cur.GetStatus() != videoV1.VideoStatus_VIDEO_STATUS_DRAFT {
-		return nil, videoV1.ErrorInvalidStatusTransition("only draft videos can be scheduled, current: %s", cur.GetStatus())
-	}
 
-	var at *time.Time
+	// 定时发布（仅 DRAFT）
 	if req.ScheduledAt != nil {
+		if cur.GetStatus() != videoV1.VideoStatus_VIDEO_STATUS_DRAFT {
+			return nil, videoV1.ErrorInvalidStatusTransition("only draft videos can be scheduled to publish, current: %s", cur.GetStatus())
+		}
 		t := req.GetScheduledAt().AsTime()
 		if !t.After(time.Now()) {
 			return nil, videoV1.ErrorBadRequest("scheduled time must be in the future")
 		}
-		at = &t
+		if _, err := s.videoRepo.SetScheduledAt(ctx, req.GetId(), &t); err != nil {
+			return nil, err
+		}
+		s.schedulePublishTask(ctx, req.GetId(), &t)
 	}
-	if _, err := s.videoRepo.SetScheduledAt(ctx, req.GetId(), at); err != nil {
-		return nil, err
+
+	// 定时下架（仅 PUBLISHED）
+	if req.ScheduledOffAt != nil {
+		if cur.GetStatus() != videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED {
+			return nil, videoV1.ErrorInvalidStatusTransition("only published videos can be scheduled to offline, current: %s", cur.GetStatus())
+		}
+		off := req.GetScheduledOffAt().AsTime()
+		if !off.After(time.Now()) {
+			return nil, videoV1.ErrorBadRequest("scheduled off time must be in the future")
+		}
+		if _, err := s.videoRepo.SetScheduledOffAt(ctx, req.GetId(), &off); err != nil {
+			return nil, err
+		}
+		s.scheduleUnpublishTask(ctx, req.GetId(), &off)
 	}
-	s.schedulePublishTask(ctx, req.GetId(), at)
+
 	return s.videoRepo.Get(ctx, req.GetId())
 }
 
@@ -392,6 +415,52 @@ func (s *VideoService) afterVideoCreated(ctx context.Context, video *videoV1.Vid
 		at := video.GetScheduledAt().AsTime()
 		s.schedulePublishTask(ctx, video.GetId(), &at)
 	}
+}
+
+// scheduleUnpublishTask 定时下架入队（取消定时无需撤销：到期回调自校验状态）
+func (s *VideoService) scheduleUnpublishTask(ctx context.Context, videoID uint32, at *time.Time) {
+	if s.taskEnqueuer == nil {
+		return
+	}
+	if err := s.taskEnqueuer.NewTask(
+		task.VideoScheduledUnpublishTaskType,
+		&task.VideoScheduledUnpublishData{VideoID: videoID},
+		asynq.ProcessAt(*at),
+	); err != nil {
+		s.log.Errorf("enqueue scheduled unpublish failed: %v", err)
+	}
+}
+
+// AsyncScheduledUnpublish asynq 订阅者：到期把 PUBLISHED+定时下架视频转 OFFLINE。
+func (s *VideoService) AsyncScheduledUnpublish(_ string, payload *task.VideoScheduledUnpublishData) error {
+	if payload == nil || payload.VideoID == 0 {
+		return nil
+	}
+	ctx := spSystemContext()
+	e, err := s.videoRepo.GetEntityRaw(ctx, payload.VideoID)
+	if err != nil {
+		return nil // 已删除：不重试
+	}
+	if e.Status != videopkg.StatusPublished || e.ScheduledOffAt == nil {
+		return nil // 状态已变（提前下架/取消排程）：跳过
+	}
+	// 先清排程再下架，保证两步任一失败可见
+	if _, err := s.videoRepo.SetScheduledOffAt(ctx, payload.VideoID, nil); err != nil {
+		s.log.Errorf("clear scheduled_off_at before offline failed: %s", err.Error())
+		return nil
+	}
+	updated, err := s.videoRepo.Update(ctx, payload.VideoID, &videoV1.Video{
+		Status:       videoV1.VideoStatus_VIDEO_STATUS_OFFLINE.Enum(),
+		RejectReason: trans.Ptr("定时下架"),
+	}, nil)
+	if err != nil {
+		s.log.Errorf("scheduled unpublish failed: %s", err.Error())
+		return nil
+	}
+	// 作者通知（系统口径）
+	s.notifyVideoReviewed(ctx, updated.GetAuthorId(), updated.GetId(), updated.GetTitle(), "定时下架", reviewOffline)
+	s.log.Infof("scheduled video %d offline (planned at %s)", payload.VideoID, e.ScheduledOffAt.Format(time.RFC3339))
+	return nil
 }
 
 // AsyncScheduledPublish asynq 订阅者：到期把 DRAFT+定时视频转 PUBLISHED。

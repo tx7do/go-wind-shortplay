@@ -64,6 +64,8 @@ const (
 	FieldPublishedAt = "published_at"
 	// FieldScheduledAt holds the string denoting the scheduled_at field in the database.
 	FieldScheduledAt = "scheduled_at"
+	// FieldScheduledOffAt holds the string denoting the scheduled_off_at field in the database.
+	FieldScheduledOffAt = "scheduled_off_at"
 	// Table holds the table name of the video in the database.
 	Table = "sp_videos"
 )
@@ -96,6 +98,7 @@ var Columns = []string{
 	FieldViewCount,
 	FieldPublishedAt,
 	FieldScheduledAt,
+	FieldScheduledOffAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -304,4 +307,9 @@ func ByPublishedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByScheduledAt orders the results by the scheduled_at field.
 func ByScheduledAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldScheduledAt, opts...).ToFunc()
+}
+
+// ByScheduledOffAt orders the results by the scheduled_off_at field.
+func ByScheduledOffAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldScheduledOffAt, opts...).ToFunc()
 }

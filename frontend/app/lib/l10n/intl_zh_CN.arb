@@ -405,5 +405,12 @@
   "imEmpty": "暂无私信，从他人主页发起对话吧",
   "imUserFallback": "用户",
   "imConversationEmpty": "还没有消息",
-  "imInputHint": "输入消息…"
+  "imInputHint": "输入消息…",
+  "creatorVideoStatsTitle": "单视频数据",
+  "danmakuArea": "弹幕显示区域",
+  "teenMode": "青少年模式",
+  "teenModeConfirm": "开启后每日累计观看满 40 分钟将提醒休息。现在开启？",
+  "teenRestTitle": "休息一下",
+  "teenRestMessage": "今天已连续观看 40 分钟，休息一下再继续吧",
+  "sharePoster": "分享海报"
 }

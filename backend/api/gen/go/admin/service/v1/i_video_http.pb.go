@@ -46,7 +46,7 @@ type VideoServiceHTTPServer interface {
 
 func RegisterVideoServiceHTTPServer(s *http.Server, srv VideoServiceHTTPServer) {
 	r := s.Route("/")
-	r.GET("/admin/v1/videos", _VideoService_List30_HTTP_Handler(srv))
+	r.GET("/admin/v1/videos", _VideoService_List31_HTTP_Handler(srv))
 	r.GET("/admin/v1/videos/{id}", _VideoService_Get30_HTTP_Handler(srv))
 	r.PUT("/admin/v1/videos/{id}", _VideoService_Update22_HTTP_Handler(srv))
 	r.PUT("/admin/v1/videos/{id}/status", _VideoService_ChangeStatus0_HTTP_Handler(srv))
@@ -54,7 +54,7 @@ func RegisterVideoServiceHTTPServer(s *http.Server, srv VideoServiceHTTPServer) 
 	r.PUT("/admin/v1/videos/{id}/schedule", _VideoService_ScheduleVideo0_HTTP_Handler(srv))
 }
 
-func _VideoService_List30_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
+func _VideoService_List31_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v1.PagingRequest
 		if err := ctx.BindQuery(&in); err != nil {

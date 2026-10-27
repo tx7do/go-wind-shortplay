@@ -107,7 +107,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Aggregated daily (plays/likes from UBA events, publishes by approval time)",
     ),
     "creatorStatsTitle": MessageLookupByLibrary.simpleMessage("Creator Stats"),
+    "creatorVideoStatsTitle": MessageLookupByLibrary.simpleMessage(
+      "Per-video Stats",
+    ),
     "danmaku": MessageLookupByLibrary.simpleMessage("Danmaku"),
+    "danmakuArea": MessageLookupByLibrary.simpleMessage("Danmaku Area"),
     "danmakuSendAction": MessageLookupByLibrary.simpleMessage("Send"),
     "danmakuSendHint": MessageLookupByLibrary.simpleMessage("Say something…"),
     "danmakuSendTitle": MessageLookupByLibrary.simpleMessage("Send Danmaku"),
@@ -532,6 +536,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "shareCopied": MessageLookupByLibrary.simpleMessage(
       "Link copied, go share it",
     ),
+    "sharePoster": MessageLookupByLibrary.simpleMessage("Share Poster"),
     "sortHot": MessageLookupByLibrary.simpleMessage("Hot"),
     "sortLatest": MessageLookupByLibrary.simpleMessage("Latest"),
     "statusDraft": MessageLookupByLibrary.simpleMessage("Draft"),
@@ -546,6 +551,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "Search or create tags",
     ),
     "tagPickerTitle": MessageLookupByLibrary.simpleMessage("Pick tags"),
+    "teenMode": MessageLookupByLibrary.simpleMessage("Teen Mode"),
+    "teenModeConfirm": MessageLookupByLibrary.simpleMessage(
+      "When on, a break reminder appears after 40 minutes of daily watch time. Turn on?",
+    ),
+    "teenRestMessage": MessageLookupByLibrary.simpleMessage(
+      "You\'ve watched for 40 minutes today. Time for a break!",
+    ),
+    "teenRestTitle": MessageLookupByLibrary.simpleMessage("Take a break"),
     "timeDaysAgo": m11,
     "timeHoursAgo": m12,
     "timeJustNow": MessageLookupByLibrary.simpleMessage("just now"),

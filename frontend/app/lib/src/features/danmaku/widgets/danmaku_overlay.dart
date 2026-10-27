@@ -6,9 +6,6 @@ import 'package:media_kit/media_kit.dart' show Player;
 
 import 'package:shortplay_app/src/features/danmaku/services/danmaku_service.dart';
 
-/// 弹幕轨道数（半屏密度，观演不遮挡主体）
-const int _kTracks = 4;
-
 /// 单条弹幕飞行时长（横穿屏幕）
 const Duration _kFlyDuration = Duration(seconds: 6);
 
@@ -24,7 +21,19 @@ class DanmakuOverlay extends StatefulWidget {
   final Player player;
   final List<DanmakuItem> items;
 
-  const DanmakuOverlay({super.key, required this.player, required this.items});
+  /// 弹幕轨道数（显示区域：1=1/4 屏，2=半屏，4=全屏）
+  final int tracks;
+
+  /// 弹幕点击（宿主弹操作面板：举报等）；null 则弹幕层不可点
+  final ValueChanged<DanmakuItem>? onDanmakuTap;
+
+  const DanmakuOverlay({
+    super.key,
+    required this.player,
+    required this.items,
+    this.tracks = 4,
+    this.onDanmakuTap,
+  });
 
   @override
   State<DanmakuOverlay> createState() => _DanmakuOverlayState();
@@ -38,7 +47,10 @@ class _DanmakuOverlayState extends State<DanmakuOverlay> {
   int _nextKey = 1;
   int _cursor = 0;
   int _lastPositionMs = 0;
-  final List<int> _trackLastSpawnAtMs = List.filled(_kTracks, -0x7fffffff);
+  late final List<int> _trackLastSpawnAtMs = List.filled(
+    widget.tracks.clamp(1, 4),
+    -0x7fffffff,
+  );
 
   @override
   void initState() {
@@ -60,7 +72,7 @@ class _DanmakuOverlayState extends State<DanmakuOverlay> {
     setState(() {
       _flying.clear();
       _cursor = 0;
-      _trackLastSpawnAtMs.fillRange(0, _kTracks, -0x7fffffff);
+      _trackLastSpawnAtMs.fillRange(0, _trackLastSpawnAtMs.length, -0x7fffffff);
     });
   }
 
@@ -104,9 +116,9 @@ class _DanmakuOverlayState extends State<DanmakuOverlay> {
 
   /// 选轨道：优先「该轨道上一条已飞出足够距离」，否则取最近发射最早者
   int _pickTrack(int nowMs) {
-    var best = _random.nextInt(_kTracks);
+    var best = _random.nextInt(_trackLastSpawnAtMs.length);
     var bestAt = _trackLastSpawnAtMs[best];
-    for (var i = 0; i < _kTracks; i++) {
+    for (var i = 0; i < _trackLastSpawnAtMs.length; i++) {
       if (_trackLastSpawnAtMs[i] < bestAt) {
         best = i;
         bestAt = _trackLastSpawnAtMs[i];
@@ -118,27 +130,30 @@ class _DanmakuOverlayState extends State<DanmakuOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final width = constraints.maxWidth;
-          return Stack(
-            clipBehavior: Clip.none,
-            children: [
-              for (final flying in _flying)
-                _DanmakuFlyWidget(
-                  key: flying.key,
-                  text: flying.item.content,
-                  track: flying.track,
-                  tracks: _kTracks,
-                  containerWidth: width,
-                  duration: _kFlyDuration,
-                  onCompleted: flying.onCompleted,
-                ),
-            ],
-          );
-        },
-      ),
+    // 不加 IgnorePointer：仅弹幕文本区域命中点击（举报入口），
+    // 其余区域透明穿透到播放器手势
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            for (final flying in _flying)
+              _DanmakuFlyWidget(
+                key: flying.key,
+                item: flying.item,
+                track: flying.track,
+                tracks: _trackLastSpawnAtMs.length,
+                containerWidth: width,
+                duration: _kFlyDuration,
+                onTap: widget.onDanmakuTap != null
+                    ? () => widget.onDanmakuTap!(flying.item)
+                    : null,
+                onCompleted: flying.onCompleted,
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -160,21 +175,25 @@ class _FlyingDanmaku {
 
 /// 单条飞行弹幕：TweenAnimationBuilder 驱动右→左平移，结束即回调移除
 class _DanmakuFlyWidget extends StatelessWidget {
-  final String text;
+  final DanmakuItem item;
   final int track;
   final int tracks;
   final double containerWidth;
   final Duration duration;
+
+  /// 点击回调（举报入口；null 不可点）
+  final VoidCallback? onTap;
   final VoidCallback onCompleted;
 
   const _DanmakuFlyWidget({
     super.key,
-    required this.text,
+    required this.item,
     required this.track,
     required this.tracks,
     required this.containerWidth,
     required this.duration,
     required this.onCompleted,
+    this.onTap,
   });
 
   @override
@@ -182,7 +201,7 @@ class _DanmakuFlyWidget extends StatelessWidget {
     // 文本宽度预估（弹幕白字带描边，字号 13）
     final tp = TextPainter(
       text: TextSpan(
-        text: text,
+        text: item.content,
         style: TextStyle(
           fontSize: 13.sp,
           color: Colors.white,
@@ -194,8 +213,10 @@ class _DanmakuFlyWidget extends StatelessWidget {
       textDirection: TextDirection.ltr,
     )..layout();
     final textWidth = tp.width;
-    // 轨道纵向位置：顶部安全区内均分
-    final top = MediaQuery.paddingOf(context).top + 8.h + track * 24.h;
+    // 轨道纵向位置：显示区域内按轨道数均分（1 轨=1/4 屏、4 轨=全屏高度）
+    final areaHeight = 240.h * (tracks / 4);
+    final slot = areaHeight / tracks;
+    final top = MediaQuery.paddingOf(context).top + 8.h + track * slot;
     // 起点右缘外，终点左缘外
     final travel = containerWidth + textWidth;
 
@@ -212,18 +233,22 @@ class _DanmakuFlyWidget extends StatelessWidget {
             child: child,
           );
         },
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: 13.sp,
-            color: Colors.white,
-            shadows: const [
-              Shadow(
-                blurRadius: 2,
-                color: Colors.black54,
-                offset: Offset(1, 1),
-              ),
-            ],
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: Text(
+            item.content,
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: Colors.white,
+              shadows: const [
+                Shadow(
+                  blurRadius: 2,
+                  color: Colors.black54,
+                  offset: Offset(1, 1),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -405,5 +405,12 @@
   "imEmpty": "No conversations yet. Start one from a profile",
   "imUserFallback": "User",
   "imConversationEmpty": "No messages yet",
-  "imInputHint": "Type a message…"
+  "imInputHint": "Type a message…",
+  "creatorVideoStatsTitle": "Per-video Stats",
+  "danmakuArea": "Danmaku Area",
+  "teenMode": "Teen Mode",
+  "teenModeConfirm": "When on, a break reminder appears after 40 minutes of daily watch time. Turn on?",
+  "teenRestTitle": "Take a break",
+  "teenRestMessage": "You've watched for 40 minutes today. Time for a break!",
+  "sharePoster": "Share Poster"
 }

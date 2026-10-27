@@ -245,6 +245,15 @@ var DefaultPermissions = []*permissionV1.Permission{
 		Status:      trans.Ptr(permissionV1.Permission_ON),
 		MenuIds:     []uint32{77},
 	},
+	{
+		Id:          trans.Ptr(uint32(14)),
+		GroupId:     trans.Ptr(uint32(1)),
+		Name:        trans.Ptr("私信监管"),
+		Description: trans.Ptr("私信查看（只读，/admin/v1/im*）"),
+		Code:        trans.Ptr(BizImManagePermissionCode),
+		Status:      trans.Ptr(permissionV1.Permission_ON),
+		MenuIds:     []uint32{78},
+	},
 }
 
 // DefaultRoles 系统初始化默认角色数据。
@@ -1044,6 +1053,21 @@ var DefaultMenus = []*permissionV1.Menu{
 			Order:     trans.Ptr(int32(6)),
 			Title:     trans.Ptr("menu.shortPlay.danmaku"),
 			Icon:      trans.Ptr("lucide:message-square-text"),
+			Authority: []string{"sys:platform_admin", "sys:tenant_manager"},
+		},
+	},
+	{
+		Id:        trans.Ptr(uint32(78)),
+		ParentId:  trans.Ptr(uint32(75)),
+		Type:      permissionV1.Menu_MENU.Enum(),
+		Name:      trans.Ptr("ImManagement"),
+		Path:      trans.Ptr("im"),
+		Component: trans.Ptr("im"),
+		CreatedAt: timeutil.TimeToTimestamppb(trans.Ptr(time.Now())),
+		Meta: &permissionV1.MenuMeta{
+			Order:     trans.Ptr(int32(7)),
+			Title:     trans.Ptr("menu.shortPlay.im"),
+			Icon:      trans.Ptr("lucide:message-circle"),
 			Authority: []string{"sys:platform_admin", "sys:tenant_manager"},
 		},
 	},

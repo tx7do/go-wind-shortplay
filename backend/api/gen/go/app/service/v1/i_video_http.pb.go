@@ -31,6 +31,7 @@ const OperationVideoServiceGetCreatorOverview = "/app.service.v1.VideoService/Ge
 const OperationVideoServiceGetDraft = "/app.service.v1.VideoService/GetDraft"
 const OperationVideoServiceGetUploadTask = "/app.service.v1.VideoService/GetUploadTask"
 const OperationVideoServiceListCreatorTrends = "/app.service.v1.VideoService/ListCreatorTrends"
+const OperationVideoServiceListCreatorVideoStats = "/app.service.v1.VideoService/ListCreatorVideoStats"
 const OperationVideoServiceListDraft = "/app.service.v1.VideoService/ListDraft"
 const OperationVideoServiceListHotVideos = "/app.service.v1.VideoService/ListHotVideos"
 const OperationVideoServiceListTag = "/app.service.v1.VideoService/ListTag"
@@ -57,6 +58,8 @@ type VideoServiceHTTPServer interface {
 	GetUploadTask(context.Context, *v1.GetUploadTaskRequest) (*v1.UploadTask, error)
 	// ListCreatorTrends 创作者近 N 日趋势（本人口径，需登录）
 	ListCreatorTrends(context.Context, *v12.ListCreatorTrendsRequest) (*v12.ListTrendsResponse, error)
+	// ListCreatorVideoStats 创作者单视频数据（本人作品逐条：播放/点赞/收藏/评论）
+	ListCreatorVideoStats(context.Context, *v12.ListCreatorVideoStatsRequest) (*v12.ListCreatorVideoStatsResponse, error)
 	// ListDraft 草稿列表
 	ListDraft(context.Context, *v11.PagingRequest) (*v1.ListDraftResponse, error)
 	// ListHotVideos 热榜（游客可访问）
@@ -92,6 +95,7 @@ func RegisterVideoServiceHTTPServer(s *http.Server, srv VideoServiceHTTPServer) 
 	r.GET("/app/v1/tags", _VideoService_ListTag0_HTTP_Handler(srv))
 	r.GET("/app/v1/creator/overview", _VideoService_GetCreatorOverview0_HTTP_Handler(srv))
 	r.GET("/app/v1/creator/trends", _VideoService_ListCreatorTrends0_HTTP_Handler(srv))
+	r.GET("/app/v1/creator/video-stats", _VideoService_ListCreatorVideoStats0_HTTP_Handler(srv))
 	r.GET("/app/v1/hot-videos", _VideoService_ListHotVideos0_HTTP_Handler(srv))
 }
 
@@ -428,6 +432,25 @@ func _VideoService_ListCreatorTrends0_HTTP_Handler(srv VideoServiceHTTPServer) f
 	}
 }
 
+func _VideoService_ListCreatorVideoStats0_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v12.ListCreatorVideoStatsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationVideoServiceListCreatorVideoStats)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListCreatorVideoStats(ctx, req.(*v12.ListCreatorVideoStatsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v12.ListCreatorVideoStatsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _VideoService_ListHotVideos0_HTTP_Handler(srv VideoServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in v1.ListHotVideosRequest
@@ -464,6 +487,8 @@ type VideoServiceHTTPClient interface {
 	GetUploadTask(ctx context.Context, req *v1.GetUploadTaskRequest, opts ...http.CallOption) (rsp *v1.UploadTask, err error)
 	// ListCreatorTrends 创作者近 N 日趋势（本人口径，需登录）
 	ListCreatorTrends(ctx context.Context, req *v12.ListCreatorTrendsRequest, opts ...http.CallOption) (rsp *v12.ListTrendsResponse, err error)
+	// ListCreatorVideoStats 创作者单视频数据（本人作品逐条：播放/点赞/收藏/评论）
+	ListCreatorVideoStats(ctx context.Context, req *v12.ListCreatorVideoStatsRequest, opts ...http.CallOption) (rsp *v12.ListCreatorVideoStatsResponse, err error)
 	// ListDraft 草稿列表
 	ListDraft(ctx context.Context, req *v11.PagingRequest, opts ...http.CallOption) (rsp *v1.ListDraftResponse, err error)
 	// ListHotVideos 热榜（游客可访问）
@@ -594,6 +619,20 @@ func (c *VideoServiceHTTPClientImpl) ListCreatorTrends(ctx context.Context, in *
 	pattern := "/app/v1/creator/trends"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationVideoServiceListCreatorTrends))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListCreatorVideoStats 创作者单视频数据（本人作品逐条：播放/点赞/收藏/评论）
+func (c *VideoServiceHTTPClientImpl) ListCreatorVideoStats(ctx context.Context, in *v12.ListCreatorVideoStatsRequest, opts ...http.CallOption) (*v12.ListCreatorVideoStatsResponse, error) {
+	var out v12.ListCreatorVideoStatsResponse
+	pattern := "/app/v1/creator/video-stats"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationVideoServiceListCreatorVideoStats))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

@@ -5,6 +5,7 @@ import 'package:shortplay_app/generated/l10n.dart';
 import 'package:shortplay_app/src/core/themes/app_colors.dart';
 import 'package:shortplay_app/src/core/transport/http/index.dart'
     show ApiStatusException, localizedErrorText;
+import 'package:shortplay_app/src/core/utilities/number_format.dart';
 import 'package:shortplay_app/src/core/widgets/empty_state.dart';
 import 'package:shortplay_app/src/features/common/data/models.dart';
 import 'package:shortplay_app/src/features/profile/services/user_service.dart';
@@ -22,6 +23,7 @@ class _CreatorStatsPageState extends State<CreatorStatsPage> {
   final UserService _userService = UserService();
 
   List<TrendPoint>? _points;
+  List<CreatorVideoStat>? _videoStats;
   int _days = 7;
   String? _error;
 
@@ -35,8 +37,18 @@ class _CreatorStatsPageState extends State<CreatorStatsPage> {
     setState(() => _error = null);
     try {
       final points = await _userService.creatorTrends(days: _days);
+      // 单视频数据尽力而为（失败不阻塞趋势图）
+      List<CreatorVideoStat>? stats;
+      try {
+        stats = await _userService.creatorVideoStats();
+      } catch (_) {
+        stats = null;
+      }
       if (!mounted) return;
-      setState(() => _points = points);
+      setState(() {
+        _points = points;
+        _videoStats = stats;
+      });
     } on ApiStatusException catch (e) {
       if (!mounted) return;
       setState(() => _error = localizedErrorText(S.of(context), e));
@@ -84,33 +96,53 @@ class _CreatorStatsPageState extends State<CreatorStatsPage> {
       body: points == null && _error == null
           ? const Center(child: CircularProgressIndicator())
           : points == null
-              ? EmptyState(
-                  icon: Icons.wifi_off_rounded,
-                  title: loc.errorOccurred,
-                  subtitle: _error!,
-                  actionLabel: loc.retry,
-                  onAction: _load,
-                )
-              : RefreshIndicator(
-                  onRefresh: _load,
-                  child: ListView(
-                    padding: EdgeInsets.all(16.w),
-                    children: [
-                      _Legend(theme: theme),
-                      SizedBox(height: 12.h),
-                      _TrendBars(points: points, theme: theme),
-                      SizedBox(height: 16.h),
-                      Text(
-                        loc.creatorStatsHint,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          color: theme.colorScheme.onSurface.withAlpha(110),
-                        ),
+          ? EmptyState(
+              icon: Icons.wifi_off_rounded,
+              title: loc.errorOccurred,
+              subtitle: _error!,
+              actionLabel: loc.retry,
+              onAction: _load,
+            )
+          : RefreshIndicator(
+              onRefresh: _load,
+              child: ListView(
+                padding: EdgeInsets.all(16.w),
+                children: [
+                  _Legend(theme: theme),
+                  SizedBox(height: 12.h),
+                  _TrendBars(points: points, theme: theme),
+                  SizedBox(height: 16.h),
+                  // 单视频数据（播放量倒序）
+                  if (_videoStats != null && _videoStats!.isNotEmpty) ...[
+                    Text(
+                      loc.creatorVideoStatsTitle,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        color: theme.colorScheme.onSurface,
                       ),
-                    ],
+                    ),
+                    SizedBox(height: 10.h),
+                    ..._videoStats!.map(
+                      (row) => Padding(
+                        padding: EdgeInsets.only(bottom: 8.h),
+                        child: _VideoStatRow(row: row),
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                  ],
+                  SizedBox(height: 16.h),
+                  Text(
+                    loc.creatorStatsHint,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: theme.colorScheme.onSurface.withAlpha(110),
+                    ),
                   ),
-                ),
+                ],
+              ),
+            ),
     );
   }
 }
@@ -155,10 +187,7 @@ class _Legend extends StatelessWidget {
         SizedBox(width: 14.w),
         item(BrandColor.violet, loc.creatorLikes),
         SizedBox(width: 14.w),
-        item(
-          theme.colorScheme.onSurface.withAlpha(120),
-          loc.creatorPublished,
-        ),
+        item(theme.colorScheme.onSurface.withAlpha(120), loc.creatorPublished),
       ],
     );
   }
@@ -208,7 +237,8 @@ class _TrendBars extends StatelessWidget {
                 for (final p in points)
                   Expanded(
                     child: Tooltip(
-                      message: '${p.date}\n'
+                      message:
+                          '${p.date}\n'
                           '${loc.creatorPlays} ${p.plays} · '
                           '${loc.creatorLikes} ${p.likes} · '
                           '${loc.creatorPublished} ${p.published}',
@@ -272,6 +302,81 @@ class _TrendBars extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.vertical(top: Radius.circular(2.r)),
+      ),
+    );
+  }
+}
+
+/// 单视频数据行：封面 + 标题 + 播放/点赞/收藏/评论
+class _VideoStatRow extends StatelessWidget {
+  final CreatorVideoStat row;
+
+  const _VideoStatRow({required this.row});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final loc = S.of(context);
+    return Container(
+      padding: EdgeInsets.all(10.w),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.onSurface.withAlpha(8),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8.r),
+            child: row.coverDisplayUrl.isNotEmpty
+                ? Image.network(
+                    row.coverDisplayUrl,
+                    width: 64.w,
+                    height: 42.h,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => Container(
+                      width: 64.w,
+                      height: 42.h,
+                      color: theme.colorScheme.onSurface.withAlpha(20),
+                    ),
+                  )
+                : Container(
+                    width: 64.w,
+                    height: 42.h,
+                    color: theme.colorScheme.onSurface.withAlpha(20),
+                  ),
+          ),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  row.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  '${loc.creatorPlays} ${NumberFormatUtils.formatCount(row.plays)} · '
+                  '${loc.creatorLikes} ${NumberFormatUtils.formatCount(row.likes)} · '
+                  '${loc.collects} ${NumberFormatUtils.formatCount(row.collects)} · '
+                  '${loc.comment} ${NumberFormatUtils.formatCount(row.comments)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: theme.colorScheme.onSurface.withAlpha(140),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

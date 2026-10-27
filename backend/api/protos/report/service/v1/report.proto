@@ -27,6 +27,7 @@ enum ReportTargetType {
   REPORT_TARGET_TYPE_VIDEO = 1;   // 举报视频
   REPORT_TARGET_TYPE_COMMENT = 2; // 举报评论
   REPORT_TARGET_TYPE_USER = 3;    // 举报用户
+  REPORT_TARGET_TYPE_DANMAKU = 4; // 举报弹幕（处置=隐藏）
 }
 
 // 工单状态

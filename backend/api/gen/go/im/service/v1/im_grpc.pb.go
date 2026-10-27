@@ -27,6 +27,7 @@ const (
 	ImService_MarkConversationRead_FullMethodName = "/im.service.v1.ImService/MarkConversationRead"
 	ImService_EnsureConversation_FullMethodName   = "/im.service.v1.ImService/EnsureConversation"
 	ImService_CountUnread_FullMethodName          = "/im.service.v1.ImService/CountUnread"
+	ImService_AdminList_FullMethodName            = "/im.service.v1.ImService/AdminList"
 )
 
 // ImServiceClient is the client API for ImService service.
@@ -52,6 +53,8 @@ type ImServiceClient interface {
 	EnsureConversation(ctx context.Context, in *EnsureConversationRequest, opts ...grpc.CallOption) (*Conversation, error)
 	// viewer 全部会话未读总数（角标）
 	CountUnread(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*CountUnreadResponse, error)
+	// 管理端全量私信列表（内容合规监管只读；senderId/receiverId/content 过滤）
+	AdminList(ctx context.Context, in *v1.PagingRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error)
 }
 
 type imServiceClient struct {
@@ -122,6 +125,16 @@ func (c *imServiceClient) CountUnread(ctx context.Context, in *emptypb.Empty, op
 	return out, nil
 }
 
+func (c *imServiceClient) AdminList(ctx context.Context, in *v1.PagingRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListMessagesResponse)
+	err := c.cc.Invoke(ctx, ImService_AdminList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ImServiceServer is the server API for ImService service.
 // All implementations must embed UnimplementedImServiceServer
 // for forward compatibility.
@@ -145,6 +158,8 @@ type ImServiceServer interface {
 	EnsureConversation(context.Context, *EnsureConversationRequest) (*Conversation, error)
 	// viewer 全部会话未读总数（角标）
 	CountUnread(context.Context, *emptypb.Empty) (*CountUnreadResponse, error)
+	// 管理端全量私信列表（内容合规监管只读；senderId/receiverId/content 过滤）
+	AdminList(context.Context, *v1.PagingRequest) (*ListMessagesResponse, error)
 	mustEmbedUnimplementedImServiceServer()
 }
 
@@ -172,6 +187,9 @@ func (UnimplementedImServiceServer) EnsureConversation(context.Context, *EnsureC
 }
 func (UnimplementedImServiceServer) CountUnread(context.Context, *emptypb.Empty) (*CountUnreadResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CountUnread not implemented")
+}
+func (UnimplementedImServiceServer) AdminList(context.Context, *v1.PagingRequest) (*ListMessagesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AdminList not implemented")
 }
 func (UnimplementedImServiceServer) mustEmbedUnimplementedImServiceServer() {}
 func (UnimplementedImServiceServer) testEmbeddedByValue()                   {}
@@ -302,6 +320,24 @@ func _ImService_CountUnread_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ImService_AdminList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.PagingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImServiceServer).AdminList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImService_AdminList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImServiceServer).AdminList(ctx, req.(*v1.PagingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ImService_ServiceDesc is the grpc.ServiceDesc for ImService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -332,6 +368,10 @@ var ImService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CountUnread",
 			Handler:    _ImService_CountUnread_Handler,
+		},
+		{
+			MethodName: "AdminList",
+			Handler:    _ImService_AdminList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
