@@ -5,7 +5,7 @@
 ## 约定
 
 - **Base URL**：App 端 `http://<host>:7700/app/v1`；Admin 端 `http://<host>:7600/admin/v1`
-- **鉴权**：`Authorization: Bearer <accessToken>`；游客仅白名单接口（登录/注册/刷新、Feed/详情/搜索/标签聚合、主页资料/统计/作品、评论列表与楼中楼、互动状态查询、标签列表、UBA 上报、媒体读取）
+- **鉴权**：`Authorization: Bearer <accessToken>`；游客仅白名单接口（登录/注册/刷新、Feed/详情/搜索/热搜词/标签聚合、主页资料/统计/作品、评论列表与楼中楼、互动状态查询、标签列表、UBA 上报、系统配置读取、媒体读取）
 - **错误响应**（HTTP 状态码 + body）：`{"code":404,"reason":"VIDEO_NOT_FOUND","message":"video not found","metadata":{}}`；reason 枚举见各 `*_error.proto`
 - **分页参数**：`page`（从 1 起）+ `pageSize`（缺省 10，上限 50）；部分新接口用 `pageNum/pageSize`（以下逐条标注）；分页响应含 `total`
 - **令牌**：登录/注册返回 `authenticator{accessToken, refreshToken, expiresIn, tokenType:"Bearer"}` + `user`；刷新 `POST /app/v1/auth/refresh {refreshToken}`。access token（JWT HS256）claims：`sub`=用户名、`uid`=用户ID、`tid`=租户ID、`roc`=角色 code 数组、`jti`=令牌ID（登出/刷新即轮换绑定键，旧 access 立即失效）
@@ -30,8 +30,8 @@
 ### Feed / 视频
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/feed?tag=&pageNum=&pageSize=` | 游客可访问；`items[]{video, reason:"FEED_REASON_FOLLOW"/"FEED_REASON_HOT"/"FEED_REASON_LATEST"}` + `hasMore`；登录态自动已看去重 |
-| GET | `/videos/{videoId}` | 详情：`{video, author, authorStats, viewerState{liked,collected,following}}` |
+| GET | `/feed?tag=&pageNum=&pageSize=` | 游客可访问；`items[]{video, reason:"FEED_REASON_FOLLOW"/"FEED_REASON_HOT"/"FEED_REASON_LATEST"}` + `hasMore`；登录态自动已看去重，**「不感兴趣」负反馈同样过滤**（`EVENT_TYPE_VIDEO_DISLIKE` 埋点进 Redis 集合，7 天有效） |
+| GET | `/videos/{videoId}` | 详情：`{video, author, authorStats, viewerState{liked,collected,following,resumePositionMs}}`；`resumePositionMs`=断点续播位置（int64 字符串，0=无历史进度；取最近心跳上报的播放位置） |
 | GET | `/search/videos?keyword=&pageNum=` | 标题模糊 + 标签精确 |
 | GET | `/tags/{tag}/videos?pageNum=` | 标签聚合 |
 | GET | `/tags?page=&pageSize=` | 标签列表（发布选择/搜索联想） |
@@ -54,19 +54,34 @@
 ### 观看历史 / 热榜
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/watch-history?pageNum=` | **本人观看历史**（需登录）：派生自 VIDEO_PLAY 事件聚合，`items[]{video, watchedAt}` 按最近观看倒序；`total`=看过的视频数 |
+| GET | `/watch-history?pageNum=` | **本人观看历史**（需登录）：派生自 VIDEO_PLAY 事件聚合，`items[]{video, watchedAt, progressSeconds}` 按最近观看倒序；`total`=看过的视频数；`progressSeconds`=最近心跳播放位置（秒，0=未记录，断点续播进度条用） |
 | GET | `/hot-videos?limit=` | **热榜**（游客可访问）：热度分（播放 + 点赞×3 + 收藏×5 + 完播×4，近发布优先）倒序，缺省 20 上限 50；Feed 的 HOT 召回同源 |
+
+### 搜索 / 热搜词
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/search/videos?keyword=&pageNum=` | 关键词搜索（标题模糊 + 标签精确；游客可访问）；每次搜索计入热搜榜 |
+| GET | `/search/hot-keywords?limit=` | **热搜词**（游客可访问）：按真实搜索频次倒序（Redis ZSet 聚合，保留 100 词），缺省 10 上限 20；尽力而为失败返回空数组 |
+
+### 公告运营位
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/sysconf` | 系统配置（游客可访问）：App 消费 `announcementEnabled/announcementText/announcementLink`——开关开且文案非空时首页顶部展示公告横幅，可关闭；链接非空点击外跳 |
 
 ### 剧集（详情/列表游客可访问）
 | 方法 | 路径 | 说明 |
 |---|---|---|
 | POST | `/series` | `{title, description?, coverUrl?}` → Series（需登录；401 未登录） |
-| GET | `/series/{id}` | 详情 `{series, items[]{video}}`：选集按 episodeNumber 升序；**游客仅见已发布集**，作者/管理员全集（含未发布各状态）；非作者且无已发布集 → 404 SERIES_NOT_FOUND |
+| GET | `/series/{id}` | 详情 `{series, items[]{video}, viewerFollowing, followerCount}`：选集按 episodeNumber 升序；**游客仅见已发布集**，作者/管理员全集（含未发布各状态）；非作者且无已发布集 → 404 SERIES_NOT_FOUND；`viewerFollowing`=观看者是否已追剧（游客 false） |
 | PUT | `/series/{id}` | `{title?, description?, coverUrl?}`（作者本人/管理端；403 NOT_SERIES_OWNER） |
 | DELETE | `/series/{id}` | 删除剧集（剧内视频解挂保留，作者本人/管理端） |
 | GET | `/series?query=&authorId=&pageNum=` | 列表 `{items[]{Series},total}`；`query` 剧名模糊、`authorId` 按作者；**非本人视角仅返回有已发布集的剧** |
+| POST·DELETE | `/series/{seriesId}/follow` | **追剧/取消追剧**（需登录；幂等）→ `{following, followerCount}`；对公众不可见的剧按 404 处理（防探测） |
+| GET | `/me/series-follows?page=` | **我的追剧列表**（需登录）：按追剧时间倒序，公开可见性同列表 |
 
-`series` 对象：`{id,title,description,coverUrl,authorId,episodeCount,publishedCount,createdAt}`（episodeCount=挂靠视频总数、publishedCount=已发布数，均为服务端实时派生 int64 字符串；coverUrl 可空——展示侧回退第一集封面）
+`series` 对象：`{id,title,description,coverUrl,authorId,episodeCount,publishedCount,followerCount,createdAt}`（episodeCount=挂靠视频总数、publishedCount=已发布数、followerCount=追剧人数，均为服务端实时派生 int64 字符串；coverUrl 可空——展示侧回退第一集封面）
+
+**追剧闭环**：追剧后新集发布（人工审核通过 / 审核关直发 / 草稿直发任一路径）向全部追剧者（作者除外，截断前 200 人）发站内信「追更更新」，内容带视频跳转标记（App 端解析 videoId 直达）。
 
 **视频挂靠剧集**（挂靠语义统一，服务端校验剧归属，跨作者挂剧 403 NOT_SERIES_OWNER）：
 - 发布挂靠：`POST /uploads/{taskId}/complete` 增 `seriesId`（>0 生效）+ `episodeNumber`（缺省自动排到剧内最大集号+1）；`asDraft=true` 时挂靠信息随草稿保存，`POST /drafts/{id}/submit` 提交时生效
@@ -106,7 +121,7 @@
 | POST | `/notifications/read-all` | 全部已读 |
 | GET | `/notifications/unread-count` | `{"count":"3"}`（int64 字符串） |
 | POST | `/reports` | `{targetType:"REPORT_TARGET_TYPE_VIDEO"视频/"REPORT_TARGET_TYPE_COMMENT"评论/"REPORT_TARGET_TYPE_USER"用户,targetId,reason,description?}`；409 DUPLICATE_REPORT |
-| POST | `/uba/events` | `{events:[{eventType:"EVENT_TYPE_VIDEO_PLAY"播放/"EVENT_TYPE_VIDEO_HEARTBEAT"心跳/"EVENT_TYPE_VIDEO_COMPLETE"完播/"EVENT_TYPE_VIDEO_SWIPE_AWAY"划走/"EVENT_TYPE_VIDEO_LIKE"赞/"EVENT_TYPE_VIDEO_COLLECT"藏/"EVENT_TYPE_COMMENT_CREATE"评/"EVENT_TYPE_FOLLOW_AUTHOR"关注,videoId,durationMs,watchPercent,extra?,occurredAt?}]}`（游客可上报，尽力而为） |
+| POST | `/uba/events` | `{events:[{eventType:"EVENT_TYPE_VIDEO_PLAY"播放/"EVENT_TYPE_VIDEO_HEARTBEAT"心跳/"EVENT_TYPE_VIDEO_COMPLETE"完播/"EVENT_TYPE_VIDEO_SWIPE_AWAY"划走/"EVENT_TYPE_VIDEO_LIKE"赞/"EVENT_TYPE_VIDEO_COLLECT"藏/"EVENT_TYPE_COMMENT_CREATE"评/"EVENT_TYPE_FOLLOW_AUTHOR"关注/"EVENT_TYPE_VIDEO_DISLIKE"不感兴趣,videoId,durationMs,watchPercent,positionMs?,extra?,occurredAt?}]}`（游客可上报，尽力而为；`positionMs`=播放位置毫秒（心跳/划走携带，断点续播用）；DISLIKE 登录态写入召回过滤集） |
 
 ### 分享 H5
 `GET /s/{videoId}`（无 /app/v1 前缀）→ 内联 HTML 预览页（OG meta + video 标签）。

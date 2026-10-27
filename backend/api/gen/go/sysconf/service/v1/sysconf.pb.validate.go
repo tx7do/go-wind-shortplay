@@ -76,6 +76,18 @@ func (m *SysConf) validate(all bool) error {
 		// no validation rules for SensitiveFilterEnabled
 	}
 
+	if m.AnnouncementEnabled != nil {
+		// no validation rules for AnnouncementEnabled
+	}
+
+	if m.AnnouncementText != nil {
+		// no validation rules for AnnouncementText
+	}
+
+	if m.AnnouncementLink != nil {
+		// no validation rules for AnnouncementLink
+	}
+
 	if m.UpdatedAt != nil {
 
 		if all {
@@ -226,6 +238,18 @@ func (m *UpdateSysConfRequest) validate(all bool) error {
 
 	if m.SensitiveFilterEnabled != nil {
 		// no validation rules for SensitiveFilterEnabled
+	}
+
+	if m.AnnouncementEnabled != nil {
+		// no validation rules for AnnouncementEnabled
+	}
+
+	if m.AnnouncementText != nil {
+		// no validation rules for AnnouncementText
+	}
+
+	if m.AnnouncementLink != nil {
+		// no validation rules for AnnouncementLink
 	}
 
 	if len(errors) > 0 {

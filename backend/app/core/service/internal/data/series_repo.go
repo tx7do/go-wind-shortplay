@@ -228,6 +228,68 @@ func (r *SeriesRepo) List(ctx context.Context, req *paginationV1.PagingRequest) 
 	return resp, nil
 }
 
+// ListByIDs 按 ID 列表取剧集（保持入参顺序；onlyPublished 仅含有已发布集的剧）
+func (r *SeriesRepo) ListByIDs(ctx context.Context, ids []uint32, onlyPublished bool, page, pageSize uint32) (*seriesV1.ListSeriesResponse, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+	if pageSize > 50 {
+		pageSize = 50
+	}
+	if len(ids) == 0 {
+		return &seriesV1.ListSeriesResponse{Total: trans.Ptr(int64(0))}, nil
+	}
+	items, err := r.entClient.Client().Series.Query().Where(series.IDIn(ids...)).All(ctx)
+	if err != nil {
+		r.log.Errorf("list series by ids failed: %s", err.Error())
+		return nil, seriesV1.ErrorInternalServerError("list series failed")
+	}
+	byID := make(map[uint32]*ent.Series, len(items))
+	for _, e := range items {
+		byID[e.ID] = e
+	}
+	ordered := make([]*ent.Series, 0, len(ids))
+	for _, id := range ids {
+		if e, ok := byID[id]; ok {
+			ordered = append(ordered, e)
+		}
+	}
+
+	totalCount, publishedCount, err := r.seriesCountsOf(ctx, ids)
+	if err != nil {
+		return nil, seriesV1.ErrorInternalServerError("count series videos failed")
+	}
+	if onlyPublished {
+		kept := ordered[:0]
+		for _, e := range ordered {
+			if publishedCount[e.ID] > 0 {
+				kept = append(kept, e)
+			}
+		}
+		ordered = kept
+	}
+
+	total := int64(len(ordered))
+	offset := int(page-1) * int(pageSize)
+	if offset >= len(ordered) {
+		return &seriesV1.ListSeriesResponse{Total: trans.Ptr(total)}, nil
+	}
+	ordered = ordered[offset:]
+	if len(ordered) > int(pageSize) {
+		ordered = ordered[:pageSize]
+	}
+
+	resp := &seriesV1.ListSeriesResponse{Total: trans.Ptr(total)}
+	for _, e := range ordered {
+		resp.Items = append(resp.Items, seriesEntityToDTO(e, totalCount[e.ID], publishedCount[e.ID]))
+	}
+	r.fillEpisodeCovers(ctx, resp.Items...)
+	return resp, nil
+}
+
 // ListByFilter App 剧集列表（query 剧名模糊 / authorId 过滤；onlyPublished 仅含有已发布集的剧）
 func (r *SeriesRepo) ListByFilter(ctx context.Context, query string, authorID uint32, onlyPublished bool, page, pageSize uint32) (*seriesV1.ListSeriesResponse, error) {
 	if page < 1 {

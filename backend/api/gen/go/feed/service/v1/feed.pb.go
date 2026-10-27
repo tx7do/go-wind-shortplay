@@ -243,12 +243,13 @@ func (x *GetFeedResponse) GetHasMore() bool {
 
 // 观看者视角状态（登录时返回，游客全 false）
 type ViewerState struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Liked         *bool                  `protobuf:"varint,1,opt,name=liked,proto3,oneof" json:"liked,omitempty"`         // 是否已点赞
-	Collected     *bool                  `protobuf:"varint,2,opt,name=collected,proto3,oneof" json:"collected,omitempty"` // 是否已收藏
-	Following     *bool                  `protobuf:"varint,3,opt,name=following,proto3,oneof" json:"following,omitempty"` // 是否已关注作者
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Liked            *bool                  `protobuf:"varint,1,opt,name=liked,proto3,oneof" json:"liked,omitempty"`                                                 // 是否已点赞
+	Collected        *bool                  `protobuf:"varint,2,opt,name=collected,proto3,oneof" json:"collected,omitempty"`                                         // 是否已收藏
+	Following        *bool                  `protobuf:"varint,3,opt,name=following,proto3,oneof" json:"following,omitempty"`                                         // 是否已关注作者
+	ResumePositionMs *uint64                `protobuf:"varint,4,opt,name=resume_position_ms,json=resumePositionMs,proto3,oneof" json:"resume_position_ms,omitempty"` // 断点续播位置（毫秒；0=无历史进度）
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *ViewerState) Reset() {
@@ -300,6 +301,13 @@ func (x *ViewerState) GetFollowing() bool {
 		return *x.Following
 	}
 	return false
+}
+
+func (x *ViewerState) GetResumePositionMs() uint64 {
+	if x != nil && x.ResumePositionMs != nil {
+		return *x.ResumePositionMs
+	}
+	return 0
 }
 
 type VideoDetail struct {
@@ -534,6 +542,94 @@ func (x *ListVideosByTagRequest) GetPageSize() uint32 {
 	return 0
 }
 
+type ListHotKeywordsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Limit         *uint32                `protobuf:"varint,1,opt,name=limit,proto3,oneof" json:"limit,omitempty"` // 返回条数（缺省 10，上限 20）
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListHotKeywordsRequest) Reset() {
+	*x = ListHotKeywordsRequest{}
+	mi := &file_feed_service_v1_feed_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListHotKeywordsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListHotKeywordsRequest) ProtoMessage() {}
+
+func (x *ListHotKeywordsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_feed_service_v1_feed_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListHotKeywordsRequest.ProtoReflect.Descriptor instead.
+func (*ListHotKeywordsRequest) Descriptor() ([]byte, []int) {
+	return file_feed_service_v1_feed_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ListHotKeywordsRequest) GetLimit() uint32 {
+	if x != nil && x.Limit != nil {
+		return *x.Limit
+	}
+	return 0
+}
+
+type ListHotKeywordsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Keywords      []string               `protobuf:"bytes,1,rep,name=keywords,proto3" json:"keywords,omitempty"` // 热搜词（热度倒序）
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListHotKeywordsResponse) Reset() {
+	*x = ListHotKeywordsResponse{}
+	mi := &file_feed_service_v1_feed_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListHotKeywordsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListHotKeywordsResponse) ProtoMessage() {}
+
+func (x *ListHotKeywordsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_feed_service_v1_feed_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListHotKeywordsResponse.ProtoReflect.Descriptor instead.
+func (*ListHotKeywordsResponse) Descriptor() ([]byte, []int) {
+	return file_feed_service_v1_feed_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ListHotKeywordsResponse) GetKeywords() []string {
+	if x != nil {
+		return x.Keywords
+	}
+	return nil
+}
+
 var File_feed_service_v1_feed_proto protoreflect.FileDescriptor
 
 const file_feed_service_v1_feed_proto_rawDesc = "" +
@@ -553,16 +649,18 @@ const file_feed_service_v1_feed_proto_rawDesc = "" +
 	"\x0fGetFeedResponse\x12/\n" +
 	"\x05items\x18\x01 \x03(\v2\x19.feed.service.v1.FeedItemR\x05items\x12\x1e\n" +
 	"\bhas_more\x18\x02 \x01(\bH\x00R\ahasMore\x88\x01\x01B\v\n" +
-	"\t_has_more\"\x94\x01\n" +
+	"\t_has_more\"\xde\x01\n" +
 	"\vViewerState\x12\x19\n" +
 	"\x05liked\x18\x01 \x01(\bH\x00R\x05liked\x88\x01\x01\x12!\n" +
 	"\tcollected\x18\x02 \x01(\bH\x01R\tcollected\x88\x01\x01\x12!\n" +
-	"\tfollowing\x18\x03 \x01(\bH\x02R\tfollowing\x88\x01\x01B\b\n" +
+	"\tfollowing\x18\x03 \x01(\bH\x02R\tfollowing\x88\x01\x01\x121\n" +
+	"\x12resume_position_ms\x18\x04 \x01(\x04H\x03R\x10resumePositionMs\x88\x01\x01B\b\n" +
 	"\x06_likedB\f\n" +
 	"\n" +
 	"_collectedB\f\n" +
 	"\n" +
-	"_following\"\xf8\x01\n" +
+	"_followingB\x15\n" +
+	"\x13_resume_position_ms\"\xf8\x01\n" +
 	"\vVideoDetail\x12-\n" +
 	"\x05video\x18\x01 \x01(\v2\x17.video.service.v1.VideoR\x05video\x126\n" +
 	"\x06author\x18\x02 \x01(\v2\x1e.identity.service.v1.UserBriefR\x06author\x12A\n" +
@@ -583,18 +681,24 @@ const file_feed_service_v1_feed_proto_rawDesc = "" +
 	"\tpage_size\x18\x03 \x01(\rH\x01R\bpageSize\x88\x01\x01B\v\n" +
 	"\t_page_numB\f\n" +
 	"\n" +
-	"_page_size*n\n" +
+	"_page_size\"=\n" +
+	"\x16ListHotKeywordsRequest\x12\x19\n" +
+	"\x05limit\x18\x01 \x01(\rH\x00R\x05limit\x88\x01\x01B\b\n" +
+	"\x06_limit\"5\n" +
+	"\x17ListHotKeywordsResponse\x12\x1a\n" +
+	"\bkeywords\x18\x01 \x03(\tR\bkeywords*n\n" +
 	"\n" +
 	"FeedReason\x12\x1b\n" +
 	"\x17FEED_REASON_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12FEED_REASON_FOLLOW\x10\x01\x12\x13\n" +
 	"\x0fFEED_REASON_HOT\x10\x02\x12\x16\n" +
-	"\x12FEED_REASON_LATEST\x10\x032\xf1\x02\n" +
+	"\x12FEED_REASON_LATEST\x10\x032\xd9\x03\n" +
 	"\vFeedService\x12N\n" +
 	"\aGetFeed\x12\x1f.feed.service.v1.GetFeedRequest\x1a .feed.service.v1.GetFeedResponse\"\x00\x12X\n" +
 	"\x0eGetVideoDetail\x12&.feed.service.v1.GetVideoDetailRequest\x1a\x1c.feed.service.v1.VideoDetail\"\x00\x12X\n" +
 	"\fSearchVideos\x12$.feed.service.v1.SearchVideosRequest\x1a .feed.service.v1.GetFeedResponse\"\x00\x12^\n" +
-	"\x0fListVideosByTag\x12'.feed.service.v1.ListVideosByTagRequest\x1a .feed.service.v1.GetFeedResponse\"\x00B\xb3\x01\n" +
+	"\x0fListVideosByTag\x12'.feed.service.v1.ListVideosByTagRequest\x1a .feed.service.v1.GetFeedResponse\"\x00\x12f\n" +
+	"\x0fListHotKeywords\x12'.feed.service.v1.ListHotKeywordsRequest\x1a(.feed.service.v1.ListHotKeywordsResponse\"\x00B\xb3\x01\n" +
 	"\x13com.feed.service.v1B\tFeedProtoP\x01Z3go-wind-shortplay/api/gen/go/feed/service/v1;feedpb\xa2\x02\x03FSX\xaa\x02\x0fFeed.Service.V1\xca\x02\x0fFeed\\Service\\V1\xe2\x02\x1bFeed\\Service\\V1\\GPBMetadata\xea\x02\x11Feed::Service::V1b\x06proto3"
 
 var (
@@ -610,39 +714,43 @@ func file_feed_service_v1_feed_proto_rawDescGZIP() []byte {
 }
 
 var file_feed_service_v1_feed_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_feed_service_v1_feed_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_feed_service_v1_feed_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_feed_service_v1_feed_proto_goTypes = []any{
-	(FeedReason)(0),                // 0: feed.service.v1.FeedReason
-	(*GetFeedRequest)(nil),         // 1: feed.service.v1.GetFeedRequest
-	(*FeedItem)(nil),               // 2: feed.service.v1.FeedItem
-	(*GetFeedResponse)(nil),        // 3: feed.service.v1.GetFeedResponse
-	(*ViewerState)(nil),            // 4: feed.service.v1.ViewerState
-	(*VideoDetail)(nil),            // 5: feed.service.v1.VideoDetail
-	(*GetVideoDetailRequest)(nil),  // 6: feed.service.v1.GetVideoDetailRequest
-	(*SearchVideosRequest)(nil),    // 7: feed.service.v1.SearchVideosRequest
-	(*ListVideosByTagRequest)(nil), // 8: feed.service.v1.ListVideosByTagRequest
-	(*v1.Video)(nil),               // 9: video.service.v1.Video
-	(*v11.UserBrief)(nil),          // 10: identity.service.v1.UserBrief
-	(*v11.UserStats)(nil),          // 11: identity.service.v1.UserStats
+	(FeedReason)(0),                 // 0: feed.service.v1.FeedReason
+	(*GetFeedRequest)(nil),          // 1: feed.service.v1.GetFeedRequest
+	(*FeedItem)(nil),                // 2: feed.service.v1.FeedItem
+	(*GetFeedResponse)(nil),         // 3: feed.service.v1.GetFeedResponse
+	(*ViewerState)(nil),             // 4: feed.service.v1.ViewerState
+	(*VideoDetail)(nil),             // 5: feed.service.v1.VideoDetail
+	(*GetVideoDetailRequest)(nil),   // 6: feed.service.v1.GetVideoDetailRequest
+	(*SearchVideosRequest)(nil),     // 7: feed.service.v1.SearchVideosRequest
+	(*ListVideosByTagRequest)(nil),  // 8: feed.service.v1.ListVideosByTagRequest
+	(*ListHotKeywordsRequest)(nil),  // 9: feed.service.v1.ListHotKeywordsRequest
+	(*ListHotKeywordsResponse)(nil), // 10: feed.service.v1.ListHotKeywordsResponse
+	(*v1.Video)(nil),                // 11: video.service.v1.Video
+	(*v11.UserBrief)(nil),           // 12: identity.service.v1.UserBrief
+	(*v11.UserStats)(nil),           // 13: identity.service.v1.UserStats
 }
 var file_feed_service_v1_feed_proto_depIdxs = []int32{
-	9,  // 0: feed.service.v1.FeedItem.video:type_name -> video.service.v1.Video
+	11, // 0: feed.service.v1.FeedItem.video:type_name -> video.service.v1.Video
 	0,  // 1: feed.service.v1.FeedItem.reason:type_name -> feed.service.v1.FeedReason
 	2,  // 2: feed.service.v1.GetFeedResponse.items:type_name -> feed.service.v1.FeedItem
-	9,  // 3: feed.service.v1.VideoDetail.video:type_name -> video.service.v1.Video
-	10, // 4: feed.service.v1.VideoDetail.author:type_name -> identity.service.v1.UserBrief
-	11, // 5: feed.service.v1.VideoDetail.author_stats:type_name -> identity.service.v1.UserStats
+	11, // 3: feed.service.v1.VideoDetail.video:type_name -> video.service.v1.Video
+	12, // 4: feed.service.v1.VideoDetail.author:type_name -> identity.service.v1.UserBrief
+	13, // 5: feed.service.v1.VideoDetail.author_stats:type_name -> identity.service.v1.UserStats
 	4,  // 6: feed.service.v1.VideoDetail.viewer_state:type_name -> feed.service.v1.ViewerState
 	1,  // 7: feed.service.v1.FeedService.GetFeed:input_type -> feed.service.v1.GetFeedRequest
 	6,  // 8: feed.service.v1.FeedService.GetVideoDetail:input_type -> feed.service.v1.GetVideoDetailRequest
 	7,  // 9: feed.service.v1.FeedService.SearchVideos:input_type -> feed.service.v1.SearchVideosRequest
 	8,  // 10: feed.service.v1.FeedService.ListVideosByTag:input_type -> feed.service.v1.ListVideosByTagRequest
-	3,  // 11: feed.service.v1.FeedService.GetFeed:output_type -> feed.service.v1.GetFeedResponse
-	5,  // 12: feed.service.v1.FeedService.GetVideoDetail:output_type -> feed.service.v1.VideoDetail
-	3,  // 13: feed.service.v1.FeedService.SearchVideos:output_type -> feed.service.v1.GetFeedResponse
-	3,  // 14: feed.service.v1.FeedService.ListVideosByTag:output_type -> feed.service.v1.GetFeedResponse
-	11, // [11:15] is the sub-list for method output_type
-	7,  // [7:11] is the sub-list for method input_type
+	9,  // 11: feed.service.v1.FeedService.ListHotKeywords:input_type -> feed.service.v1.ListHotKeywordsRequest
+	3,  // 12: feed.service.v1.FeedService.GetFeed:output_type -> feed.service.v1.GetFeedResponse
+	5,  // 13: feed.service.v1.FeedService.GetVideoDetail:output_type -> feed.service.v1.VideoDetail
+	3,  // 14: feed.service.v1.FeedService.SearchVideos:output_type -> feed.service.v1.GetFeedResponse
+	3,  // 15: feed.service.v1.FeedService.ListVideosByTag:output_type -> feed.service.v1.GetFeedResponse
+	10, // 16: feed.service.v1.FeedService.ListHotKeywords:output_type -> feed.service.v1.ListHotKeywordsResponse
+	12, // [12:17] is the sub-list for method output_type
+	7,  // [7:12] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name
 	7,  // [7:7] is the sub-list for extension extendee
 	0,  // [0:7] is the sub-list for field type_name
@@ -658,13 +766,14 @@ func file_feed_service_v1_feed_proto_init() {
 	file_feed_service_v1_feed_proto_msgTypes[3].OneofWrappers = []any{}
 	file_feed_service_v1_feed_proto_msgTypes[6].OneofWrappers = []any{}
 	file_feed_service_v1_feed_proto_msgTypes[7].OneofWrappers = []any{}
+	file_feed_service_v1_feed_proto_msgTypes[8].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_feed_service_v1_feed_proto_rawDesc), len(file_feed_service_v1_feed_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   8,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

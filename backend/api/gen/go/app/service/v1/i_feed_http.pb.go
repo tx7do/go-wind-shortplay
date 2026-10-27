@@ -22,6 +22,7 @@ const _ = http.SupportPackageIsVersion1
 
 const OperationFeedServiceGetFeed = "/app.service.v1.FeedService/GetFeed"
 const OperationFeedServiceGetVideoDetail = "/app.service.v1.FeedService/GetVideoDetail"
+const OperationFeedServiceListHotKeywords = "/app.service.v1.FeedService/ListHotKeywords"
 const OperationFeedServiceListVideosByTag = "/app.service.v1.FeedService/ListVideosByTag"
 const OperationFeedServiceSearchVideos = "/app.service.v1.FeedService/SearchVideos"
 
@@ -30,6 +31,8 @@ type FeedServiceHTTPServer interface {
 	GetFeed(context.Context, *v1.GetFeedRequest) (*v1.GetFeedResponse, error)
 	// GetVideoDetail 单视频详情（分享跳转 / 点击进入）
 	GetVideoDetail(context.Context, *v1.GetVideoDetailRequest) (*v1.VideoDetail, error)
+	// ListHotKeywords 热搜词（游客可访问）
+	ListHotKeywords(context.Context, *v1.ListHotKeywordsRequest) (*v1.ListHotKeywordsResponse, error)
 	// ListVideosByTag 标签聚合页
 	ListVideosByTag(context.Context, *v1.ListVideosByTagRequest) (*v1.GetFeedResponse, error)
 	// SearchVideos 搜索视频（标题 / 标签）
@@ -42,6 +45,7 @@ func RegisterFeedServiceHTTPServer(s *http.Server, srv FeedServiceHTTPServer) {
 	r.GET("/app/v1/videos/{video_id}", _FeedService_GetVideoDetail0_HTTP_Handler(srv))
 	r.GET("/app/v1/search/videos", _FeedService_SearchVideos0_HTTP_Handler(srv))
 	r.GET("/app/v1/tags/{tag}/videos", _FeedService_ListVideosByTag0_HTTP_Handler(srv))
+	r.GET("/app/v1/search/hot-keywords", _FeedService_ListHotKeywords0_HTTP_Handler(srv))
 }
 
 func _FeedService_GetFeed0_HTTP_Handler(srv FeedServiceHTTPServer) func(ctx http.Context) error {
@@ -126,11 +130,32 @@ func _FeedService_ListVideosByTag0_HTTP_Handler(srv FeedServiceHTTPServer) func(
 	}
 }
 
+func _FeedService_ListHotKeywords0_HTTP_Handler(srv FeedServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.ListHotKeywordsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationFeedServiceListHotKeywords)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListHotKeywords(ctx, req.(*v1.ListHotKeywordsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ListHotKeywordsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type FeedServiceHTTPClient interface {
 	// GetFeed 获取 Feed 流（游客可访问）
 	GetFeed(ctx context.Context, req *v1.GetFeedRequest, opts ...http.CallOption) (rsp *v1.GetFeedResponse, err error)
 	// GetVideoDetail 单视频详情（分享跳转 / 点击进入）
 	GetVideoDetail(ctx context.Context, req *v1.GetVideoDetailRequest, opts ...http.CallOption) (rsp *v1.VideoDetail, err error)
+	// ListHotKeywords 热搜词（游客可访问）
+	ListHotKeywords(ctx context.Context, req *v1.ListHotKeywordsRequest, opts ...http.CallOption) (rsp *v1.ListHotKeywordsResponse, err error)
 	// ListVideosByTag 标签聚合页
 	ListVideosByTag(ctx context.Context, req *v1.ListVideosByTagRequest, opts ...http.CallOption) (rsp *v1.GetFeedResponse, err error)
 	// SearchVideos 搜索视频（标题 / 标签）
@@ -165,6 +190,20 @@ func (c *FeedServiceHTTPClientImpl) GetVideoDetail(ctx context.Context, in *v1.G
 	pattern := "/app/v1/videos/{video_id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationFeedServiceGetVideoDetail))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListHotKeywords 热搜词（游客可访问）
+func (c *FeedServiceHTTPClientImpl) ListHotKeywords(ctx context.Context, in *v1.ListHotKeywordsRequest, opts ...http.CallOption) (*v1.ListHotKeywordsResponse, error) {
+	var out v1.ListHotKeywordsResponse
+	pattern := "/app/v1/search/hot-keywords"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationFeedServiceListHotKeywords))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

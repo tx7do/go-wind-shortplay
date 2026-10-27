@@ -46,6 +46,7 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent/rolepermission"
 	"go-wind-shortplay/app/core/service/internal/data/ent/schema"
 	"go-wind-shortplay/app/core/service/internal/data/ent/series"
+	"go-wind-shortplay/app/core/service/internal/data/ent/seriesfollow"
 	"go-wind-shortplay/app/core/service/internal/data/ent/sysconfig"
 	"go-wind-shortplay/app/core/service/internal/data/ent/task"
 	"go-wind-shortplay/app/core/service/internal/data/ent/tenant"
@@ -1312,6 +1313,38 @@ func init() {
 	seriesDescID := seriesMixinFields0[0].Descriptor()
 	// series.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	series.IDValidator = seriesDescID.Validators[0].(func(uint32) error)
+	seriesfollowMixin := schema.SeriesFollow{}.Mixin()
+	seriesfollow.Policy = privacy.NewPolicies(seriesfollowMixin[2], schema.SeriesFollow{})
+	seriesfollow.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := seriesfollow.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	seriesfollowMixinFields0 := seriesfollowMixin[0].Fields()
+	_ = seriesfollowMixinFields0
+	seriesfollowMixinFields2 := seriesfollowMixin[2].Fields()
+	_ = seriesfollowMixinFields2
+	seriesfollowFields := schema.SeriesFollow{}.Fields()
+	_ = seriesfollowFields
+	// seriesfollowDescTenantID is the schema descriptor for tenant_id field.
+	seriesfollowDescTenantID := seriesfollowMixinFields2[0].Descriptor()
+	// seriesfollow.DefaultTenantID holds the default value on creation for the tenant_id field.
+	seriesfollow.DefaultTenantID = seriesfollowDescTenantID.Default.(uint32)
+	// seriesfollowDescFollowerID is the schema descriptor for follower_id field.
+	seriesfollowDescFollowerID := seriesfollowFields[0].Descriptor()
+	// seriesfollow.DefaultFollowerID holds the default value on creation for the follower_id field.
+	seriesfollow.DefaultFollowerID = seriesfollowDescFollowerID.Default.(uint32)
+	// seriesfollowDescSeriesID is the schema descriptor for series_id field.
+	seriesfollowDescSeriesID := seriesfollowFields[1].Descriptor()
+	// seriesfollow.DefaultSeriesID holds the default value on creation for the series_id field.
+	seriesfollow.DefaultSeriesID = seriesfollowDescSeriesID.Default.(uint32)
+	// seriesfollowDescID is the schema descriptor for id field.
+	seriesfollowDescID := seriesfollowMixinFields0[0].Descriptor()
+	// seriesfollow.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	seriesfollow.IDValidator = seriesfollowDescID.Validators[0].(func(uint32) error)
 	sysconfigMixin := schema.SysConfig{}.Mixin()
 	sysconfigMixinFields0 := sysconfigMixin[0].Fields()
 	_ = sysconfigMixinFields0
@@ -1337,6 +1370,14 @@ func init() {
 	sysconfigDescSensitiveFilterEnabled := sysconfigFields[5].Descriptor()
 	// sysconfig.DefaultSensitiveFilterEnabled holds the default value on creation for the sensitive_filter_enabled field.
 	sysconfig.DefaultSensitiveFilterEnabled = sysconfigDescSensitiveFilterEnabled.Default.(bool)
+	// sysconfigDescAnnouncementEnabled is the schema descriptor for announcement_enabled field.
+	sysconfigDescAnnouncementEnabled := sysconfigFields[7].Descriptor()
+	// sysconfig.DefaultAnnouncementEnabled holds the default value on creation for the announcement_enabled field.
+	sysconfig.DefaultAnnouncementEnabled = sysconfigDescAnnouncementEnabled.Default.(bool)
+	// sysconfigDescAnnouncementLink is the schema descriptor for announcement_link field.
+	sysconfigDescAnnouncementLink := sysconfigFields[9].Descriptor()
+	// sysconfig.DefaultAnnouncementLink holds the default value on creation for the announcement_link field.
+	sysconfig.DefaultAnnouncementLink = sysconfigDescAnnouncementLink.Default.(string)
 	// sysconfigDescID is the schema descriptor for id field.
 	sysconfigDescID := sysconfigMixinFields0[0].Descriptor()
 	// sysconfig.IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -1426,6 +1467,10 @@ func init() {
 	ubaeventDescWatchPercent := ubaeventFields[5].Descriptor()
 	// ubaevent.DefaultWatchPercent holds the default value on creation for the watch_percent field.
 	ubaevent.DefaultWatchPercent = ubaeventDescWatchPercent.Default.(uint32)
+	// ubaeventDescPositionMs is the schema descriptor for position_ms field.
+	ubaeventDescPositionMs := ubaeventFields[6].Descriptor()
+	// ubaevent.DefaultPositionMs holds the default value on creation for the position_ms field.
+	ubaevent.DefaultPositionMs = ubaeventDescPositionMs.Default.(uint64)
 	// ubaeventDescID is the schema descriptor for id field.
 	ubaeventDescID := ubaeventMixinFields0[0].Descriptor()
 	// ubaevent.IDValidator is a validator for the "id" field. It is called by the builders before save.

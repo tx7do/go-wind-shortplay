@@ -109,6 +109,21 @@ func SensitiveFilterEnabled(v bool) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldEQ(FieldSensitiveFilterEnabled, v))
 }
 
+// AnnouncementEnabled applies equality check predicate on the "announcement_enabled" field. It's identical to AnnouncementEnabledEQ.
+func AnnouncementEnabled(v bool) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldAnnouncementEnabled, v))
+}
+
+// AnnouncementText applies equality check predicate on the "announcement_text" field. It's identical to AnnouncementTextEQ.
+func AnnouncementText(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldAnnouncementText, v))
+}
+
+// AnnouncementLink applies equality check predicate on the "announcement_link" field. It's identical to AnnouncementLinkEQ.
+func AnnouncementLink(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldAnnouncementLink, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldEQ(FieldCreatedAt, v))
@@ -537,6 +552,156 @@ func SensitiveWordsIsNil() predicate.SysConfig {
 // SensitiveWordsNotNil applies the NotNil predicate on the "sensitive_words" field.
 func SensitiveWordsNotNil() predicate.SysConfig {
 	return predicate.SysConfig(sql.FieldNotNull(FieldSensitiveWords))
+}
+
+// AnnouncementEnabledEQ applies the EQ predicate on the "announcement_enabled" field.
+func AnnouncementEnabledEQ(v bool) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldAnnouncementEnabled, v))
+}
+
+// AnnouncementEnabledNEQ applies the NEQ predicate on the "announcement_enabled" field.
+func AnnouncementEnabledNEQ(v bool) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNEQ(FieldAnnouncementEnabled, v))
+}
+
+// AnnouncementTextEQ applies the EQ predicate on the "announcement_text" field.
+func AnnouncementTextEQ(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldAnnouncementText, v))
+}
+
+// AnnouncementTextNEQ applies the NEQ predicate on the "announcement_text" field.
+func AnnouncementTextNEQ(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNEQ(FieldAnnouncementText, v))
+}
+
+// AnnouncementTextIn applies the In predicate on the "announcement_text" field.
+func AnnouncementTextIn(vs ...string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldIn(FieldAnnouncementText, vs...))
+}
+
+// AnnouncementTextNotIn applies the NotIn predicate on the "announcement_text" field.
+func AnnouncementTextNotIn(vs ...string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNotIn(FieldAnnouncementText, vs...))
+}
+
+// AnnouncementTextGT applies the GT predicate on the "announcement_text" field.
+func AnnouncementTextGT(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldGT(FieldAnnouncementText, v))
+}
+
+// AnnouncementTextGTE applies the GTE predicate on the "announcement_text" field.
+func AnnouncementTextGTE(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldGTE(FieldAnnouncementText, v))
+}
+
+// AnnouncementTextLT applies the LT predicate on the "announcement_text" field.
+func AnnouncementTextLT(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldLT(FieldAnnouncementText, v))
+}
+
+// AnnouncementTextLTE applies the LTE predicate on the "announcement_text" field.
+func AnnouncementTextLTE(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldLTE(FieldAnnouncementText, v))
+}
+
+// AnnouncementTextContains applies the Contains predicate on the "announcement_text" field.
+func AnnouncementTextContains(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldContains(FieldAnnouncementText, v))
+}
+
+// AnnouncementTextHasPrefix applies the HasPrefix predicate on the "announcement_text" field.
+func AnnouncementTextHasPrefix(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldHasPrefix(FieldAnnouncementText, v))
+}
+
+// AnnouncementTextHasSuffix applies the HasSuffix predicate on the "announcement_text" field.
+func AnnouncementTextHasSuffix(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldHasSuffix(FieldAnnouncementText, v))
+}
+
+// AnnouncementTextIsNil applies the IsNil predicate on the "announcement_text" field.
+func AnnouncementTextIsNil() predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldIsNull(FieldAnnouncementText))
+}
+
+// AnnouncementTextNotNil applies the NotNil predicate on the "announcement_text" field.
+func AnnouncementTextNotNil() predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNotNull(FieldAnnouncementText))
+}
+
+// AnnouncementTextEqualFold applies the EqualFold predicate on the "announcement_text" field.
+func AnnouncementTextEqualFold(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEqualFold(FieldAnnouncementText, v))
+}
+
+// AnnouncementTextContainsFold applies the ContainsFold predicate on the "announcement_text" field.
+func AnnouncementTextContainsFold(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldContainsFold(FieldAnnouncementText, v))
+}
+
+// AnnouncementLinkEQ applies the EQ predicate on the "announcement_link" field.
+func AnnouncementLinkEQ(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEQ(FieldAnnouncementLink, v))
+}
+
+// AnnouncementLinkNEQ applies the NEQ predicate on the "announcement_link" field.
+func AnnouncementLinkNEQ(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNEQ(FieldAnnouncementLink, v))
+}
+
+// AnnouncementLinkIn applies the In predicate on the "announcement_link" field.
+func AnnouncementLinkIn(vs ...string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldIn(FieldAnnouncementLink, vs...))
+}
+
+// AnnouncementLinkNotIn applies the NotIn predicate on the "announcement_link" field.
+func AnnouncementLinkNotIn(vs ...string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldNotIn(FieldAnnouncementLink, vs...))
+}
+
+// AnnouncementLinkGT applies the GT predicate on the "announcement_link" field.
+func AnnouncementLinkGT(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldGT(FieldAnnouncementLink, v))
+}
+
+// AnnouncementLinkGTE applies the GTE predicate on the "announcement_link" field.
+func AnnouncementLinkGTE(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldGTE(FieldAnnouncementLink, v))
+}
+
+// AnnouncementLinkLT applies the LT predicate on the "announcement_link" field.
+func AnnouncementLinkLT(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldLT(FieldAnnouncementLink, v))
+}
+
+// AnnouncementLinkLTE applies the LTE predicate on the "announcement_link" field.
+func AnnouncementLinkLTE(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldLTE(FieldAnnouncementLink, v))
+}
+
+// AnnouncementLinkContains applies the Contains predicate on the "announcement_link" field.
+func AnnouncementLinkContains(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldContains(FieldAnnouncementLink, v))
+}
+
+// AnnouncementLinkHasPrefix applies the HasPrefix predicate on the "announcement_link" field.
+func AnnouncementLinkHasPrefix(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldHasPrefix(FieldAnnouncementLink, v))
+}
+
+// AnnouncementLinkHasSuffix applies the HasSuffix predicate on the "announcement_link" field.
+func AnnouncementLinkHasSuffix(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldHasSuffix(FieldAnnouncementLink, v))
+}
+
+// AnnouncementLinkEqualFold applies the EqualFold predicate on the "announcement_link" field.
+func AnnouncementLinkEqualFold(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldEqualFold(FieldAnnouncementLink, v))
+}
+
+// AnnouncementLinkContainsFold applies the ContainsFold predicate on the "announcement_link" field.
+func AnnouncementLinkContainsFold(v string) predicate.SysConfig {
+	return predicate.SysConfig(sql.FieldContainsFold(FieldAnnouncementLink, v))
 }
 
 // And groups predicates with the AND operator between them.

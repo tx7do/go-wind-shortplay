@@ -188,6 +188,48 @@ func (_c *SysConfigCreate) SetSensitiveWords(v []string) *SysConfigCreate {
 	return _c
 }
 
+// SetAnnouncementEnabled sets the "announcement_enabled" field.
+func (_c *SysConfigCreate) SetAnnouncementEnabled(v bool) *SysConfigCreate {
+	_c.mutation.SetAnnouncementEnabled(v)
+	return _c
+}
+
+// SetNillableAnnouncementEnabled sets the "announcement_enabled" field if the given value is not nil.
+func (_c *SysConfigCreate) SetNillableAnnouncementEnabled(v *bool) *SysConfigCreate {
+	if v != nil {
+		_c.SetAnnouncementEnabled(*v)
+	}
+	return _c
+}
+
+// SetAnnouncementText sets the "announcement_text" field.
+func (_c *SysConfigCreate) SetAnnouncementText(v string) *SysConfigCreate {
+	_c.mutation.SetAnnouncementText(v)
+	return _c
+}
+
+// SetNillableAnnouncementText sets the "announcement_text" field if the given value is not nil.
+func (_c *SysConfigCreate) SetNillableAnnouncementText(v *string) *SysConfigCreate {
+	if v != nil {
+		_c.SetAnnouncementText(*v)
+	}
+	return _c
+}
+
+// SetAnnouncementLink sets the "announcement_link" field.
+func (_c *SysConfigCreate) SetAnnouncementLink(v string) *SysConfigCreate {
+	_c.mutation.SetAnnouncementLink(v)
+	return _c
+}
+
+// SetNillableAnnouncementLink sets the "announcement_link" field if the given value is not nil.
+func (_c *SysConfigCreate) SetNillableAnnouncementLink(v *string) *SysConfigCreate {
+	if v != nil {
+		_c.SetAnnouncementLink(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *SysConfigCreate) SetID(v uint32) *SysConfigCreate {
 	_c.mutation.SetID(v)
@@ -249,6 +291,14 @@ func (_c *SysConfigCreate) defaults() {
 		v := sysconfig.DefaultSensitiveFilterEnabled
 		_c.mutation.SetSensitiveFilterEnabled(v)
 	}
+	if _, ok := _c.mutation.AnnouncementEnabled(); !ok {
+		v := sysconfig.DefaultAnnouncementEnabled
+		_c.mutation.SetAnnouncementEnabled(v)
+	}
+	if _, ok := _c.mutation.AnnouncementLink(); !ok {
+		v := sysconfig.DefaultAnnouncementLink
+		_c.mutation.SetAnnouncementLink(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -267,6 +317,12 @@ func (_c *SysConfigCreate) check() error {
 	}
 	if _, ok := _c.mutation.SensitiveFilterEnabled(); !ok {
 		return &ValidationError{Name: "sensitive_filter_enabled", err: errors.New(`ent: missing required field "SysConfig.sensitive_filter_enabled"`)}
+	}
+	if _, ok := _c.mutation.AnnouncementEnabled(); !ok {
+		return &ValidationError{Name: "announcement_enabled", err: errors.New(`ent: missing required field "SysConfig.announcement_enabled"`)}
+	}
+	if _, ok := _c.mutation.AnnouncementLink(); !ok {
+		return &ValidationError{Name: "announcement_link", err: errors.New(`ent: missing required field "SysConfig.announcement_link"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := sysconfig.IDValidator(v); err != nil {
@@ -357,6 +413,18 @@ func (_c *SysConfigCreate) createSpec() (*SysConfig, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.SensitiveWords(); ok {
 		_spec.SetField(sysconfig.FieldSensitiveWords, field.TypeJSON, value)
 		_node.SensitiveWords = value
+	}
+	if value, ok := _c.mutation.AnnouncementEnabled(); ok {
+		_spec.SetField(sysconfig.FieldAnnouncementEnabled, field.TypeBool, value)
+		_node.AnnouncementEnabled = value
+	}
+	if value, ok := _c.mutation.AnnouncementText(); ok {
+		_spec.SetField(sysconfig.FieldAnnouncementText, field.TypeString, value)
+		_node.AnnouncementText = &value
+	}
+	if value, ok := _c.mutation.AnnouncementLink(); ok {
+		_spec.SetField(sysconfig.FieldAnnouncementLink, field.TypeString, value)
+		_node.AnnouncementLink = value
 	}
 	return _node, _spec
 }
@@ -623,6 +691,48 @@ func (u *SysConfigUpsert) UpdateSensitiveWords() *SysConfigUpsert {
 // ClearSensitiveWords clears the value of the "sensitive_words" field.
 func (u *SysConfigUpsert) ClearSensitiveWords() *SysConfigUpsert {
 	u.SetNull(sysconfig.FieldSensitiveWords)
+	return u
+}
+
+// SetAnnouncementEnabled sets the "announcement_enabled" field.
+func (u *SysConfigUpsert) SetAnnouncementEnabled(v bool) *SysConfigUpsert {
+	u.Set(sysconfig.FieldAnnouncementEnabled, v)
+	return u
+}
+
+// UpdateAnnouncementEnabled sets the "announcement_enabled" field to the value that was provided on create.
+func (u *SysConfigUpsert) UpdateAnnouncementEnabled() *SysConfigUpsert {
+	u.SetExcluded(sysconfig.FieldAnnouncementEnabled)
+	return u
+}
+
+// SetAnnouncementText sets the "announcement_text" field.
+func (u *SysConfigUpsert) SetAnnouncementText(v string) *SysConfigUpsert {
+	u.Set(sysconfig.FieldAnnouncementText, v)
+	return u
+}
+
+// UpdateAnnouncementText sets the "announcement_text" field to the value that was provided on create.
+func (u *SysConfigUpsert) UpdateAnnouncementText() *SysConfigUpsert {
+	u.SetExcluded(sysconfig.FieldAnnouncementText)
+	return u
+}
+
+// ClearAnnouncementText clears the value of the "announcement_text" field.
+func (u *SysConfigUpsert) ClearAnnouncementText() *SysConfigUpsert {
+	u.SetNull(sysconfig.FieldAnnouncementText)
+	return u
+}
+
+// SetAnnouncementLink sets the "announcement_link" field.
+func (u *SysConfigUpsert) SetAnnouncementLink(v string) *SysConfigUpsert {
+	u.Set(sysconfig.FieldAnnouncementLink, v)
+	return u
+}
+
+// UpdateAnnouncementLink sets the "announcement_link" field to the value that was provided on create.
+func (u *SysConfigUpsert) UpdateAnnouncementLink() *SysConfigUpsert {
+	u.SetExcluded(sysconfig.FieldAnnouncementLink)
 	return u
 }
 
@@ -926,6 +1036,55 @@ func (u *SysConfigUpsertOne) UpdateSensitiveWords() *SysConfigUpsertOne {
 func (u *SysConfigUpsertOne) ClearSensitiveWords() *SysConfigUpsertOne {
 	return u.Update(func(s *SysConfigUpsert) {
 		s.ClearSensitiveWords()
+	})
+}
+
+// SetAnnouncementEnabled sets the "announcement_enabled" field.
+func (u *SysConfigUpsertOne) SetAnnouncementEnabled(v bool) *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetAnnouncementEnabled(v)
+	})
+}
+
+// UpdateAnnouncementEnabled sets the "announcement_enabled" field to the value that was provided on create.
+func (u *SysConfigUpsertOne) UpdateAnnouncementEnabled() *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateAnnouncementEnabled()
+	})
+}
+
+// SetAnnouncementText sets the "announcement_text" field.
+func (u *SysConfigUpsertOne) SetAnnouncementText(v string) *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetAnnouncementText(v)
+	})
+}
+
+// UpdateAnnouncementText sets the "announcement_text" field to the value that was provided on create.
+func (u *SysConfigUpsertOne) UpdateAnnouncementText() *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateAnnouncementText()
+	})
+}
+
+// ClearAnnouncementText clears the value of the "announcement_text" field.
+func (u *SysConfigUpsertOne) ClearAnnouncementText() *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.ClearAnnouncementText()
+	})
+}
+
+// SetAnnouncementLink sets the "announcement_link" field.
+func (u *SysConfigUpsertOne) SetAnnouncementLink(v string) *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetAnnouncementLink(v)
+	})
+}
+
+// UpdateAnnouncementLink sets the "announcement_link" field to the value that was provided on create.
+func (u *SysConfigUpsertOne) UpdateAnnouncementLink() *SysConfigUpsertOne {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateAnnouncementLink()
 	})
 }
 
@@ -1395,6 +1554,55 @@ func (u *SysConfigUpsertBulk) UpdateSensitiveWords() *SysConfigUpsertBulk {
 func (u *SysConfigUpsertBulk) ClearSensitiveWords() *SysConfigUpsertBulk {
 	return u.Update(func(s *SysConfigUpsert) {
 		s.ClearSensitiveWords()
+	})
+}
+
+// SetAnnouncementEnabled sets the "announcement_enabled" field.
+func (u *SysConfigUpsertBulk) SetAnnouncementEnabled(v bool) *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetAnnouncementEnabled(v)
+	})
+}
+
+// UpdateAnnouncementEnabled sets the "announcement_enabled" field to the value that was provided on create.
+func (u *SysConfigUpsertBulk) UpdateAnnouncementEnabled() *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateAnnouncementEnabled()
+	})
+}
+
+// SetAnnouncementText sets the "announcement_text" field.
+func (u *SysConfigUpsertBulk) SetAnnouncementText(v string) *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetAnnouncementText(v)
+	})
+}
+
+// UpdateAnnouncementText sets the "announcement_text" field to the value that was provided on create.
+func (u *SysConfigUpsertBulk) UpdateAnnouncementText() *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateAnnouncementText()
+	})
+}
+
+// ClearAnnouncementText clears the value of the "announcement_text" field.
+func (u *SysConfigUpsertBulk) ClearAnnouncementText() *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.ClearAnnouncementText()
+	})
+}
+
+// SetAnnouncementLink sets the "announcement_link" field.
+func (u *SysConfigUpsertBulk) SetAnnouncementLink(v string) *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.SetAnnouncementLink(v)
+	})
+}
+
+// UpdateAnnouncementLink sets the "announcement_link" field to the value that was provided on create.
+func (u *SysConfigUpsertBulk) UpdateAnnouncementLink() *SysConfigUpsertBulk {
+	return u.Update(func(s *SysConfigUpsert) {
+		s.UpdateAnnouncementLink()
 	})
 }
 

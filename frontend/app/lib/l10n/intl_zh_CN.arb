@@ -377,5 +377,16 @@
   "creatorPlays": "播放",
   "creatorLikes": "点赞",
   "creatorPublished": "发布",
-  "errorSensitiveWordHit": "内容包含违规词汇，请修改后再试"
+  "errorSensitiveWordHit": "内容包含违规词汇，请修改后再试",
+  "seriesFollowing": "已追剧",
+  "seriesFollowShort": "追剧",
+  "seriesFollowersCount": "{count}人在追",
+  "@seriesFollowersCount": {"placeholders": {"count": {"type": "int"}}},
+  "followingSeriesTab": "追剧",
+  "followingSeriesEmpty": "还没有追的剧，去发现好剧吧",
+  "dislikeNotInterested": "不感兴趣",
+  "dislikeRecorded": "将减少此类内容推荐",
+  "searchHistory": "搜索历史",
+  "searchHistoryClear": "清空",
+  "hotKeywords": "热搜词"
 }

@@ -7,6 +7,7 @@
 package servicev1
 
 import (
+	v11 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
 	v1 "go-wind-shortplay/api/gen/go/series/service/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -27,43 +28,55 @@ var File_app_service_v1_i_series_proto protoreflect.FileDescriptor
 
 const file_app_service_v1_i_series_proto_rawDesc = "" +
 	"\n" +
-	"\x1dapp/service/v1/i_series.proto\x12\x0eapp.service.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1eseries/service/v1/series.proto2\xc1\x04\n" +
+	"\x1dapp/service/v1/i_series.proto\x12\x0eapp.service.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1epagination/v1/pagination.proto\x1a\x1eseries/service/v1/series.proto2\xd8\a\n" +
 	"\rSeriesService\x12l\n" +
 	"\fCreateSeries\x12&.series.service.v1.CreateSeriesRequest\x1a\x19.series.service.v1.Series\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/app/v1/series\x12n\n" +
 	"\tGetSeries\x12#.series.service.v1.GetSeriesRequest\x1a\x1f.series.service.v1.SeriesDetail\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/app/v1/series/{id}\x12q\n" +
 	"\fUpdateSeries\x12&.series.service.v1.UpdateSeriesRequest\x1a\x19.series.service.v1.Series\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\x1a\x13/app/v1/series/{id}\x12k\n" +
 	"\fDeleteSeries\x12&.series.service.v1.DeleteSeriesRequest\x1a\x16.google.protobuf.Empty\"\x1b\x82\xd3\xe4\x93\x02\x15*\x13/app/v1/series/{id}\x12r\n" +
 	"\n" +
-	"ListSeries\x12%.series.service.v1.QuerySeriesRequest\x1a%.series.service.v1.ListSeriesResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/app/v1/seriesB\xb3\x01\n" +
+	"ListSeries\x12%.series.service.v1.QuerySeriesRequest\x1a%.series.service.v1.ListSeriesResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/app/v1/series\x12\x8a\x01\n" +
+	"\fFollowSeries\x12&.series.service.v1.FollowSeriesRequest\x1a'.series.service.v1.FollowSeriesResponse\")\x82\xd3\xe4\x93\x02#\"!/app/v1/series/{series_id}/follow\x12\x8c\x01\n" +
+	"\x0eUnfollowSeries\x12&.series.service.v1.FollowSeriesRequest\x1a'.series.service.v1.FollowSeriesResponse\")\x82\xd3\xe4\x93\x02#*!/app/v1/series/{series_id}/follow\x12y\n" +
+	"\x12ListFollowedSeries\x12\x19.pagination.PagingRequest\x1a%.series.service.v1.ListSeriesResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/app/v1/me/series-followsB\xb3\x01\n" +
 	"\x12com.app.service.v1B\fISeriesProtoP\x01Z5go-wind-shortplay/api/gen/go/app/service/v1;servicev1\xa2\x02\x03ASX\xaa\x02\x0eApp.Service.V1\xca\x02\x0eApp\\Service\\V1\xe2\x02\x1aApp\\Service\\V1\\GPBMetadata\xea\x02\x10App::Service::V1b\x06proto3"
 
 var file_app_service_v1_i_series_proto_goTypes = []any{
-	(*v1.CreateSeriesRequest)(nil), // 0: series.service.v1.CreateSeriesRequest
-	(*v1.GetSeriesRequest)(nil),    // 1: series.service.v1.GetSeriesRequest
-	(*v1.UpdateSeriesRequest)(nil), // 2: series.service.v1.UpdateSeriesRequest
-	(*v1.DeleteSeriesRequest)(nil), // 3: series.service.v1.DeleteSeriesRequest
-	(*v1.QuerySeriesRequest)(nil),  // 4: series.service.v1.QuerySeriesRequest
-	(*v1.Series)(nil),              // 5: series.service.v1.Series
-	(*v1.SeriesDetail)(nil),        // 6: series.service.v1.SeriesDetail
-	(*emptypb.Empty)(nil),          // 7: google.protobuf.Empty
-	(*v1.ListSeriesResponse)(nil),  // 8: series.service.v1.ListSeriesResponse
+	(*v1.CreateSeriesRequest)(nil),  // 0: series.service.v1.CreateSeriesRequest
+	(*v1.GetSeriesRequest)(nil),     // 1: series.service.v1.GetSeriesRequest
+	(*v1.UpdateSeriesRequest)(nil),  // 2: series.service.v1.UpdateSeriesRequest
+	(*v1.DeleteSeriesRequest)(nil),  // 3: series.service.v1.DeleteSeriesRequest
+	(*v1.QuerySeriesRequest)(nil),   // 4: series.service.v1.QuerySeriesRequest
+	(*v1.FollowSeriesRequest)(nil),  // 5: series.service.v1.FollowSeriesRequest
+	(*v11.PagingRequest)(nil),       // 6: pagination.PagingRequest
+	(*v1.Series)(nil),               // 7: series.service.v1.Series
+	(*v1.SeriesDetail)(nil),         // 8: series.service.v1.SeriesDetail
+	(*emptypb.Empty)(nil),           // 9: google.protobuf.Empty
+	(*v1.ListSeriesResponse)(nil),   // 10: series.service.v1.ListSeriesResponse
+	(*v1.FollowSeriesResponse)(nil), // 11: series.service.v1.FollowSeriesResponse
 }
 var file_app_service_v1_i_series_proto_depIdxs = []int32{
-	0, // 0: app.service.v1.SeriesService.CreateSeries:input_type -> series.service.v1.CreateSeriesRequest
-	1, // 1: app.service.v1.SeriesService.GetSeries:input_type -> series.service.v1.GetSeriesRequest
-	2, // 2: app.service.v1.SeriesService.UpdateSeries:input_type -> series.service.v1.UpdateSeriesRequest
-	3, // 3: app.service.v1.SeriesService.DeleteSeries:input_type -> series.service.v1.DeleteSeriesRequest
-	4, // 4: app.service.v1.SeriesService.ListSeries:input_type -> series.service.v1.QuerySeriesRequest
-	5, // 5: app.service.v1.SeriesService.CreateSeries:output_type -> series.service.v1.Series
-	6, // 6: app.service.v1.SeriesService.GetSeries:output_type -> series.service.v1.SeriesDetail
-	5, // 7: app.service.v1.SeriesService.UpdateSeries:output_type -> series.service.v1.Series
-	7, // 8: app.service.v1.SeriesService.DeleteSeries:output_type -> google.protobuf.Empty
-	8, // 9: app.service.v1.SeriesService.ListSeries:output_type -> series.service.v1.ListSeriesResponse
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: app.service.v1.SeriesService.CreateSeries:input_type -> series.service.v1.CreateSeriesRequest
+	1,  // 1: app.service.v1.SeriesService.GetSeries:input_type -> series.service.v1.GetSeriesRequest
+	2,  // 2: app.service.v1.SeriesService.UpdateSeries:input_type -> series.service.v1.UpdateSeriesRequest
+	3,  // 3: app.service.v1.SeriesService.DeleteSeries:input_type -> series.service.v1.DeleteSeriesRequest
+	4,  // 4: app.service.v1.SeriesService.ListSeries:input_type -> series.service.v1.QuerySeriesRequest
+	5,  // 5: app.service.v1.SeriesService.FollowSeries:input_type -> series.service.v1.FollowSeriesRequest
+	5,  // 6: app.service.v1.SeriesService.UnfollowSeries:input_type -> series.service.v1.FollowSeriesRequest
+	6,  // 7: app.service.v1.SeriesService.ListFollowedSeries:input_type -> pagination.PagingRequest
+	7,  // 8: app.service.v1.SeriesService.CreateSeries:output_type -> series.service.v1.Series
+	8,  // 9: app.service.v1.SeriesService.GetSeries:output_type -> series.service.v1.SeriesDetail
+	7,  // 10: app.service.v1.SeriesService.UpdateSeries:output_type -> series.service.v1.Series
+	9,  // 11: app.service.v1.SeriesService.DeleteSeries:output_type -> google.protobuf.Empty
+	10, // 12: app.service.v1.SeriesService.ListSeries:output_type -> series.service.v1.ListSeriesResponse
+	11, // 13: app.service.v1.SeriesService.FollowSeries:output_type -> series.service.v1.FollowSeriesResponse
+	11, // 14: app.service.v1.SeriesService.UnfollowSeries:output_type -> series.service.v1.FollowSeriesResponse
+	10, // 15: app.service.v1.SeriesService.ListFollowedSeries:output_type -> series.service.v1.ListSeriesResponse
+	8,  // [8:16] is the sub-list for method output_type
+	0,  // [0:8] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_app_service_v1_i_series_proto_init() }

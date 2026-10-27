@@ -138,9 +138,10 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 	// 评论
 	commentRepo := data.NewCommentRepo(ctx, entClient)
 
-	// shortplay 业务域：视频 / 剧集 / 上传 / 草稿 / 互动 / 评论 / 举报 / 埋点 / 配置 / 看板
+	// shortplay 业务域：视频 / 剧集 / 追剧 / 上传 / 草稿 / 互动 / 评论 / 举报 / 埋点 / 配置 / 看板
 	videoRepo := data.NewVideoRepo(ctx, entClient)
 	seriesRepo := data.NewSeriesRepo(ctx, entClient)
+	seriesFollowRepo := data.NewSeriesFollowRepo(ctx, entClient)
 	videoDraftRepo := data.NewVideoDraftRepo(ctx, entClient)
 	uploadTaskRepo := data.NewUploadTaskRepo(ctx, entClient)
 	interactionRepo := data.NewInteractionRepo(ctx, entClient)
@@ -228,22 +229,23 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 	mediaAssetService := service.NewMediaAssetService(ctx, mediaAssetRepo)
 
 	// shortplay 业务域服务
-	seriesService := service.NewSeriesService(ctx, seriesRepo, videoRepo)
+	seriesService := service.NewSeriesService(ctx, seriesRepo, videoRepo, seriesFollowRepo)
 	videoService := service.NewVideoService(ctx, videoRepo, seriesService, videoDraftRepo, uploadTaskRepo, sysConfRepo, minIOClient)
-	feedService := service.NewFeedService(ctx, videoRepo, userRepo, interactionRepo, statsRepo, redisClient)
+	feedService := service.NewFeedService(ctx, videoRepo, userRepo, interactionRepo, statsRepo, ubaRepo, redisClient)
 	interactionService := service.NewInteractionService(ctx, interactionRepo, videoRepo, userRepo)
 	videoCommentService := service.NewVideoCommentService(ctx, videoCommentRepo, videoRepo, userRepo, sysConfRepo)
 	reportService := service.NewReportService(ctx, reportRepo, userRepo, videoRepo, videoCommentRepo)
 	sysConfService := service.NewSysConfService(ctx, sysConfRepo)
-	ubaService := service.NewUbaService(ctx, ubaRepo, videoRepo)
+	ubaService := service.NewUbaService(ctx, ubaRepo, videoRepo, redisClient)
 	dashboardService := service.NewDashboardService(ctx, statsRepo, videoRepo, interactionRepo, userRepo)
 
 	// shortplay 接缝：举报通知走基座站内信（超管收件）；封面抽帧走 asynq。
 	reportService.RegisterNotifier(internalMessageService)
-	// C 端互动通知：点赞/关注（interaction）、评论/回复（comment）、审核结果（video）
+	// C 端互动通知：点赞/关注（interaction）、评论/回复（comment）、审核结果（video）、追更更新（series）
 	interactionService.RegisterNotifier(internalMessageService)
 	videoCommentService.RegisterNotifier(internalMessageService)
 	videoService.RegisterNotifier(internalMessageService)
+	seriesService.RegisterNotifier(internalMessageService)
 	reportService.RegisterSuperAdminResolver(roleService)
 	reportService.RegisterVideoModerator(videoService)
 	videoService.RegisterTaskEnqueuer(taskService)

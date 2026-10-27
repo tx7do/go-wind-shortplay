@@ -50,6 +50,7 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent/rolemetadata"
 	"go-wind-shortplay/app/core/service/internal/data/ent/rolepermission"
 	"go-wind-shortplay/app/core/service/internal/data/ent/series"
+	"go-wind-shortplay/app/core/service/internal/data/ent/seriesfollow"
 	"go-wind-shortplay/app/core/service/internal/data/ent/sysconfig"
 	"go-wind-shortplay/app/core/service/internal/data/ent/task"
 	"go-wind-shortplay/app/core/service/internal/data/ent/tenant"
@@ -125,6 +126,7 @@ const (
 	TypeRoleMetadata             = "RoleMetadata"
 	TypeRolePermission           = "RolePermission"
 	TypeSeries                   = "Series"
+	TypeSeriesFollow             = "SeriesFollow"
 	TypeSysConfig                = "SysConfig"
 	TypeTask                     = "Task"
 	TypeTenant                   = "Tenant"
@@ -65108,6 +65110,790 @@ func (m *SeriesMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Series edge %s", name)
 }
 
+// SeriesFollowMutation represents an operation that mutates the SeriesFollow nodes in the graph.
+type SeriesFollowMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *uint32
+	created_at     *time.Time
+	updated_at     *time.Time
+	deleted_at     *time.Time
+	tenant_id      *uint32
+	addtenant_id   *int32
+	follower_id    *uint32
+	addfollower_id *int32
+	series_id      *uint32
+	addseries_id   *int32
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*SeriesFollow, error)
+	predicates     []predicate.SeriesFollow
+}
+
+var _ ent.Mutation = (*SeriesFollowMutation)(nil)
+
+// seriesfollowOption allows management of the mutation configuration using functional options.
+type seriesfollowOption func(*SeriesFollowMutation)
+
+// newSeriesFollowMutation creates new mutation for the SeriesFollow entity.
+func newSeriesFollowMutation(c config, op Op, opts ...seriesfollowOption) *SeriesFollowMutation {
+	m := &SeriesFollowMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSeriesFollow,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSeriesFollowID sets the ID field of the mutation.
+func withSeriesFollowID(id uint32) seriesfollowOption {
+	return func(m *SeriesFollowMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SeriesFollow
+		)
+		m.oldValue = func(ctx context.Context) (*SeriesFollow, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SeriesFollow.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSeriesFollow sets the old SeriesFollow of the mutation.
+func withSeriesFollow(node *SeriesFollow) seriesfollowOption {
+	return func(m *SeriesFollowMutation) {
+		m.oldValue = func(context.Context) (*SeriesFollow, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SeriesFollowMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SeriesFollowMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SeriesFollow entities.
+func (m *SeriesFollowMutation) SetID(id uint32) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SeriesFollowMutation) ID() (id uint32, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SeriesFollowMutation) IDs(ctx context.Context) ([]uint32, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uint32{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SeriesFollow.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *SeriesFollowMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *SeriesFollowMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the SeriesFollow entity.
+// If the SeriesFollow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesFollowMutation) OldCreatedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ClearCreatedAt clears the value of the "created_at" field.
+func (m *SeriesFollowMutation) ClearCreatedAt() {
+	m.created_at = nil
+	m.clearedFields[seriesfollow.FieldCreatedAt] = struct{}{}
+}
+
+// CreatedAtCleared returns if the "created_at" field was cleared in this mutation.
+func (m *SeriesFollowMutation) CreatedAtCleared() bool {
+	_, ok := m.clearedFields[seriesfollow.FieldCreatedAt]
+	return ok
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *SeriesFollowMutation) ResetCreatedAt() {
+	m.created_at = nil
+	delete(m.clearedFields, seriesfollow.FieldCreatedAt)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *SeriesFollowMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *SeriesFollowMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the SeriesFollow entity.
+// If the SeriesFollow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesFollowMutation) OldUpdatedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (m *SeriesFollowMutation) ClearUpdatedAt() {
+	m.updated_at = nil
+	m.clearedFields[seriesfollow.FieldUpdatedAt] = struct{}{}
+}
+
+// UpdatedAtCleared returns if the "updated_at" field was cleared in this mutation.
+func (m *SeriesFollowMutation) UpdatedAtCleared() bool {
+	_, ok := m.clearedFields[seriesfollow.FieldUpdatedAt]
+	return ok
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *SeriesFollowMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+	delete(m.clearedFields, seriesfollow.FieldUpdatedAt)
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *SeriesFollowMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *SeriesFollowMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the SeriesFollow entity.
+// If the SeriesFollow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesFollowMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *SeriesFollowMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[seriesfollow.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *SeriesFollowMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[seriesfollow.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *SeriesFollowMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, seriesfollow.FieldDeletedAt)
+}
+
+// SetTenantID sets the "tenant_id" field.
+func (m *SeriesFollowMutation) SetTenantID(u uint32) {
+	m.tenant_id = &u
+	m.addtenant_id = nil
+}
+
+// TenantID returns the value of the "tenant_id" field in the mutation.
+func (m *SeriesFollowMutation) TenantID() (r uint32, exists bool) {
+	v := m.tenant_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTenantID returns the old "tenant_id" field's value of the SeriesFollow entity.
+// If the SeriesFollow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesFollowMutation) OldTenantID(ctx context.Context) (v *uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTenantID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTenantID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTenantID: %w", err)
+	}
+	return oldValue.TenantID, nil
+}
+
+// AddTenantID adds u to the "tenant_id" field.
+func (m *SeriesFollowMutation) AddTenantID(u int32) {
+	if m.addtenant_id != nil {
+		*m.addtenant_id += u
+	} else {
+		m.addtenant_id = &u
+	}
+}
+
+// AddedTenantID returns the value that was added to the "tenant_id" field in this mutation.
+func (m *SeriesFollowMutation) AddedTenantID() (r int32, exists bool) {
+	v := m.addtenant_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearTenantID clears the value of the "tenant_id" field.
+func (m *SeriesFollowMutation) ClearTenantID() {
+	m.tenant_id = nil
+	m.addtenant_id = nil
+	m.clearedFields[seriesfollow.FieldTenantID] = struct{}{}
+}
+
+// TenantIDCleared returns if the "tenant_id" field was cleared in this mutation.
+func (m *SeriesFollowMutation) TenantIDCleared() bool {
+	_, ok := m.clearedFields[seriesfollow.FieldTenantID]
+	return ok
+}
+
+// ResetTenantID resets all changes to the "tenant_id" field.
+func (m *SeriesFollowMutation) ResetTenantID() {
+	m.tenant_id = nil
+	m.addtenant_id = nil
+	delete(m.clearedFields, seriesfollow.FieldTenantID)
+}
+
+// SetFollowerID sets the "follower_id" field.
+func (m *SeriesFollowMutation) SetFollowerID(u uint32) {
+	m.follower_id = &u
+	m.addfollower_id = nil
+}
+
+// FollowerID returns the value of the "follower_id" field in the mutation.
+func (m *SeriesFollowMutation) FollowerID() (r uint32, exists bool) {
+	v := m.follower_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFollowerID returns the old "follower_id" field's value of the SeriesFollow entity.
+// If the SeriesFollow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesFollowMutation) OldFollowerID(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFollowerID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFollowerID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFollowerID: %w", err)
+	}
+	return oldValue.FollowerID, nil
+}
+
+// AddFollowerID adds u to the "follower_id" field.
+func (m *SeriesFollowMutation) AddFollowerID(u int32) {
+	if m.addfollower_id != nil {
+		*m.addfollower_id += u
+	} else {
+		m.addfollower_id = &u
+	}
+}
+
+// AddedFollowerID returns the value that was added to the "follower_id" field in this mutation.
+func (m *SeriesFollowMutation) AddedFollowerID() (r int32, exists bool) {
+	v := m.addfollower_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetFollowerID resets all changes to the "follower_id" field.
+func (m *SeriesFollowMutation) ResetFollowerID() {
+	m.follower_id = nil
+	m.addfollower_id = nil
+}
+
+// SetSeriesID sets the "series_id" field.
+func (m *SeriesFollowMutation) SetSeriesID(u uint32) {
+	m.series_id = &u
+	m.addseries_id = nil
+}
+
+// SeriesID returns the value of the "series_id" field in the mutation.
+func (m *SeriesFollowMutation) SeriesID() (r uint32, exists bool) {
+	v := m.series_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSeriesID returns the old "series_id" field's value of the SeriesFollow entity.
+// If the SeriesFollow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesFollowMutation) OldSeriesID(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSeriesID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSeriesID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSeriesID: %w", err)
+	}
+	return oldValue.SeriesID, nil
+}
+
+// AddSeriesID adds u to the "series_id" field.
+func (m *SeriesFollowMutation) AddSeriesID(u int32) {
+	if m.addseries_id != nil {
+		*m.addseries_id += u
+	} else {
+		m.addseries_id = &u
+	}
+}
+
+// AddedSeriesID returns the value that was added to the "series_id" field in this mutation.
+func (m *SeriesFollowMutation) AddedSeriesID() (r int32, exists bool) {
+	v := m.addseries_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSeriesID resets all changes to the "series_id" field.
+func (m *SeriesFollowMutation) ResetSeriesID() {
+	m.series_id = nil
+	m.addseries_id = nil
+}
+
+// Where appends a list predicates to the SeriesFollowMutation builder.
+func (m *SeriesFollowMutation) Where(ps ...predicate.SeriesFollow) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SeriesFollowMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SeriesFollowMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SeriesFollow, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SeriesFollowMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SeriesFollowMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SeriesFollow).
+func (m *SeriesFollowMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SeriesFollowMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.created_at != nil {
+		fields = append(fields, seriesfollow.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, seriesfollow.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, seriesfollow.FieldDeletedAt)
+	}
+	if m.tenant_id != nil {
+		fields = append(fields, seriesfollow.FieldTenantID)
+	}
+	if m.follower_id != nil {
+		fields = append(fields, seriesfollow.FieldFollowerID)
+	}
+	if m.series_id != nil {
+		fields = append(fields, seriesfollow.FieldSeriesID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SeriesFollowMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case seriesfollow.FieldCreatedAt:
+		return m.CreatedAt()
+	case seriesfollow.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case seriesfollow.FieldDeletedAt:
+		return m.DeletedAt()
+	case seriesfollow.FieldTenantID:
+		return m.TenantID()
+	case seriesfollow.FieldFollowerID:
+		return m.FollowerID()
+	case seriesfollow.FieldSeriesID:
+		return m.SeriesID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SeriesFollowMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case seriesfollow.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case seriesfollow.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case seriesfollow.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case seriesfollow.FieldTenantID:
+		return m.OldTenantID(ctx)
+	case seriesfollow.FieldFollowerID:
+		return m.OldFollowerID(ctx)
+	case seriesfollow.FieldSeriesID:
+		return m.OldSeriesID(ctx)
+	}
+	return nil, fmt.Errorf("unknown SeriesFollow field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SeriesFollowMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case seriesfollow.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case seriesfollow.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case seriesfollow.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case seriesfollow.FieldTenantID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTenantID(v)
+		return nil
+	case seriesfollow.FieldFollowerID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFollowerID(v)
+		return nil
+	case seriesfollow.FieldSeriesID:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSeriesID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SeriesFollow field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SeriesFollowMutation) AddedFields() []string {
+	var fields []string
+	if m.addtenant_id != nil {
+		fields = append(fields, seriesfollow.FieldTenantID)
+	}
+	if m.addfollower_id != nil {
+		fields = append(fields, seriesfollow.FieldFollowerID)
+	}
+	if m.addseries_id != nil {
+		fields = append(fields, seriesfollow.FieldSeriesID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SeriesFollowMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case seriesfollow.FieldTenantID:
+		return m.AddedTenantID()
+	case seriesfollow.FieldFollowerID:
+		return m.AddedFollowerID()
+	case seriesfollow.FieldSeriesID:
+		return m.AddedSeriesID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SeriesFollowMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case seriesfollow.FieldTenantID:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTenantID(v)
+		return nil
+	case seriesfollow.FieldFollowerID:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFollowerID(v)
+		return nil
+	case seriesfollow.FieldSeriesID:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSeriesID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SeriesFollow numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SeriesFollowMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(seriesfollow.FieldCreatedAt) {
+		fields = append(fields, seriesfollow.FieldCreatedAt)
+	}
+	if m.FieldCleared(seriesfollow.FieldUpdatedAt) {
+		fields = append(fields, seriesfollow.FieldUpdatedAt)
+	}
+	if m.FieldCleared(seriesfollow.FieldDeletedAt) {
+		fields = append(fields, seriesfollow.FieldDeletedAt)
+	}
+	if m.FieldCleared(seriesfollow.FieldTenantID) {
+		fields = append(fields, seriesfollow.FieldTenantID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SeriesFollowMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SeriesFollowMutation) ClearField(name string) error {
+	switch name {
+	case seriesfollow.FieldCreatedAt:
+		m.ClearCreatedAt()
+		return nil
+	case seriesfollow.FieldUpdatedAt:
+		m.ClearUpdatedAt()
+		return nil
+	case seriesfollow.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case seriesfollow.FieldTenantID:
+		m.ClearTenantID()
+		return nil
+	}
+	return fmt.Errorf("unknown SeriesFollow nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SeriesFollowMutation) ResetField(name string) error {
+	switch name {
+	case seriesfollow.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case seriesfollow.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case seriesfollow.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case seriesfollow.FieldTenantID:
+		m.ResetTenantID()
+		return nil
+	case seriesfollow.FieldFollowerID:
+		m.ResetFollowerID()
+		return nil
+	case seriesfollow.FieldSeriesID:
+		m.ResetSeriesID()
+		return nil
+	}
+	return fmt.Errorf("unknown SeriesFollow field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SeriesFollowMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SeriesFollowMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SeriesFollowMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SeriesFollowMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SeriesFollowMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SeriesFollowMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SeriesFollowMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown SeriesFollow unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SeriesFollowMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown SeriesFollow edge %s", name)
+}
+
 // SysConfigMutation represents an operation that mutates the SysConfig nodes in the graph.
 type SysConfigMutation struct {
 	config
@@ -65134,6 +65920,9 @@ type SysConfigMutation struct {
 	sensitive_filter_enabled  *bool
 	sensitive_words           *[]string
 	appendsensitive_words     []string
+	announcement_enabled      *bool
+	announcement_text         *string
+	announcement_link         *string
 	clearedFields             map[string]struct{}
 	done                      bool
 	oldValue                  func(context.Context) (*SysConfig, error)
@@ -65951,6 +66740,127 @@ func (m *SysConfigMutation) ResetSensitiveWords() {
 	delete(m.clearedFields, sysconfig.FieldSensitiveWords)
 }
 
+// SetAnnouncementEnabled sets the "announcement_enabled" field.
+func (m *SysConfigMutation) SetAnnouncementEnabled(b bool) {
+	m.announcement_enabled = &b
+}
+
+// AnnouncementEnabled returns the value of the "announcement_enabled" field in the mutation.
+func (m *SysConfigMutation) AnnouncementEnabled() (r bool, exists bool) {
+	v := m.announcement_enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAnnouncementEnabled returns the old "announcement_enabled" field's value of the SysConfig entity.
+// If the SysConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SysConfigMutation) OldAnnouncementEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAnnouncementEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAnnouncementEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAnnouncementEnabled: %w", err)
+	}
+	return oldValue.AnnouncementEnabled, nil
+}
+
+// ResetAnnouncementEnabled resets all changes to the "announcement_enabled" field.
+func (m *SysConfigMutation) ResetAnnouncementEnabled() {
+	m.announcement_enabled = nil
+}
+
+// SetAnnouncementText sets the "announcement_text" field.
+func (m *SysConfigMutation) SetAnnouncementText(s string) {
+	m.announcement_text = &s
+}
+
+// AnnouncementText returns the value of the "announcement_text" field in the mutation.
+func (m *SysConfigMutation) AnnouncementText() (r string, exists bool) {
+	v := m.announcement_text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAnnouncementText returns the old "announcement_text" field's value of the SysConfig entity.
+// If the SysConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SysConfigMutation) OldAnnouncementText(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAnnouncementText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAnnouncementText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAnnouncementText: %w", err)
+	}
+	return oldValue.AnnouncementText, nil
+}
+
+// ClearAnnouncementText clears the value of the "announcement_text" field.
+func (m *SysConfigMutation) ClearAnnouncementText() {
+	m.announcement_text = nil
+	m.clearedFields[sysconfig.FieldAnnouncementText] = struct{}{}
+}
+
+// AnnouncementTextCleared returns if the "announcement_text" field was cleared in this mutation.
+func (m *SysConfigMutation) AnnouncementTextCleared() bool {
+	_, ok := m.clearedFields[sysconfig.FieldAnnouncementText]
+	return ok
+}
+
+// ResetAnnouncementText resets all changes to the "announcement_text" field.
+func (m *SysConfigMutation) ResetAnnouncementText() {
+	m.announcement_text = nil
+	delete(m.clearedFields, sysconfig.FieldAnnouncementText)
+}
+
+// SetAnnouncementLink sets the "announcement_link" field.
+func (m *SysConfigMutation) SetAnnouncementLink(s string) {
+	m.announcement_link = &s
+}
+
+// AnnouncementLink returns the value of the "announcement_link" field in the mutation.
+func (m *SysConfigMutation) AnnouncementLink() (r string, exists bool) {
+	v := m.announcement_link
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAnnouncementLink returns the old "announcement_link" field's value of the SysConfig entity.
+// If the SysConfig object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SysConfigMutation) OldAnnouncementLink(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAnnouncementLink is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAnnouncementLink requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAnnouncementLink: %w", err)
+	}
+	return oldValue.AnnouncementLink, nil
+}
+
+// ResetAnnouncementLink resets all changes to the "announcement_link" field.
+func (m *SysConfigMutation) ResetAnnouncementLink() {
+	m.announcement_link = nil
+}
+
 // Where appends a list predicates to the SysConfigMutation builder.
 func (m *SysConfigMutation) Where(ps ...predicate.SysConfig) {
 	m.predicates = append(m.predicates, ps...)
@@ -65985,7 +66895,7 @@ func (m *SysConfigMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SysConfigMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 16)
 	if m.created_at != nil {
 		fields = append(fields, sysconfig.FieldCreatedAt)
 	}
@@ -66025,6 +66935,15 @@ func (m *SysConfigMutation) Fields() []string {
 	if m.sensitive_words != nil {
 		fields = append(fields, sysconfig.FieldSensitiveWords)
 	}
+	if m.announcement_enabled != nil {
+		fields = append(fields, sysconfig.FieldAnnouncementEnabled)
+	}
+	if m.announcement_text != nil {
+		fields = append(fields, sysconfig.FieldAnnouncementText)
+	}
+	if m.announcement_link != nil {
+		fields = append(fields, sysconfig.FieldAnnouncementLink)
+	}
 	return fields
 }
 
@@ -66059,6 +66978,12 @@ func (m *SysConfigMutation) Field(name string) (ent.Value, bool) {
 		return m.SensitiveFilterEnabled()
 	case sysconfig.FieldSensitiveWords:
 		return m.SensitiveWords()
+	case sysconfig.FieldAnnouncementEnabled:
+		return m.AnnouncementEnabled()
+	case sysconfig.FieldAnnouncementText:
+		return m.AnnouncementText()
+	case sysconfig.FieldAnnouncementLink:
+		return m.AnnouncementLink()
 	}
 	return nil, false
 }
@@ -66094,6 +67019,12 @@ func (m *SysConfigMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldSensitiveFilterEnabled(ctx)
 	case sysconfig.FieldSensitiveWords:
 		return m.OldSensitiveWords(ctx)
+	case sysconfig.FieldAnnouncementEnabled:
+		return m.OldAnnouncementEnabled(ctx)
+	case sysconfig.FieldAnnouncementText:
+		return m.OldAnnouncementText(ctx)
+	case sysconfig.FieldAnnouncementLink:
+		return m.OldAnnouncementLink(ctx)
 	}
 	return nil, fmt.Errorf("unknown SysConfig field %s", name)
 }
@@ -66193,6 +67124,27 @@ func (m *SysConfigMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSensitiveWords(v)
+		return nil
+	case sysconfig.FieldAnnouncementEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAnnouncementEnabled(v)
+		return nil
+	case sysconfig.FieldAnnouncementText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAnnouncementText(v)
+		return nil
+	case sysconfig.FieldAnnouncementLink:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAnnouncementLink(v)
 		return nil
 	}
 	return fmt.Errorf("unknown SysConfig field %s", name)
@@ -66311,6 +67263,9 @@ func (m *SysConfigMutation) ClearedFields() []string {
 	if m.FieldCleared(sysconfig.FieldSensitiveWords) {
 		fields = append(fields, sysconfig.FieldSensitiveWords)
 	}
+	if m.FieldCleared(sysconfig.FieldAnnouncementText) {
+		fields = append(fields, sysconfig.FieldAnnouncementText)
+	}
 	return fields
 }
 
@@ -66348,6 +67303,9 @@ func (m *SysConfigMutation) ClearField(name string) error {
 		return nil
 	case sysconfig.FieldSensitiveWords:
 		m.ClearSensitiveWords()
+		return nil
+	case sysconfig.FieldAnnouncementText:
+		m.ClearAnnouncementText()
 		return nil
 	}
 	return fmt.Errorf("unknown SysConfig nullable field %s", name)
@@ -66395,6 +67353,15 @@ func (m *SysConfigMutation) ResetField(name string) error {
 		return nil
 	case sysconfig.FieldSensitiveWords:
 		m.ResetSensitiveWords()
+		return nil
+	case sysconfig.FieldAnnouncementEnabled:
+		m.ResetAnnouncementEnabled()
+		return nil
+	case sysconfig.FieldAnnouncementText:
+		m.ResetAnnouncementText()
+		return nil
+	case sysconfig.FieldAnnouncementLink:
+		m.ResetAnnouncementLink()
 		return nil
 	}
 	return fmt.Errorf("unknown SysConfig field %s", name)
@@ -69792,6 +70759,8 @@ type UbaEventMutation struct {
 	addduration_ms    *int64
 	watch_percent     *uint32
 	addwatch_percent  *int32
+	position_ms       *uint64
+	addposition_ms    *int64
 	extra             *string
 	occurred_at       *time.Time
 	clearedFields     map[string]struct{}
@@ -70437,6 +71406,62 @@ func (m *UbaEventMutation) ResetWatchPercent() {
 	m.addwatch_percent = nil
 }
 
+// SetPositionMs sets the "position_ms" field.
+func (m *UbaEventMutation) SetPositionMs(u uint64) {
+	m.position_ms = &u
+	m.addposition_ms = nil
+}
+
+// PositionMs returns the value of the "position_ms" field in the mutation.
+func (m *UbaEventMutation) PositionMs() (r uint64, exists bool) {
+	v := m.position_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPositionMs returns the old "position_ms" field's value of the UbaEvent entity.
+// If the UbaEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UbaEventMutation) OldPositionMs(ctx context.Context) (v uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPositionMs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPositionMs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPositionMs: %w", err)
+	}
+	return oldValue.PositionMs, nil
+}
+
+// AddPositionMs adds u to the "position_ms" field.
+func (m *UbaEventMutation) AddPositionMs(u int64) {
+	if m.addposition_ms != nil {
+		*m.addposition_ms += u
+	} else {
+		m.addposition_ms = &u
+	}
+}
+
+// AddedPositionMs returns the value that was added to the "position_ms" field in this mutation.
+func (m *UbaEventMutation) AddedPositionMs() (r int64, exists bool) {
+	v := m.addposition_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPositionMs resets all changes to the "position_ms" field.
+func (m *UbaEventMutation) ResetPositionMs() {
+	m.position_ms = nil
+	m.addposition_ms = nil
+}
+
 // SetExtra sets the "extra" field.
 func (m *UbaEventMutation) SetExtra(s string) {
 	m.extra = &s
@@ -70569,7 +71594,7 @@ func (m *UbaEventMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UbaEventMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
 		fields = append(fields, ubaevent.FieldCreatedAt)
 	}
@@ -70599,6 +71624,9 @@ func (m *UbaEventMutation) Fields() []string {
 	}
 	if m.watch_percent != nil {
 		fields = append(fields, ubaevent.FieldWatchPercent)
+	}
+	if m.position_ms != nil {
+		fields = append(fields, ubaevent.FieldPositionMs)
 	}
 	if m.extra != nil {
 		fields = append(fields, ubaevent.FieldExtra)
@@ -70634,6 +71662,8 @@ func (m *UbaEventMutation) Field(name string) (ent.Value, bool) {
 		return m.DurationMs()
 	case ubaevent.FieldWatchPercent:
 		return m.WatchPercent()
+	case ubaevent.FieldPositionMs:
+		return m.PositionMs()
 	case ubaevent.FieldExtra:
 		return m.Extra()
 	case ubaevent.FieldOccurredAt:
@@ -70667,6 +71697,8 @@ func (m *UbaEventMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldDurationMs(ctx)
 	case ubaevent.FieldWatchPercent:
 		return m.OldWatchPercent(ctx)
+	case ubaevent.FieldPositionMs:
+		return m.OldPositionMs(ctx)
 	case ubaevent.FieldExtra:
 		return m.OldExtra(ctx)
 	case ubaevent.FieldOccurredAt:
@@ -70750,6 +71782,13 @@ func (m *UbaEventMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetWatchPercent(v)
 		return nil
+	case ubaevent.FieldPositionMs:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPositionMs(v)
+		return nil
 	case ubaevent.FieldExtra:
 		v, ok := value.(string)
 		if !ok {
@@ -70790,6 +71829,9 @@ func (m *UbaEventMutation) AddedFields() []string {
 	if m.addwatch_percent != nil {
 		fields = append(fields, ubaevent.FieldWatchPercent)
 	}
+	if m.addposition_ms != nil {
+		fields = append(fields, ubaevent.FieldPositionMs)
+	}
 	return fields
 }
 
@@ -70810,6 +71852,8 @@ func (m *UbaEventMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedDurationMs()
 	case ubaevent.FieldWatchPercent:
 		return m.AddedWatchPercent()
+	case ubaevent.FieldPositionMs:
+		return m.AddedPositionMs()
 	}
 	return nil, false
 }
@@ -70860,6 +71904,13 @@ func (m *UbaEventMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddWatchPercent(v)
+		return nil
+	case ubaevent.FieldPositionMs:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPositionMs(v)
 		return nil
 	}
 	return fmt.Errorf("unknown UbaEvent numeric field %s", name)
@@ -70956,6 +72007,9 @@ func (m *UbaEventMutation) ResetField(name string) error {
 		return nil
 	case ubaevent.FieldWatchPercent:
 		m.ResetWatchPercent()
+		return nil
+	case ubaevent.FieldPositionMs:
+		m.ResetPositionMs()
 		return nil
 	case ubaevent.FieldExtra:
 		m.ResetExtra()

@@ -110,6 +110,10 @@ func (m *UbaEvent) validate(all bool) error {
 
 	}
 
+	if m.PositionMs != nil {
+		// no validation rules for PositionMs
+	}
+
 	if len(errors) > 0 {
 		return UbaEventMultiError(errors)
 	}
@@ -515,6 +519,10 @@ func (m *WatchHistoryItem) validate(all bool) error {
 			}
 		}
 
+	}
+
+	if m.ProgressSeconds != nil {
+		// no validation rules for ProgressSeconds
 	}
 
 	if len(errors) > 0 {

@@ -92,6 +92,8 @@ type Tx struct {
 	RolePermission *RolePermissionClient
 	// Series is the client for interacting with the Series builders.
 	Series *SeriesClient
+	// SeriesFollow is the client for interacting with the SeriesFollow builders.
+	SeriesFollow *SeriesFollowClient
 	// SysConfig is the client for interacting with the SysConfig builders.
 	SysConfig *SysConfigClient
 	// Task is the client for interacting with the Task builders.
@@ -301,6 +303,7 @@ func (tx *Tx) init() {
 	tx.RoleMetadata = NewRoleMetadataClient(tx.config)
 	tx.RolePermission = NewRolePermissionClient(tx.config)
 	tx.Series = NewSeriesClient(tx.config)
+	tx.SeriesFollow = NewSeriesFollowClient(tx.config)
 	tx.SysConfig = NewSysConfigClient(tx.config)
 	tx.Task = NewTaskClient(tx.config)
 	tx.Tenant = NewTenantClient(tx.config)

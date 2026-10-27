@@ -71,6 +71,11 @@ func (s *FeedService) ListVideosByTag(ctx context.Context, req *feedV1.ListVideo
 	return s.feedClient.ListVideosByTag(ctx, req)
 }
 
+// ListHotKeywords 热搜词（游客白名单，转发 core）。
+func (s *FeedService) ListHotKeywords(ctx context.Context, req *feedV1.ListHotKeywordsRequest) (*feedV1.ListHotKeywordsResponse, error) {
+	return s.feedClient.ListHotKeywords(ctx, req)
+}
+
 // ── 互动（app BFF 薄转发）──
 
 type InteractionService struct {

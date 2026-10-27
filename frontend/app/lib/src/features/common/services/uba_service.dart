@@ -18,6 +18,7 @@ class UbaEventType {
   static const videoCollect = 'EVENT_TYPE_VIDEO_COLLECT';
   static const commentCreate = 'EVENT_TYPE_COMMENT_CREATE';
   static const followAuthor = 'EVENT_TYPE_FOLLOW_AUTHOR';
+  static const videoDislike = 'EVENT_TYPE_VIDEO_DISLIKE';
 }
 
 /// 单条行为事件
@@ -37,22 +38,27 @@ class UbaEvent {
   /// 观看进度百分比 0-100
   final int watchPercent;
 
+  /// 播放位置（毫秒，心跳/划走时上报，断点续播用）
+  final int positionMs;
+
   const UbaEvent({
     required this.eventType,
     this.videoId = 0,
     this.targetUserId = 0,
     this.durationMs = 0,
     this.watchPercent = 0,
+    this.positionMs = 0,
   });
 
   Map<String, dynamic> toJson() {
-    // protojson：durationMs 为 int64 → 字符串；watchPercent 为 uint32 → 数字
+    // protojson：durationMs/positionMs 为 int64 → 字符串；watchPercent 为 uint32 → 数字
     return {
       'eventType': eventType,
       if (videoId > 0) 'videoId': videoId,
       if (targetUserId > 0) 'targetUserId': targetUserId,
       'durationMs': '$durationMs',
       'watchPercent': watchPercent.clamp(0, 100),
+      if (positionMs > 0) 'positionMs': '$positionMs',
     };
   }
 }
@@ -77,13 +83,14 @@ class UbaService extends BaseService {
       _dio
           .post<Object?>(
             '/uba/events',
-            data: {
-              'events': events.map((e) => e.toJson()).toList(),
-            },
+            data: {'events': events.map((e) => e.toJson()).toList()},
           )
-          .then((_) {}, onError: (Object e) {
-        debug('uba report failed (ignored): $e');
-      }),
+          .then(
+            (_) {},
+            onError: (Object e) {
+              debug('uba report failed (ignored): $e');
+            },
+          ),
     );
   }
 }

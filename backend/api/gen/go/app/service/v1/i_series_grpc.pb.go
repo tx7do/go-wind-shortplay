@@ -8,6 +8,7 @@ package servicev1
 
 import (
 	context "context"
+	v11 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
 	v1 "go-wind-shortplay/api/gen/go/series/service/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -21,11 +22,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	SeriesService_CreateSeries_FullMethodName = "/app.service.v1.SeriesService/CreateSeries"
-	SeriesService_GetSeries_FullMethodName    = "/app.service.v1.SeriesService/GetSeries"
-	SeriesService_UpdateSeries_FullMethodName = "/app.service.v1.SeriesService/UpdateSeries"
-	SeriesService_DeleteSeries_FullMethodName = "/app.service.v1.SeriesService/DeleteSeries"
-	SeriesService_ListSeries_FullMethodName   = "/app.service.v1.SeriesService/ListSeries"
+	SeriesService_CreateSeries_FullMethodName       = "/app.service.v1.SeriesService/CreateSeries"
+	SeriesService_GetSeries_FullMethodName          = "/app.service.v1.SeriesService/GetSeries"
+	SeriesService_UpdateSeries_FullMethodName       = "/app.service.v1.SeriesService/UpdateSeries"
+	SeriesService_DeleteSeries_FullMethodName       = "/app.service.v1.SeriesService/DeleteSeries"
+	SeriesService_ListSeries_FullMethodName         = "/app.service.v1.SeriesService/ListSeries"
+	SeriesService_FollowSeries_FullMethodName       = "/app.service.v1.SeriesService/FollowSeries"
+	SeriesService_UnfollowSeries_FullMethodName     = "/app.service.v1.SeriesService/UnfollowSeries"
+	SeriesService_ListFollowedSeries_FullMethodName = "/app.service.v1.SeriesService/ListFollowedSeries"
 )
 
 // SeriesServiceClient is the client API for SeriesService service.
@@ -44,6 +48,12 @@ type SeriesServiceClient interface {
 	DeleteSeries(ctx context.Context, in *v1.DeleteSeriesRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 剧集列表（query 剧名模糊 / authorId 按作者过滤；游客仅见有已发布集的剧）
 	ListSeries(ctx context.Context, in *v1.QuerySeriesRequest, opts ...grpc.CallOption) (*v1.ListSeriesResponse, error)
+	// 追剧（需登录）。幂等。
+	FollowSeries(ctx context.Context, in *v1.FollowSeriesRequest, opts ...grpc.CallOption) (*v1.FollowSeriesResponse, error)
+	// 取消追剧。幂等。
+	UnfollowSeries(ctx context.Context, in *v1.FollowSeriesRequest, opts ...grpc.CallOption) (*v1.FollowSeriesResponse, error)
+	// 我的追剧列表（按追剧时间倒序）
+	ListFollowedSeries(ctx context.Context, in *v11.PagingRequest, opts ...grpc.CallOption) (*v1.ListSeriesResponse, error)
 }
 
 type seriesServiceClient struct {
@@ -104,6 +114,36 @@ func (c *seriesServiceClient) ListSeries(ctx context.Context, in *v1.QuerySeries
 	return out, nil
 }
 
+func (c *seriesServiceClient) FollowSeries(ctx context.Context, in *v1.FollowSeriesRequest, opts ...grpc.CallOption) (*v1.FollowSeriesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.FollowSeriesResponse)
+	err := c.cc.Invoke(ctx, SeriesService_FollowSeries_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *seriesServiceClient) UnfollowSeries(ctx context.Context, in *v1.FollowSeriesRequest, opts ...grpc.CallOption) (*v1.FollowSeriesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.FollowSeriesResponse)
+	err := c.cc.Invoke(ctx, SeriesService_UnfollowSeries_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *seriesServiceClient) ListFollowedSeries(ctx context.Context, in *v11.PagingRequest, opts ...grpc.CallOption) (*v1.ListSeriesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.ListSeriesResponse)
+	err := c.cc.Invoke(ctx, SeriesService_ListFollowedSeries_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SeriesServiceServer is the server API for SeriesService service.
 // All implementations must embed UnimplementedSeriesServiceServer
 // for forward compatibility.
@@ -120,6 +160,12 @@ type SeriesServiceServer interface {
 	DeleteSeries(context.Context, *v1.DeleteSeriesRequest) (*emptypb.Empty, error)
 	// 剧集列表（query 剧名模糊 / authorId 按作者过滤；游客仅见有已发布集的剧）
 	ListSeries(context.Context, *v1.QuerySeriesRequest) (*v1.ListSeriesResponse, error)
+	// 追剧（需登录）。幂等。
+	FollowSeries(context.Context, *v1.FollowSeriesRequest) (*v1.FollowSeriesResponse, error)
+	// 取消追剧。幂等。
+	UnfollowSeries(context.Context, *v1.FollowSeriesRequest) (*v1.FollowSeriesResponse, error)
+	// 我的追剧列表（按追剧时间倒序）
+	ListFollowedSeries(context.Context, *v11.PagingRequest) (*v1.ListSeriesResponse, error)
 	mustEmbedUnimplementedSeriesServiceServer()
 }
 
@@ -144,6 +190,15 @@ func (UnimplementedSeriesServiceServer) DeleteSeries(context.Context, *v1.Delete
 }
 func (UnimplementedSeriesServiceServer) ListSeries(context.Context, *v1.QuerySeriesRequest) (*v1.ListSeriesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListSeries not implemented")
+}
+func (UnimplementedSeriesServiceServer) FollowSeries(context.Context, *v1.FollowSeriesRequest) (*v1.FollowSeriesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method FollowSeries not implemented")
+}
+func (UnimplementedSeriesServiceServer) UnfollowSeries(context.Context, *v1.FollowSeriesRequest) (*v1.FollowSeriesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UnfollowSeries not implemented")
+}
+func (UnimplementedSeriesServiceServer) ListFollowedSeries(context.Context, *v11.PagingRequest) (*v1.ListSeriesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListFollowedSeries not implemented")
 }
 func (UnimplementedSeriesServiceServer) mustEmbedUnimplementedSeriesServiceServer() {}
 func (UnimplementedSeriesServiceServer) testEmbeddedByValue()                       {}
@@ -256,6 +311,60 @@ func _SeriesService_ListSeries_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SeriesService_FollowSeries_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.FollowSeriesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SeriesServiceServer).FollowSeries(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SeriesService_FollowSeries_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SeriesServiceServer).FollowSeries(ctx, req.(*v1.FollowSeriesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SeriesService_UnfollowSeries_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.FollowSeriesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SeriesServiceServer).UnfollowSeries(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SeriesService_UnfollowSeries_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SeriesServiceServer).UnfollowSeries(ctx, req.(*v1.FollowSeriesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SeriesService_ListFollowedSeries_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v11.PagingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SeriesServiceServer).ListFollowedSeries(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SeriesService_ListFollowedSeries_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SeriesServiceServer).ListFollowedSeries(ctx, req.(*v11.PagingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SeriesService_ServiceDesc is the grpc.ServiceDesc for SeriesService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -282,6 +391,18 @@ var SeriesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListSeries",
 			Handler:    _SeriesService_ListSeries_Handler,
+		},
+		{
+			MethodName: "FollowSeries",
+			Handler:    _SeriesService_FollowSeries_Handler,
+		},
+		{
+			MethodName: "UnfollowSeries",
+			Handler:    _SeriesService_UnfollowSeries_Handler,
+		},
+		{
+			MethodName: "ListFollowedSeries",
+			Handler:    _SeriesService_ListFollowedSeries_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

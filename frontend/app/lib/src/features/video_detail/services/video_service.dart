@@ -12,23 +12,32 @@ class VideoDetail {
   /// 作者统计：{videoCount, followerCount, followingCount, likeReceivedCount}
   final UserStats? authorStats;
 
-  const VideoDetail({
-    required this.video,
-    this.author,
-    this.authorStats,
-  });
+  const VideoDetail({required this.video, this.author, this.authorStats});
 
   factory VideoDetail.fromJson(Map<String, dynamic> json) {
     final video = json['video'];
     final author = json['author'];
     final stats = json['authorStats'];
+    // viewerState 与 video 在 wire 上平级（protojson），合并进 video 后统一解析
+    //（liked/collected/following + resumePositionMs 都从这里取）
+    Map<String, dynamic> videoJson = const {};
+    if (video is Map<String, dynamic>) {
+      videoJson = Map<String, dynamic>.of(video);
+      final viewer = json['viewerState'];
+      if (viewer is Map<String, dynamic>) {
+        videoJson['viewerState'] = viewer;
+      }
+    }
     return VideoDetail(
-      video: video is Map<String, dynamic>
-          ? Video.fromJson(video)
+      video: videoJson.isNotEmpty
+          ? Video.fromJson(videoJson)
           : const Video(id: 0),
-      author: author is Map<String, dynamic> ? UserBrief.fromJson(author) : null,
-      authorStats:
-          stats is Map<String, dynamic> ? UserStats.fromJson(stats) : null,
+      author: author is Map<String, dynamic>
+          ? UserBrief.fromJson(author)
+          : null,
+      authorStats: stats is Map<String, dynamic>
+          ? UserStats.fromJson(stats)
+          : null,
     );
   }
 }
@@ -63,11 +72,7 @@ class VideoService extends BaseService {
     try {
       final res = await _dio.put<Map<String, dynamic>>(
         '/videos/$videoId',
-        data: {
-          'title': ?title,
-          'description': ?description,
-          'tags': ?tags,
-        },
+        data: {'title': ?title, 'description': ?description, 'tags': ?tags},
       );
       final data = res.data;
       if (data == null) {

@@ -21,5 +21,13 @@
   "sensitiveFilterEnabledHint": "开启后：发布命中敏感词转审核中，评论命中直接拒绝",
   "sensitiveWords": "敏感词表",
   "sensitiveWordsHint": "每行一个词（也可逗号分隔），保存后即时生效",
-  "sensitiveWordsPlaceholder": "每行一个敏感词"
+  "sensitiveWordsPlaceholder": "每行一个敏感词",
+  "announcementEnabled": "App 公告横幅",
+  "announcementEnabledHint": "开启后 App 首页顶部展示公告横幅（文案为空不展示）",
+  "announcementText": "公告文案",
+  "announcementTextHint": "展示在 App 首页顶部的公告内容",
+  "announcementTextPlaceholder": "公告内容（最长 200 字）",
+  "announcementLink": "公告跳转链接",
+  "announcementLinkHint": "可选；App 端点击横幅时打开（http/https）",
+  "announcementLinkInvalid": "链接需以 http(s):// 开头"
 }

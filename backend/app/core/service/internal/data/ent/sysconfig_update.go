@@ -271,6 +271,54 @@ func (_u *SysConfigUpdate) ClearSensitiveWords() *SysConfigUpdate {
 	return _u
 }
 
+// SetAnnouncementEnabled sets the "announcement_enabled" field.
+func (_u *SysConfigUpdate) SetAnnouncementEnabled(v bool) *SysConfigUpdate {
+	_u.mutation.SetAnnouncementEnabled(v)
+	return _u
+}
+
+// SetNillableAnnouncementEnabled sets the "announcement_enabled" field if the given value is not nil.
+func (_u *SysConfigUpdate) SetNillableAnnouncementEnabled(v *bool) *SysConfigUpdate {
+	if v != nil {
+		_u.SetAnnouncementEnabled(*v)
+	}
+	return _u
+}
+
+// SetAnnouncementText sets the "announcement_text" field.
+func (_u *SysConfigUpdate) SetAnnouncementText(v string) *SysConfigUpdate {
+	_u.mutation.SetAnnouncementText(v)
+	return _u
+}
+
+// SetNillableAnnouncementText sets the "announcement_text" field if the given value is not nil.
+func (_u *SysConfigUpdate) SetNillableAnnouncementText(v *string) *SysConfigUpdate {
+	if v != nil {
+		_u.SetAnnouncementText(*v)
+	}
+	return _u
+}
+
+// ClearAnnouncementText clears the value of the "announcement_text" field.
+func (_u *SysConfigUpdate) ClearAnnouncementText() *SysConfigUpdate {
+	_u.mutation.ClearAnnouncementText()
+	return _u
+}
+
+// SetAnnouncementLink sets the "announcement_link" field.
+func (_u *SysConfigUpdate) SetAnnouncementLink(v string) *SysConfigUpdate {
+	_u.mutation.SetAnnouncementLink(v)
+	return _u
+}
+
+// SetNillableAnnouncementLink sets the "announcement_link" field if the given value is not nil.
+func (_u *SysConfigUpdate) SetNillableAnnouncementLink(v *string) *SysConfigUpdate {
+	if v != nil {
+		_u.SetAnnouncementLink(*v)
+	}
+	return _u
+}
+
 // Mutation returns the SysConfigMutation object of the builder.
 func (_u *SysConfigUpdate) Mutation() *SysConfigMutation {
 	return _u.mutation
@@ -402,6 +450,18 @@ func (_u *SysConfigUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.SensitiveWordsCleared() {
 		_spec.ClearField(sysconfig.FieldSensitiveWords, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.AnnouncementEnabled(); ok {
+		_spec.SetField(sysconfig.FieldAnnouncementEnabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.AnnouncementText(); ok {
+		_spec.SetField(sysconfig.FieldAnnouncementText, field.TypeString, value)
+	}
+	if _u.mutation.AnnouncementTextCleared() {
+		_spec.ClearField(sysconfig.FieldAnnouncementText, field.TypeString)
+	}
+	if value, ok := _u.mutation.AnnouncementLink(); ok {
+		_spec.SetField(sysconfig.FieldAnnouncementLink, field.TypeString, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -666,6 +726,54 @@ func (_u *SysConfigUpdateOne) ClearSensitiveWords() *SysConfigUpdateOne {
 	return _u
 }
 
+// SetAnnouncementEnabled sets the "announcement_enabled" field.
+func (_u *SysConfigUpdateOne) SetAnnouncementEnabled(v bool) *SysConfigUpdateOne {
+	_u.mutation.SetAnnouncementEnabled(v)
+	return _u
+}
+
+// SetNillableAnnouncementEnabled sets the "announcement_enabled" field if the given value is not nil.
+func (_u *SysConfigUpdateOne) SetNillableAnnouncementEnabled(v *bool) *SysConfigUpdateOne {
+	if v != nil {
+		_u.SetAnnouncementEnabled(*v)
+	}
+	return _u
+}
+
+// SetAnnouncementText sets the "announcement_text" field.
+func (_u *SysConfigUpdateOne) SetAnnouncementText(v string) *SysConfigUpdateOne {
+	_u.mutation.SetAnnouncementText(v)
+	return _u
+}
+
+// SetNillableAnnouncementText sets the "announcement_text" field if the given value is not nil.
+func (_u *SysConfigUpdateOne) SetNillableAnnouncementText(v *string) *SysConfigUpdateOne {
+	if v != nil {
+		_u.SetAnnouncementText(*v)
+	}
+	return _u
+}
+
+// ClearAnnouncementText clears the value of the "announcement_text" field.
+func (_u *SysConfigUpdateOne) ClearAnnouncementText() *SysConfigUpdateOne {
+	_u.mutation.ClearAnnouncementText()
+	return _u
+}
+
+// SetAnnouncementLink sets the "announcement_link" field.
+func (_u *SysConfigUpdateOne) SetAnnouncementLink(v string) *SysConfigUpdateOne {
+	_u.mutation.SetAnnouncementLink(v)
+	return _u
+}
+
+// SetNillableAnnouncementLink sets the "announcement_link" field if the given value is not nil.
+func (_u *SysConfigUpdateOne) SetNillableAnnouncementLink(v *string) *SysConfigUpdateOne {
+	if v != nil {
+		_u.SetAnnouncementLink(*v)
+	}
+	return _u
+}
+
 // Mutation returns the SysConfigMutation object of the builder.
 func (_u *SysConfigUpdateOne) Mutation() *SysConfigMutation {
 	return _u.mutation
@@ -827,6 +935,18 @@ func (_u *SysConfigUpdateOne) sqlSave(ctx context.Context) (_node *SysConfig, er
 	}
 	if _u.mutation.SensitiveWordsCleared() {
 		_spec.ClearField(sysconfig.FieldSensitiveWords, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.AnnouncementEnabled(); ok {
+		_spec.SetField(sysconfig.FieldAnnouncementEnabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.AnnouncementText(); ok {
+		_spec.SetField(sysconfig.FieldAnnouncementText, field.TypeString, value)
+	}
+	if _u.mutation.AnnouncementTextCleared() {
+		_spec.ClearField(sysconfig.FieldAnnouncementText, field.TypeString)
+	}
+	if value, ok := _u.mutation.AnnouncementLink(); ok {
+		_spec.SetField(sysconfig.FieldAnnouncementLink, field.TypeString, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &SysConfig{config: _u.config}

@@ -6,11 +6,26 @@ import 'package:shortplay_app/src/core/transport/http/index.dart';
 import 'package:shortplay_app/src/core/utilities/convert.dart';
 import 'package:shortplay_app/src/features/common/data/models.dart';
 
-/// 搜索服务：关键词搜索（标题模糊 + 标签精确）/ 标签聚合
+/// 搜索服务：关键词搜索（标题模糊 + 标签精确）/ 标签聚合 / 热搜词
 class SearchService extends BaseService {
   SearchService() : super(tag: 'SearchService');
 
   Dio get _dio => GetIt.instance<Dio>();
+
+  /// 热搜词（真实搜索频次倒序，游客可访问；尽力而为失败返回空）
+  Future<List<String>> hotKeywords({int limit = 10}) async {
+    try {
+      final res = await _dio.get<Map<String, dynamic>>(
+        '/search/hot-keywords',
+        queryParameters: {'limit': limit},
+      );
+      return (res.data?['keywords'] as List<dynamic>? ?? const [])
+          .whereType<String>()
+          .toList();
+    } on DioException {
+      return const [];
+    }
+  }
 
   /// 关键词搜索（游客可访问，`pageNum` 分页形态）
   ///
@@ -84,9 +99,10 @@ class SearchService extends BaseService {
     final body = data ?? const {};
     final items = (body['items'] as List<dynamic>? ?? const [])
         .whereType<Map<String, dynamic>>()
-        .map((item) => Video.fromJson(
-              (item['video'] as Map<String, dynamic>?) ?? item,
-            ))
+        .map(
+          (item) =>
+              Video.fromJson((item['video'] as Map<String, dynamic>?) ?? item),
+        )
         .toList();
     return PageData.inferHasMore(
       items: items,

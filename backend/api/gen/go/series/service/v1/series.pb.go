@@ -35,6 +35,7 @@ type Series struct {
 	// 计数
 	EpisodeCount   *uint64                `protobuf:"varint,20,opt,name=episode_count,json=episodeCount,proto3,oneof" json:"episode_count,omitempty"`       // 集总数（挂靠视频数）
 	PublishedCount *uint64                `protobuf:"varint,21,opt,name=published_count,json=publishedCount,proto3,oneof" json:"published_count,omitempty"` // 已发布集数
+	FollowerCount  *uint64                `protobuf:"varint,22,opt,name=follower_count,json=followerCount,proto3,oneof" json:"follower_count,omitempty"`    // 追剧人数
 	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,41,opt,name=created_at,json=createdAt,proto3,oneof" json:"created_at,omitempty"`                 // 创建时间
 	UpdatedAt      *timestamppb.Timestamp `protobuf:"bytes,42,opt,name=updated_at,json=updatedAt,proto3,oneof" json:"updated_at,omitempty"`                 // 更新时间
 	unknownFields  protoimpl.UnknownFields
@@ -120,6 +121,13 @@ func (x *Series) GetPublishedCount() uint64 {
 	return 0
 }
 
+func (x *Series) GetFollowerCount() uint64 {
+	if x != nil && x.FollowerCount != nil {
+		return *x.FollowerCount
+	}
+	return 0
+}
+
 func (x *Series) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
@@ -135,11 +143,13 @@ func (x *Series) GetUpdatedAt() *timestamppb.Timestamp {
 }
 
 type SeriesDetail struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Series        *Series                `protobuf:"bytes,1,opt,name=series,proto3,oneof" json:"series,omitempty"` // 剧信息
-	Items         []*v1.Video            `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`         // 选集列表（episode_number 升序，含 seriesId/episodeNumber/seriesTitle）
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Series          *Series                `protobuf:"bytes,1,opt,name=series,proto3,oneof" json:"series,omitempty"`                                           // 剧信息
+	Items           []*v1.Video            `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`                                                   // 选集列表（episode_number 升序，含 seriesId/episodeNumber/seriesTitle）
+	ViewerFollowing *bool                  `protobuf:"varint,3,opt,name=viewer_following,json=viewerFollowing,proto3,oneof" json:"viewer_following,omitempty"` // 观看者是否已追剧（游客 false）
+	FollowerCount   *uint64                `protobuf:"varint,4,opt,name=follower_count,json=followerCount,proto3,oneof" json:"follower_count,omitempty"`       // 追剧人数
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *SeriesDetail) Reset() {
@@ -184,6 +194,20 @@ func (x *SeriesDetail) GetItems() []*v1.Video {
 		return x.Items
 	}
 	return nil
+}
+
+func (x *SeriesDetail) GetViewerFollowing() bool {
+	if x != nil && x.ViewerFollowing != nil {
+		return *x.ViewerFollowing
+	}
+	return false
+}
+
+func (x *SeriesDetail) GetFollowerCount() uint64 {
+	if x != nil && x.FollowerCount != nil {
+		return *x.FollowerCount
+	}
+	return 0
 }
 
 type ListSeriesResponse struct {
@@ -522,11 +546,239 @@ func (x *QuerySeriesRequest) GetAuthorId() uint32 {
 	return 0
 }
 
+type FollowSeriesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SeriesId      uint32                 `protobuf:"varint,1,opt,name=series_id,json=seriesId,proto3" json:"series_id,omitempty"` // 剧集ID
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FollowSeriesRequest) Reset() {
+	*x = FollowSeriesRequest{}
+	mi := &file_series_service_v1_series_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FollowSeriesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FollowSeriesRequest) ProtoMessage() {}
+
+func (x *FollowSeriesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_series_service_v1_series_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FollowSeriesRequest.ProtoReflect.Descriptor instead.
+func (*FollowSeriesRequest) Descriptor() ([]byte, []int) {
+	return file_series_service_v1_series_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *FollowSeriesRequest) GetSeriesId() uint32 {
+	if x != nil {
+		return x.SeriesId
+	}
+	return 0
+}
+
+type FollowSeriesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Following     *bool                  `protobuf:"varint,1,opt,name=following,proto3,oneof" json:"following,omitempty"`                              // 操作后的追剧状态
+	FollowerCount *uint64                `protobuf:"varint,2,opt,name=follower_count,json=followerCount,proto3,oneof" json:"follower_count,omitempty"` // 操作后的追剧人数
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FollowSeriesResponse) Reset() {
+	*x = FollowSeriesResponse{}
+	mi := &file_series_service_v1_series_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FollowSeriesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FollowSeriesResponse) ProtoMessage() {}
+
+func (x *FollowSeriesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_series_service_v1_series_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FollowSeriesResponse.ProtoReflect.Descriptor instead.
+func (*FollowSeriesResponse) Descriptor() ([]byte, []int) {
+	return file_series_service_v1_series_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *FollowSeriesResponse) GetFollowing() bool {
+	if x != nil && x.Following != nil {
+		return *x.Following
+	}
+	return false
+}
+
+func (x *FollowSeriesResponse) GetFollowerCount() uint64 {
+	if x != nil && x.FollowerCount != nil {
+		return *x.FollowerCount
+	}
+	return 0
+}
+
+type GetSeriesFollowStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SeriesIds     []uint32               `protobuf:"varint,1,rep,packed,name=series_ids,json=seriesIds,proto3" json:"series_ids,omitempty"` // 剧集ID列表
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSeriesFollowStatusRequest) Reset() {
+	*x = GetSeriesFollowStatusRequest{}
+	mi := &file_series_service_v1_series_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSeriesFollowStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSeriesFollowStatusRequest) ProtoMessage() {}
+
+func (x *GetSeriesFollowStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_series_service_v1_series_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSeriesFollowStatusRequest.ProtoReflect.Descriptor instead.
+func (*GetSeriesFollowStatusRequest) Descriptor() ([]byte, []int) {
+	return file_series_service_v1_series_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GetSeriesFollowStatusRequest) GetSeriesIds() []uint32 {
+	if x != nil {
+		return x.SeriesIds
+	}
+	return nil
+}
+
+type SeriesFollowStatus struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Following     *bool                  `protobuf:"varint,1,opt,name=following,proto3,oneof" json:"following,omitempty"` // 是否已追剧
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SeriesFollowStatus) Reset() {
+	*x = SeriesFollowStatus{}
+	mi := &file_series_service_v1_series_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SeriesFollowStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SeriesFollowStatus) ProtoMessage() {}
+
+func (x *SeriesFollowStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_series_service_v1_series_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SeriesFollowStatus.ProtoReflect.Descriptor instead.
+func (*SeriesFollowStatus) Descriptor() ([]byte, []int) {
+	return file_series_service_v1_series_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *SeriesFollowStatus) GetFollowing() bool {
+	if x != nil && x.Following != nil {
+		return *x.Following
+	}
+	return false
+}
+
+type GetSeriesFollowStatusResponse struct {
+	state         protoimpl.MessageState         `protogen:"open.v1"`
+	Statuses      map[uint32]*SeriesFollowStatus `protobuf:"bytes,1,rep,name=statuses,proto3" json:"statuses,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // seriesId → 状态
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSeriesFollowStatusResponse) Reset() {
+	*x = GetSeriesFollowStatusResponse{}
+	mi := &file_series_service_v1_series_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSeriesFollowStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSeriesFollowStatusResponse) ProtoMessage() {}
+
+func (x *GetSeriesFollowStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_series_service_v1_series_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSeriesFollowStatusResponse.ProtoReflect.Descriptor instead.
+func (*GetSeriesFollowStatusResponse) Descriptor() ([]byte, []int) {
+	return file_series_service_v1_series_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *GetSeriesFollowStatusResponse) GetStatuses() map[uint32]*SeriesFollowStatus {
+	if x != nil {
+		return x.Statuses
+	}
+	return nil
+}
+
 var File_series_service_v1_series_proto protoreflect.FileDescriptor
 
 const file_series_service_v1_series_proto_rawDesc = "" +
 	"\n" +
-	"\x1eseries/service/v1/series.proto\x12\x11series.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1epagination/v1/pagination.proto\x1a\x1cvideo/service/v1/video.proto\"\xfc\x03\n" +
+	"\x1eseries/service/v1/series.proto\x12\x11series.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1epagination/v1/pagination.proto\x1a\x1cvideo/service/v1/video.proto\"\xbb\x04\n" +
 	"\x06Series\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\rH\x00R\x02id\x88\x01\x01\x12\x19\n" +
 	"\x05title\x18\x02 \x01(\tH\x01R\x05title\x88\x01\x01\x12%\n" +
@@ -534,11 +786,12 @@ const file_series_service_v1_series_proto_rawDesc = "" +
 	"\tcover_url\x18\x04 \x01(\tH\x03R\bcoverUrl\x88\x01\x01\x12 \n" +
 	"\tauthor_id\x18\x05 \x01(\rH\x04R\bauthorId\x88\x01\x01\x12(\n" +
 	"\repisode_count\x18\x14 \x01(\x04H\x05R\fepisodeCount\x88\x01\x01\x12,\n" +
-	"\x0fpublished_count\x18\x15 \x01(\x04H\x06R\x0epublishedCount\x88\x01\x01\x12>\n" +
+	"\x0fpublished_count\x18\x15 \x01(\x04H\x06R\x0epublishedCount\x88\x01\x01\x12*\n" +
+	"\x0efollower_count\x18\x16 \x01(\x04H\aR\rfollowerCount\x88\x01\x01\x12>\n" +
 	"\n" +
-	"created_at\x18) \x01(\v2\x1a.google.protobuf.TimestampH\aR\tcreatedAt\x88\x01\x01\x12>\n" +
+	"created_at\x18) \x01(\v2\x1a.google.protobuf.TimestampH\bR\tcreatedAt\x88\x01\x01\x12>\n" +
 	"\n" +
-	"updated_at\x18* \x01(\v2\x1a.google.protobuf.TimestampH\bR\tupdatedAt\x88\x01\x01B\x05\n" +
+	"updated_at\x18* \x01(\v2\x1a.google.protobuf.TimestampH\tR\tupdatedAt\x88\x01\x01B\x05\n" +
 	"\x03_idB\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\f\n" +
@@ -547,13 +800,18 @@ const file_series_service_v1_series_proto_rawDesc = "" +
 	"\n" +
 	"_author_idB\x10\n" +
 	"\x0e_episode_countB\x12\n" +
-	"\x10_published_countB\r\n" +
+	"\x10_published_countB\x11\n" +
+	"\x0f_follower_countB\r\n" +
 	"\v_created_atB\r\n" +
-	"\v_updated_at\"\x80\x01\n" +
+	"\v_updated_at\"\x84\x02\n" +
 	"\fSeriesDetail\x126\n" +
 	"\x06series\x18\x01 \x01(\v2\x19.series.service.v1.SeriesH\x00R\x06series\x88\x01\x01\x12-\n" +
-	"\x05items\x18\x02 \x03(\v2\x17.video.service.v1.VideoR\x05itemsB\t\n" +
-	"\a_series\"j\n" +
+	"\x05items\x18\x02 \x03(\v2\x17.video.service.v1.VideoR\x05items\x12.\n" +
+	"\x10viewer_following\x18\x03 \x01(\bH\x01R\x0fviewerFollowing\x88\x01\x01\x12*\n" +
+	"\x0efollower_count\x18\x04 \x01(\x04H\x02R\rfollowerCount\x88\x01\x01B\t\n" +
+	"\a_seriesB\x13\n" +
+	"\x11_viewer_followingB\x11\n" +
+	"\x0f_follower_count\"j\n" +
 	"\x12ListSeriesResponse\x12/\n" +
 	"\x05items\x18\x01 \x03(\v2\x19.series.service.v1.SeriesR\x05items\x12\x19\n" +
 	"\x05total\x18\x02 \x01(\x03H\x00R\x05total\x88\x01\x01B\b\n" +
@@ -588,7 +846,27 @@ const file_series_service_v1_series_proto_rawDesc = "" +
 	"_page_sizeB\b\n" +
 	"\x06_queryB\f\n" +
 	"\n" +
-	"_author_id2\x91\x04\n" +
+	"_author_id\"2\n" +
+	"\x13FollowSeriesRequest\x12\x1b\n" +
+	"\tseries_id\x18\x01 \x01(\rR\bseriesId\"\x86\x01\n" +
+	"\x14FollowSeriesResponse\x12!\n" +
+	"\tfollowing\x18\x01 \x01(\bH\x00R\tfollowing\x88\x01\x01\x12*\n" +
+	"\x0efollower_count\x18\x02 \x01(\x04H\x01R\rfollowerCount\x88\x01\x01B\f\n" +
+	"\n" +
+	"_followingB\x11\n" +
+	"\x0f_follower_count\"=\n" +
+	"\x1cGetSeriesFollowStatusRequest\x12\x1d\n" +
+	"\n" +
+	"series_ids\x18\x01 \x03(\rR\tseriesIds\"E\n" +
+	"\x12SeriesFollowStatus\x12!\n" +
+	"\tfollowing\x18\x01 \x01(\bH\x00R\tfollowing\x88\x01\x01B\f\n" +
+	"\n" +
+	"_following\"\xdf\x01\n" +
+	"\x1dGetSeriesFollowStatusResponse\x12Z\n" +
+	"\bstatuses\x18\x01 \x03(\v2>.series.service.v1.GetSeriesFollowStatusResponse.StatusesEntryR\bstatuses\x1ab\n" +
+	"\rStatusesEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\rR\x03key\x12;\n" +
+	"\x05value\x18\x02 \x01(\v2%.series.service.v1.SeriesFollowStatusR\x05value:\x028\x012\xb1\a\n" +
 	"\rSeriesService\x12S\n" +
 	"\fCreateSeries\x12&.series.service.v1.CreateSeriesRequest\x1a\x19.series.service.v1.Series\"\x00\x12S\n" +
 	"\tGetSeries\x12#.series.service.v1.GetSeriesRequest\x1a\x1f.series.service.v1.SeriesDetail\"\x00\x12S\n" +
@@ -596,7 +874,11 @@ const file_series_service_v1_series_proto_rawDesc = "" +
 	"\fDeleteSeries\x12&.series.service.v1.DeleteSeriesRequest\x1a\x16.google.protobuf.Empty\"\x00\x12P\n" +
 	"\n" +
 	"ListSeries\x12\x19.pagination.PagingRequest\x1a%.series.service.v1.ListSeriesResponse\"\x00\x12]\n" +
-	"\vQuerySeries\x12%.series.service.v1.QuerySeriesRequest\x1a%.series.service.v1.ListSeriesResponse\"\x00B\xc3\x01\n" +
+	"\vQuerySeries\x12%.series.service.v1.QuerySeriesRequest\x1a%.series.service.v1.ListSeriesResponse\"\x00\x12a\n" +
+	"\fFollowSeries\x12&.series.service.v1.FollowSeriesRequest\x1a'.series.service.v1.FollowSeriesResponse\"\x00\x12c\n" +
+	"\x0eUnfollowSeries\x12&.series.service.v1.FollowSeriesRequest\x1a'.series.service.v1.FollowSeriesResponse\"\x00\x12X\n" +
+	"\x12ListFollowedSeries\x12\x19.pagination.PagingRequest\x1a%.series.service.v1.ListSeriesResponse\"\x00\x12|\n" +
+	"\x15GetSeriesFollowStatus\x12/.series.service.v1.GetSeriesFollowStatusRequest\x1a0.series.service.v1.GetSeriesFollowStatusResponse\"\x00B\xc3\x01\n" +
 	"\x15com.series.service.v1B\vSeriesProtoP\x01Z7go-wind-shortplay/api/gen/go/series/service/v1;seriespb\xa2\x02\x03SSX\xaa\x02\x11Series.Service.V1\xca\x02\x11Series\\Service\\V1\xe2\x02\x1dSeries\\Service\\V1\\GPBMetadata\xea\x02\x13Series::Service::V1b\x06proto3"
 
 var (
@@ -611,44 +893,60 @@ func file_series_service_v1_series_proto_rawDescGZIP() []byte {
 	return file_series_service_v1_series_proto_rawDescData
 }
 
-var file_series_service_v1_series_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_series_service_v1_series_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_series_service_v1_series_proto_goTypes = []any{
-	(*Series)(nil),                // 0: series.service.v1.Series
-	(*SeriesDetail)(nil),          // 1: series.service.v1.SeriesDetail
-	(*ListSeriesResponse)(nil),    // 2: series.service.v1.ListSeriesResponse
-	(*CreateSeriesRequest)(nil),   // 3: series.service.v1.CreateSeriesRequest
-	(*GetSeriesRequest)(nil),      // 4: series.service.v1.GetSeriesRequest
-	(*UpdateSeriesRequest)(nil),   // 5: series.service.v1.UpdateSeriesRequest
-	(*DeleteSeriesRequest)(nil),   // 6: series.service.v1.DeleteSeriesRequest
-	(*QuerySeriesRequest)(nil),    // 7: series.service.v1.QuerySeriesRequest
-	(*timestamppb.Timestamp)(nil), // 8: google.protobuf.Timestamp
-	(*v1.Video)(nil),              // 9: video.service.v1.Video
-	(*v11.PagingRequest)(nil),     // 10: pagination.PagingRequest
-	(*emptypb.Empty)(nil),         // 11: google.protobuf.Empty
+	(*Series)(nil),                        // 0: series.service.v1.Series
+	(*SeriesDetail)(nil),                  // 1: series.service.v1.SeriesDetail
+	(*ListSeriesResponse)(nil),            // 2: series.service.v1.ListSeriesResponse
+	(*CreateSeriesRequest)(nil),           // 3: series.service.v1.CreateSeriesRequest
+	(*GetSeriesRequest)(nil),              // 4: series.service.v1.GetSeriesRequest
+	(*UpdateSeriesRequest)(nil),           // 5: series.service.v1.UpdateSeriesRequest
+	(*DeleteSeriesRequest)(nil),           // 6: series.service.v1.DeleteSeriesRequest
+	(*QuerySeriesRequest)(nil),            // 7: series.service.v1.QuerySeriesRequest
+	(*FollowSeriesRequest)(nil),           // 8: series.service.v1.FollowSeriesRequest
+	(*FollowSeriesResponse)(nil),          // 9: series.service.v1.FollowSeriesResponse
+	(*GetSeriesFollowStatusRequest)(nil),  // 10: series.service.v1.GetSeriesFollowStatusRequest
+	(*SeriesFollowStatus)(nil),            // 11: series.service.v1.SeriesFollowStatus
+	(*GetSeriesFollowStatusResponse)(nil), // 12: series.service.v1.GetSeriesFollowStatusResponse
+	nil,                                   // 13: series.service.v1.GetSeriesFollowStatusResponse.StatusesEntry
+	(*timestamppb.Timestamp)(nil),         // 14: google.protobuf.Timestamp
+	(*v1.Video)(nil),                      // 15: video.service.v1.Video
+	(*v11.PagingRequest)(nil),             // 16: pagination.PagingRequest
+	(*emptypb.Empty)(nil),                 // 17: google.protobuf.Empty
 }
 var file_series_service_v1_series_proto_depIdxs = []int32{
-	8,  // 0: series.service.v1.Series.created_at:type_name -> google.protobuf.Timestamp
-	8,  // 1: series.service.v1.Series.updated_at:type_name -> google.protobuf.Timestamp
+	14, // 0: series.service.v1.Series.created_at:type_name -> google.protobuf.Timestamp
+	14, // 1: series.service.v1.Series.updated_at:type_name -> google.protobuf.Timestamp
 	0,  // 2: series.service.v1.SeriesDetail.series:type_name -> series.service.v1.Series
-	9,  // 3: series.service.v1.SeriesDetail.items:type_name -> video.service.v1.Video
+	15, // 3: series.service.v1.SeriesDetail.items:type_name -> video.service.v1.Video
 	0,  // 4: series.service.v1.ListSeriesResponse.items:type_name -> series.service.v1.Series
-	3,  // 5: series.service.v1.SeriesService.CreateSeries:input_type -> series.service.v1.CreateSeriesRequest
-	4,  // 6: series.service.v1.SeriesService.GetSeries:input_type -> series.service.v1.GetSeriesRequest
-	5,  // 7: series.service.v1.SeriesService.UpdateSeries:input_type -> series.service.v1.UpdateSeriesRequest
-	6,  // 8: series.service.v1.SeriesService.DeleteSeries:input_type -> series.service.v1.DeleteSeriesRequest
-	10, // 9: series.service.v1.SeriesService.ListSeries:input_type -> pagination.PagingRequest
-	7,  // 10: series.service.v1.SeriesService.QuerySeries:input_type -> series.service.v1.QuerySeriesRequest
-	0,  // 11: series.service.v1.SeriesService.CreateSeries:output_type -> series.service.v1.Series
-	1,  // 12: series.service.v1.SeriesService.GetSeries:output_type -> series.service.v1.SeriesDetail
-	0,  // 13: series.service.v1.SeriesService.UpdateSeries:output_type -> series.service.v1.Series
-	11, // 14: series.service.v1.SeriesService.DeleteSeries:output_type -> google.protobuf.Empty
-	2,  // 15: series.service.v1.SeriesService.ListSeries:output_type -> series.service.v1.ListSeriesResponse
-	2,  // 16: series.service.v1.SeriesService.QuerySeries:output_type -> series.service.v1.ListSeriesResponse
-	11, // [11:17] is the sub-list for method output_type
-	5,  // [5:11] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	13, // 5: series.service.v1.GetSeriesFollowStatusResponse.statuses:type_name -> series.service.v1.GetSeriesFollowStatusResponse.StatusesEntry
+	11, // 6: series.service.v1.GetSeriesFollowStatusResponse.StatusesEntry.value:type_name -> series.service.v1.SeriesFollowStatus
+	3,  // 7: series.service.v1.SeriesService.CreateSeries:input_type -> series.service.v1.CreateSeriesRequest
+	4,  // 8: series.service.v1.SeriesService.GetSeries:input_type -> series.service.v1.GetSeriesRequest
+	5,  // 9: series.service.v1.SeriesService.UpdateSeries:input_type -> series.service.v1.UpdateSeriesRequest
+	6,  // 10: series.service.v1.SeriesService.DeleteSeries:input_type -> series.service.v1.DeleteSeriesRequest
+	16, // 11: series.service.v1.SeriesService.ListSeries:input_type -> pagination.PagingRequest
+	7,  // 12: series.service.v1.SeriesService.QuerySeries:input_type -> series.service.v1.QuerySeriesRequest
+	8,  // 13: series.service.v1.SeriesService.FollowSeries:input_type -> series.service.v1.FollowSeriesRequest
+	8,  // 14: series.service.v1.SeriesService.UnfollowSeries:input_type -> series.service.v1.FollowSeriesRequest
+	16, // 15: series.service.v1.SeriesService.ListFollowedSeries:input_type -> pagination.PagingRequest
+	10, // 16: series.service.v1.SeriesService.GetSeriesFollowStatus:input_type -> series.service.v1.GetSeriesFollowStatusRequest
+	0,  // 17: series.service.v1.SeriesService.CreateSeries:output_type -> series.service.v1.Series
+	1,  // 18: series.service.v1.SeriesService.GetSeries:output_type -> series.service.v1.SeriesDetail
+	0,  // 19: series.service.v1.SeriesService.UpdateSeries:output_type -> series.service.v1.Series
+	17, // 20: series.service.v1.SeriesService.DeleteSeries:output_type -> google.protobuf.Empty
+	2,  // 21: series.service.v1.SeriesService.ListSeries:output_type -> series.service.v1.ListSeriesResponse
+	2,  // 22: series.service.v1.SeriesService.QuerySeries:output_type -> series.service.v1.ListSeriesResponse
+	9,  // 23: series.service.v1.SeriesService.FollowSeries:output_type -> series.service.v1.FollowSeriesResponse
+	9,  // 24: series.service.v1.SeriesService.UnfollowSeries:output_type -> series.service.v1.FollowSeriesResponse
+	2,  // 25: series.service.v1.SeriesService.ListFollowedSeries:output_type -> series.service.v1.ListSeriesResponse
+	12, // 26: series.service.v1.SeriesService.GetSeriesFollowStatus:output_type -> series.service.v1.GetSeriesFollowStatusResponse
+	17, // [17:27] is the sub-list for method output_type
+	7,  // [7:17] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_series_service_v1_series_proto_init() }
@@ -662,13 +960,15 @@ func file_series_service_v1_series_proto_init() {
 	file_series_service_v1_series_proto_msgTypes[3].OneofWrappers = []any{}
 	file_series_service_v1_series_proto_msgTypes[5].OneofWrappers = []any{}
 	file_series_service_v1_series_proto_msgTypes[7].OneofWrappers = []any{}
+	file_series_service_v1_series_proto_msgTypes[9].OneofWrappers = []any{}
+	file_series_service_v1_series_proto_msgTypes[11].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_series_service_v1_series_proto_rawDesc), len(file_series_service_v1_series_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

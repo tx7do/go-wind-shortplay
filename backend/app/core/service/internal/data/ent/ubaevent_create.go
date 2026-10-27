@@ -162,6 +162,20 @@ func (_c *UbaEventCreate) SetNillableWatchPercent(v *uint32) *UbaEventCreate {
 	return _c
 }
 
+// SetPositionMs sets the "position_ms" field.
+func (_c *UbaEventCreate) SetPositionMs(v uint64) *UbaEventCreate {
+	_c.mutation.SetPositionMs(v)
+	return _c
+}
+
+// SetNillablePositionMs sets the "position_ms" field if the given value is not nil.
+func (_c *UbaEventCreate) SetNillablePositionMs(v *uint64) *UbaEventCreate {
+	if v != nil {
+		_c.SetPositionMs(*v)
+	}
+	return _c
+}
+
 // SetExtra sets the "extra" field.
 func (_c *UbaEventCreate) SetExtra(v string) *UbaEventCreate {
 	_c.mutation.SetExtra(v)
@@ -261,6 +275,10 @@ func (_c *UbaEventCreate) defaults() error {
 		v := ubaevent.DefaultWatchPercent
 		_c.mutation.SetWatchPercent(v)
 	}
+	if _, ok := _c.mutation.PositionMs(); !ok {
+		v := ubaevent.DefaultPositionMs
+		_c.mutation.SetPositionMs(v)
+	}
 	return nil
 }
 
@@ -288,6 +306,9 @@ func (_c *UbaEventCreate) check() error {
 	}
 	if _, ok := _c.mutation.WatchPercent(); !ok {
 		return &ValidationError{Name: "watch_percent", err: errors.New(`ent: missing required field "UbaEvent.watch_percent"`)}
+	}
+	if _, ok := _c.mutation.PositionMs(); !ok {
+		return &ValidationError{Name: "position_ms", err: errors.New(`ent: missing required field "UbaEvent.position_ms"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := ubaevent.IDValidator(v); err != nil {
@@ -366,6 +387,10 @@ func (_c *UbaEventCreate) createSpec() (*UbaEvent, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.WatchPercent(); ok {
 		_spec.SetField(ubaevent.FieldWatchPercent, field.TypeUint32, value)
 		_node.WatchPercent = value
+	}
+	if value, ok := _c.mutation.PositionMs(); ok {
+		_spec.SetField(ubaevent.FieldPositionMs, field.TypeUint64, value)
+		_node.PositionMs = value
 	}
 	if value, ok := _c.mutation.Extra(); ok {
 		_spec.SetField(ubaevent.FieldExtra, field.TypeString, value)
@@ -562,6 +587,24 @@ func (u *UbaEventUpsert) UpdateWatchPercent() *UbaEventUpsert {
 // AddWatchPercent adds v to the "watch_percent" field.
 func (u *UbaEventUpsert) AddWatchPercent(v uint32) *UbaEventUpsert {
 	u.Add(ubaevent.FieldWatchPercent, v)
+	return u
+}
+
+// SetPositionMs sets the "position_ms" field.
+func (u *UbaEventUpsert) SetPositionMs(v uint64) *UbaEventUpsert {
+	u.Set(ubaevent.FieldPositionMs, v)
+	return u
+}
+
+// UpdatePositionMs sets the "position_ms" field to the value that was provided on create.
+func (u *UbaEventUpsert) UpdatePositionMs() *UbaEventUpsert {
+	u.SetExcluded(ubaevent.FieldPositionMs)
+	return u
+}
+
+// AddPositionMs adds v to the "position_ms" field.
+func (u *UbaEventUpsert) AddPositionMs(v uint64) *UbaEventUpsert {
+	u.Add(ubaevent.FieldPositionMs, v)
 	return u
 }
 
@@ -813,6 +856,27 @@ func (u *UbaEventUpsertOne) AddWatchPercent(v uint32) *UbaEventUpsertOne {
 func (u *UbaEventUpsertOne) UpdateWatchPercent() *UbaEventUpsertOne {
 	return u.Update(func(s *UbaEventUpsert) {
 		s.UpdateWatchPercent()
+	})
+}
+
+// SetPositionMs sets the "position_ms" field.
+func (u *UbaEventUpsertOne) SetPositionMs(v uint64) *UbaEventUpsertOne {
+	return u.Update(func(s *UbaEventUpsert) {
+		s.SetPositionMs(v)
+	})
+}
+
+// AddPositionMs adds v to the "position_ms" field.
+func (u *UbaEventUpsertOne) AddPositionMs(v uint64) *UbaEventUpsertOne {
+	return u.Update(func(s *UbaEventUpsert) {
+		s.AddPositionMs(v)
+	})
+}
+
+// UpdatePositionMs sets the "position_ms" field to the value that was provided on create.
+func (u *UbaEventUpsertOne) UpdatePositionMs() *UbaEventUpsertOne {
+	return u.Update(func(s *UbaEventUpsert) {
+		s.UpdatePositionMs()
 	})
 }
 
@@ -1236,6 +1300,27 @@ func (u *UbaEventUpsertBulk) AddWatchPercent(v uint32) *UbaEventUpsertBulk {
 func (u *UbaEventUpsertBulk) UpdateWatchPercent() *UbaEventUpsertBulk {
 	return u.Update(func(s *UbaEventUpsert) {
 		s.UpdateWatchPercent()
+	})
+}
+
+// SetPositionMs sets the "position_ms" field.
+func (u *UbaEventUpsertBulk) SetPositionMs(v uint64) *UbaEventUpsertBulk {
+	return u.Update(func(s *UbaEventUpsert) {
+		s.SetPositionMs(v)
+	})
+}
+
+// AddPositionMs adds v to the "position_ms" field.
+func (u *UbaEventUpsertBulk) AddPositionMs(v uint64) *UbaEventUpsertBulk {
+	return u.Update(func(s *UbaEventUpsert) {
+		s.AddPositionMs(v)
+	})
+}
+
+// UpdatePositionMs sets the "position_ms" field to the value that was provided on create.
+func (u *UbaEventUpsertBulk) UpdatePositionMs() *UbaEventUpsertBulk {
+	return u.Update(func(s *UbaEventUpsert) {
+		s.UpdatePositionMs()
 	})
 }
 

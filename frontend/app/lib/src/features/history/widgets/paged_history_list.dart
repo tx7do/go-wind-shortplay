@@ -136,7 +136,39 @@ class _PagedHistoryListState extends State<PagedHistoryList> {
                 );
               }
               final entry = _items[index];
-              return VideoListCard(video: entry.video);
+              final video = entry.video;
+              final card = VideoListCard(video: video);
+              // 断点续播进度条（有进度且未到片尾）
+              if (!entry.resumable) return card;
+              final ratio = (entry.progressSeconds / video.duration).clamp(
+                0.0,
+                1.0,
+              );
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  card,
+                  Transform.translate(
+                    offset: Offset(0, -6.h),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12.w),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                        child: LinearProgressIndicator(
+                          value: ratio,
+                          minHeight: 3.h,
+                          valueColor: AlwaysStoppedAnimation(
+                            Theme.of(context).colorScheme.primary,
+                          ),
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withAlpha(24),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
             },
           ),
         ),

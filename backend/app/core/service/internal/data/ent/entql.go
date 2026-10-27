@@ -44,6 +44,7 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent/rolemetadata"
 	"go-wind-shortplay/app/core/service/internal/data/ent/rolepermission"
 	"go-wind-shortplay/app/core/service/internal/data/ent/series"
+	"go-wind-shortplay/app/core/service/internal/data/ent/seriesfollow"
 	"go-wind-shortplay/app/core/service/internal/data/ent/sysconfig"
 	"go-wind-shortplay/app/core/service/internal/data/ent/task"
 	"go-wind-shortplay/app/core/service/internal/data/ent/tenant"
@@ -72,7 +73,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 59)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 60)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   api.Table,
@@ -1228,6 +1229,25 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[40] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   seriesfollow.Table,
+			Columns: seriesfollow.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUint32,
+				Column: seriesfollow.FieldID,
+			},
+		},
+		Type: "SeriesFollow",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			seriesfollow.FieldCreatedAt:  {Type: field.TypeTime, Column: seriesfollow.FieldCreatedAt},
+			seriesfollow.FieldUpdatedAt:  {Type: field.TypeTime, Column: seriesfollow.FieldUpdatedAt},
+			seriesfollow.FieldDeletedAt:  {Type: field.TypeTime, Column: seriesfollow.FieldDeletedAt},
+			seriesfollow.FieldTenantID:   {Type: field.TypeUint32, Column: seriesfollow.FieldTenantID},
+			seriesfollow.FieldFollowerID: {Type: field.TypeUint32, Column: seriesfollow.FieldFollowerID},
+			seriesfollow.FieldSeriesID:   {Type: field.TypeUint32, Column: seriesfollow.FieldSeriesID},
+		},
+	}
+	graph.Nodes[41] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   sysconfig.Table,
 			Columns: sysconfig.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -1250,9 +1270,12 @@ var schemaGraph = func() *sqlgraph.Schema {
 			sysconfig.FieldAllowedVideoTypes:      {Type: field.TypeJSON, Column: sysconfig.FieldAllowedVideoTypes},
 			sysconfig.FieldSensitiveFilterEnabled: {Type: field.TypeBool, Column: sysconfig.FieldSensitiveFilterEnabled},
 			sysconfig.FieldSensitiveWords:         {Type: field.TypeJSON, Column: sysconfig.FieldSensitiveWords},
+			sysconfig.FieldAnnouncementEnabled:    {Type: field.TypeBool, Column: sysconfig.FieldAnnouncementEnabled},
+			sysconfig.FieldAnnouncementText:       {Type: field.TypeString, Column: sysconfig.FieldAnnouncementText},
+			sysconfig.FieldAnnouncementLink:       {Type: field.TypeString, Column: sysconfig.FieldAnnouncementLink},
 		},
 	}
-	graph.Nodes[41] = &sqlgraph.Node{
+	graph.Nodes[42] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   task.Table,
 			Columns: task.Columns,
@@ -1279,7 +1302,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			task.FieldEnable:      {Type: field.TypeBool, Column: task.FieldEnable},
 		},
 	}
-	graph.Nodes[42] = &sqlgraph.Node{
+	graph.Nodes[43] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   tenant.Table,
 			Columns: tenant.Columns,
@@ -1312,7 +1335,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			tenant.FieldExpiredAt:        {Type: field.TypeTime, Column: tenant.FieldExpiredAt},
 		},
 	}
-	graph.Nodes[43] = &sqlgraph.Node{
+	graph.Nodes[44] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   ubaevent.Table,
 			Columns: ubaevent.Columns,
@@ -1333,11 +1356,12 @@ var schemaGraph = func() *sqlgraph.Schema {
 			ubaevent.FieldTargetUserID: {Type: field.TypeUint32, Column: ubaevent.FieldTargetUserID},
 			ubaevent.FieldDurationMs:   {Type: field.TypeUint64, Column: ubaevent.FieldDurationMs},
 			ubaevent.FieldWatchPercent: {Type: field.TypeUint32, Column: ubaevent.FieldWatchPercent},
+			ubaevent.FieldPositionMs:   {Type: field.TypeUint64, Column: ubaevent.FieldPositionMs},
 			ubaevent.FieldExtra:        {Type: field.TypeString, Column: ubaevent.FieldExtra},
 			ubaevent.FieldOccurredAt:   {Type: field.TypeTime, Column: ubaevent.FieldOccurredAt},
 		},
 	}
-	graph.Nodes[44] = &sqlgraph.Node{
+	graph.Nodes[45] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   uploadtask.Table,
 			Columns: uploadtask.Columns,
@@ -1364,7 +1388,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			uploadtask.FieldAuthorID:       {Type: field.TypeUint32, Column: uploadtask.FieldAuthorID},
 		},
 	}
-	graph.Nodes[45] = &sqlgraph.Node{
+	graph.Nodes[46] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -1400,7 +1424,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			user.FieldStatus:      {Type: field.TypeEnum, Column: user.FieldStatus},
 		},
 	}
-	graph.Nodes[46] = &sqlgraph.Node{
+	graph.Nodes[47] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   usercredential.Table,
 			Columns: usercredential.Columns,
@@ -1433,7 +1457,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			usercredential.FieldResetTokenUsedAt:       {Type: field.TypeTime, Column: usercredential.FieldResetTokenUsedAt},
 		},
 	}
-	graph.Nodes[47] = &sqlgraph.Node{
+	graph.Nodes[48] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   userfollow.Table,
 			Columns: userfollow.Columns,
@@ -1452,7 +1476,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			userfollow.FieldFolloweeID: {Type: field.TypeUint32, Column: userfollow.FieldFolloweeID},
 		},
 	}
-	graph.Nodes[48] = &sqlgraph.Node{
+	graph.Nodes[49] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   userorgunit.Table,
 			Columns: userorgunit.Columns,
@@ -1482,7 +1506,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			userorgunit.FieldStatus:     {Type: field.TypeEnum, Column: userorgunit.FieldStatus},
 		},
 	}
-	graph.Nodes[49] = &sqlgraph.Node{
+	graph.Nodes[50] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   userposition.Table,
 			Columns: userposition.Columns,
@@ -1511,7 +1535,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			userposition.FieldStatus:     {Type: field.TypeEnum, Column: userposition.FieldStatus},
 		},
 	}
-	graph.Nodes[50] = &sqlgraph.Node{
+	graph.Nodes[51] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   userrole.Table,
 			Columns: userrole.Columns,
@@ -1539,7 +1563,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			userrole.FieldStatus:     {Type: field.TypeEnum, Column: userrole.FieldStatus},
 		},
 	}
-	graph.Nodes[51] = &sqlgraph.Node{
+	graph.Nodes[52] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   video.Table,
 			Columns: video.Columns,
@@ -1576,7 +1600,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			video.FieldPublishedAt:   {Type: field.TypeTime, Column: video.FieldPublishedAt},
 		},
 	}
-	graph.Nodes[52] = &sqlgraph.Node{
+	graph.Nodes[53] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   videocollect.Table,
 			Columns: videocollect.Columns,
@@ -1595,7 +1619,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			videocollect.FieldVideoID:   {Type: field.TypeUint32, Column: videocollect.FieldVideoID},
 		},
 	}
-	graph.Nodes[53] = &sqlgraph.Node{
+	graph.Nodes[54] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   videocomment.Table,
 			Columns: videocomment.Columns,
@@ -1621,7 +1645,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			videocomment.FieldReplyCount: {Type: field.TypeUint64, Column: videocomment.FieldReplyCount},
 		},
 	}
-	graph.Nodes[54] = &sqlgraph.Node{
+	graph.Nodes[55] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   videodraft.Table,
 			Columns: videodraft.Columns,
@@ -1653,7 +1677,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			videodraft.FieldEpisodeNumber: {Type: field.TypeUint32, Column: videodraft.FieldEpisodeNumber},
 		},
 	}
-	graph.Nodes[55] = &sqlgraph.Node{
+	graph.Nodes[56] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   videolike.Table,
 			Columns: videolike.Columns,
@@ -1673,7 +1697,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			videolike.FieldTargetID:   {Type: field.TypeUint32, Column: videolike.FieldTargetID},
 		},
 	}
-	graph.Nodes[56] = &sqlgraph.Node{
+	graph.Nodes[57] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   videoreport.Table,
 			Columns: videoreport.Columns,
@@ -1702,7 +1726,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			videoreport.FieldHandledAt:   {Type: field.TypeTime, Column: videoreport.FieldHandledAt},
 		},
 	}
-	graph.Nodes[57] = &sqlgraph.Node{
+	graph.Nodes[58] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   videotag.Table,
 			Columns: videotag.Columns,
@@ -1724,7 +1748,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			videotag.FieldVideoCount: {Type: field.TypeUint64, Column: videotag.FieldVideoCount},
 		},
 	}
-	graph.Nodes[58] = &sqlgraph.Node{
+	graph.Nodes[59] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   videotagrel.Table,
 			Columns: videotagrel.Columns,
@@ -6882,6 +6906,76 @@ func (f *SeriesFilter) WhereAuthorID(p entql.Uint32P) {
 }
 
 // addPredicate implements the predicateAdder interface.
+func (_q *SeriesFollowQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the SeriesFollowQuery builder.
+func (_q *SeriesFollowQuery) Filter() *SeriesFollowFilter {
+	return &SeriesFollowFilter{config: _q.config, predicateAdder: _q}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *SeriesFollowMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the SeriesFollowMutation builder.
+func (m *SeriesFollowMutation) Filter() *SeriesFollowFilter {
+	return &SeriesFollowFilter{config: m.config, predicateAdder: m}
+}
+
+// SeriesFollowFilter provides a generic filtering capability at runtime for SeriesFollowQuery.
+type SeriesFollowFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *SeriesFollowFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[40].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *SeriesFollowFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(seriesfollow.FieldID))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *SeriesFollowFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(seriesfollow.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *SeriesFollowFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(seriesfollow.FieldUpdatedAt))
+}
+
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *SeriesFollowFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(seriesfollow.FieldDeletedAt))
+}
+
+// WhereTenantID applies the entql uint32 predicate on the tenant_id field.
+func (f *SeriesFollowFilter) WhereTenantID(p entql.Uint32P) {
+	f.Where(p.Field(seriesfollow.FieldTenantID))
+}
+
+// WhereFollowerID applies the entql uint32 predicate on the follower_id field.
+func (f *SeriesFollowFilter) WhereFollowerID(p entql.Uint32P) {
+	f.Where(p.Field(seriesfollow.FieldFollowerID))
+}
+
+// WhereSeriesID applies the entql uint32 predicate on the series_id field.
+func (f *SeriesFollowFilter) WhereSeriesID(p entql.Uint32P) {
+	f.Where(p.Field(seriesfollow.FieldSeriesID))
+}
+
+// addPredicate implements the predicateAdder interface.
 func (_q *SysConfigQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
 }
@@ -6910,7 +7004,7 @@ type SysConfigFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *SysConfigFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[40].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[41].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -6986,6 +7080,21 @@ func (f *SysConfigFilter) WhereSensitiveWords(p entql.BytesP) {
 	f.Where(p.Field(sysconfig.FieldSensitiveWords))
 }
 
+// WhereAnnouncementEnabled applies the entql bool predicate on the announcement_enabled field.
+func (f *SysConfigFilter) WhereAnnouncementEnabled(p entql.BoolP) {
+	f.Where(p.Field(sysconfig.FieldAnnouncementEnabled))
+}
+
+// WhereAnnouncementText applies the entql string predicate on the announcement_text field.
+func (f *SysConfigFilter) WhereAnnouncementText(p entql.StringP) {
+	f.Where(p.Field(sysconfig.FieldAnnouncementText))
+}
+
+// WhereAnnouncementLink applies the entql string predicate on the announcement_link field.
+func (f *SysConfigFilter) WhereAnnouncementLink(p entql.StringP) {
+	f.Where(p.Field(sysconfig.FieldAnnouncementLink))
+}
+
 // addPredicate implements the predicateAdder interface.
 func (_q *TaskQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
@@ -7015,7 +7124,7 @@ type TaskFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TaskFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[41].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[42].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -7125,7 +7234,7 @@ type TenantFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TenantFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[42].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[43].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -7265,7 +7374,7 @@ type UbaEventFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UbaEventFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[43].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[44].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -7326,6 +7435,11 @@ func (f *UbaEventFilter) WhereWatchPercent(p entql.Uint32P) {
 	f.Where(p.Field(ubaevent.FieldWatchPercent))
 }
 
+// WherePositionMs applies the entql uint64 predicate on the position_ms field.
+func (f *UbaEventFilter) WherePositionMs(p entql.Uint64P) {
+	f.Where(p.Field(ubaevent.FieldPositionMs))
+}
+
 // WhereExtra applies the entql string predicate on the extra field.
 func (f *UbaEventFilter) WhereExtra(p entql.StringP) {
 	f.Where(p.Field(ubaevent.FieldExtra))
@@ -7365,7 +7479,7 @@ type UploadTaskFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UploadTaskFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[44].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[45].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -7475,7 +7589,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[45].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[46].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -7630,7 +7744,7 @@ type UserCredentialFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserCredentialFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[46].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[47].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -7770,7 +7884,7 @@ type UserFollowFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFollowFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[47].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[48].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -7840,7 +7954,7 @@ type UserOrgUnitFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserOrgUnitFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[48].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[49].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -7965,7 +8079,7 @@ type UserPositionFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserPositionFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[49].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[50].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8085,7 +8199,7 @@ type UserRoleFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserRoleFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[50].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[51].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8200,7 +8314,7 @@ type VideoFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *VideoFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[51].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[52].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8360,7 +8474,7 @@ type VideoCollectFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *VideoCollectFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[52].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[53].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8430,7 +8544,7 @@ type VideoCommentFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *VideoCommentFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[53].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[54].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8535,7 +8649,7 @@ type VideoDraftFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *VideoDraftFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[54].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[55].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8670,7 +8784,7 @@ type VideoLikeFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *VideoLikeFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[55].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[56].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8745,7 +8859,7 @@ type VideoReportFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *VideoReportFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[56].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[57].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8865,7 +8979,7 @@ type VideoTagFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *VideoTagFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[57].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[58].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -8950,7 +9064,7 @@ type VideoTagRelFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *VideoTagRelFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[58].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[59].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})

@@ -48,6 +48,9 @@ func sysconfEntityToDTO(e *ent.SysConfig) *sysconfV1.SysConf {
 		AllowedVideoTypes:      e.AllowedVideoTypes,
 		SensitiveFilterEnabled: trans.Ptr(e.SensitiveFilterEnabled),
 		SensitiveWords:         e.SensitiveWords,
+		AnnouncementEnabled:    trans.Ptr(e.AnnouncementEnabled),
+		AnnouncementText:       e.AnnouncementText,
+		AnnouncementLink:       trans.Ptr(e.AnnouncementLink),
 		UpdatedAt:              timeutil.TimeToTimestamppb(e.UpdatedAt),
 	}
 }
@@ -66,7 +69,18 @@ func (s *SysConfService) UpdateSysConf(ctx context.Context, req *sysconfV1.Updat
 	if req == nil {
 		return nil, sysconfV1.ErrorBadRequest("invalid parameter")
 	}
-	e, err := s.sysConfRepo.Update(ctx, req.MaxUploadSizeMb, req.MaxDurationSeconds, req.ManualReviewEnabled, req.RegisterEnabled, req.AllowedVideoTypes, req.SensitiveFilterEnabled, req.SensitiveWords)
+	e, err := s.sysConfRepo.Update(ctx, &data.SysConfUpdate{
+		MaxUploadMB:         req.MaxUploadSizeMb,
+		MaxDuration:         req.MaxDurationSeconds,
+		ManualReview:        req.ManualReviewEnabled,
+		Register:            req.RegisterEnabled,
+		AllowedTypes:        req.AllowedVideoTypes,
+		SensitiveEnabled:    req.SensitiveFilterEnabled,
+		SensitiveWords:      req.SensitiveWords,
+		AnnouncementEnabled: req.AnnouncementEnabled,
+		AnnouncementText:    req.AnnouncementText,
+		AnnouncementLink:    req.AnnouncementLink,
+	})
 	if err != nil {
 		return nil, err
 	}

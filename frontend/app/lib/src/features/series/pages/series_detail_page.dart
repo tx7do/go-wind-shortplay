@@ -5,8 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:get_it/get_it.dart' show GetIt;
 
 import 'package:shortplay_app/generated/l10n.dart';
-import 'package:shortplay_app/src/app_router/app_router.dart'
-    show RouteNames;
+import 'package:shortplay_app/src/app_router/app_router.dart' show RouteNames;
 import 'package:shortplay_app/src/core/repositories/user_auth_cache.dart';
 import 'package:shortplay_app/src/core/themes/app_colors.dart';
 import 'package:shortplay_app/src/core/transport/http/index.dart'
@@ -15,6 +14,7 @@ import 'package:shortplay_app/src/core/widgets/empty_state.dart';
 import 'package:shortplay_app/src/core/widgets/gradient_button.dart';
 import 'package:shortplay_app/src/features/common/data/models.dart';
 import 'package:shortplay_app/src/features/common/widgets/cover_image.dart';
+import 'package:shortplay_app/src/features/common/widgets/login_guard.dart';
 import 'package:shortplay_app/src/features/series/services/series_service.dart';
 
 /// 剧集详情页（剧信息头 + 选集列表）
@@ -44,6 +44,11 @@ class _SeriesDetailPageState extends State<SeriesDetailPage> {
   String? _error;
   bool _loading = true;
 
+  /// 追剧状态与人数（详情下发初值，本地乐观切换）
+  bool _following = false;
+  int _followerCount = 0;
+  bool _followPending = false;
+
   @override
   void initState() {
     super.initState();
@@ -61,6 +66,8 @@ class _SeriesDetailPageState extends State<SeriesDetailPage> {
       setState(() {
         _detail = detail;
         _loading = false;
+        _following = detail.viewerFollowing;
+        _followerCount = detail.series?.followerCount ?? 0;
       });
     } on ApiStatusException catch (e) {
       if (!mounted) return;
@@ -80,6 +87,48 @@ class _SeriesDetailPageState extends State<SeriesDetailPage> {
   bool get _isMine =>
       GetIt.instance<UserAuthCache>().userId > 0 &&
       GetIt.instance<UserAuthCache>().userId == _detail?.series?.authorId;
+
+  /// 追剧/取消追剧（幂等接口 + 本地乐观切换；未登录引导登录）
+  Future<void> _toggleFollow() async {
+    if (_followPending) return;
+    final series = _detail?.series;
+    if (series == null) return;
+    if (!await ensureLogin(context)) return;
+
+    final next = !_following;
+    setState(() {
+      _followPending = true;
+      _following = next;
+      _followerCount += next ? 1 : -1;
+    });
+    try {
+      final count = next
+          ? await _seriesService.followSeries(series.id)
+          : await _seriesService.unfollowSeries(series.id);
+      if (!mounted) return;
+      setState(() {
+        _followerCount = count;
+        _followPending = false;
+      });
+    } on ApiStatusException catch (e) {
+      if (!mounted) return;
+      // 回滚乐观态
+      setState(() {
+        _following = !next;
+        _followerCount += next ? -1 : 1;
+        _followPending = false;
+      });
+      EasyLoading.showToast(localizedErrorText(S.of(context), e));
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _following = !next;
+        _followerCount += next ? -1 : 1;
+        _followPending = false;
+      });
+      EasyLoading.showToast(S.of(context).errorOccurred);
+    }
+  }
 
   Future<void> _editSeries() async {
     final loc = S.of(context);
@@ -205,13 +254,13 @@ class _SeriesDetailPageState extends State<SeriesDetailPage> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null || detail?.series == null
-              ? EmptyState(
-                  icon: Icons.movie_filter_outlined,
-                  title: _error ?? loc.seriesNotFound,
-                  actionLabel: loc.retry,
-                  onAction: _load,
-                )
-              : _buildContent(loc, detail!),
+          ? EmptyState(
+              icon: Icons.movie_filter_outlined,
+              title: _error ?? loc.seriesNotFound,
+              actionLabel: loc.retry,
+              onAction: _load,
+            )
+          : _buildContent(loc, detail!),
     );
   }
 
@@ -255,10 +304,7 @@ class _SeriesDetailPageState extends State<SeriesDetailPage> {
                 fit: StackFit.expand,
                 children: [
                   if (coverUrl.isNotEmpty)
-                    CoverImage(
-                      url: coverUrl,
-                      borderRadius: BorderRadius.zero,
-                    )
+                    CoverImage(url: coverUrl, borderRadius: BorderRadius.zero)
                   else
                     DecoratedBox(
                       decoration: BoxDecoration(gradient: BrandColor.gradient),
@@ -318,6 +364,15 @@ class _SeriesDetailPageState extends State<SeriesDetailPage> {
                             ),
                           ),
                         ],
+                        if (!_isMine) ...[
+                          SizedBox(height: 10.h),
+                          _FollowButton(
+                            following: _following,
+                            pending: _followPending,
+                            followerCount: _followerCount,
+                            onPressed: _toggleFollow,
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -345,13 +400,11 @@ class _SeriesDetailPageState extends State<SeriesDetailPage> {
                         episodeNumber: index + 1,
                         isCurrent:
                             widget.currentVideoId != null &&
-                                video.id == widget.currentVideoId,
+                            video.id == widget.currentVideoId,
                         showStatusBadge: _isMine,
                         onTap: () => context.pushNamed(
                           RouteNames.videoDetail,
-                          pathParameters: {
-                            'videoId': '${video.id}',
-                          },
+                          pathParameters: {'videoId': '${video.id}'},
                         ),
                       );
                     },
@@ -361,6 +414,85 @@ class _SeriesDetailPageState extends State<SeriesDetailPage> {
           SliverToBoxAdapter(child: SizedBox(height: 24.h)),
         ],
       ),
+    );
+  }
+}
+
+/// 追剧按钮（胶囊态：追剧 + / 已追剧 ✓，随人数展示）
+class _FollowButton extends StatelessWidget {
+  final bool following;
+  final bool pending;
+  final int followerCount;
+  final VoidCallback onPressed;
+
+  const _FollowButton({
+    required this.following,
+    required this.pending,
+    required this.followerCount,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = S.of(context);
+    final label = following ? loc.seriesFollowing : loc.seriesFollowShort;
+
+    return Row(
+      children: [
+        GestureDetector(
+          onTap: pending ? null : onPressed,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+            decoration: BoxDecoration(
+              gradient: following ? null : BrandColor.gradient,
+              color: following ? Colors.white.withAlpha(38) : null,
+              borderRadius: BorderRadius.circular(100),
+              border: following
+                  ? Border.all(color: Colors.white.withAlpha(120))
+                  : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (pending)
+                  SizedBox(
+                    width: 12.sp,
+                    height: 12.sp,
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 1.6,
+                      color: Colors.white,
+                    ),
+                  )
+                else
+                  Icon(
+                    following ? Icons.check : Icons.add,
+                    size: 14.sp,
+                    color: Colors.white,
+                  ),
+                SizedBox(width: 4.w),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (followerCount > 0) ...[
+          SizedBox(width: 10.w),
+          Text(
+            loc.seriesFollowersCount(followerCount),
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: Colors.white.withAlpha(190),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -414,9 +546,7 @@ class _EpisodeTile extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 8.w),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12.r),
-          color: isCurrent
-              ? BrandColor.rose.withAlpha(18)
-              : Colors.transparent,
+          color: isCurrent ? BrandColor.rose.withAlpha(18) : Colors.transparent,
           border: isCurrent
               ? Border.all(color: BrandColor.rose.withAlpha(120))
               : null,
@@ -437,7 +567,9 @@ class _EpisodeTile extends StatelessWidget {
                     bottom: 4.h,
                     child: Container(
                       padding: EdgeInsets.symmetric(
-                          horizontal: 5.w, vertical: 1.h),
+                        horizontal: 5.w,
+                        vertical: 1.h,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.black.withAlpha(150),
                         borderRadius: BorderRadius.circular(100),

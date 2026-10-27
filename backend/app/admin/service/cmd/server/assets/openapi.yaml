@@ -9796,6 +9796,8 @@ components:
                     description: 计数
                 publishedCount:
                     type: string
+                followerCount:
+                    type: string
                 createdAt:
                     type: string
                     format: date-time
@@ -9811,6 +9813,10 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/video.service.v1.Video'
+                viewerFollowing:
+                    type: boolean
+                followerCount:
+                    type: string
         series.service.v1.UpdateSeriesRequest:
             type: object
             properties:
@@ -10128,6 +10134,18 @@ components:
                     type: array
                     items:
                         type: string
+                sensitiveFilterEnabled:
+                    type: boolean
+                sensitiveWords:
+                    type: array
+                    items:
+                        type: string
+                announcementEnabled:
+                    type: boolean
+                announcementText:
+                    type: string
+                announcementLink:
+                    type: string
                 updatedAt:
                     type: string
                     format: date-time
@@ -10148,6 +10166,18 @@ components:
                     type: array
                     items:
                         type: string
+                sensitiveFilterEnabled:
+                    type: boolean
+                sensitiveWords:
+                    type: array
+                    items:
+                        type: string
+                announcementEnabled:
+                    type: boolean
+                announcementText:
+                    type: string
+                announcementLink:
+                    type: string
         task.service.v1.ControlTaskRequest:
             type: object
             properties:

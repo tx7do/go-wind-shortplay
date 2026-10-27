@@ -34,4 +34,11 @@ service FeedService {
       get: "/app/v1/tags/{tag}/videos"
     };
   }
+
+  // 热搜词（游客可访问）
+  rpc ListHotKeywords (feed.service.v1.ListHotKeywordsRequest) returns (feed.service.v1.ListHotKeywordsResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/search/hot-keywords"
+    };
+  }
 }

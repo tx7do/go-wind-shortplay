@@ -7,6 +7,9 @@ import 'package:shortplay_app/src/core/services/pagination_query.dart';
 import 'package:shortplay_app/src/core/transport/http/status.dart';
 import 'package:shortplay_app/src/core/utilities/convert.dart';
 import 'package:shortplay_app/src/features/common/data/models.dart';
+import 'package:shortplay_app/src/features/history/services/history_service.dart';
+import 'package:shortplay_app/src/features/video_detail/services/video_service.dart'
+    show VideoDetail;
 
 void main() {
   group('protojson 序列化约定', () {
@@ -48,7 +51,12 @@ void main() {
         'collectCount': '1',
         'commentCount': '2',
         'viewCount': '1',
-        'viewerState': {'liked': false, 'collected': true, 'following': false},
+        'viewerState': {
+          'liked': false,
+          'collected': true,
+          'following': false,
+          'resumePositionMs': '12345',
+        },
       });
 
       expect(video.id, 1);
@@ -59,6 +67,46 @@ void main() {
       expect(video.commentCount, 2);
       expect(video.liked, isFalse);
       expect(video.collected, isTrue);
+      expect(video.resumePositionMs, 12345); // int64 字符串形态的续播位置
+    });
+
+    test('VideoDetail.fromJson 合并平级 viewerState（互动态 + 续播位置）', () {
+      // wire 上 viewerState 与 video 平级（protojson），解析须合并
+      final detail = VideoDetail.fromJson({
+        'video': {
+          'id': 7,
+          'title': 'Detail Video',
+          'status': 'VIDEO_STATUS_PUBLISHED',
+          'duration': 60,
+        },
+        'viewerState': {
+          'liked': true,
+          'collected': false,
+          'following': true,
+          'resumePositionMs': '30000',
+        },
+      });
+      expect(detail.video.id, 7);
+      expect(detail.video.liked, isTrue);
+      expect(detail.video.followingAuthor, isTrue);
+      expect(detail.video.resumePositionMs, 30000);
+    });
+
+    test('Series/SeriesDetail 解析追剧字段', () {
+      final detail = SeriesDetail.fromJson({
+        'series': {
+          'id': '3',
+          'title': 'Test Series',
+          'episodeCount': '12',
+          'publishedCount': '5',
+          'followerCount': '42',
+        },
+        'items': [],
+        'viewerFollowing': true,
+      });
+      expect(detail.series!.id, 3);
+      expect(detail.series!.followerCount, 42);
+      expect(detail.viewerFollowing, isTrue);
     });
 
     test('FeedItem.fromJson 解析 feed 条目', () {
@@ -73,6 +121,20 @@ void main() {
       });
       expect(item.video.id, 9);
       expect(item.reason, FeedReason.hot);
+    });
+
+    test('HistoryEntry 进度判定', () {
+      final video = const Video(id: 1, duration: 100);
+      // 有效进度：>5s 且未接近片尾
+      expect(HistoryEntry(video: video, progressSeconds: 40).resumable, isTrue);
+      // 片尾 5s 内不续播
+      expect(
+        HistoryEntry(video: video, progressSeconds: 98).resumable,
+        isFalse,
+      );
+      // 未记录 / 开头几秒不续播
+      expect(HistoryEntry(video: video, progressSeconds: 0).resumable, isFalse);
+      expect(HistoryEntry(video: video, progressSeconds: 3).resumable, isFalse);
     });
 
     test('Status 解析错误响应 + ApiStatusException', () {
@@ -126,10 +188,7 @@ void main() {
               final loc = S.of(context);
               return Column(
                 mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(loc.appName),
-                  Text(loc.commentsCount(3)),
-                ],
+                children: [Text(loc.appName), Text(loc.commentsCount(3))],
               );
             },
           ),
@@ -150,9 +209,7 @@ void main() {
           ],
           supportedLocales: S.delegate.supportedLocales,
           locale: const Locale('en', 'US'),
-          home: Builder(
-            builder: (context) => Text(S.of(context).appName),
-          ),
+          home: Builder(builder: (context) => Text(S.of(context).appName)),
         ),
       );
       expect(find.text('Fengyin ShortPlay'), findsOneWidget);

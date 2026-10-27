@@ -293,9 +293,9 @@ class _ProfilePageState extends State<ProfilePage>
                 child: _CreatorCenterCard(overview: _overview, onDark: isDark),
               ),
               SizedBox(height: 16.h),
-              // 作品 / 剧集 / 收藏 / 历史 Tab
+              // 作品 / 剧集 / 追剧 / 收藏 / 历史 Tab
               DefaultTabController(
-                length: 4,
+                length: 5,
                 child: SizedBox(
                   height: 480.h,
                   child: Column(
@@ -304,6 +304,7 @@ class _ProfilePageState extends State<ProfilePage>
                         tabs: [
                           Tab(text: loc.works),
                           Tab(text: loc.seriesTab),
+                          Tab(text: loc.followingSeriesTab),
                           Tab(text: loc.collects),
                           Tab(text: loc.historyTab),
                         ],
@@ -325,13 +326,16 @@ class _ProfilePageState extends State<ProfilePage>
                               ),
                               emptyText: loc.seriesEmptyMine,
                             ),
+                            PagedSeriesList(
+                              loader: (query) => _seriesService
+                                  .listFollowedSeries(paging: query),
+                              emptyText: loc.followingSeriesEmpty,
+                            ),
                             PagedVideoList(
                               loader: _userService.collects,
                               emptyText: loc.noCollectedVideos,
                             ),
-                            PagedHistoryList(
-                              emptyText: loc.historyEmpty,
-                            ),
+                            PagedHistoryList(emptyText: loc.historyEmpty),
                           ],
                         ),
                       ),

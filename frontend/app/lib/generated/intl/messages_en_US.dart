@@ -38,16 +38,18 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m8(count) => "${count} EP";
 
-  static String m9(published, total) =>
+  static String m9(count) => "${count} following";
+
+  static String m10(published, total) =>
       "Updated to EP${published} · ${total} total";
 
-  static String m10(count) => "${count} d ago";
+  static String m11(count) => "${count} d ago";
 
-  static String m11(count) => "${count} h ago";
+  static String m12(count) => "${count} h ago";
 
-  static String m12(count) => "${count} min ago";
+  static String m13(count) => "${count} min ago";
 
-  static String m13(percent) => "Uploading ${percent}%";
+  static String m14(percent) => "Uploading ${percent}%";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -123,6 +125,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Tell viewers about your video…",
     ),
     "descriptionLabel": MessageLookupByLibrary.simpleMessage("Description"),
+    "dislikeNotInterested": MessageLookupByLibrary.simpleMessage(
+      "Not interested",
+    ),
+    "dislikeRecorded": MessageLookupByLibrary.simpleMessage(
+      "You will see less of this",
+    ),
     "draftSaved": MessageLookupByLibrary.simpleMessage("Draft saved"),
     "draftSeriesAttached": MessageLookupByLibrary.simpleMessage(
       "In a series (episode auto-assigned on publish)",
@@ -326,6 +334,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "followed": MessageLookupByLibrary.simpleMessage("Following"),
     "followers": MessageLookupByLibrary.simpleMessage("Followers"),
     "followingCountLabel": MessageLookupByLibrary.simpleMessage("Following"),
+    "followingSeriesEmpty": MessageLookupByLibrary.simpleMessage(
+      "No series followed yet. Go discover some!",
+    ),
+    "followingSeriesTab": MessageLookupByLibrary.simpleMessage("Following"),
     "goLogin": MessageLookupByLibrary.simpleMessage("Log in"),
     "guestInteractionDesc": MessageLookupByLibrary.simpleMessage(
       "Log in to like, comment, collect and follow",
@@ -338,6 +350,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "historyTab": MessageLookupByLibrary.simpleMessage("History"),
     "home": MessageLookupByLibrary.simpleMessage("Home"),
+    "hotKeywords": MessageLookupByLibrary.simpleMessage("Trending Searches"),
     "hotList": MessageLookupByLibrary.simpleMessage("Hot List"),
     "hotListEmpty": MessageLookupByLibrary.simpleMessage(
       "Nothing on the hot list yet",
@@ -465,6 +478,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "search": MessageLookupByLibrary.simpleMessage("Search"),
     "searchEmpty": m7,
     "searchHint": MessageLookupByLibrary.simpleMessage("Search videos, tags"),
+    "searchHistory": MessageLookupByLibrary.simpleMessage("Search History"),
+    "searchHistoryClear": MessageLookupByLibrary.simpleMessage("Clear"),
     "searchSomeKeyword": MessageLookupByLibrary.simpleMessage(
       "Search something to explore",
     ),
@@ -476,13 +491,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "No series yet. Attach one when publishing to create it",
     ),
     "seriesEpisodeBadge": m8,
+    "seriesFollowShort": MessageLookupByLibrary.simpleMessage("Follow"),
+    "seriesFollowersCount": m9,
+    "seriesFollowing": MessageLookupByLibrary.simpleMessage("Following"),
     "seriesNotFound": MessageLookupByLibrary.simpleMessage(
       "Series not found or not visible",
     ),
     "seriesSaved": MessageLookupByLibrary.simpleMessage("Series saved"),
     "seriesTab": MessageLookupByLibrary.simpleMessage("Series"),
     "seriesTitleLabel": MessageLookupByLibrary.simpleMessage("Series Title"),
-    "seriesUpdatedTo": m9,
+    "seriesUpdatedTo": m10,
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
     "share": MessageLookupByLibrary.simpleMessage("Share"),
     "shareCopied": MessageLookupByLibrary.simpleMessage(
@@ -502,10 +520,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Search or create tags",
     ),
     "tagPickerTitle": MessageLookupByLibrary.simpleMessage("Pick tags"),
-    "timeDaysAgo": m10,
-    "timeHoursAgo": m11,
+    "timeDaysAgo": m11,
+    "timeHoursAgo": m12,
     "timeJustNow": MessageLookupByLibrary.simpleMessage("just now"),
-    "timeMinutesAgo": m12,
+    "timeMinutesAgo": m13,
     "titleHint": MessageLookupByLibrary.simpleMessage(
       "Give your video a catchy title",
     ),
@@ -525,7 +543,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "unreadOnly": MessageLookupByLibrary.simpleMessage("Unread only"),
     "uploading": MessageLookupByLibrary.simpleMessage("Uploading"),
-    "uploadingPercent": m13,
+    "uploadingPercent": m14,
     "username": MessageLookupByLibrary.simpleMessage("Username"),
     "usernameHint": MessageLookupByLibrary.simpleMessage("Enter username"),
     "versionLabel": MessageLookupByLibrary.simpleMessage("Version"),

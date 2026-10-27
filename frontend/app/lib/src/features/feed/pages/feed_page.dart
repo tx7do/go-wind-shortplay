@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart' as launcher;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:media_kit/media_kit.dart' show Player;
 
@@ -12,6 +13,7 @@ import 'package:shortplay_app/src/app_router/app_router.dart';
 import 'package:shortplay_app/src/core/widgets/empty_state.dart';
 import 'package:shortplay_app/src/features/comment/widgets/comment_sheet.dart';
 import 'package:shortplay_app/src/features/common/data/models.dart';
+import 'package:shortplay_app/src/features/common/services/sysconf_service.dart';
 import 'package:shortplay_app/src/features/common/services/uba_service.dart';
 import 'package:shortplay_app/src/features/feed/bloc/feed_bloc.dart';
 import 'package:shortplay_app/src/features/feed/widgets/feed_action_bar.dart';
@@ -41,6 +43,10 @@ class _FeedPageState extends State<FeedPage>
   final Map<int, UserBrief> _authors = {};
   final Set<int> _detailFetched = {};
 
+  /// 公告横幅（sysconf 下发；游客可读，失败静默不展示）
+  SysConf _sysConf = const SysConf();
+  bool _announcementDismissed = false;
+
   @override
   bool get wantKeepAlive => true;
 
@@ -48,6 +54,12 @@ class _FeedPageState extends State<FeedPage>
   void initState() {
     super.initState();
     context.read<FeedBloc>().add(const FeedRefreshed());
+    // 公告配置尽力而为拉取（不阻塞 Feed 首屏）
+    unawaited(
+      SysConfService().getSysConf().then((conf) {
+        if (mounted) setState(() => _sysConf = conf);
+      }),
+    );
   }
 
   @override
@@ -86,14 +98,16 @@ class _FeedPageState extends State<FeedPage>
         if (old.liked != detail.video.liked ||
             old.collected != detail.video.collected ||
             old.followingAuthor != detail.video.followingAuthor) {
-          context.read<FeedBloc>().add(FeedVideoReplaced(
-                videoId,
-                old.copyWith(
-                  liked: detail.video.liked,
-                  collected: detail.video.collected,
-                  followingAuthor: detail.video.followingAuthor,
-                ),
-              ));
+          context.read<FeedBloc>().add(
+            FeedVideoReplaced(
+              videoId,
+              old.copyWith(
+                liked: detail.video.liked,
+                collected: detail.video.collected,
+                followingAuthor: detail.video.followingAuthor,
+              ),
+            ),
+          );
         }
       }
     } catch (_) {
@@ -142,8 +156,7 @@ class _FeedPageState extends State<FeedPage>
   void _flipPage(int direction) {
     if (!_pageController.hasClients) return;
     final now = DateTime.now();
-    if (now.difference(_lastWheelFlipAt) <
-        const Duration(milliseconds: 180)) {
+    if (now.difference(_lastWheelFlipAt) < const Duration(milliseconds: 180)) {
       return;
     }
     _lastWheelFlipAt = now;
@@ -173,12 +186,14 @@ class _FeedPageState extends State<FeedPage>
           }
         }
         if (item == null) return;
-        context.read<FeedBloc>().add(FeedVideoReplaced(
-              video.id,
-              item.video.copyWith(
-                commentCount: (video.commentCount + delta).clamp(0, 1 << 40),
-              ),
-            ));
+        context.read<FeedBloc>().add(
+          FeedVideoReplaced(
+            video.id,
+            item.video.copyWith(
+              commentCount: (video.commentCount + delta).clamp(0, 1 << 40),
+            ),
+          ),
+        );
       },
     );
   }
@@ -255,10 +270,7 @@ class _FeedPageState extends State<FeedPage>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: const Icon(
-                          Icons.local_fire_department,
-                          size: 22,
-                        ),
+                        icon: const Icon(Icons.local_fire_department, size: 22),
                         tooltip: loc.hotList,
                         onPressed: () => context.push(AppRoutePath.hotList),
                         style: IconButton.styleFrom(
@@ -279,6 +291,29 @@ class _FeedPageState extends State<FeedPage>
               ),
             ),
           ),
+          // 公告横幅（运营位：sysconf 下发，可关闭；带链接时点击打开）
+          if (_sysConf.announcementVisible && !_announcementDismissed)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 12.w, right: 12.w, top: 4.h),
+                  child: _AnnouncementBanner(
+                    text: _sysConf.announcementText,
+                    hasLink: _sysConf.announcementLink.isNotEmpty,
+                    onOpen: () => launcher.launchUrl(
+                      Uri.parse(_sysConf.announcementLink),
+                      mode: launcher.LaunchMode.externalApplication,
+                    ),
+                    onDismiss: () =>
+                        setState(() => _announcementDismissed = true),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -293,6 +328,84 @@ class _FeedPageState extends State<FeedPage>
           ? () => context.read<FeedBloc>().add(const FeedRefreshed())
           : null,
       onDark: true,
+    );
+  }
+}
+
+/// 公告横幅（半透明黑底白字胶囊：喇叭 + 单行文案 + 可选外链 + 关闭）
+class _AnnouncementBanner extends StatelessWidget {
+  final String text;
+  final bool hasLink;
+  final VoidCallback onOpen;
+  final VoidCallback onDismiss;
+
+  const _AnnouncementBanner({
+    required this.text,
+    required this.hasLink,
+    required this.onOpen,
+    required this.onDismiss,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black.withAlpha(120),
+      borderRadius: BorderRadius.circular(100),
+      child: InkWell(
+        onTap: hasLink ? onOpen : null,
+        borderRadius: BorderRadius.circular(100),
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 12.w,
+            right: 4.w,
+            top: 4.h,
+            bottom: 4.h,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.campaign_outlined,
+                size: 15.sp,
+                color: Colors.white.withAlpha(220),
+              ),
+              SizedBox(width: 6.w),
+              Flexible(
+                child: Text(
+                  text,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: Colors.white.withAlpha(230),
+                  ),
+                ),
+              ),
+              if (hasLink) ...[
+                SizedBox(width: 4.w),
+                Icon(
+                  Icons.open_in_new_rounded,
+                  size: 13.sp,
+                  color: Colors.white.withAlpha(200),
+                ),
+              ],
+              SizedBox(width: 2.w),
+              GestureDetector(
+                onTap: onDismiss,
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: EdgeInsets.all(6.w),
+                  child: Icon(
+                    Icons.close_rounded,
+                    size: 14.sp,
+                    color: Colors.white.withAlpha(190),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -335,11 +448,13 @@ class _FeedPageItemState extends State<_FeedPageItem> {
   /// 双击点赞：红心动画 + 真实点赞（未登录引导）
   void _onDoubleTapLike(Offset position) {
     _burst.burst(position);
-    unawaited(runDoubleTapLike(
-      context,
-      video: widget.feedItem.video,
-      onUpdated: widget.onVideoUpdated,
-    ));
+    unawaited(
+      runDoubleTapLike(
+        context,
+        video: widget.feedItem.video,
+        onUpdated: widget.onVideoUpdated,
+      ),
+    );
   }
 
   @override
@@ -361,35 +476,41 @@ class _FeedPageItemState extends State<_FeedPageItem> {
           },
           onDoubleTapLike: _onDoubleTapLike,
           onPlayStart: (_) {
-            uba.report(UbaEvent(
-              eventType: UbaEventType.videoPlay,
-              videoId: video.id,
-            ));
+            uba.report(
+              UbaEvent(eventType: UbaEventType.videoPlay, videoId: video.id),
+            );
             widget.onNeedDetail();
           },
           onSwipeAway: (progress) {
-            uba.report(UbaEvent(
-              eventType: UbaEventType.videoSwipeAway,
-              videoId: video.id,
-              durationMs: progress.watchMs,
-              watchPercent: progress.percent,
-            ));
+            uba.report(
+              UbaEvent(
+                eventType: UbaEventType.videoSwipeAway,
+                videoId: video.id,
+                durationMs: progress.watchMs,
+                watchPercent: progress.percent,
+              ),
+            );
           },
           onComplete: (progress) {
-            uba.report(UbaEvent(
-              eventType: UbaEventType.videoComplete,
-              videoId: video.id,
-              durationMs: progress.watchMs,
-              watchPercent: 100,
-            ));
+            uba.report(
+              UbaEvent(
+                eventType: UbaEventType.videoComplete,
+                videoId: video.id,
+                durationMs: progress.watchMs,
+                watchPercent: 100,
+              ),
+            );
           },
           onHeartbeat: (progress) {
-            uba.report(UbaEvent(
-              eventType: UbaEventType.videoHeartbeat,
-              videoId: video.id,
-              durationMs: progress.watchMs,
-              watchPercent: progress.percent,
-            ));
+            uba.report(
+              UbaEvent(
+                eventType: UbaEventType.videoHeartbeat,
+                videoId: video.id,
+                durationMs: progress.watchMs,
+                watchPercent: progress.percent,
+                positionMs: progress.positionMs,
+              ),
+            );
           },
         ),
         // 底部信息（左）
@@ -422,9 +543,7 @@ class _FeedPageItemState extends State<_FeedPageItem> {
             bottomInset: MediaQuery.paddingOf(context).bottom + 5.h,
           ),
         // 双击点赞红心动画层
-        Positioned.fill(
-          child: LikeBurstLayer(controller: _burst),
-        ),
+        Positioned.fill(child: LikeBurstLayer(controller: _burst)),
       ],
     );
   }
@@ -437,7 +556,7 @@ class _MouseDragScrollBehavior extends MaterialScrollBehavior {
 
   @override
   Set<PointerDeviceKind> get dragDevices => {
-        ...super.dragDevices,
-        PointerDeviceKind.mouse,
-      };
+    ...super.dragDevices,
+    PointerDeviceKind.mouse,
+  };
 }

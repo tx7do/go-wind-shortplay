@@ -377,5 +377,16 @@
   "creatorPlays": "Plays",
   "creatorLikes": "Likes",
   "creatorPublished": "Published",
-  "errorSensitiveWordHit": "Contains prohibited words. Please revise and try again"
+  "errorSensitiveWordHit": "Contains prohibited words. Please revise and try again",
+  "seriesFollowing": "Following",
+  "seriesFollowShort": "Follow",
+  "seriesFollowersCount": "{count} following",
+  "@seriesFollowersCount": {"placeholders": {"count": {"type": "int"}}},
+  "followingSeriesTab": "Following",
+  "followingSeriesEmpty": "No series followed yet. Go discover some!",
+  "dislikeNotInterested": "Not interested",
+  "dislikeRecorded": "You will see less of this",
+  "searchHistory": "Search History",
+  "searchHistoryClear": "Clear",
+  "hotKeywords": "Trending Searches"
 }

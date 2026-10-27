@@ -99,6 +99,11 @@ func WatchPercent(v uint32) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldEQ(FieldWatchPercent, v))
 }
 
+// PositionMs applies equality check predicate on the "position_ms" field. It's identical to PositionMsEQ.
+func PositionMs(v uint64) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldEQ(FieldPositionMs, v))
+}
+
 // Extra applies equality check predicate on the "extra" field. It's identical to ExtraEQ.
 func Extra(v string) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldEQ(FieldExtra, v))
@@ -527,6 +532,46 @@ func WatchPercentLT(v uint32) predicate.UbaEvent {
 // WatchPercentLTE applies the LTE predicate on the "watch_percent" field.
 func WatchPercentLTE(v uint32) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldLTE(FieldWatchPercent, v))
+}
+
+// PositionMsEQ applies the EQ predicate on the "position_ms" field.
+func PositionMsEQ(v uint64) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldEQ(FieldPositionMs, v))
+}
+
+// PositionMsNEQ applies the NEQ predicate on the "position_ms" field.
+func PositionMsNEQ(v uint64) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldNEQ(FieldPositionMs, v))
+}
+
+// PositionMsIn applies the In predicate on the "position_ms" field.
+func PositionMsIn(vs ...uint64) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldIn(FieldPositionMs, vs...))
+}
+
+// PositionMsNotIn applies the NotIn predicate on the "position_ms" field.
+func PositionMsNotIn(vs ...uint64) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldNotIn(FieldPositionMs, vs...))
+}
+
+// PositionMsGT applies the GT predicate on the "position_ms" field.
+func PositionMsGT(v uint64) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldGT(FieldPositionMs, v))
+}
+
+// PositionMsGTE applies the GTE predicate on the "position_ms" field.
+func PositionMsGTE(v uint64) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldGTE(FieldPositionMs, v))
+}
+
+// PositionMsLT applies the LT predicate on the "position_ms" field.
+func PositionMsLT(v uint64) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldLT(FieldPositionMs, v))
+}
+
+// PositionMsLTE applies the LTE predicate on the "position_ms" field.
+func PositionMsLTE(v uint64) predicate.UbaEvent {
+	return predicate.UbaEvent(sql.FieldLTE(FieldPositionMs, v))
 }
 
 // ExtraEQ applies the EQ predicate on the "extra" field.

@@ -126,6 +126,9 @@ type RolePermission func(*sql.Selector)
 // Series is the predicate function for series builders.
 type Series func(*sql.Selector)
 
+// SeriesFollow is the predicate function for seriesfollow builders.
+type SeriesFollow func(*sql.Selector)
+
 // SysConfig is the predicate function for sysconfig builders.
 type SysConfig func(*sql.Selector)
 

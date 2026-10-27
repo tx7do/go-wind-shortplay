@@ -57,6 +57,19 @@ func (SysConfig) Fields() []ent.Field {
 		field.JSON("sensitive_words", []string{}).
 			Comment("敏感词表").
 			Optional(),
+
+		field.Bool("announcement_enabled").
+			Comment("App 公告横幅开关").
+			Default(false),
+
+		field.Text("announcement_text").
+			Comment("公告文案（空则不展示）").
+			Optional().
+			Nillable(),
+
+		field.String("announcement_link").
+			Comment("公告跳转链接（可空）").
+			Default(""),
 	}
 }
 

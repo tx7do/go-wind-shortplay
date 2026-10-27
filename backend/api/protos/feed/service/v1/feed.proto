@@ -12,7 +12,7 @@ import "video/service/v1/video.proto";
 //   1. 关注作者最新视频
 //   2. 平台热门（点赞 + 浏览简单加权）
 //   3. 最新发布兜底
-// 已看视频经 Redis 去重过滤。
+// 已看视频经 Redis 去重过滤；「不感兴趣」负反馈同样过滤。
 service FeedService {
   // 获取沉浸式 Feed 流（分页拉取，无限滚动）
   rpc GetFeed (GetFeedRequest) returns (GetFeedResponse) {}
@@ -25,6 +25,9 @@ service FeedService {
 
   // 按标签拉取视频聚合（话题标签主页，Phase 2 完整化）
   rpc ListVideosByTag (ListVideosByTagRequest) returns (GetFeedResponse) {}
+
+  // 热搜词（按真实搜索频次聚合，游客可访问）
+  rpc ListHotKeywords (ListHotKeywordsRequest) returns (ListHotKeywordsResponse) {}
 }
 
 // Feed 召回来源
@@ -56,6 +59,7 @@ message ViewerState {
   optional bool liked = 1 [json_name = "liked"];         // 是否已点赞
   optional bool collected = 2 [json_name = "collected"]; // 是否已收藏
   optional bool following = 3 [json_name = "following"]; // 是否已关注作者
+  optional uint64 resume_position_ms = 4 [json_name = "resumePositionMs"]; // 断点续播位置（毫秒；0=无历史进度）
 }
 
 message VideoDetail {
@@ -79,4 +83,14 @@ message ListVideosByTagRequest {
   string tag = 1 [json_name = "tag"];                    // 标签名
   optional uint32 page_num = 2 [json_name = "pageNum"];  // 页码
   optional uint32 page_size = 3 [json_name = "pageSize"]; // 页大小
+}
+
+// ── 热搜词 ──
+
+message ListHotKeywordsRequest {
+  optional uint32 limit = 1 [json_name = "limit"]; // 返回条数（缺省 10，上限 20）
+}
+
+message ListHotKeywordsResponse {
+  repeated string keywords = 1 [json_name = "keywords"]; // 热搜词（热度倒序）
 }

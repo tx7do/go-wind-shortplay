@@ -304,6 +304,11 @@ func (s *VideoService) ChangeVideoStatus(ctx context.Context, req *videoV1.Chang
 	if outcome != reviewNone {
 		s.notifyVideoReviewed(ctx, updated.GetAuthorId(), updated.GetId(), updated.GetTitle(), reason, outcome)
 	}
+
+	// 剧集更新通知：挂靠剧集的视频新发布，fan-out 给追剧者（尽力而为）
+	if to == videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED && updated.GetSeriesId() > 0 && s.seriesSvc != nil {
+		s.seriesSvc.NotifyFollowersNewEpisode(ctx, updated.GetSeriesId(), updated.GetId(), updated.GetEpisodeNumber(), updated.GetTitle(), updated.GetAuthorId())
+	}
 	return updated, nil
 }
 
@@ -504,6 +509,11 @@ func (s *VideoService) CompleteUpload(ctx context.Context, req *videoV1.Complete
 	if err != nil {
 		_ = s.uploadTaskRepo.UpdateStatus(ctx, e.ID, videoV1.UploadTaskStatus_UPLOAD_TASK_STATUS_FAILED, nil)
 		return nil, err
+	}
+
+	// 直发即可见：挂靠剧集时 fan-out 追更通知（尽力而为）
+	if video.GetStatus() == videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED && video.GetSeriesId() > 0 && s.seriesSvc != nil {
+		s.seriesSvc.NotifyFollowersNewEpisode(ctx, video.GetSeriesId(), video.GetId(), video.GetEpisodeNumber(), video.GetTitle(), video.GetAuthorId())
 	}
 	_ = s.uploadTaskRepo.UpdateStatus(ctx, e.ID, videoV1.UploadTaskStatus_UPLOAD_TASK_STATUS_COMPLETED, func(b *ent.UploadTaskUpdateOne) {
 		b.SetFileKey(objectKey)
@@ -850,6 +860,10 @@ func (s *VideoService) SubmitDraft(ctx context.Context, req *videoV1.SubmitDraft
 	video, err := s.videoRepo.Create(ctx, dto, e.Tags)
 	if err != nil {
 		return nil, err
+	}
+	// 直发即可见：挂靠剧集时 fan-out 追更通知（尽力而为）
+	if status == videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED && video.GetSeriesId() > 0 && s.seriesSvc != nil {
+		s.seriesSvc.NotifyFollowersNewEpisode(ctx, video.GetSeriesId(), video.GetId(), video.GetEpisodeNumber(), video.GetTitle(), video.GetAuthorId())
 	}
 	if err = s.draftRepo.Delete(ctx, e.ID); err != nil {
 		s.log.Errorf("delete draft after submit failed: %s", err.Error())

@@ -45,6 +45,7 @@ func (UbaEvent) Fields() []ent.Field {
 				"VideoCollect", "VIDEO_COLLECT",
 				"CommentCreate", "COMMENT_CREATE",
 				"FollowAuthor", "FOLLOW_AUTHOR",
+				"VideoDislike", "VIDEO_DISLIKE",
 			).
 			Default("VIDEO_PLAY"),
 
@@ -62,6 +63,10 @@ func (UbaEvent) Fields() []ent.Field {
 
 		field.Uint32("watch_percent").
 			Comment("观看进度百分比（0-100）").
+			Default(0),
+
+		field.Uint64("position_ms").
+			Comment("播放位置（毫秒，心跳/划走时上报，断点续播用）").
 			Default(0),
 
 		field.String("extra").

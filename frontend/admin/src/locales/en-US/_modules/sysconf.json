@@ -21,5 +21,13 @@
   "sensitiveFilterEnabledHint": "When on: publishes hitting words go to review, comments are rejected",
   "sensitiveWords": "Sensitive Words",
   "sensitiveWordsHint": "One word per line (or comma-separated), effective on save",
-  "sensitiveWordsPlaceholder": "One word per line"
+  "sensitiveWordsPlaceholder": "One word per line",
+  "announcementEnabled": "App Announcement Banner",
+  "announcementEnabledHint": "Show an announcement banner at the top of the app home (empty text hides it)",
+  "announcementText": "Announcement Text",
+  "announcementTextHint": "Content shown in the banner on the app home",
+  "announcementTextPlaceholder": "Announcement content (max 200 chars)",
+  "announcementLink": "Announcement Link",
+  "announcementLinkHint": "Optional; opened when the banner is tapped (http/https)",
+  "announcementLinkInvalid": "Link must start with http(s)://"
 }

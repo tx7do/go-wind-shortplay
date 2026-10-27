@@ -1,4 +1,4 @@
-import 'dart:async' show Timer;
+import 'dart:async' show Timer, unawaited;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,6 +10,7 @@ import 'package:shortplay_app/src/core/widgets/empty_state.dart';
 import 'package:shortplay_app/src/features/common/services/tag_service.dart';
 import 'package:shortplay_app/src/features/common/widgets/paged_video_list.dart';
 import 'package:shortplay_app/src/features/common/data/models.dart';
+import 'package:shortplay_app/src/features/search/services/search_history_store.dart';
 import 'package:shortplay_app/src/features/search/services/search_service.dart';
 import 'package:shortplay_app/src/features/series/widgets/paged_series_list.dart';
 
@@ -33,6 +34,10 @@ class _SearchPageState extends State<SearchPage> {
   String _keyword = '';
   Timer? _debounce;
   List<String> _hotTags = [];
+  List<String> _hotKeywords = [];
+
+  /// 本地搜索历史（[SearchHistoryStore] 内存镜像，setState 驱动）
+  List<String> _history = const [];
 
   @override
   void initState() {
@@ -45,8 +50,14 @@ class _SearchPageState extends State<SearchPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _focusNode.requestFocus();
         _loadHotTags();
+        _loadHotKeywords();
       });
     }
+    _history = searchHistoryStore.items;
+    // 首次进入装载本地历史（后续共享内存缓存）
+    searchHistoryStore.load().then((_) {
+      if (mounted) setState(() => _history = searchHistoryStore.items);
+    });
   }
 
   @override
@@ -69,10 +80,36 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
+  Future<void> _loadHotKeywords() async {
+    // 热搜词（服务端按真实搜索频次聚合）尽力而为
+    final kws = await _searchService.hotKeywords(limit: 10);
+    if (!mounted) return;
+    setState(() => _hotKeywords = kws);
+  }
+
+  /// 记录搜索历史（去重置顶，落盘尽力而为）
+  Future<void> _recordHistory(String keyword) async {
+    await searchHistoryStore.record(keyword);
+    if (!mounted) return;
+    setState(() => _history = searchHistoryStore.items);
+  }
+
+  /// 清空搜索历史
+  Future<void> _clearHistory() async {
+    await searchHistoryStore.clear();
+    if (!mounted) return;
+    setState(() => _history = const []);
+  }
+
   void _onChanged(String value) {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 400), () {
-      if (mounted) setState(() => _keyword = value.trim());
+      final kw = value.trim();
+      if (!mounted) return;
+      setState(() => _keyword = kw);
+      if (kw.isNotEmpty && !kw.startsWith('#')) {
+        unawaited(_recordHistory(kw));
+      }
     });
   }
 
@@ -182,11 +219,11 @@ class _SearchPageState extends State<SearchPage> {
                 ],
               ),
             )
-          : _buildHotTags(theme, loc),
+          : _buildDiscover(theme, loc),
     );
   }
 
-  Widget _buildHotTags(ThemeData theme, S loc) {
+  Widget _buildDiscover(ThemeData theme, S loc) {
     final isDark = theme.brightness == Brightness.dark;
     // 榜单式配色：前三名品牌渐变系高亮，其余中性
     final rankColors = [
@@ -195,7 +232,7 @@ class _SearchPageState extends State<SearchPage> {
       isDark ? const Color(0xFFFFB43A) : const Color(0xFFE8890C),
     ];
 
-    if (_hotTags.isEmpty) {
+    if (_hotTags.isEmpty && _hotKeywords.isEmpty && _history.isEmpty) {
       return EmptyState(
         icon: Icons.search_rounded,
         title: loc.searchSomeKeyword,
@@ -208,6 +245,163 @@ class _SearchPageState extends State<SearchPage> {
         child: ListView(
           padding: EdgeInsets.all(16.w),
           children: [
+            // 本地搜索历史（chips + 清空）
+            if (_history.isNotEmpty) ...[
+              Row(
+                children: [
+                  Icon(
+                    Icons.history_rounded,
+                    size: 18.sp,
+                    color: theme.colorScheme.onSurface.withAlpha(150),
+                  ),
+                  SizedBox(width: 6.w),
+                  Expanded(
+                    child: Text(
+                      loc.searchHistory,
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: _clearHistory,
+                    borderRadius: BorderRadius.circular(100),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 4.h,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.delete_outline_rounded,
+                            size: 14.sp,
+                            color: theme.colorScheme.onSurface.withAlpha(120),
+                          ),
+                          SizedBox(width: 3.w),
+                          Text(
+                            loc.searchHistoryClear,
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: theme.colorScheme.onSurface.withAlpha(120),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.h),
+              Wrap(
+                spacing: 8.w,
+                runSpacing: 8.h,
+                children: _history
+                    .map(
+                      (kw) => InkWell(
+                        onTap: () {
+                          _controller.text = kw;
+                          setState(() => _keyword = kw);
+                        },
+                        borderRadius: BorderRadius.circular(100),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 6.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.onSurface.withAlpha(14),
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: Text(
+                            kw,
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              color: theme.colorScheme.onSurface.withAlpha(200),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+              SizedBox(height: 18.h),
+            ],
+            // 热搜词（服务端按真实搜索频次聚合）
+            if (_hotKeywords.isNotEmpty) ...[
+              Row(
+                children: [
+                  Icon(
+                    Icons.trending_up_rounded,
+                    size: 18.sp,
+                    color: BrandColor.rose,
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    loc.hotKeywords,
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 6.h),
+              ...List.generate(_hotKeywords.length, (index) {
+                final kw = _hotKeywords[index];
+                final rank = index + 1;
+                final rankColor = index < rankColors.length
+                    ? rankColors[index]
+                    : theme.colorScheme.onSurface.withAlpha(110);
+                return InkWell(
+                  onTap: () {
+                    _controller.text = kw;
+                    setState(() => _keyword = kw);
+                  },
+                  borderRadius: BorderRadius.circular(10.r),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 6.w,
+                      vertical: 10.h,
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 22.w,
+                          child: Text(
+                            '$rank',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w800,
+                              fontStyle: FontStyle.italic,
+                              color: rankColor,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: Text(
+                            kw,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: index < 3
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+              SizedBox(height: 18.h),
+            ],
             Row(
               children: [
                 Icon(

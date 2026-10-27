@@ -64,7 +64,8 @@ class SeriesService extends BaseService {
         '/series',
         data: {
           'title': title,
-          if (description != null && description.isNotEmpty) 'description': description,
+          if (description != null && description.isNotEmpty)
+            'description': description,
           if (coverUrl != null && coverUrl.isNotEmpty) 'coverUrl': coverUrl,
         },
       );
@@ -83,10 +84,7 @@ class SeriesService extends BaseService {
     try {
       final res = await _dio.put<Map<String, dynamic>>(
         '/series/$seriesId',
-        data: {
-          'title': title,
-          'description': ?description,
-        },
+        data: {'title': title, 'description': ?description},
       );
       return Series.fromJson(res.data ?? const {});
     } on DioException catch (e) {
@@ -98,6 +96,55 @@ class SeriesService extends BaseService {
   Future<void> deleteSeries(int seriesId) async {
     try {
       await _dio.delete<void>('/series/$seriesId');
+    } on DioException catch (e) {
+      throw ApiStatusException(handleDioError(e));
+    }
+  }
+
+  /// 追剧（幂等；需登录）。返回操作后的追剧人数。
+  Future<int> followSeries(int seriesId) async {
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        '/series/$seriesId/follow',
+      );
+      return jsonInt(res.data?['followerCount']);
+    } on DioException catch (e) {
+      throw ApiStatusException(handleDioError(e));
+    }
+  }
+
+  /// 取消追剧（幂等）。返回操作后的追剧人数。
+  Future<int> unfollowSeries(int seriesId) async {
+    try {
+      final res = await _dio.delete<Map<String, dynamic>>(
+        '/series/$seriesId/follow',
+      );
+      return jsonInt(res.data?['followerCount']);
+    } on DioException catch (e) {
+      throw ApiStatusException(handleDioError(e));
+    }
+  }
+
+  /// 我的追剧列表（按追剧时间倒序）
+  Future<PageData<Series>> listFollowedSeries({
+    required PaginationQuery paging,
+  }) async {
+    try {
+      final res = await _dio.get<Map<String, dynamic>>(
+        '/me/series-follows',
+        queryParameters: paging.toQueryMap(),
+      );
+      final body = res.data ?? const {};
+      final items = (body['items'] as List<dynamic>? ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(Series.fromJson)
+          .toList();
+      return PageData.inferHasMore(
+        items: items,
+        total: jsonInt(body['total'], fallback: items.length),
+        pageNum: paging.pageNum,
+        pageSize: paging.pageSize,
+      );
     } on DioException catch (e) {
       throw ApiStatusException(handleDioError(e));
     }

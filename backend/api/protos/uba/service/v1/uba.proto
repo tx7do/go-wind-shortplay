@@ -28,6 +28,7 @@ enum EventType {
   EVENT_TYPE_VIDEO_COLLECT = 6;      // 收藏
   EVENT_TYPE_COMMENT_CREATE = 7;     // 发表评论
   EVENT_TYPE_FOLLOW_AUTHOR = 8;      // 关注作者
+  EVENT_TYPE_VIDEO_DISLIKE = 9;      // 不感兴趣（Feed 负反馈，召回过滤）
 }
 
 message UbaEvent {
@@ -38,6 +39,7 @@ message UbaEvent {
   optional uint32 watch_percent = 5 [json_name = "watchPercent"];  // 观看进度百分比（0-100）
   optional string extra = 6 [json_name = "extra"];       // 扩展参数（JSON 字符串）
   optional google.protobuf.Timestamp occurred_at = 7 [json_name = "occurredAt"]; // 发生时间
+  optional uint64 position_ms = 8 [json_name = "positionMs"];      // 播放位置（毫秒，心跳/划走时上报，断点续播用）
 }
 
 message ReportEventsRequest {
@@ -52,6 +54,7 @@ message ListWatchHistoryRequest {
 message WatchHistoryItem {
   video.service.v1.Video video = 1 [json_name = "video"];              // 视频详情
   optional google.protobuf.Timestamp watched_at = 2 [json_name = "watchedAt"]; // 最近观看时间
+  optional uint32 progress_seconds = 3 [json_name = "progressSeconds"]; // 观看进度（秒，取最近心跳播放位置；0=未记录）
 }
 
 message WatchHistoryResponse {

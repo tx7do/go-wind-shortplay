@@ -21,12 +21,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	SeriesService_CreateSeries_FullMethodName = "/series.service.v1.SeriesService/CreateSeries"
-	SeriesService_GetSeries_FullMethodName    = "/series.service.v1.SeriesService/GetSeries"
-	SeriesService_UpdateSeries_FullMethodName = "/series.service.v1.SeriesService/UpdateSeries"
-	SeriesService_DeleteSeries_FullMethodName = "/series.service.v1.SeriesService/DeleteSeries"
-	SeriesService_ListSeries_FullMethodName   = "/series.service.v1.SeriesService/ListSeries"
-	SeriesService_QuerySeries_FullMethodName  = "/series.service.v1.SeriesService/QuerySeries"
+	SeriesService_CreateSeries_FullMethodName          = "/series.service.v1.SeriesService/CreateSeries"
+	SeriesService_GetSeries_FullMethodName             = "/series.service.v1.SeriesService/GetSeries"
+	SeriesService_UpdateSeries_FullMethodName          = "/series.service.v1.SeriesService/UpdateSeries"
+	SeriesService_DeleteSeries_FullMethodName          = "/series.service.v1.SeriesService/DeleteSeries"
+	SeriesService_ListSeries_FullMethodName            = "/series.service.v1.SeriesService/ListSeries"
+	SeriesService_QuerySeries_FullMethodName           = "/series.service.v1.SeriesService/QuerySeries"
+	SeriesService_FollowSeries_FullMethodName          = "/series.service.v1.SeriesService/FollowSeries"
+	SeriesService_UnfollowSeries_FullMethodName        = "/series.service.v1.SeriesService/UnfollowSeries"
+	SeriesService_ListFollowedSeries_FullMethodName    = "/series.service.v1.SeriesService/ListFollowedSeries"
+	SeriesService_GetSeriesFollowStatus_FullMethodName = "/series.service.v1.SeriesService/GetSeriesFollowStatus"
 )
 
 // SeriesServiceClient is the client API for SeriesService service.
@@ -53,6 +57,14 @@ type SeriesServiceClient interface {
 	ListSeries(ctx context.Context, in *v1.PagingRequest, opts ...grpc.CallOption) (*ListSeriesResponse, error)
 	// App 剧集列表（query 剧名模糊 / authorId 按作者过滤；非本人视角仅含有已发布集的剧）
 	QuerySeries(ctx context.Context, in *QuerySeriesRequest, opts ...grpc.CallOption) (*ListSeriesResponse, error)
+	// 追剧（需登录）。幂等：已追则 no-op。
+	FollowSeries(ctx context.Context, in *FollowSeriesRequest, opts ...grpc.CallOption) (*FollowSeriesResponse, error)
+	// 取消追剧。幂等：未追则 no-op。
+	UnfollowSeries(ctx context.Context, in *FollowSeriesRequest, opts ...grpc.CallOption) (*FollowSeriesResponse, error)
+	// 我的追剧列表（本人视角，按追剧时间倒序；游客可见性规则同 QuerySeries）
+	ListFollowedSeries(ctx context.Context, in *v1.PagingRequest, opts ...grpc.CallOption) (*ListSeriesResponse, error)
+	// 批量查询 viewer 对剧集的追剧状态，供客户端渲染按钮态。
+	GetSeriesFollowStatus(ctx context.Context, in *GetSeriesFollowStatusRequest, opts ...grpc.CallOption) (*GetSeriesFollowStatusResponse, error)
 }
 
 type seriesServiceClient struct {
@@ -123,6 +135,46 @@ func (c *seriesServiceClient) QuerySeries(ctx context.Context, in *QuerySeriesRe
 	return out, nil
 }
 
+func (c *seriesServiceClient) FollowSeries(ctx context.Context, in *FollowSeriesRequest, opts ...grpc.CallOption) (*FollowSeriesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(FollowSeriesResponse)
+	err := c.cc.Invoke(ctx, SeriesService_FollowSeries_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *seriesServiceClient) UnfollowSeries(ctx context.Context, in *FollowSeriesRequest, opts ...grpc.CallOption) (*FollowSeriesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(FollowSeriesResponse)
+	err := c.cc.Invoke(ctx, SeriesService_UnfollowSeries_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *seriesServiceClient) ListFollowedSeries(ctx context.Context, in *v1.PagingRequest, opts ...grpc.CallOption) (*ListSeriesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListSeriesResponse)
+	err := c.cc.Invoke(ctx, SeriesService_ListFollowedSeries_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *seriesServiceClient) GetSeriesFollowStatus(ctx context.Context, in *GetSeriesFollowStatusRequest, opts ...grpc.CallOption) (*GetSeriesFollowStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSeriesFollowStatusResponse)
+	err := c.cc.Invoke(ctx, SeriesService_GetSeriesFollowStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SeriesServiceServer is the server API for SeriesService service.
 // All implementations must embed UnimplementedSeriesServiceServer
 // for forward compatibility.
@@ -147,6 +199,14 @@ type SeriesServiceServer interface {
 	ListSeries(context.Context, *v1.PagingRequest) (*ListSeriesResponse, error)
 	// App 剧集列表（query 剧名模糊 / authorId 按作者过滤；非本人视角仅含有已发布集的剧）
 	QuerySeries(context.Context, *QuerySeriesRequest) (*ListSeriesResponse, error)
+	// 追剧（需登录）。幂等：已追则 no-op。
+	FollowSeries(context.Context, *FollowSeriesRequest) (*FollowSeriesResponse, error)
+	// 取消追剧。幂等：未追则 no-op。
+	UnfollowSeries(context.Context, *FollowSeriesRequest) (*FollowSeriesResponse, error)
+	// 我的追剧列表（本人视角，按追剧时间倒序；游客可见性规则同 QuerySeries）
+	ListFollowedSeries(context.Context, *v1.PagingRequest) (*ListSeriesResponse, error)
+	// 批量查询 viewer 对剧集的追剧状态，供客户端渲染按钮态。
+	GetSeriesFollowStatus(context.Context, *GetSeriesFollowStatusRequest) (*GetSeriesFollowStatusResponse, error)
 	mustEmbedUnimplementedSeriesServiceServer()
 }
 
@@ -174,6 +234,18 @@ func (UnimplementedSeriesServiceServer) ListSeries(context.Context, *v1.PagingRe
 }
 func (UnimplementedSeriesServiceServer) QuerySeries(context.Context, *QuerySeriesRequest) (*ListSeriesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method QuerySeries not implemented")
+}
+func (UnimplementedSeriesServiceServer) FollowSeries(context.Context, *FollowSeriesRequest) (*FollowSeriesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method FollowSeries not implemented")
+}
+func (UnimplementedSeriesServiceServer) UnfollowSeries(context.Context, *FollowSeriesRequest) (*FollowSeriesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UnfollowSeries not implemented")
+}
+func (UnimplementedSeriesServiceServer) ListFollowedSeries(context.Context, *v1.PagingRequest) (*ListSeriesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListFollowedSeries not implemented")
+}
+func (UnimplementedSeriesServiceServer) GetSeriesFollowStatus(context.Context, *GetSeriesFollowStatusRequest) (*GetSeriesFollowStatusResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetSeriesFollowStatus not implemented")
 }
 func (UnimplementedSeriesServiceServer) mustEmbedUnimplementedSeriesServiceServer() {}
 func (UnimplementedSeriesServiceServer) testEmbeddedByValue()                       {}
@@ -304,6 +376,78 @@ func _SeriesService_QuerySeries_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SeriesService_FollowSeries_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FollowSeriesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SeriesServiceServer).FollowSeries(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SeriesService_FollowSeries_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SeriesServiceServer).FollowSeries(ctx, req.(*FollowSeriesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SeriesService_UnfollowSeries_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FollowSeriesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SeriesServiceServer).UnfollowSeries(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SeriesService_UnfollowSeries_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SeriesServiceServer).UnfollowSeries(ctx, req.(*FollowSeriesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SeriesService_ListFollowedSeries_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.PagingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SeriesServiceServer).ListFollowedSeries(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SeriesService_ListFollowedSeries_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SeriesServiceServer).ListFollowedSeries(ctx, req.(*v1.PagingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SeriesService_GetSeriesFollowStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSeriesFollowStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SeriesServiceServer).GetSeriesFollowStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SeriesService_GetSeriesFollowStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SeriesServiceServer).GetSeriesFollowStatus(ctx, req.(*GetSeriesFollowStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SeriesService_ServiceDesc is the grpc.ServiceDesc for SeriesService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -334,6 +478,22 @@ var SeriesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "QuerySeries",
 			Handler:    _SeriesService_QuerySeries_Handler,
+		},
+		{
+			MethodName: "FollowSeries",
+			Handler:    _SeriesService_FollowSeries_Handler,
+		},
+		{
+			MethodName: "UnfollowSeries",
+			Handler:    _SeriesService_UnfollowSeries_Handler,
+		},
+		{
+			MethodName: "ListFollowedSeries",
+			Handler:    _SeriesService_ListFollowedSeries_Handler,
+		},
+		{
+			MethodName: "GetSeriesFollowStatus",
+			Handler:    _SeriesService_GetSeriesFollowStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

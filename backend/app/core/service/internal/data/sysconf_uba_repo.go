@@ -62,31 +62,56 @@ func (r *SysConfRepo) GetEnsure(ctx context.Context) (*ent.SysConfig, error) {
 	return e, nil
 }
 
-func (r *SysConfRepo) Update(ctx context.Context, maxUploadMB, maxDuration *uint32, manualReview, register *bool, types []string, sensitiveEnabled *bool, sensitiveWords []string) (*ent.SysConfig, error) {
+// SysConfUpdate 系统配置部分更新参数（nil = 不更新该字段）
+type SysConfUpdate struct {
+	MaxUploadMB         *uint32
+	MaxDuration         *uint32
+	ManualReview        *bool
+	Register            *bool
+	AllowedTypes        []string
+	SensitiveEnabled    *bool
+	SensitiveWords      []string
+	AnnouncementEnabled *bool
+	AnnouncementText    *string
+	AnnouncementLink    *string
+}
+
+func (r *SysConfRepo) Update(ctx context.Context, u *SysConfUpdate) (*ent.SysConfig, error) {
 	if _, err := r.GetEnsure(ctx); err != nil {
 		return nil, err
 	}
 	builder := r.entClient.Client().SysConfig.UpdateOneID(1).SetUpdatedAt(time.Now())
-	if maxUploadMB != nil {
-		builder.SetMaxUploadSizeMB(*maxUploadMB)
-	}
-	if maxDuration != nil {
-		builder.SetMaxDurationSeconds(*maxDuration)
-	}
-	if manualReview != nil {
-		builder.SetManualReviewEnabled(*manualReview)
-	}
-	if register != nil {
-		builder.SetRegisterEnabled(*register)
-	}
-	if types != nil {
-		builder.SetAllowedVideoTypes(types)
-	}
-	if sensitiveEnabled != nil {
-		builder.SetSensitiveFilterEnabled(*sensitiveEnabled)
-	}
-	if sensitiveWords != nil {
-		builder.SetSensitiveWords(sensitiveWords)
+	if u != nil {
+		if u.MaxUploadMB != nil {
+			builder.SetMaxUploadSizeMB(*u.MaxUploadMB)
+		}
+		if u.MaxDuration != nil {
+			builder.SetMaxDurationSeconds(*u.MaxDuration)
+		}
+		if u.ManualReview != nil {
+			builder.SetManualReviewEnabled(*u.ManualReview)
+		}
+		if u.Register != nil {
+			builder.SetRegisterEnabled(*u.Register)
+		}
+		if u.AllowedTypes != nil {
+			builder.SetAllowedVideoTypes(u.AllowedTypes)
+		}
+		if u.SensitiveEnabled != nil {
+			builder.SetSensitiveFilterEnabled(*u.SensitiveEnabled)
+		}
+		if u.SensitiveWords != nil {
+			builder.SetSensitiveWords(u.SensitiveWords)
+		}
+		if u.AnnouncementEnabled != nil {
+			builder.SetAnnouncementEnabled(*u.AnnouncementEnabled)
+		}
+		if u.AnnouncementText != nil {
+			builder.SetAnnouncementText(*u.AnnouncementText)
+		}
+		if u.AnnouncementLink != nil {
+			builder.SetAnnouncementLink(*u.AnnouncementLink)
+		}
 	}
 	e, err := builder.Save(ctx)
 	if err != nil {
@@ -126,6 +151,8 @@ func ubaEventTypeEntity(t ubaV1.EventType) ubaevent.EventType {
 		return ubaevent.EventTypeCommentCreate
 	case ubaV1.EventType_EVENT_TYPE_FOLLOW_AUTHOR:
 		return ubaevent.EventTypeFollowAuthor
+	case ubaV1.EventType_EVENT_TYPE_VIDEO_DISLIKE:
+		return ubaevent.EventTypeVideoDislike
 	default:
 		return ubaevent.EventTypeVideoPlay
 	}
@@ -145,6 +172,7 @@ func (r *UbaRepo) CreateBatch(ctx context.Context, userID uint32, events []*ubaV
 			SetTargetUserID(ev.GetTargetUserId()).
 			SetDurationMs(ev.GetDurationMs()).
 			SetWatchPercent(ev.GetWatchPercent()).
+			SetPositionMs(ev.GetPositionMs()).
 			SetNillableExtra(ev.Extra).
 			SetNillableOccurredAt(timePtrOfUba(ev.OccurredAt.AsTime(), ev.OccurredAt != nil)).
 			SetCreatedAt(time.Now())
@@ -165,6 +193,52 @@ func timePtrOfUba(t time.Time, ok bool) *time.Time {
 		return nil
 	}
 	return &t
+}
+
+// LatestPosition 用户对单个视频最近一次心跳的播放位置（毫秒；无记录 0）
+func (r *UbaRepo) LatestPosition(ctx context.Context, userID, videoID uint32) (uint64, error) {
+	row, err := r.entClient.Client().UbaEvent.Query().
+		Where(
+			ubaevent.UserIDEQ(userID),
+			ubaevent.VideoIDEQ(videoID),
+			ubaevent.EventTypeEQ(ubaevent.EventTypeVideoHeartbeat),
+			ubaevent.PositionMsGT(0),
+		).
+		Order(ent.Desc(ubaevent.FieldOccurredAt), ent.Desc(ubaevent.FieldID)).
+		First(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return 0, nil
+		}
+		return 0, err
+	}
+	return row.PositionMs, nil
+}
+
+// HeartbeatPositions 用户所有视频的最近播放位置（毫秒，历史进度条用）。
+// 单用户心跳量级小，全量取回内存按视频去重（occurred_at 倒序首个即最近）。
+func (r *UbaRepo) HeartbeatPositions(ctx context.Context, userID uint32) map[uint32]uint64 {
+	out := make(map[uint32]uint64)
+	rows, err := r.entClient.Client().UbaEvent.Query().
+		Where(
+			ubaevent.UserIDEQ(userID),
+			ubaevent.EventTypeEQ(ubaevent.EventTypeVideoHeartbeat),
+			ubaevent.VideoIDGT(0),
+			ubaevent.PositionMsGT(0),
+		).
+		Order(ent.Desc(ubaevent.FieldOccurredAt), ent.Desc(ubaevent.FieldID)).
+		Limit(2000).
+		All(ctx)
+	if err != nil {
+		r.log.Errorf("list heartbeat positions failed: %s", err.Error())
+		return out
+	}
+	for _, row := range rows {
+		if _, dup := out[row.VideoID]; !dup {
+			out[row.VideoID] = row.PositionMs
+		}
+	}
+	return out
 }
 
 // WatchedVideo 观看历史条目（派生自播放事件聚合）

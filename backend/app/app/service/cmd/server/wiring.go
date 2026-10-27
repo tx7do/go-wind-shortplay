@@ -112,6 +112,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 	spReportService := service.NewReportService(ctx, spReportServiceClient)
 	spUbaService := service.NewUbaService(ctx, spUbaServiceClient)
 	spUserService := service.NewUserService(ctx, userServiceClient, spDashboardServiceClient, spVideoServiceClient)
+	spSysConfService := service.NewSysConfService(ctx, spSysConfServiceClient)
 
 	// 消息通知（基座 internal_message 域收件箱薄转发）
 	notificationService := service.NewNotificationService(ctx, internalMessageRecipientServiceClient)
@@ -130,7 +131,7 @@ func initApp(ctx *bootstrap.Context) (*kratos.App, func(), error) {
 		mediaAssetService,
 		commentService,
 		spFeedService, spVideoService, spSeriesService, spInteractionService,
-		spReportService, spUbaService, spUserService,
+		spReportService, spUbaService, spUserService, spSysConfService,
 		notificationService,
 		// register:rest-arg ── 新模块服务实参在此行后追加(make register 工具锚点,勿删)
 	)

@@ -18,7 +18,14 @@ class PlaybackProgress {
   /// 观看百分比 0-100
   final int percent;
 
-  const PlaybackProgress({required this.watchMs, required this.percent});
+  /// 当前播放位置（毫秒，断点续播用）
+  final int positionMs;
+
+  const PlaybackProgress({
+    required this.watchMs,
+    required this.percent,
+    this.positionMs = 0,
+  });
 }
 
 /// 沉浸式单视频播放组件（media_kit 内核）
@@ -55,6 +62,9 @@ class VideoPlayerItem extends StatefulWidget {
   /// 播完停在末帧、completed 事件由宿主切下一集）
   final bool loop;
 
+  /// 起播位置（断点续播；Duration.zero 从头播）
+  final Duration startAt;
+
   const VideoPlayerItem({
     super.key,
     required this.video,
@@ -66,6 +76,7 @@ class VideoPlayerItem extends StatefulWidget {
     this.onDoubleTapLike,
     this.onPlayerReady,
     this.loop = true,
+    this.startAt = Duration.zero,
   });
 
   @override
@@ -186,9 +197,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
       if (_toggledByLastTap) {
         // 撤销第一次单击的切换，回到双击前的播放状态
         _toggledByLastTap = false;
-        unawaited(
-          _player.state.playing ? _player.pause() : _player.play(),
-        );
+        unawaited(_player.state.playing ? _player.pause() : _player.play());
       }
       widget.onDoubleTapLike?.call(details.localPosition);
       return;
@@ -229,6 +238,17 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
       widget.loop ? PlaylistMode.loop : PlaylistMode.none,
     );
     await _player.open(Media(url), play: widget.isActive);
+    // 断点续播：媒体就绪后跳到上次播放位置（仅一次；接近片尾不跳，重看结尾）。
+    // 超时兜底：加载失败/无限流等不出时长时放弃 seek，不阻塞起播。
+    if (widget.startAt > Duration.zero) {
+      final duration = await _player.stream.duration
+          .firstWhere((d) => d > Duration.zero)
+          .timeout(const Duration(seconds: 8), onTimeout: () => Duration.zero);
+      final durationMs = duration.inMilliseconds;
+      if (durationMs > 0 && widget.startAt.inMilliseconds < durationMs - 5000) {
+        await _player.seek(widget.startAt);
+      }
+    }
     _opened = true;
     if (mounted) setState(() {});
   }
@@ -264,9 +284,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
 
   void _onCompleted(bool completed) {
     if (!completed || !mounted) return;
-    widget.onComplete?.call(
-      PlaybackProgress(watchMs: _watchMs, percent: 100),
-    );
+    widget.onComplete?.call(PlaybackProgress(watchMs: _watchMs, percent: 100));
     _stopHeartbeat();
   }
 
@@ -280,6 +298,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     return PlaybackProgress(
       watchMs: _watchMs,
       percent: percent.clamp(0, 100),
+      positionMs: _lastPosition.inMilliseconds,
     );
   }
 
@@ -323,8 +342,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
           media_video.Video(
             controller: _controller,
             fit: BoxFit.contain,
-            controls: (media_video.VideoState state) =>
-                const SizedBox.shrink(),
+            controls: (media_video.VideoState state) => const SizedBox.shrink(),
           ),
           // 缓冲指示
           if (_isBuffering && widget.isActive)
@@ -347,8 +365,10 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
               child: IgnorePointer(
                 child: Center(
                   child: Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 14.w, vertical: 5.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 14.w,
+                      vertical: 5.h,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withAlpha(140),
                       borderRadius: BorderRadius.circular(100),
@@ -356,8 +376,11 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.fast_forward_rounded,
-                            size: 15.sp, color: Colors.white),
+                        Icon(
+                          Icons.fast_forward_rounded,
+                          size: 15.sp,
+                          color: Colors.white,
+                        ),
                         SizedBox(width: 5.w),
                         Text(
                           '2x 快进中',

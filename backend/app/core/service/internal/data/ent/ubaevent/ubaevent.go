@@ -34,6 +34,8 @@ const (
 	FieldDurationMs = "duration_ms"
 	// FieldWatchPercent holds the string denoting the watch_percent field in the database.
 	FieldWatchPercent = "watch_percent"
+	// FieldPositionMs holds the string denoting the position_ms field in the database.
+	FieldPositionMs = "position_ms"
 	// FieldExtra holds the string denoting the extra field in the database.
 	FieldExtra = "extra"
 	// FieldOccurredAt holds the string denoting the occurred_at field in the database.
@@ -55,6 +57,7 @@ var Columns = []string{
 	FieldTargetUserID,
 	FieldDurationMs,
 	FieldWatchPercent,
+	FieldPositionMs,
 	FieldExtra,
 	FieldOccurredAt,
 }
@@ -89,6 +92,8 @@ var (
 	DefaultDurationMs uint64
 	// DefaultWatchPercent holds the default value on creation for the "watch_percent" field.
 	DefaultWatchPercent uint32
+	// DefaultPositionMs holds the default value on creation for the "position_ms" field.
+	DefaultPositionMs uint64
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(uint32) error
 )
@@ -109,6 +114,7 @@ const (
 	EventTypeVideoCollect   EventType = "VIDEO_COLLECT"
 	EventTypeCommentCreate  EventType = "COMMENT_CREATE"
 	EventTypeFollowAuthor   EventType = "FOLLOW_AUTHOR"
+	EventTypeVideoDislike   EventType = "VIDEO_DISLIKE"
 )
 
 func (et EventType) String() string {
@@ -118,7 +124,7 @@ func (et EventType) String() string {
 // EventTypeValidator is a validator for the "event_type" field enum values. It is called by the builders before save.
 func EventTypeValidator(et EventType) error {
 	switch et {
-	case EventTypeVideoPlay, EventTypeVideoHeartbeat, EventTypeVideoComplete, EventTypeVideoSwipeAway, EventTypeVideoLike, EventTypeVideoCollect, EventTypeCommentCreate, EventTypeFollowAuthor:
+	case EventTypeVideoPlay, EventTypeVideoHeartbeat, EventTypeVideoComplete, EventTypeVideoSwipeAway, EventTypeVideoLike, EventTypeVideoCollect, EventTypeCommentCreate, EventTypeFollowAuthor, EventTypeVideoDislike:
 		return nil
 	default:
 		return fmt.Errorf("ubaevent: invalid enum value for event_type field: %q", et)
@@ -181,6 +187,11 @@ func ByDurationMs(opts ...sql.OrderTermOption) OrderOption {
 // ByWatchPercent orders the results by the watch_percent field.
 func ByWatchPercent(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWatchPercent, opts...).ToFunc()
+}
+
+// ByPositionMs orders the results by the position_ms field.
+func ByPositionMs(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPositionMs, opts...).ToFunc()
 }
 
 // ByExtra orders the results by the extra field.

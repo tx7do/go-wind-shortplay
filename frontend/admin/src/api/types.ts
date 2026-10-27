@@ -302,6 +302,9 @@ export interface SysConf {
   allowedVideoTypes?: string[];
   sensitiveFilterEnabled?: boolean;
   sensitiveWords?: string[];
+  announcementEnabled?: boolean;
+  announcementText?: string;
+  announcementLink?: string;
   updatedAt?: ProtoTimestamp;
 }
 
@@ -313,6 +316,9 @@ export interface UpdateSysConfRequest {
   allowedVideoTypes?: string[];
   sensitiveFilterEnabled?: boolean;
   sensitiveWords?: string[];
+  announcementEnabled?: boolean;
+  announcementText?: string;
+  announcementLink?: string;
 }
 
 // ========== 组织与权限（基座 RBAC 契约：cms i_role/i_menu/i_api/i_department） ==========

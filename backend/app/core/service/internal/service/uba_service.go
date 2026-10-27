@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/redis/go-redis/v9"
 	"github.com/tx7do/kratos-bootstrap/bootstrap"
 	"github.com/tx7do/go-utils/trans"
 	"github.com/tx7do/go-utils/timeutil"
@@ -22,15 +24,35 @@ type UbaService struct {
 
 	log *log.Helper
 
-	ubaRepo  *data.UbaRepo
+	ubaRepo   *data.UbaRepo
 	videoRepo *data.VideoRepo
+	redis     *redis.Client
 }
 
-func NewUbaService(ctx *bootstrap.Context, ubaRepo *data.UbaRepo, videoRepo *data.VideoRepo) *UbaService {
+func NewUbaService(ctx *bootstrap.Context, ubaRepo *data.UbaRepo, videoRepo *data.VideoRepo, rdb *redis.Client) *UbaService {
 	return &UbaService{
-		log:      ctx.NewLoggerHelper("uba/service/core-service"),
-		ubaRepo:  ubaRepo,
+		log:       ctx.NewLoggerHelper("uba/service/core-service"),
+		ubaRepo:   ubaRepo,
 		videoRepo: videoRepo,
+		redis:     rdb,
+	}
+}
+
+// markDisliked 「不感兴趣」负反馈写入 Redis set（feed 召回过滤读；尽力而为）
+func (s *UbaService) markDisliked(ctx context.Context, uid uint32, videoIDs []uint32) {
+	if s.redis == nil || uid == 0 || len(videoIDs) == 0 {
+		return
+	}
+	key := fmt.Sprintf("%s%d", feedDislikeKeyPrefix, uid)
+	members := make([]interface{}, 0, len(videoIDs))
+	for _, id := range videoIDs {
+		members = append(members, fmt.Sprintf("%d", id))
+	}
+	pipe := s.redis.Pipeline()
+	pipe.SAdd(ctx, key, members...)
+	pipe.Expire(ctx, key, feedDislikeTTL)
+	if _, err := pipe.Exec(ctx); err != nil {
+		s.log.Warnf("mark disliked failed: %s", err.Error())
 	}
 }
 
@@ -48,6 +70,16 @@ func (s *UbaService) ReportEvents(ctx context.Context, req *ubaV1.ReportEventsRe
 	if err != nil {
 		// 尽力而为：落库失败也不阻塞播放链路
 		s.log.Errorf("report uba events failed: %s", err.Error())
+	}
+	// 不感兴趣负反馈同步进 Redis 过滤集（登录用户）
+	if uid > 0 {
+		dislikedIDs := make([]uint32, 0, len(events))
+		for _, ev := range events {
+			if ev.GetEventType() == ubaV1.EventType_EVENT_TYPE_VIDEO_DISLIKE && ev.GetVideoId() > 0 {
+				dislikedIDs = append(dislikedIDs, ev.GetVideoId())
+			}
+		}
+		s.markDisliked(ctx, uid, dislikedIDs)
 	}
 	s.log.Debugf("uba events saved %d/%d (uid=%d)", saved, len(events), uid)
 	return &emptypb.Empty{}, nil
@@ -76,6 +108,8 @@ func (s *UbaService) ListWatchHistory(ctx context.Context, req *ubaV1.ListWatchH
 	if err != nil {
 		return nil, ubaV1.ErrorInternalServerError("list watch history failed")
 	}
+	// 断点续播位置（尽力而为）：每视频取最近心跳上报的播放位置
+	positions := s.ubaRepo.HeartbeatPositions(ctx, uid)
 	resp := &ubaV1.WatchHistoryResponse{Total: trans.Ptr(int64(total))}
 	for _, row := range rows {
 		e, verr := s.videoRepo.GetEntityRaw(ctx, row.VideoID)
@@ -86,10 +120,14 @@ func (s *UbaService) ListWatchHistory(ctx context.Context, req *ubaV1.ListWatchH
 		if derr != nil {
 			continue
 		}
-		resp.Items = append(resp.Items, &ubaV1.WatchHistoryItem{
+		item := &ubaV1.WatchHistoryItem{
 			Video:     vd,
 			WatchedAt: timeutil.TimeToTimestamppb(&row.WatchedAt),
-		})
+		}
+		if pos := positions[row.VideoID]; pos > 0 {
+			item.ProgressSeconds = trans.Ptr(uint32(pos / 1000))
+		}
+		resp.Items = append(resp.Items, item)
 	}
 	return resp, nil
 }

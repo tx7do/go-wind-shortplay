@@ -38,15 +38,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m8(count) => "${count}集";
 
-  static String m9(published, total) => "更新至${published}集 · 共${total}集";
+  static String m9(count) => "${count}人在追";
 
-  static String m10(count) => "${count} 天前";
+  static String m10(published, total) => "更新至${published}集 · 共${total}集";
 
-  static String m11(count) => "${count} 小时前";
+  static String m11(count) => "${count} 天前";
 
-  static String m12(count) => "${count} 分钟前";
+  static String m12(count) => "${count} 小时前";
 
-  static String m13(percent) => "上传中 ${percent}%";
+  static String m13(count) => "${count} 分钟前";
+
+  static String m14(percent) => "上传中 ${percent}%";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -104,6 +106,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "descriptionHint": MessageLookupByLibrary.simpleMessage("介绍一下你的视频…"),
     "descriptionLabel": MessageLookupByLibrary.simpleMessage("简介"),
+    "dislikeNotInterested": MessageLookupByLibrary.simpleMessage("不感兴趣"),
+    "dislikeRecorded": MessageLookupByLibrary.simpleMessage("将减少此类内容推荐"),
     "draftSaved": MessageLookupByLibrary.simpleMessage("草稿已保存"),
     "draftSeriesAttached": MessageLookupByLibrary.simpleMessage(
       "已挂剧集（发布时自动排集号）",
@@ -225,6 +229,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "followed": MessageLookupByLibrary.simpleMessage("已关注"),
     "followers": MessageLookupByLibrary.simpleMessage("粉丝"),
     "followingCountLabel": MessageLookupByLibrary.simpleMessage("关注"),
+    "followingSeriesEmpty": MessageLookupByLibrary.simpleMessage(
+      "还没有追的剧，去发现好剧吧",
+    ),
+    "followingSeriesTab": MessageLookupByLibrary.simpleMessage("追剧"),
     "goLogin": MessageLookupByLibrary.simpleMessage("去登录"),
     "guestInteractionDesc": MessageLookupByLibrary.simpleMessage(
       "登录后即可点赞、评论、收藏和关注",
@@ -233,6 +241,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "historyEmpty": MessageLookupByLibrary.simpleMessage("还没有观看记录，去刷刷视频吧"),
     "historyTab": MessageLookupByLibrary.simpleMessage("历史"),
     "home": MessageLookupByLibrary.simpleMessage("首页"),
+    "hotKeywords": MessageLookupByLibrary.simpleMessage("热搜词"),
     "hotList": MessageLookupByLibrary.simpleMessage("热榜"),
     "hotListEmpty": MessageLookupByLibrary.simpleMessage("热榜暂时还没有内容"),
     "hotTags": MessageLookupByLibrary.simpleMessage("热门标签"),
@@ -318,6 +327,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "search": MessageLookupByLibrary.simpleMessage("搜索"),
     "searchEmpty": m7,
     "searchHint": MessageLookupByLibrary.simpleMessage("搜索视频、标签"),
+    "searchHistory": MessageLookupByLibrary.simpleMessage("搜索历史"),
+    "searchHistoryClear": MessageLookupByLibrary.simpleMessage("清空"),
     "searchSomeKeyword": MessageLookupByLibrary.simpleMessage("搜点什么看看吧"),
     "seriesCreated": MessageLookupByLibrary.simpleMessage("剧集已创建"),
     "seriesDeleted": MessageLookupByLibrary.simpleMessage("剧集已删除"),
@@ -325,11 +336,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "seriesEmpty": MessageLookupByLibrary.simpleMessage("暂无剧集"),
     "seriesEmptyMine": MessageLookupByLibrary.simpleMessage("还没有剧集，发布时挂靠即可创建"),
     "seriesEpisodeBadge": m8,
+    "seriesFollowShort": MessageLookupByLibrary.simpleMessage("追剧"),
+    "seriesFollowersCount": m9,
+    "seriesFollowing": MessageLookupByLibrary.simpleMessage("已追剧"),
     "seriesNotFound": MessageLookupByLibrary.simpleMessage("剧集不存在或暂无可见剧集"),
     "seriesSaved": MessageLookupByLibrary.simpleMessage("剧集已保存"),
     "seriesTab": MessageLookupByLibrary.simpleMessage("剧集"),
     "seriesTitleLabel": MessageLookupByLibrary.simpleMessage("剧名"),
-    "seriesUpdatedTo": m9,
+    "seriesUpdatedTo": m10,
     "settings": MessageLookupByLibrary.simpleMessage("设置"),
     "share": MessageLookupByLibrary.simpleMessage("分享"),
     "shareCopied": MessageLookupByLibrary.simpleMessage("链接已复制，快去分享吧"),
@@ -343,10 +357,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "tagInlineHint": MessageLookupByLibrary.simpleMessage("输入标签，回车或逗号添加"),
     "tagInputHint": MessageLookupByLibrary.simpleMessage("搜索或创建标签"),
     "tagPickerTitle": MessageLookupByLibrary.simpleMessage("选择标签"),
-    "timeDaysAgo": m10,
-    "timeHoursAgo": m11,
+    "timeDaysAgo": m11,
+    "timeHoursAgo": m12,
     "timeJustNow": MessageLookupByLibrary.simpleMessage("刚刚"),
-    "timeMinutesAgo": m12,
+    "timeMinutesAgo": m13,
     "titleHint": MessageLookupByLibrary.simpleMessage("给视频起个吸引人的标题"),
     "titleLabel": MessageLookupByLibrary.simpleMessage("标题"),
     "titleRequired": MessageLookupByLibrary.simpleMessage("请填写视频标题"),
@@ -360,7 +374,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "unfollowConfirm": MessageLookupByLibrary.simpleMessage("确定不再关注该用户吗？"),
     "unreadOnly": MessageLookupByLibrary.simpleMessage("只看未读"),
     "uploading": MessageLookupByLibrary.simpleMessage("上传中"),
-    "uploadingPercent": m13,
+    "uploadingPercent": m14,
     "username": MessageLookupByLibrary.simpleMessage("用户名"),
     "usernameHint": MessageLookupByLibrary.simpleMessage("请输入用户名"),
     "versionLabel": MessageLookupByLibrary.simpleMessage("版本"),

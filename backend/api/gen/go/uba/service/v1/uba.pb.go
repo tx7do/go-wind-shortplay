@@ -37,6 +37,7 @@ const (
 	EventType_EVENT_TYPE_VIDEO_COLLECT    EventType = 6 // 收藏
 	EventType_EVENT_TYPE_COMMENT_CREATE   EventType = 7 // 发表评论
 	EventType_EVENT_TYPE_FOLLOW_AUTHOR    EventType = 8 // 关注作者
+	EventType_EVENT_TYPE_VIDEO_DISLIKE    EventType = 9 // 不感兴趣（Feed 负反馈，召回过滤）
 )
 
 // Enum value maps for EventType.
@@ -51,6 +52,7 @@ var (
 		6: "EVENT_TYPE_VIDEO_COLLECT",
 		7: "EVENT_TYPE_COMMENT_CREATE",
 		8: "EVENT_TYPE_FOLLOW_AUTHOR",
+		9: "EVENT_TYPE_VIDEO_DISLIKE",
 	}
 	EventType_value = map[string]int32{
 		"EVENT_TYPE_UNSPECIFIED":      0,
@@ -62,6 +64,7 @@ var (
 		"EVENT_TYPE_VIDEO_COLLECT":    6,
 		"EVENT_TYPE_COMMENT_CREATE":   7,
 		"EVENT_TYPE_FOLLOW_AUTHOR":    8,
+		"EVENT_TYPE_VIDEO_DISLIKE":    9,
 	}
 )
 
@@ -101,6 +104,7 @@ type UbaEvent struct {
 	WatchPercent  *uint32                `protobuf:"varint,5,opt,name=watch_percent,json=watchPercent,proto3,oneof" json:"watch_percent,omitempty"`                // 观看进度百分比（0-100）
 	Extra         *string                `protobuf:"bytes,6,opt,name=extra,proto3,oneof" json:"extra,omitempty"`                                                   // 扩展参数（JSON 字符串）
 	OccurredAt    *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=occurred_at,json=occurredAt,proto3,oneof" json:"occurred_at,omitempty"`                       // 发生时间
+	PositionMs    *uint64                `protobuf:"varint,8,opt,name=position_ms,json=positionMs,proto3,oneof" json:"position_ms,omitempty"`                      // 播放位置（毫秒，心跳/划走时上报，断点续播用）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -182,6 +186,13 @@ func (x *UbaEvent) GetOccurredAt() *timestamppb.Timestamp {
 		return x.OccurredAt
 	}
 	return nil
+}
+
+func (x *UbaEvent) GetPositionMs() uint64 {
+	if x != nil && x.PositionMs != nil {
+		return *x.PositionMs
+	}
+	return 0
 }
 
 type ReportEventsRequest struct {
@@ -281,11 +292,12 @@ func (x *ListWatchHistoryRequest) GetPageSize() uint32 {
 }
 
 type WatchHistoryItem struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Video         *v1.Video              `protobuf:"bytes,1,opt,name=video,proto3" json:"video,omitempty"`                                // 视频详情
-	WatchedAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=watched_at,json=watchedAt,proto3,oneof" json:"watched_at,omitempty"` // 最近观看时间
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Video           *v1.Video              `protobuf:"bytes,1,opt,name=video,proto3" json:"video,omitempty"`                                                   // 视频详情
+	WatchedAt       *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=watched_at,json=watchedAt,proto3,oneof" json:"watched_at,omitempty"`                    // 最近观看时间
+	ProgressSeconds *uint32                `protobuf:"varint,3,opt,name=progress_seconds,json=progressSeconds,proto3,oneof" json:"progress_seconds,omitempty"` // 观看进度（秒，取最近心跳播放位置；0=未记录）
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *WatchHistoryItem) Reset() {
@@ -330,6 +342,13 @@ func (x *WatchHistoryItem) GetWatchedAt() *timestamppb.Timestamp {
 		return x.WatchedAt
 	}
 	return nil
+}
+
+func (x *WatchHistoryItem) GetProgressSeconds() uint32 {
+	if x != nil && x.ProgressSeconds != nil {
+		return *x.ProgressSeconds
+	}
+	return 0
 }
 
 type WatchHistoryResponse struct {
@@ -388,7 +407,7 @@ var File_uba_service_v1_uba_proto protoreflect.FileDescriptor
 
 const file_uba_service_v1_uba_proto_rawDesc = "" +
 	"\n" +
-	"\x18uba/service/v1/uba.proto\x12\x0euba.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cvideo/service/v1/video.proto\"\x86\x03\n" +
+	"\x18uba/service/v1/uba.proto\x12\x0euba.service.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cvideo/service/v1/video.proto\"\xbc\x03\n" +
 	"\bUbaEvent\x128\n" +
 	"\n" +
 	"event_type\x18\x01 \x01(\x0e2\x19.uba.service.v1.EventTypeR\teventType\x12\x19\n" +
@@ -399,12 +418,15 @@ const file_uba_service_v1_uba_proto_rawDesc = "" +
 	"\rwatch_percent\x18\x05 \x01(\rH\x02R\fwatchPercent\x88\x01\x01\x12\x19\n" +
 	"\x05extra\x18\x06 \x01(\tH\x03R\x05extra\x88\x01\x01\x12@\n" +
 	"\voccurred_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampH\x04R\n" +
-	"occurredAt\x88\x01\x01B\x11\n" +
+	"occurredAt\x88\x01\x01\x12$\n" +
+	"\vposition_ms\x18\b \x01(\x04H\x05R\n" +
+	"positionMs\x88\x01\x01B\x11\n" +
 	"\x0f_target_user_idB\x0e\n" +
 	"\f_duration_msB\x10\n" +
 	"\x0e_watch_percentB\b\n" +
 	"\x06_extraB\x0e\n" +
-	"\f_occurred_at\"G\n" +
+	"\f_occurred_atB\x0e\n" +
+	"\f_position_ms\"G\n" +
 	"\x13ReportEventsRequest\x120\n" +
 	"\x06events\x18\x01 \x03(\v2\x18.uba.service.v1.UbaEventR\x06events\"v\n" +
 	"\x17ListWatchHistoryRequest\x12\x1e\n" +
@@ -412,16 +434,18 @@ const file_uba_service_v1_uba_proto_rawDesc = "" +
 	"\tpage_size\x18\x02 \x01(\rH\x01R\bpageSize\x88\x01\x01B\v\n" +
 	"\t_page_numB\f\n" +
 	"\n" +
-	"_page_size\"\x90\x01\n" +
+	"_page_size\"\xd5\x01\n" +
 	"\x10WatchHistoryItem\x12-\n" +
 	"\x05video\x18\x01 \x01(\v2\x17.video.service.v1.VideoR\x05video\x12>\n" +
 	"\n" +
-	"watched_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\twatchedAt\x88\x01\x01B\r\n" +
-	"\v_watched_at\"s\n" +
+	"watched_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\twatchedAt\x88\x01\x01\x12.\n" +
+	"\x10progress_seconds\x18\x03 \x01(\rH\x01R\x0fprogressSeconds\x88\x01\x01B\r\n" +
+	"\v_watched_atB\x13\n" +
+	"\x11_progress_seconds\"s\n" +
 	"\x14WatchHistoryResponse\x126\n" +
 	"\x05items\x18\x01 \x03(\v2 .uba.service.v1.WatchHistoryItemR\x05items\x12\x19\n" +
 	"\x05total\x18\x02 \x01(\x03H\x00R\x05total\x88\x01\x01B\b\n" +
-	"\x06_total*\x98\x02\n" +
+	"\x06_total*\xb6\x02\n" +
 	"\tEventType\x12\x1a\n" +
 	"\x16EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15EVENT_TYPE_VIDEO_PLAY\x10\x01\x12\x1e\n" +
@@ -431,7 +455,8 @@ const file_uba_service_v1_uba_proto_rawDesc = "" +
 	"\x15EVENT_TYPE_VIDEO_LIKE\x10\x05\x12\x1c\n" +
 	"\x18EVENT_TYPE_VIDEO_COLLECT\x10\x06\x12\x1d\n" +
 	"\x19EVENT_TYPE_COMMENT_CREATE\x10\a\x12\x1c\n" +
-	"\x18EVENT_TYPE_FOLLOW_AUTHOR\x10\b2\xc0\x01\n" +
+	"\x18EVENT_TYPE_FOLLOW_AUTHOR\x10\b\x12\x1c\n" +
+	"\x18EVENT_TYPE_VIDEO_DISLIKE\x10\t2\xc0\x01\n" +
 	"\n" +
 	"UbaService\x12M\n" +
 	"\fReportEvents\x12#.uba.service.v1.ReportEventsRequest\x1a\x16.google.protobuf.Empty\"\x00\x12c\n" +

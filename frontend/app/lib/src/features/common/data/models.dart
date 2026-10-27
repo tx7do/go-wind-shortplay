@@ -59,6 +59,9 @@ class Video {
   final bool collected;
   final bool followingAuthor;
 
+  /// 断点续播位置（毫秒，详情接口 viewerState；0=无历史进度）
+  final int resumePositionMs;
+
   const Video({
     required this.id,
     this.title = '',
@@ -84,6 +87,7 @@ class Video {
     this.liked = false,
     this.collected = false,
     this.followingAuthor = false,
+    this.resumePositionMs = 0,
   });
 
   factory Video.fromJson(Map<String, dynamic> json) {
@@ -115,6 +119,7 @@ class Video {
       liked: jsonBool(viewer?['liked']),
       collected: jsonBool(viewer?['collected']),
       followingAuthor: jsonBool(viewer?['following']),
+      resumePositionMs: jsonInt(viewer?['resumePositionMs']),
     );
   }
 
@@ -154,9 +159,13 @@ class Video {
       rejectReason: rejectReason,
       publishedAt: publishedAt,
       createdAt: createdAt,
+      seriesId: seriesId,
+      episodeNumber: episodeNumber,
+      seriesTitle: seriesTitle,
       liked: liked ?? this.liked,
       collected: collected ?? this.collected,
       followingAuthor: followingAuthor ?? this.followingAuthor,
+      resumePositionMs: resumePositionMs,
     );
   }
 }
@@ -187,11 +196,7 @@ class UserBrief {
   final String nickname;
   final String avatarUrl;
 
-  const UserBrief({
-    required this.id,
-    this.nickname = '',
-    this.avatarUrl = '',
-  });
+  const UserBrief({required this.id, this.nickname = '', this.avatarUrl = ''});
 
   factory UserBrief.fromJson(Map<String, dynamic> json) {
     return UserBrief(
@@ -341,6 +346,7 @@ class Series {
   final int authorId;
   final int episodeCount;
   final int publishedCount;
+  final int followerCount;
   final DateTime? createdAt;
 
   const Series({
@@ -351,6 +357,7 @@ class Series {
     this.authorId = 0,
     this.episodeCount = 0,
     this.publishedCount = 0,
+    this.followerCount = 0,
     this.createdAt,
   });
 
@@ -363,6 +370,7 @@ class Series {
       authorId: jsonInt(json['authorId']),
       episodeCount: jsonInt(json['episodeCount']),
       publishedCount: jsonInt(json['publishedCount']),
+      followerCount: jsonInt(json['followerCount']),
       createdAt: parseTime(json['createdAt']),
     );
   }
@@ -371,12 +379,19 @@ class Series {
   String get coverDisplayUrl => MediaUrl.resolve(coverUrl);
 }
 
-/// 剧集详情（series.service.v1.SeriesDetail：剧信息 + 选集，集号升序）
+/// 剧集详情（series.service.v1.SeriesDetail：剧信息 + 选集，集号升序 + 观看者追剧态）
 class SeriesDetail {
   final Series? series;
   final List<Video> items;
 
-  const SeriesDetail({this.series, this.items = const []});
+  /// 观看者是否已追剧（游客 false）
+  final bool viewerFollowing;
+
+  const SeriesDetail({
+    this.series,
+    this.items = const [],
+    this.viewerFollowing = false,
+  });
 
   factory SeriesDetail.fromJson(Map<String, dynamic> json) {
     return SeriesDetail(
@@ -387,6 +402,7 @@ class SeriesDetail {
           .whereType<Map<String, dynamic>>()
           .map(Video.fromJson)
           .toList(),
+      viewerFollowing: jsonBool(json['viewerFollowing']),
     );
   }
 }

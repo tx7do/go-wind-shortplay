@@ -4,6 +4,7 @@ package app.service.v1;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
+import "pagination/v1/pagination.proto";
 import "series/service/v1/series.proto";
 
 // 剧集服务（App 端：建剧 / 编辑 / 选集浏览；详情与列表对游客开放）
@@ -42,6 +43,27 @@ service SeriesService {
   rpc ListSeries (series.service.v1.QuerySeriesRequest) returns (series.service.v1.ListSeriesResponse) {
     option (google.api.http) = {
       get: "/app/v1/series"
+    };
+  }
+
+  // 追剧（需登录）。幂等。
+  rpc FollowSeries (series.service.v1.FollowSeriesRequest) returns (series.service.v1.FollowSeriesResponse) {
+    option (google.api.http) = {
+      post: "/app/v1/series/{series_id}/follow"
+    };
+  }
+
+  // 取消追剧。幂等。
+  rpc UnfollowSeries (series.service.v1.FollowSeriesRequest) returns (series.service.v1.FollowSeriesResponse) {
+    option (google.api.http) = {
+      delete: "/app/v1/series/{series_id}/follow"
+    };
+  }
+
+  // 我的追剧列表（按追剧时间倒序）
+  rpc ListFollowedSeries (pagination.PagingRequest) returns (series.service.v1.ListSeriesResponse) {
+    option (google.api.http) = {
+      get: "/app/v1/me/series-follows"
     };
   }
 }

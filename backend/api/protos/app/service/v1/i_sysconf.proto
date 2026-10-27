@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package app.service.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "sysconf/service/v1/sysconf.proto";
+
+// 系统配置服务（App 端：启动拉取运营开关与公告；游客可读）
+service SysConfService {
+  // 获取系统配置（游客白名单）
+  rpc GetSysConf (google.protobuf.Empty) returns (sysconf.service.v1.SysConf) {
+    option (google.api.http) = {
+      get: "/app/v1/sysconf"
+    };
+  }
+}

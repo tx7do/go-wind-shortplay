@@ -449,6 +449,10 @@ func (m *ViewerState) validate(all bool) error {
 		// no validation rules for Following
 	}
 
+	if m.ResumePositionMs != nil {
+		// no validation rules for ResumePositionMs
+	}
+
 	if len(errors) > 0 {
 		return ViewerStateMultiError(errors)
 	}
@@ -1068,3 +1072,211 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ListVideosByTagRequestValidationError{}
+
+// Validate checks the field values on ListHotKeywordsRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ListHotKeywordsRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListHotKeywordsRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ListHotKeywordsRequestMultiError, or nil if none found.
+func (m *ListHotKeywordsRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListHotKeywordsRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.Limit != nil {
+		// no validation rules for Limit
+	}
+
+	if len(errors) > 0 {
+		return ListHotKeywordsRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListHotKeywordsRequestMultiError is an error wrapping multiple validation
+// errors returned by ListHotKeywordsRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ListHotKeywordsRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListHotKeywordsRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListHotKeywordsRequestMultiError) AllErrors() []error { return m }
+
+// ListHotKeywordsRequestValidationError is the validation error returned by
+// ListHotKeywordsRequest.Validate if the designated constraints aren't met.
+type ListHotKeywordsRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListHotKeywordsRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListHotKeywordsRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListHotKeywordsRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListHotKeywordsRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListHotKeywordsRequestValidationError) ErrorName() string {
+	return "ListHotKeywordsRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListHotKeywordsRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListHotKeywordsRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListHotKeywordsRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListHotKeywordsRequestValidationError{}
+
+// Validate checks the field values on ListHotKeywordsResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ListHotKeywordsResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListHotKeywordsResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ListHotKeywordsResponseMultiError, or nil if none found.
+func (m *ListHotKeywordsResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListHotKeywordsResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return ListHotKeywordsResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListHotKeywordsResponseMultiError is an error wrapping multiple validation
+// errors returned by ListHotKeywordsResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ListHotKeywordsResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListHotKeywordsResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListHotKeywordsResponseMultiError) AllErrors() []error { return m }
+
+// ListHotKeywordsResponseValidationError is the validation error returned by
+// ListHotKeywordsResponse.Validate if the designated constraints aren't met.
+type ListHotKeywordsResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListHotKeywordsResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListHotKeywordsResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListHotKeywordsResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListHotKeywordsResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListHotKeywordsResponseValidationError) ErrorName() string {
+	return "ListHotKeywordsResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListHotKeywordsResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListHotKeywordsResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListHotKeywordsResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListHotKeywordsResponseValidationError{}

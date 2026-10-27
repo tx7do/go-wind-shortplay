@@ -36,6 +36,9 @@ const SysConfPage = () => {
         allowedVideoTypesText: (data.allowedVideoTypes ?? []).join(', '),
         sensitiveFilterEnabled: !!data.sensitiveFilterEnabled,
         sensitiveWordsText: (data.sensitiveWords ?? []).join('\n'),
+        announcementEnabled: !!data.announcementEnabled,
+        announcementText: data.announcementText ?? '',
+        announcementLink: data.announcementLink ?? '',
       });
     }
   }, [data]);
@@ -73,6 +76,9 @@ const SysConfPage = () => {
         allowedVideoTypes: types,
         sensitiveFilterEnabled: !!values.sensitiveFilterEnabled,
         sensitiveWords,
+        announcementEnabled: !!values.announcementEnabled,
+        announcementText: String(values.announcementText ?? '').trim(),
+        announcementLink: String(values.announcementLink ?? '').trim(),
       });
       return true;
     } catch {
@@ -151,6 +157,24 @@ const SysConfPage = () => {
             label={t('sensitiveWords')}
             extra={t('sensitiveWordsHint')}
             fieldProps={{ rows: 4, placeholder: t('sensitiveWordsPlaceholder') }}
+          />
+          <ProFormSwitch
+            name="announcementEnabled"
+            label={t('announcementEnabled')}
+            extra={t('announcementEnabledHint')}
+          />
+          <ProFormTextArea
+            name="announcementText"
+            label={t('announcementText')}
+            extra={t('announcementTextHint')}
+            fieldProps={{ rows: 2, maxLength: 200, showCount: true, placeholder: t('announcementTextPlaceholder') }}
+          />
+          <ProFormText
+            name="announcementLink"
+            label={t('announcementLink')}
+            extra={t('announcementLinkHint')}
+            fieldProps={{ type: 'url', placeholder: 'https://...' }}
+            rules={[{ pattern: /^https?:\/\/\S+$/, message: t('announcementLinkInvalid') }]}
           />
         </ProForm>
 

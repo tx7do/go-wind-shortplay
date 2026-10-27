@@ -488,6 +488,18 @@ func (f SeriesFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SeriesMutation", m)
 }
 
+// The SeriesFollowFunc type is an adapter to allow the use of ordinary
+// function as SeriesFollow mutator.
+type SeriesFollowFunc func(context.Context, *ent.SeriesFollowMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SeriesFollowFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SeriesFollowMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SeriesFollowMutation", m)
+}
+
 // The SysConfigFunc type is an adapter to allow the use of ordinary
 // function as SysConfig mutator.
 type SysConfigFunc func(context.Context, *ent.SysConfigMutation) (ent.Value, error)

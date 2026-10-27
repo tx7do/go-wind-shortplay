@@ -84,6 +84,10 @@ func (m *Series) validate(all bool) error {
 		// no validation rules for PublishedCount
 	}
 
+	if m.FollowerCount != nil {
+		// no validation rules for FollowerCount
+	}
+
 	if m.CreatedAt != nil {
 
 		if all {
@@ -314,6 +318,14 @@ func (m *SeriesDetail) validate(all bool) error {
 			}
 		}
 
+	}
+
+	if m.ViewerFollowing != nil {
+		// no validation rules for ViewerFollowing
+	}
+
+	if m.FollowerCount != nil {
+		// no validation rules for FollowerCount
 	}
 
 	if len(errors) > 0 {
@@ -1084,3 +1096,575 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = QuerySeriesRequestValidationError{}
+
+// Validate checks the field values on FollowSeriesRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *FollowSeriesRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on FollowSeriesRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// FollowSeriesRequestMultiError, or nil if none found.
+func (m *FollowSeriesRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *FollowSeriesRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for SeriesId
+
+	if len(errors) > 0 {
+		return FollowSeriesRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// FollowSeriesRequestMultiError is an error wrapping multiple validation
+// errors returned by FollowSeriesRequest.ValidateAll() if the designated
+// constraints aren't met.
+type FollowSeriesRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m FollowSeriesRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m FollowSeriesRequestMultiError) AllErrors() []error { return m }
+
+// FollowSeriesRequestValidationError is the validation error returned by
+// FollowSeriesRequest.Validate if the designated constraints aren't met.
+type FollowSeriesRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e FollowSeriesRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e FollowSeriesRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e FollowSeriesRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e FollowSeriesRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e FollowSeriesRequestValidationError) ErrorName() string {
+	return "FollowSeriesRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e FollowSeriesRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sFollowSeriesRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = FollowSeriesRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = FollowSeriesRequestValidationError{}
+
+// Validate checks the field values on FollowSeriesResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *FollowSeriesResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on FollowSeriesResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// FollowSeriesResponseMultiError, or nil if none found.
+func (m *FollowSeriesResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *FollowSeriesResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.Following != nil {
+		// no validation rules for Following
+	}
+
+	if m.FollowerCount != nil {
+		// no validation rules for FollowerCount
+	}
+
+	if len(errors) > 0 {
+		return FollowSeriesResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// FollowSeriesResponseMultiError is an error wrapping multiple validation
+// errors returned by FollowSeriesResponse.ValidateAll() if the designated
+// constraints aren't met.
+type FollowSeriesResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m FollowSeriesResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m FollowSeriesResponseMultiError) AllErrors() []error { return m }
+
+// FollowSeriesResponseValidationError is the validation error returned by
+// FollowSeriesResponse.Validate if the designated constraints aren't met.
+type FollowSeriesResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e FollowSeriesResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e FollowSeriesResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e FollowSeriesResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e FollowSeriesResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e FollowSeriesResponseValidationError) ErrorName() string {
+	return "FollowSeriesResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e FollowSeriesResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sFollowSeriesResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = FollowSeriesResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = FollowSeriesResponseValidationError{}
+
+// Validate checks the field values on GetSeriesFollowStatusRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetSeriesFollowStatusRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetSeriesFollowStatusRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetSeriesFollowStatusRequestMultiError, or nil if none found.
+func (m *GetSeriesFollowStatusRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetSeriesFollowStatusRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return GetSeriesFollowStatusRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetSeriesFollowStatusRequestMultiError is an error wrapping multiple
+// validation errors returned by GetSeriesFollowStatusRequest.ValidateAll() if
+// the designated constraints aren't met.
+type GetSeriesFollowStatusRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetSeriesFollowStatusRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetSeriesFollowStatusRequestMultiError) AllErrors() []error { return m }
+
+// GetSeriesFollowStatusRequestValidationError is the validation error returned
+// by GetSeriesFollowStatusRequest.Validate if the designated constraints
+// aren't met.
+type GetSeriesFollowStatusRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetSeriesFollowStatusRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetSeriesFollowStatusRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetSeriesFollowStatusRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetSeriesFollowStatusRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetSeriesFollowStatusRequestValidationError) ErrorName() string {
+	return "GetSeriesFollowStatusRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetSeriesFollowStatusRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetSeriesFollowStatusRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetSeriesFollowStatusRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetSeriesFollowStatusRequestValidationError{}
+
+// Validate checks the field values on SeriesFollowStatus with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *SeriesFollowStatus) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on SeriesFollowStatus with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// SeriesFollowStatusMultiError, or nil if none found.
+func (m *SeriesFollowStatus) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *SeriesFollowStatus) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.Following != nil {
+		// no validation rules for Following
+	}
+
+	if len(errors) > 0 {
+		return SeriesFollowStatusMultiError(errors)
+	}
+
+	return nil
+}
+
+// SeriesFollowStatusMultiError is an error wrapping multiple validation errors
+// returned by SeriesFollowStatus.ValidateAll() if the designated constraints
+// aren't met.
+type SeriesFollowStatusMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m SeriesFollowStatusMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m SeriesFollowStatusMultiError) AllErrors() []error { return m }
+
+// SeriesFollowStatusValidationError is the validation error returned by
+// SeriesFollowStatus.Validate if the designated constraints aren't met.
+type SeriesFollowStatusValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e SeriesFollowStatusValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e SeriesFollowStatusValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e SeriesFollowStatusValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e SeriesFollowStatusValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e SeriesFollowStatusValidationError) ErrorName() string {
+	return "SeriesFollowStatusValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e SeriesFollowStatusValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSeriesFollowStatus.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = SeriesFollowStatusValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = SeriesFollowStatusValidationError{}
+
+// Validate checks the field values on GetSeriesFollowStatusResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetSeriesFollowStatusResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetSeriesFollowStatusResponse with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// GetSeriesFollowStatusResponseMultiError, or nil if none found.
+func (m *GetSeriesFollowStatusResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetSeriesFollowStatusResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	{
+		sorted_keys := make([]uint32, len(m.GetStatuses()))
+		i := 0
+		for key := range m.GetStatuses() {
+			sorted_keys[i] = key
+			i++
+		}
+		sort.Slice(sorted_keys, func(i, j int) bool { return sorted_keys[i] < sorted_keys[j] })
+		for _, key := range sorted_keys {
+			val := m.GetStatuses()[key]
+			_ = val
+
+			// no validation rules for Statuses[key]
+
+			if all {
+				switch v := interface{}(val).(type) {
+				case interface{ ValidateAll() error }:
+					if err := v.ValidateAll(); err != nil {
+						errors = append(errors, GetSeriesFollowStatusResponseValidationError{
+							field:  fmt.Sprintf("Statuses[%v]", key),
+							reason: "embedded message failed validation",
+							cause:  err,
+						})
+					}
+				case interface{ Validate() error }:
+					if err := v.Validate(); err != nil {
+						errors = append(errors, GetSeriesFollowStatusResponseValidationError{
+							field:  fmt.Sprintf("Statuses[%v]", key),
+							reason: "embedded message failed validation",
+							cause:  err,
+						})
+					}
+				}
+			} else if v, ok := interface{}(val).(interface{ Validate() error }); ok {
+				if err := v.Validate(); err != nil {
+					return GetSeriesFollowStatusResponseValidationError{
+						field:  fmt.Sprintf("Statuses[%v]", key),
+						reason: "embedded message failed validation",
+						cause:  err,
+					}
+				}
+			}
+
+		}
+	}
+
+	if len(errors) > 0 {
+		return GetSeriesFollowStatusResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetSeriesFollowStatusResponseMultiError is an error wrapping multiple
+// validation errors returned by GetSeriesFollowStatusResponse.ValidateAll()
+// if the designated constraints aren't met.
+type GetSeriesFollowStatusResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetSeriesFollowStatusResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetSeriesFollowStatusResponseMultiError) AllErrors() []error { return m }
+
+// GetSeriesFollowStatusResponseValidationError is the validation error
+// returned by GetSeriesFollowStatusResponse.Validate if the designated
+// constraints aren't met.
+type GetSeriesFollowStatusResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetSeriesFollowStatusResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetSeriesFollowStatusResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetSeriesFollowStatusResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetSeriesFollowStatusResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetSeriesFollowStatusResponseValidationError) ErrorName() string {
+	return "GetSeriesFollowStatusResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetSeriesFollowStatusResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetSeriesFollowStatusResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetSeriesFollowStatusResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetSeriesFollowStatusResponseValidationError{}

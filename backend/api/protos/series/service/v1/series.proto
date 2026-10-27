@@ -31,6 +31,18 @@ service SeriesService {
 
   // App 剧集列表（query 剧名模糊 / authorId 按作者过滤；非本人视角仅含有已发布集的剧）
   rpc QuerySeries (QuerySeriesRequest) returns (ListSeriesResponse) {}
+
+  // 追剧（需登录）。幂等：已追则 no-op。
+  rpc FollowSeries (FollowSeriesRequest) returns (FollowSeriesResponse) {}
+
+  // 取消追剧。幂等：未追则 no-op。
+  rpc UnfollowSeries (FollowSeriesRequest) returns (FollowSeriesResponse) {}
+
+  // 我的追剧列表（本人视角，按追剧时间倒序；游客可见性规则同 QuerySeries）
+  rpc ListFollowedSeries (pagination.PagingRequest) returns (ListSeriesResponse) {}
+
+  // 批量查询 viewer 对剧集的追剧状态，供客户端渲染按钮态。
+  rpc GetSeriesFollowStatus (GetSeriesFollowStatusRequest) returns (GetSeriesFollowStatusResponse) {}
 }
 
 message Series {
@@ -43,6 +55,7 @@ message Series {
   // 计数
   optional uint64 episode_count = 20 [json_name = "episodeCount"];     // 集总数（挂靠视频数）
   optional uint64 published_count = 21 [json_name = "publishedCount"]; // 已发布集数
+  optional uint64 follower_count = 22 [json_name = "followerCount"];   // 追剧人数
 
   optional google.protobuf.Timestamp created_at = 41 [json_name = "createdAt"]; // 创建时间
   optional google.protobuf.Timestamp updated_at = 42 [json_name = "updatedAt"]; // 更新时间
@@ -51,6 +64,8 @@ message Series {
 message SeriesDetail {
   optional Series series = 1 [json_name = "series"];                // 剧信息
   repeated video.service.v1.Video items = 2 [json_name = "items"];  // 选集列表（episode_number 升序，含 seriesId/episodeNumber/seriesTitle）
+  optional bool viewer_following = 3 [json_name = "viewerFollowing"]; // 观看者是否已追剧（游客 false）
+  optional uint64 follower_count = 4 [json_name = "followerCount"];   // 追剧人数
 }
 
 message ListSeriesResponse {
@@ -84,4 +99,27 @@ message QuerySeriesRequest {
   optional uint32 page_size = 2 [json_name = "pageSize"];  // 页大小
   optional string query = 3 [json_name = "query"];         // 剧名模糊
   optional uint32 author_id = 4 [json_name = "authorId"];  // 按作者过滤（0=不过滤）
+}
+
+// ── 追剧 ──
+
+message FollowSeriesRequest {
+  uint32 series_id = 1 [json_name = "seriesId"]; // 剧集ID
+}
+
+message FollowSeriesResponse {
+  optional bool following = 1 [json_name = "following"];         // 操作后的追剧状态
+  optional uint64 follower_count = 2 [json_name = "followerCount"]; // 操作后的追剧人数
+}
+
+message GetSeriesFollowStatusRequest {
+  repeated uint32 series_ids = 1 [json_name = "seriesIds"]; // 剧集ID列表
+}
+
+message SeriesFollowStatus {
+  optional bool following = 1 [json_name = "following"]; // 是否已追剧
+}
+
+message GetSeriesFollowStatusResponse {
+  map<uint32, SeriesFollowStatus> statuses = 1 [json_name = "statuses"]; // seriesId → 状态
 }

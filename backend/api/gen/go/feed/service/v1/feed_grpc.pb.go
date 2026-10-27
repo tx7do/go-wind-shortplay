@@ -23,6 +23,7 @@ const (
 	FeedService_GetVideoDetail_FullMethodName  = "/feed.service.v1.FeedService/GetVideoDetail"
 	FeedService_SearchVideos_FullMethodName    = "/feed.service.v1.FeedService/SearchVideos"
 	FeedService_ListVideosByTag_FullMethodName = "/feed.service.v1.FeedService/ListVideosByTag"
+	FeedService_ListHotKeywords_FullMethodName = "/feed.service.v1.FeedService/ListHotKeywords"
 )
 
 // FeedServiceClient is the client API for FeedService service.
@@ -36,7 +37,7 @@ const (
 //  2. 平台热门（点赞 + 浏览简单加权）
 //  3. 最新发布兜底
 //
-// 已看视频经 Redis 去重过滤。
+// 已看视频经 Redis 去重过滤；「不感兴趣」负反馈同样过滤。
 type FeedServiceClient interface {
 	// 获取沉浸式 Feed 流（分页拉取，无限滚动）
 	GetFeed(ctx context.Context, in *GetFeedRequest, opts ...grpc.CallOption) (*GetFeedResponse, error)
@@ -46,6 +47,8 @@ type FeedServiceClient interface {
 	SearchVideos(ctx context.Context, in *SearchVideosRequest, opts ...grpc.CallOption) (*GetFeedResponse, error)
 	// 按标签拉取视频聚合（话题标签主页，Phase 2 完整化）
 	ListVideosByTag(ctx context.Context, in *ListVideosByTagRequest, opts ...grpc.CallOption) (*GetFeedResponse, error)
+	// 热搜词（按真实搜索频次聚合，游客可访问）
+	ListHotKeywords(ctx context.Context, in *ListHotKeywordsRequest, opts ...grpc.CallOption) (*ListHotKeywordsResponse, error)
 }
 
 type feedServiceClient struct {
@@ -96,6 +99,16 @@ func (c *feedServiceClient) ListVideosByTag(ctx context.Context, in *ListVideosB
 	return out, nil
 }
 
+func (c *feedServiceClient) ListHotKeywords(ctx context.Context, in *ListHotKeywordsRequest, opts ...grpc.CallOption) (*ListHotKeywordsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListHotKeywordsResponse)
+	err := c.cc.Invoke(ctx, FeedService_ListHotKeywords_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FeedServiceServer is the server API for FeedService service.
 // All implementations must embed UnimplementedFeedServiceServer
 // for forward compatibility.
@@ -107,7 +120,7 @@ func (c *feedServiceClient) ListVideosByTag(ctx context.Context, in *ListVideosB
 //  2. 平台热门（点赞 + 浏览简单加权）
 //  3. 最新发布兜底
 //
-// 已看视频经 Redis 去重过滤。
+// 已看视频经 Redis 去重过滤；「不感兴趣」负反馈同样过滤。
 type FeedServiceServer interface {
 	// 获取沉浸式 Feed 流（分页拉取，无限滚动）
 	GetFeed(context.Context, *GetFeedRequest) (*GetFeedResponse, error)
@@ -117,6 +130,8 @@ type FeedServiceServer interface {
 	SearchVideos(context.Context, *SearchVideosRequest) (*GetFeedResponse, error)
 	// 按标签拉取视频聚合（话题标签主页，Phase 2 完整化）
 	ListVideosByTag(context.Context, *ListVideosByTagRequest) (*GetFeedResponse, error)
+	// 热搜词（按真实搜索频次聚合，游客可访问）
+	ListHotKeywords(context.Context, *ListHotKeywordsRequest) (*ListHotKeywordsResponse, error)
 	mustEmbedUnimplementedFeedServiceServer()
 }
 
@@ -138,6 +153,9 @@ func (UnimplementedFeedServiceServer) SearchVideos(context.Context, *SearchVideo
 }
 func (UnimplementedFeedServiceServer) ListVideosByTag(context.Context, *ListVideosByTagRequest) (*GetFeedResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListVideosByTag not implemented")
+}
+func (UnimplementedFeedServiceServer) ListHotKeywords(context.Context, *ListHotKeywordsRequest) (*ListHotKeywordsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListHotKeywords not implemented")
 }
 func (UnimplementedFeedServiceServer) mustEmbedUnimplementedFeedServiceServer() {}
 func (UnimplementedFeedServiceServer) testEmbeddedByValue()                     {}
@@ -232,6 +250,24 @@ func _FeedService_ListVideosByTag_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FeedService_ListHotKeywords_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListHotKeywordsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FeedServiceServer).ListHotKeywords(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FeedService_ListHotKeywords_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FeedServiceServer).ListHotKeywords(ctx, req.(*ListHotKeywordsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FeedService_ServiceDesc is the grpc.ServiceDesc for FeedService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -254,6 +290,10 @@ var FeedService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListVideosByTag",
 			Handler:    _FeedService_ListVideosByTag_Handler,
+		},
+		{
+			MethodName: "ListHotKeywords",
+			Handler:    _FeedService_ListHotKeywords_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

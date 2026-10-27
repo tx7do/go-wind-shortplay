@@ -51,6 +51,7 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent/rolemetadata"
 	"go-wind-shortplay/app/core/service/internal/data/ent/rolepermission"
 	"go-wind-shortplay/app/core/service/internal/data/ent/series"
+	"go-wind-shortplay/app/core/service/internal/data/ent/seriesfollow"
 	"go-wind-shortplay/app/core/service/internal/data/ent/sysconfig"
 	"go-wind-shortplay/app/core/service/internal/data/ent/task"
 	"go-wind-shortplay/app/core/service/internal/data/ent/tenant"
@@ -162,6 +163,8 @@ type Client struct {
 	RolePermission *RolePermissionClient
 	// Series is the client for interacting with the Series builders.
 	Series *SeriesClient
+	// SeriesFollow is the client for interacting with the SeriesFollow builders.
+	SeriesFollow *SeriesFollowClient
 	// SysConfig is the client for interacting with the SysConfig builders.
 	SysConfig *SysConfigClient
 	// Task is the client for interacting with the Task builders.
@@ -251,6 +254,7 @@ func (c *Client) init() {
 	c.RoleMetadata = NewRoleMetadataClient(c.config)
 	c.RolePermission = NewRolePermissionClient(c.config)
 	c.Series = NewSeriesClient(c.config)
+	c.SeriesFollow = NewSeriesFollowClient(c.config)
 	c.SysConfig = NewSysConfigClient(c.config)
 	c.Task = NewTaskClient(c.config)
 	c.Tenant = NewTenantClient(c.config)
@@ -402,6 +406,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		RoleMetadata:             NewRoleMetadataClient(cfg),
 		RolePermission:           NewRolePermissionClient(cfg),
 		Series:                   NewSeriesClient(cfg),
+		SeriesFollow:             NewSeriesFollowClient(cfg),
 		SysConfig:                NewSysConfigClient(cfg),
 		Task:                     NewTaskClient(cfg),
 		Tenant:                   NewTenantClient(cfg),
@@ -480,6 +485,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		RoleMetadata:             NewRoleMetadataClient(cfg),
 		RolePermission:           NewRolePermissionClient(cfg),
 		Series:                   NewSeriesClient(cfg),
+		SeriesFollow:             NewSeriesFollowClient(cfg),
 		SysConfig:                NewSysConfigClient(cfg),
 		Task:                     NewTaskClient(cfg),
 		Tenant:                   NewTenantClient(cfg),
@@ -537,11 +543,11 @@ func (c *Client) Use(hooks ...Hook) {
 		c.NotificationRule, c.NotificationTemplate, c.OperationAuditLog, c.OrgUnit,
 		c.Permission, c.PermissionApi, c.PermissionAuditLog, c.PermissionGroup,
 		c.PermissionMenu, c.PermissionPolicy, c.PolicyEvaluationLog, c.Position,
-		c.Role, c.RoleMetadata, c.RolePermission, c.Series, c.SysConfig, c.Task,
-		c.Tenant, c.UbaEvent, c.UploadTask, c.User, c.UserCredential, c.UserFollow,
-		c.UserOrgUnit, c.UserPosition, c.UserRole, c.Video, c.VideoCollect,
-		c.VideoComment, c.VideoDraft, c.VideoLike, c.VideoReport, c.VideoTag,
-		c.VideoTagRel,
+		c.Role, c.RoleMetadata, c.RolePermission, c.Series, c.SeriesFollow,
+		c.SysConfig, c.Task, c.Tenant, c.UbaEvent, c.UploadTask, c.User,
+		c.UserCredential, c.UserFollow, c.UserOrgUnit, c.UserPosition, c.UserRole,
+		c.Video, c.VideoCollect, c.VideoComment, c.VideoDraft, c.VideoLike,
+		c.VideoReport, c.VideoTag, c.VideoTagRel,
 	} {
 		n.Use(hooks...)
 	}
@@ -560,11 +566,11 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.NotificationRule, c.NotificationTemplate, c.OperationAuditLog, c.OrgUnit,
 		c.Permission, c.PermissionApi, c.PermissionAuditLog, c.PermissionGroup,
 		c.PermissionMenu, c.PermissionPolicy, c.PolicyEvaluationLog, c.Position,
-		c.Role, c.RoleMetadata, c.RolePermission, c.Series, c.SysConfig, c.Task,
-		c.Tenant, c.UbaEvent, c.UploadTask, c.User, c.UserCredential, c.UserFollow,
-		c.UserOrgUnit, c.UserPosition, c.UserRole, c.Video, c.VideoCollect,
-		c.VideoComment, c.VideoDraft, c.VideoLike, c.VideoReport, c.VideoTag,
-		c.VideoTagRel,
+		c.Role, c.RoleMetadata, c.RolePermission, c.Series, c.SeriesFollow,
+		c.SysConfig, c.Task, c.Tenant, c.UbaEvent, c.UploadTask, c.User,
+		c.UserCredential, c.UserFollow, c.UserOrgUnit, c.UserPosition, c.UserRole,
+		c.Video, c.VideoCollect, c.VideoComment, c.VideoDraft, c.VideoLike,
+		c.VideoReport, c.VideoTag, c.VideoTagRel,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -653,6 +659,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.RolePermission.mutate(ctx, m)
 	case *SeriesMutation:
 		return c.Series.mutate(ctx, m)
+	case *SeriesFollowMutation:
+		return c.SeriesFollow.mutate(ctx, m)
 	case *SysConfigMutation:
 		return c.SysConfig.mutate(ctx, m)
 	case *TaskMutation:
@@ -6274,6 +6282,140 @@ func (c *SeriesClient) mutate(ctx context.Context, m *SeriesMutation) (Value, er
 	}
 }
 
+// SeriesFollowClient is a client for the SeriesFollow schema.
+type SeriesFollowClient struct {
+	config
+}
+
+// NewSeriesFollowClient returns a client for the SeriesFollow from the given config.
+func NewSeriesFollowClient(c config) *SeriesFollowClient {
+	return &SeriesFollowClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `seriesfollow.Hooks(f(g(h())))`.
+func (c *SeriesFollowClient) Use(hooks ...Hook) {
+	c.hooks.SeriesFollow = append(c.hooks.SeriesFollow, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `seriesfollow.Intercept(f(g(h())))`.
+func (c *SeriesFollowClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SeriesFollow = append(c.inters.SeriesFollow, interceptors...)
+}
+
+// Create returns a builder for creating a SeriesFollow entity.
+func (c *SeriesFollowClient) Create() *SeriesFollowCreate {
+	mutation := newSeriesFollowMutation(c.config, OpCreate)
+	return &SeriesFollowCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SeriesFollow entities.
+func (c *SeriesFollowClient) CreateBulk(builders ...*SeriesFollowCreate) *SeriesFollowCreateBulk {
+	return &SeriesFollowCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SeriesFollowClient) MapCreateBulk(slice any, setFunc func(*SeriesFollowCreate, int)) *SeriesFollowCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SeriesFollowCreateBulk{err: fmt.Errorf("calling to SeriesFollowClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SeriesFollowCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SeriesFollowCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SeriesFollow.
+func (c *SeriesFollowClient) Update() *SeriesFollowUpdate {
+	mutation := newSeriesFollowMutation(c.config, OpUpdate)
+	return &SeriesFollowUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SeriesFollowClient) UpdateOne(_m *SeriesFollow) *SeriesFollowUpdateOne {
+	mutation := newSeriesFollowMutation(c.config, OpUpdateOne, withSeriesFollow(_m))
+	return &SeriesFollowUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SeriesFollowClient) UpdateOneID(id uint32) *SeriesFollowUpdateOne {
+	mutation := newSeriesFollowMutation(c.config, OpUpdateOne, withSeriesFollowID(id))
+	return &SeriesFollowUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SeriesFollow.
+func (c *SeriesFollowClient) Delete() *SeriesFollowDelete {
+	mutation := newSeriesFollowMutation(c.config, OpDelete)
+	return &SeriesFollowDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SeriesFollowClient) DeleteOne(_m *SeriesFollow) *SeriesFollowDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SeriesFollowClient) DeleteOneID(id uint32) *SeriesFollowDeleteOne {
+	builder := c.Delete().Where(seriesfollow.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SeriesFollowDeleteOne{builder}
+}
+
+// Query returns a query builder for SeriesFollow.
+func (c *SeriesFollowClient) Query() *SeriesFollowQuery {
+	return &SeriesFollowQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSeriesFollow},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SeriesFollow entity by its id.
+func (c *SeriesFollowClient) Get(ctx context.Context, id uint32) (*SeriesFollow, error) {
+	return c.Query().Where(seriesfollow.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SeriesFollowClient) GetX(ctx context.Context, id uint32) *SeriesFollow {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SeriesFollowClient) Hooks() []Hook {
+	hooks := c.hooks.SeriesFollow
+	return append(hooks[:len(hooks):len(hooks)], seriesfollow.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *SeriesFollowClient) Interceptors() []Interceptor {
+	return c.inters.SeriesFollow
+}
+
+func (c *SeriesFollowClient) mutate(ctx context.Context, m *SeriesFollowMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SeriesFollowCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SeriesFollowUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SeriesFollowUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SeriesFollowDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SeriesFollow mutation op: %q", m.Op())
+	}
+}
+
 // SysConfigClient is a client for the SysConfig schema.
 type SysConfigClient struct {
 	config
@@ -8829,10 +8971,10 @@ type (
 		NotificationPreference, NotificationRule, NotificationTemplate,
 		OperationAuditLog, OrgUnit, Permission, PermissionApi, PermissionAuditLog,
 		PermissionGroup, PermissionMenu, PermissionPolicy, PolicyEvaluationLog,
-		Position, Role, RoleMetadata, RolePermission, Series, SysConfig, Task, Tenant,
-		UbaEvent, UploadTask, User, UserCredential, UserFollow, UserOrgUnit,
-		UserPosition, UserRole, Video, VideoCollect, VideoComment, VideoDraft,
-		VideoLike, VideoReport, VideoTag, VideoTagRel []ent.Hook
+		Position, Role, RoleMetadata, RolePermission, Series, SeriesFollow, SysConfig,
+		Task, Tenant, UbaEvent, UploadTask, User, UserCredential, UserFollow,
+		UserOrgUnit, UserPosition, UserRole, Video, VideoCollect, VideoComment,
+		VideoDraft, VideoLike, VideoReport, VideoTag, VideoTagRel []ent.Hook
 	}
 	inters struct {
 		Api, ApiAuditLog, Comment, DataAccessAuditLog, DictEntry, DictEntryI18n,
@@ -8843,9 +8985,9 @@ type (
 		NotificationPreference, NotificationRule, NotificationTemplate,
 		OperationAuditLog, OrgUnit, Permission, PermissionApi, PermissionAuditLog,
 		PermissionGroup, PermissionMenu, PermissionPolicy, PolicyEvaluationLog,
-		Position, Role, RoleMetadata, RolePermission, Series, SysConfig, Task, Tenant,
-		UbaEvent, UploadTask, User, UserCredential, UserFollow, UserOrgUnit,
-		UserPosition, UserRole, Video, VideoCollect, VideoComment, VideoDraft,
-		VideoLike, VideoReport, VideoTag, VideoTagRel []ent.Interceptor
+		Position, Role, RoleMetadata, RolePermission, Series, SeriesFollow, SysConfig,
+		Task, Tenant, UbaEvent, UploadTask, User, UserCredential, UserFollow,
+		UserOrgUnit, UserPosition, UserRole, Video, VideoCollect, VideoComment,
+		VideoDraft, VideoLike, VideoReport, VideoTag, VideoTagRel []ent.Interceptor
 	}
 )

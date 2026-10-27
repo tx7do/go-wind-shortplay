@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/log"
+	paginationV1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
 	"github.com/tx7do/kratos-bootstrap/bootstrap"
 	"google.golang.org/protobuf/types/known/emptypb"
 
@@ -47,4 +48,16 @@ func (s *SeriesService) DeleteSeries(ctx context.Context, req *seriesV1.DeleteSe
 
 func (s *SeriesService) ListSeries(ctx context.Context, req *seriesV1.QuerySeriesRequest) (*seriesV1.ListSeriesResponse, error) {
 	return s.seriesClient.QuerySeries(ctx, req)
+}
+
+func (s *SeriesService) FollowSeries(ctx context.Context, req *seriesV1.FollowSeriesRequest) (*seriesV1.FollowSeriesResponse, error) {
+	return s.seriesClient.FollowSeries(ctx, req)
+}
+
+func (s *SeriesService) UnfollowSeries(ctx context.Context, req *seriesV1.FollowSeriesRequest) (*seriesV1.FollowSeriesResponse, error) {
+	return s.seriesClient.UnfollowSeries(ctx, req)
+}
+
+func (s *SeriesService) ListFollowedSeries(ctx context.Context, req *paginationV1.PagingRequest) (*seriesV1.ListSeriesResponse, error) {
+	return s.seriesClient.ListFollowedSeries(ctx, req)
 }

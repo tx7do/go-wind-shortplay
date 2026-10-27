@@ -24,6 +24,7 @@ const (
 	FeedService_GetVideoDetail_FullMethodName  = "/app.service.v1.FeedService/GetVideoDetail"
 	FeedService_SearchVideos_FullMethodName    = "/app.service.v1.FeedService/SearchVideos"
 	FeedService_ListVideosByTag_FullMethodName = "/app.service.v1.FeedService/ListVideosByTag"
+	FeedService_ListHotKeywords_FullMethodName = "/app.service.v1.FeedService/ListHotKeywords"
 )
 
 // FeedServiceClient is the client API for FeedService service.
@@ -40,6 +41,8 @@ type FeedServiceClient interface {
 	SearchVideos(ctx context.Context, in *v1.SearchVideosRequest, opts ...grpc.CallOption) (*v1.GetFeedResponse, error)
 	// 标签聚合页
 	ListVideosByTag(ctx context.Context, in *v1.ListVideosByTagRequest, opts ...grpc.CallOption) (*v1.GetFeedResponse, error)
+	// 热搜词（游客可访问）
+	ListHotKeywords(ctx context.Context, in *v1.ListHotKeywordsRequest, opts ...grpc.CallOption) (*v1.ListHotKeywordsResponse, error)
 }
 
 type feedServiceClient struct {
@@ -90,6 +93,16 @@ func (c *feedServiceClient) ListVideosByTag(ctx context.Context, in *v1.ListVide
 	return out, nil
 }
 
+func (c *feedServiceClient) ListHotKeywords(ctx context.Context, in *v1.ListHotKeywordsRequest, opts ...grpc.CallOption) (*v1.ListHotKeywordsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.ListHotKeywordsResponse)
+	err := c.cc.Invoke(ctx, FeedService_ListHotKeywords_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FeedServiceServer is the server API for FeedService service.
 // All implementations must embed UnimplementedFeedServiceServer
 // for forward compatibility.
@@ -104,6 +117,8 @@ type FeedServiceServer interface {
 	SearchVideos(context.Context, *v1.SearchVideosRequest) (*v1.GetFeedResponse, error)
 	// 标签聚合页
 	ListVideosByTag(context.Context, *v1.ListVideosByTagRequest) (*v1.GetFeedResponse, error)
+	// 热搜词（游客可访问）
+	ListHotKeywords(context.Context, *v1.ListHotKeywordsRequest) (*v1.ListHotKeywordsResponse, error)
 	mustEmbedUnimplementedFeedServiceServer()
 }
 
@@ -125,6 +140,9 @@ func (UnimplementedFeedServiceServer) SearchVideos(context.Context, *v1.SearchVi
 }
 func (UnimplementedFeedServiceServer) ListVideosByTag(context.Context, *v1.ListVideosByTagRequest) (*v1.GetFeedResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListVideosByTag not implemented")
+}
+func (UnimplementedFeedServiceServer) ListHotKeywords(context.Context, *v1.ListHotKeywordsRequest) (*v1.ListHotKeywordsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListHotKeywords not implemented")
 }
 func (UnimplementedFeedServiceServer) mustEmbedUnimplementedFeedServiceServer() {}
 func (UnimplementedFeedServiceServer) testEmbeddedByValue()                     {}
@@ -219,6 +237,24 @@ func _FeedService_ListVideosByTag_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FeedService_ListHotKeywords_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.ListHotKeywordsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FeedServiceServer).ListHotKeywords(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FeedService_ListHotKeywords_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FeedServiceServer).ListHotKeywords(ctx, req.(*v1.ListHotKeywordsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FeedService_ServiceDesc is the grpc.ServiceDesc for FeedService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -241,6 +277,10 @@ var FeedService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListVideosByTag",
 			Handler:    _FeedService_ListVideosByTag_Handler,
+		},
+		{
+			MethodName: "ListHotKeywords",
+			Handler:    _FeedService_ListHotKeywords_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

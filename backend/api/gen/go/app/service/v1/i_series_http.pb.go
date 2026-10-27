@@ -10,6 +10,7 @@ import (
 	context "context"
 	http "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
+	v11 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
 	v1 "go-wind-shortplay/api/gen/go/series/service/v1"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
@@ -23,8 +24,11 @@ const _ = http.SupportPackageIsVersion1
 
 const OperationSeriesServiceCreateSeries = "/app.service.v1.SeriesService/CreateSeries"
 const OperationSeriesServiceDeleteSeries = "/app.service.v1.SeriesService/DeleteSeries"
+const OperationSeriesServiceFollowSeries = "/app.service.v1.SeriesService/FollowSeries"
 const OperationSeriesServiceGetSeries = "/app.service.v1.SeriesService/GetSeries"
+const OperationSeriesServiceListFollowedSeries = "/app.service.v1.SeriesService/ListFollowedSeries"
 const OperationSeriesServiceListSeries = "/app.service.v1.SeriesService/ListSeries"
+const OperationSeriesServiceUnfollowSeries = "/app.service.v1.SeriesService/UnfollowSeries"
 const OperationSeriesServiceUpdateSeries = "/app.service.v1.SeriesService/UpdateSeries"
 
 type SeriesServiceHTTPServer interface {
@@ -32,10 +36,16 @@ type SeriesServiceHTTPServer interface {
 	CreateSeries(context.Context, *v1.CreateSeriesRequest) (*v1.Series, error)
 	// DeleteSeries 删除自己的剧集（剧内视频解挂不删除）
 	DeleteSeries(context.Context, *v1.DeleteSeriesRequest) (*emptypb.Empty, error)
+	// FollowSeries 追剧（需登录）。幂等。
+	FollowSeries(context.Context, *v1.FollowSeriesRequest) (*v1.FollowSeriesResponse, error)
 	// GetSeries 剧集详情（剧信息 + 选集；游客仅见已发布集）
 	GetSeries(context.Context, *v1.GetSeriesRequest) (*v1.SeriesDetail, error)
+	// ListFollowedSeries 我的追剧列表（按追剧时间倒序）
+	ListFollowedSeries(context.Context, *v11.PagingRequest) (*v1.ListSeriesResponse, error)
 	// ListSeries 剧集列表（query 剧名模糊 / authorId 按作者过滤；游客仅见有已发布集的剧）
 	ListSeries(context.Context, *v1.QuerySeriesRequest) (*v1.ListSeriesResponse, error)
+	// UnfollowSeries 取消追剧。幂等。
+	UnfollowSeries(context.Context, *v1.FollowSeriesRequest) (*v1.FollowSeriesResponse, error)
 	// UpdateSeries 编辑自己的剧集（标题 / 简介 / 封面）
 	UpdateSeries(context.Context, *v1.UpdateSeriesRequest) (*v1.Series, error)
 }
@@ -47,6 +57,9 @@ func RegisterSeriesServiceHTTPServer(s *http.Server, srv SeriesServiceHTTPServer
 	r.PUT("/app/v1/series/{id}", _SeriesService_UpdateSeries0_HTTP_Handler(srv))
 	r.DELETE("/app/v1/series/{id}", _SeriesService_DeleteSeries0_HTTP_Handler(srv))
 	r.GET("/app/v1/series", _SeriesService_ListSeries0_HTTP_Handler(srv))
+	r.POST("/app/v1/series/{series_id}/follow", _SeriesService_FollowSeries0_HTTP_Handler(srv))
+	r.DELETE("/app/v1/series/{series_id}/follow", _SeriesService_UnfollowSeries0_HTTP_Handler(srv))
+	r.GET("/app/v1/me/series-follows", _SeriesService_ListFollowedSeries0_HTTP_Handler(srv))
 }
 
 func _SeriesService_CreateSeries0_HTTP_Handler(srv SeriesServiceHTTPServer) func(ctx http.Context) error {
@@ -159,15 +172,84 @@ func _SeriesService_ListSeries0_HTTP_Handler(srv SeriesServiceHTTPServer) func(c
 	}
 }
 
+func _SeriesService_FollowSeries0_HTTP_Handler(srv SeriesServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.FollowSeriesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationSeriesServiceFollowSeries)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.FollowSeries(ctx, req.(*v1.FollowSeriesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.FollowSeriesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _SeriesService_UnfollowSeries0_HTTP_Handler(srv SeriesServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v1.FollowSeriesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationSeriesServiceUnfollowSeries)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UnfollowSeries(ctx, req.(*v1.FollowSeriesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.FollowSeriesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _SeriesService_ListFollowedSeries0_HTTP_Handler(srv SeriesServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in v11.PagingRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationSeriesServiceListFollowedSeries)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListFollowedSeries(ctx, req.(*v11.PagingRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.ListSeriesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type SeriesServiceHTTPClient interface {
 	// CreateSeries 创建剧集（需登录）
 	CreateSeries(ctx context.Context, req *v1.CreateSeriesRequest, opts ...http.CallOption) (rsp *v1.Series, err error)
 	// DeleteSeries 删除自己的剧集（剧内视频解挂不删除）
 	DeleteSeries(ctx context.Context, req *v1.DeleteSeriesRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
+	// FollowSeries 追剧（需登录）。幂等。
+	FollowSeries(ctx context.Context, req *v1.FollowSeriesRequest, opts ...http.CallOption) (rsp *v1.FollowSeriesResponse, err error)
 	// GetSeries 剧集详情（剧信息 + 选集；游客仅见已发布集）
 	GetSeries(ctx context.Context, req *v1.GetSeriesRequest, opts ...http.CallOption) (rsp *v1.SeriesDetail, err error)
+	// ListFollowedSeries 我的追剧列表（按追剧时间倒序）
+	ListFollowedSeries(ctx context.Context, req *v11.PagingRequest, opts ...http.CallOption) (rsp *v1.ListSeriesResponse, err error)
 	// ListSeries 剧集列表（query 剧名模糊 / authorId 按作者过滤；游客仅见有已发布集的剧）
 	ListSeries(ctx context.Context, req *v1.QuerySeriesRequest, opts ...http.CallOption) (rsp *v1.ListSeriesResponse, err error)
+	// UnfollowSeries 取消追剧。幂等。
+	UnfollowSeries(ctx context.Context, req *v1.FollowSeriesRequest, opts ...http.CallOption) (rsp *v1.FollowSeriesResponse, err error)
 	// UpdateSeries 编辑自己的剧集（标题 / 简介 / 封面）
 	UpdateSeries(ctx context.Context, req *v1.UpdateSeriesRequest, opts ...http.CallOption) (rsp *v1.Series, err error)
 }
@@ -208,12 +290,40 @@ func (c *SeriesServiceHTTPClientImpl) DeleteSeries(ctx context.Context, in *v1.D
 	return &out, nil
 }
 
+// FollowSeries 追剧（需登录）。幂等。
+func (c *SeriesServiceHTTPClientImpl) FollowSeries(ctx context.Context, in *v1.FollowSeriesRequest, opts ...http.CallOption) (*v1.FollowSeriesResponse, error) {
+	var out v1.FollowSeriesResponse
+	pattern := "/app/v1/series/{series_id}/follow"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationSeriesServiceFollowSeries))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // GetSeries 剧集详情（剧信息 + 选集；游客仅见已发布集）
 func (c *SeriesServiceHTTPClientImpl) GetSeries(ctx context.Context, in *v1.GetSeriesRequest, opts ...http.CallOption) (*v1.SeriesDetail, error) {
 	var out v1.SeriesDetail
 	pattern := "/app/v1/series/{id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationSeriesServiceGetSeries))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListFollowedSeries 我的追剧列表（按追剧时间倒序）
+func (c *SeriesServiceHTTPClientImpl) ListFollowedSeries(ctx context.Context, in *v11.PagingRequest, opts ...http.CallOption) (*v1.ListSeriesResponse, error) {
+	var out v1.ListSeriesResponse
+	pattern := "/app/v1/me/series-follows"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationSeriesServiceListFollowedSeries))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -230,6 +340,20 @@ func (c *SeriesServiceHTTPClientImpl) ListSeries(ctx context.Context, in *v1.Que
 	opts = append(opts, http.Operation(OperationSeriesServiceListSeries))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// UnfollowSeries 取消追剧。幂等。
+func (c *SeriesServiceHTTPClientImpl) UnfollowSeries(ctx context.Context, in *v1.FollowSeriesRequest, opts ...http.CallOption) (*v1.FollowSeriesResponse, error) {
+	var out v1.FollowSeriesResponse
+	pattern := "/app/v1/series/{series_id}/follow"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationSeriesServiceUnfollowSeries))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -26,6 +27,18 @@ const (
 	feedSeenTTL = 7 * 24 * time.Hour
 	// feedSeenCap 已看集合上限，防止无限膨胀
 	feedSeenCap = 2000
+
+	// feedDislikeKeyPrefix 「不感兴趣」负反馈集合 key 前缀（uba 服务写入、feed 召回过滤）
+	feedDislikeKeyPrefix = "gowind-shortplay:feed:dislike:"
+	// feedDislikeTTL 负反馈过期时间（与已看集合同周期）
+	feedDislikeTTL = 7 * 24 * time.Hour
+
+	// searchHotKey 热搜词 ZSet key（member=关键词，score=搜索次数）
+	searchHotKey = "gowind-shortplay:search:hot"
+	// searchHotCap 热搜词榜保留条数（裁剪尾部防膨胀）
+	searchHotCap = 100
+	// spSearchKeywordMaxRunes 关键词入库上限（防超长串污染榜单）
+	spSearchKeywordMaxRunes = 50
 )
 
 type FeedService struct {
@@ -37,6 +50,7 @@ type FeedService struct {
 	userRepo  data.UserRepo
 	interRepo *data.InteractionRepo
 	statsRepo *data.StatsRepo
+	ubaRepo   *data.UbaRepo
 	redis     *redis.Client
 }
 
@@ -46,6 +60,7 @@ func NewFeedService(
 	userRepo data.UserRepo,
 	interRepo *data.InteractionRepo,
 	statsRepo *data.StatsRepo,
+	ubaRepo *data.UbaRepo,
 	rdb *redis.Client,
 ) *FeedService {
 	return &FeedService{
@@ -54,6 +69,7 @@ func NewFeedService(
 		userRepo:  userRepo,
 		interRepo: interRepo,
 		statsRepo: statsRepo,
+		ubaRepo:   ubaRepo,
 		redis:     rdb,
 	}
 }
@@ -104,6 +120,43 @@ func (s *FeedService) markSeen(ctx context.Context, uid uint32, videoIDs []uint3
 	}
 }
 
+// loadDislikeSet 「不感兴趣」集合（Redis set，尽力而为；uba 服务写入）
+func (s *FeedService) loadDislikeSet(ctx context.Context, uid uint32) map[uint32]struct{} {
+	out := make(map[uint32]struct{})
+	if uid == 0 || s.redis == nil {
+		return out
+	}
+	ids, err := s.redis.SMembers(ctx, fmt.Sprintf("%s%d", feedDislikeKeyPrefix, uid)).Result()
+	if err != nil {
+		return out
+	}
+	for _, idStr := range ids {
+		var id uint32
+		if _, err := fmt.Sscanf(idStr, "%d", &id); err == nil {
+			out[id] = struct{}{}
+		}
+	}
+	return out
+}
+
+// RecordSearchKeyword 搜索词计入热搜榜（ZIncrBy + 裁剪，尽力而为）。
+// 空串/超长词不入榜；大小写归一防同词分列。
+func (s *FeedService) RecordSearchKeyword(ctx context.Context, keyword string) {
+	if s.redis == nil {
+		return
+	}
+	kw := strings.TrimSpace(strings.ToLower(keyword))
+	if kw == "" || len([]rune(kw)) > spSearchKeywordMaxRunes {
+		return
+	}
+	pipe := s.redis.Pipeline()
+	pipe.ZIncrBy(ctx, searchHotKey, 1, kw)
+	pipe.ZRemRangeByRank(ctx, searchHotKey, 0, -(searchHotCap + 1))
+	if _, err := pipe.Exec(ctx); err != nil {
+		s.log.Warnf("record search keyword failed: %s", err.Error())
+	}
+}
+
 // pageArgsFeed 页码/页大小（缺省 1/10，上限 50）
 func pageArgsFeed(pageNum, pageSize uint32) (uint32, uint32) {
 	if pageNum < 1 {
@@ -140,13 +193,17 @@ func (s *FeedService) GetFeed(ctx context.Context, req *feedV1.GetFeedRequest) (
 	}
 
 	seen := s.loadSeenSet(ctx, uid)
-	seenFiltered := func(vs []*ent.Video) []*ent.Video {
-		if len(seen) == 0 {
+	disliked := s.loadDislikeSet(ctx, uid)
+	excluded := func(vs []*ent.Video) []*ent.Video {
+		if len(seen) == 0 && len(disliked) == 0 {
 			return vs
 		}
 		out := make([]*ent.Video, 0, len(vs))
 		for _, v := range vs {
 			if _, wasSeen := seen[v.ID]; wasSeen {
+				continue
+			}
+			if _, notInterested := disliked[v.ID]; notInterested {
 				continue
 			}
 			out = append(out, v)
@@ -158,20 +215,20 @@ func (s *FeedService) GetFeed(ctx context.Context, req *feedV1.GetFeedRequest) (
 	if uid > 0 {
 		authorIDs, _ := s.interRepo.FollowingAuthorIDs(ctx, uid, 100)
 		if followVideos, err := s.videoRepo.ListPublishedByAuthors(ctx, authorIDs, recallN); err == nil {
-			add(seenFiltered(followVideos), feedV1.FeedReason_FEED_REASON_FOLLOW)
+			add(excluded(followVideos), feedV1.FeedReason_FEED_REASON_FOLLOW)
 		}
 	}
 	// 2. 热门加权
 	if hotVideos, err := s.videoRepo.ListHot(ctx, recallN); err == nil {
-		add(seenFiltered(hotVideos), feedV1.FeedReason_FEED_REASON_HOT)
+		add(excluded(hotVideos), feedV1.FeedReason_FEED_REASON_HOT)
 	}
 	// 3. 最新兜底（带标签过滤时走标签聚合）
 	if req.GetTag() != "" {
 		if tagVideos, err := s.videoRepo.ListByTag(ctx, req.GetTag(), recallN); err == nil {
-			add(seenFiltered(tagVideos), feedV1.FeedReason_FEED_REASON_LATEST)
+			add(excluded(tagVideos), feedV1.FeedReason_FEED_REASON_LATEST)
 		}
 	} else if latestVideos, err := s.videoRepo.ListLatest(ctx, recallN); err == nil {
-		add(seenFiltered(latestVideos), feedV1.FeedReason_FEED_REASON_LATEST)
+		add(excluded(latestVideos), feedV1.FeedReason_FEED_REASON_LATEST)
 	}
 
 	// 截页
@@ -241,7 +298,7 @@ func (s *FeedService) GetVideoDetail(ctx context.Context, req *feedV1.GetVideoDe
 		}
 	}
 
-	// 观看者互动状态（游客全 false）
+	// 观看者互动状态（游客全 false）+ 断点续播位置
 	uid := spViewerUserID(ctx)
 	state := &feedV1.ViewerState{Liked: trans.Ptr(false), Collected: trans.Ptr(false), Following: trans.Ptr(false)}
 	if uid > 0 {
@@ -251,6 +308,11 @@ func (s *FeedService) GetVideoDetail(ctx context.Context, req *feedV1.GetVideoDe
 		state.Liked = trans.Ptr(liked[e.ID])
 		state.Collected = trans.Ptr(collected[e.ID])
 		state.Following = trans.Ptr(followed[e.AuthorID])
+		if s.ubaRepo != nil {
+			if pos, perr := s.ubaRepo.LatestPosition(ctx, uid, e.ID); perr == nil && pos > 0 {
+				state.ResumePositionMs = trans.Ptr(pos)
+			}
+		}
 	}
 	detail.ViewerState = state
 
@@ -260,14 +322,41 @@ func (s *FeedService) GetVideoDetail(ctx context.Context, req *feedV1.GetVideoDe
 	return detail, nil
 }
 
-// SearchVideos 搜索（标题模糊 + 标签精确合并）
+// SearchVideos 搜索（标题模糊 + 标签精确合并；关键词计入热搜榜）
 func (s *FeedService) SearchVideos(ctx context.Context, req *feedV1.SearchVideosRequest) (*feedV1.GetFeedResponse, error) {
 	pageNum, pageSize := pageArgsFeed(req.GetPageNum(), req.GetPageSize())
 	videos, err := s.videoRepo.SearchByKeyword(ctx, req.GetKeyword(), 200)
 	if err != nil {
 		return nil, err
 	}
+	s.RecordSearchKeyword(ctx, req.GetKeyword())
 	return feedItemsFromVideosSP(videos, int(pageNum), int(pageSize)), nil
+}
+
+// ListHotKeywords 热搜词（真实搜索频次倒序，游客可访问；尽力而为）
+func (s *FeedService) ListHotKeywords(ctx context.Context, req *feedV1.ListHotKeywordsRequest) (*feedV1.ListHotKeywordsResponse, error) {
+	resp := &feedV1.ListHotKeywordsResponse{Keywords: []string{}}
+	if s.redis == nil {
+		return resp, nil
+	}
+	limit := int(req.GetLimit())
+	if limit <= 0 {
+		limit = 10
+	}
+	if limit > 20 {
+		limit = 20
+	}
+	kws, err := s.redis.ZRangeArgs(ctx, redis.ZRangeArgs{
+		Key:   searchHotKey,
+		Start: 0,
+		Stop:  int64(limit - 1),
+		Rev:   true,
+	}).Result()
+	if err != nil {
+		return resp, nil
+	}
+	resp.Keywords = kws
+	return resp, nil
 }
 
 // ListVideosByTag 标签聚合

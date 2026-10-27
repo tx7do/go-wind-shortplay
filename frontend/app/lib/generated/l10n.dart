@@ -1968,6 +1968,76 @@ class S {
       args: [],
     );
   }
+
+  /// `已追剧`
+  String get seriesFollowing {
+    return Intl.message('已追剧', name: 'seriesFollowing', desc: '', args: []);
+  }
+
+  /// `追剧`
+  String get seriesFollowShort {
+    return Intl.message('追剧', name: 'seriesFollowShort', desc: '', args: []);
+  }
+
+  /// `{count}人在追`
+  String seriesFollowersCount(int count) {
+    return Intl.message(
+      '$count人在追',
+      name: 'seriesFollowersCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `追剧`
+  String get followingSeriesTab {
+    return Intl.message('追剧', name: 'followingSeriesTab', desc: '', args: []);
+  }
+
+  /// `还没有追的剧，去发现好剧吧`
+  String get followingSeriesEmpty {
+    return Intl.message(
+      '还没有追的剧，去发现好剧吧',
+      name: 'followingSeriesEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `不感兴趣`
+  String get dislikeNotInterested {
+    return Intl.message(
+      '不感兴趣',
+      name: 'dislikeNotInterested',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `将减少此类内容推荐`
+  String get dislikeRecorded {
+    return Intl.message(
+      '将减少此类内容推荐',
+      name: 'dislikeRecorded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `搜索历史`
+  String get searchHistory {
+    return Intl.message('搜索历史', name: 'searchHistory', desc: '', args: []);
+  }
+
+  /// `清空`
+  String get searchHistoryClear {
+    return Intl.message('清空', name: 'searchHistoryClear', desc: '', args: []);
+  }
+
+  /// `热搜词`
+  String get hotKeywords {
+    return Intl.message('热搜词', name: 'hotKeywords', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

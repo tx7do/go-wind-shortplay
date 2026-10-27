@@ -73,8 +73,7 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
       _error = null;
     });
     try {
-      final detail =
-          await _videoService.getDetail(videoId: widget.videoId);
+      final detail = await _videoService.getDetail(videoId: widget.videoId);
       // 挂靠剧时拉选集上下文（连播/入口），失败不阻断播放
       SeriesDetail? seriesCtx;
       if (detail.video.seriesId > 0) {
@@ -159,6 +158,16 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
     );
   }
 
+  /// 不感兴趣（Feed 负反馈）：上报埋点后退出详情，召回侧后续过滤
+  void _markDisliked() {
+    final loc = S.of(context);
+    UbaService().report(
+      UbaEvent(eventType: UbaEventType.videoDislike, videoId: widget.videoId),
+    );
+    EasyLoading.showToast(loc.dislikeRecorded);
+    if (context.canPop()) context.pop();
+  }
+
   void _showMoreMenu() {
     final loc = S.of(context);
     showModalBottomSheet(
@@ -181,6 +190,14 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
                     targetType: ReportTargetType.video,
                     targetId: widget.videoId,
                   );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.visibility_off_outlined),
+                title: Text(loc.dislikeNotInterested),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  _markDisliked();
                 },
               ),
               if (_isMine)
@@ -230,8 +247,8 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: Colors.white))
           : _error != null || detail == null
-              ? _buildError(loc)
-              : _buildPlayer(detail),
+          ? _buildError(loc)
+          : _buildPlayer(detail),
     );
   }
 
@@ -279,44 +296,55 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
           isActive: true,
           // 剧集且有下一集：关单集循环，播完由 [_playNextEpisode] 切集
           loop: _nextEpisode == null,
+          // 断点续播：有历史进度则从上次位置起播
+          startAt: Duration(milliseconds: video.resumePositionMs),
           onPlayerReady: (player) {
             if (mounted) setState(() => _player = player);
           },
           onDoubleTapLike: (position) {
             _burst.burst(position);
-            unawaited(runDoubleTapLike(
-              context,
-              video: video,
-              onUpdated: (updated) {
-                if (mounted) setState(() => _current = updated);
-              },
-            ));
+            unawaited(
+              runDoubleTapLike(
+                context,
+                video: video,
+                onUpdated: (updated) {
+                  if (mounted) setState(() => _current = updated);
+                },
+              ),
+            );
           },
           onPlayStart: (_) => uba.report(
             UbaEvent(eventType: UbaEventType.videoPlay, videoId: video.id),
           ),
-          onSwipeAway: (progress) => uba.report(UbaEvent(
-            eventType: UbaEventType.videoSwipeAway,
-            videoId: video.id,
-            durationMs: progress.watchMs,
-            watchPercent: progress.percent,
-          )),
-          onComplete: (progress) {
-            uba.report(UbaEvent(
-              eventType: UbaEventType.videoComplete,
+          onSwipeAway: (progress) => uba.report(
+            UbaEvent(
+              eventType: UbaEventType.videoSwipeAway,
               videoId: video.id,
               durationMs: progress.watchMs,
-              watchPercent: 100,
-            ));
+              watchPercent: progress.percent,
+            ),
+          ),
+          onComplete: (progress) {
+            uba.report(
+              UbaEvent(
+                eventType: UbaEventType.videoComplete,
+                videoId: video.id,
+                durationMs: progress.watchMs,
+                watchPercent: 100,
+              ),
+            );
             // 剧集连播：播完自动切下一集
             unawaited(_playNextEpisode());
           },
-          onHeartbeat: (progress) => uba.report(UbaEvent(
-            eventType: UbaEventType.videoHeartbeat,
-            videoId: video.id,
-            durationMs: progress.watchMs,
-            watchPercent: progress.percent,
-          )),
+          onHeartbeat: (progress) => uba.report(
+            UbaEvent(
+              eventType: UbaEventType.videoHeartbeat,
+              videoId: video.id,
+              durationMs: progress.watchMs,
+              watchPercent: progress.percent,
+              positionMs: progress.positionMs,
+            ),
+          ),
         ),
         Positioned(
           left: 16.w,
@@ -345,9 +373,7 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
         if (_player != null)
           FeedProgressBar(player: _player!, bottomInset: 16.h),
         // 双击点赞红心动画层
-        Positioned.fill(
-          child: LikeBurstLayer(controller: _burst),
-        ),
+        Positioned.fill(child: LikeBurstLayer(controller: _burst)),
         // 剧集入口 chip（挂靠剧时展示，点击进剧集详情选集）
         if (_seriesCtx?.series != null)
           Positioned(

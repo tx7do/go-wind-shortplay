@@ -38,6 +38,8 @@ type UbaEvent struct {
 	DurationMs uint64 `json:"duration_ms,omitempty"`
 	// 观看进度百分比（0-100）
 	WatchPercent uint32 `json:"watch_percent,omitempty"`
+	// 播放位置（毫秒，心跳/划走时上报，断点续播用）
+	PositionMs uint64 `json:"position_ms,omitempty"`
 	// 扩展参数（JSON 字符串）
 	Extra *string `json:"extra,omitempty"`
 	// 发生时间
@@ -50,7 +52,7 @@ func (*UbaEvent) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case ubaevent.FieldID, ubaevent.FieldTenantID, ubaevent.FieldUserID, ubaevent.FieldVideoID, ubaevent.FieldTargetUserID, ubaevent.FieldDurationMs, ubaevent.FieldWatchPercent:
+		case ubaevent.FieldID, ubaevent.FieldTenantID, ubaevent.FieldUserID, ubaevent.FieldVideoID, ubaevent.FieldTargetUserID, ubaevent.FieldDurationMs, ubaevent.FieldWatchPercent, ubaevent.FieldPositionMs:
 			values[i] = new(sql.NullInt64)
 		case ubaevent.FieldEventType, ubaevent.FieldExtra:
 			values[i] = new(sql.NullString)
@@ -141,6 +143,12 @@ func (_m *UbaEvent) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.WatchPercent = uint32(value.Int64)
 			}
+		case ubaevent.FieldPositionMs:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field position_ms", values[i])
+			} else if value.Valid {
+				_m.PositionMs = uint64(value.Int64)
+			}
 		case ubaevent.FieldExtra:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field extra", values[i])
@@ -228,6 +236,9 @@ func (_m *UbaEvent) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("watch_percent=")
 	builder.WriteString(fmt.Sprintf("%v", _m.WatchPercent))
+	builder.WriteString(", ")
+	builder.WriteString("position_ms=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PositionMs))
 	builder.WriteString(", ")
 	if v := _m.Extra; v != nil {
 		builder.WriteString("extra=")

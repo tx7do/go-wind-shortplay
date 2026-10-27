@@ -87,6 +87,8 @@ func NewRestMiddleware(
 		appV1.OperationVideoServiceListHotVideos,
 		appV1.OperationSeriesServiceGetSeries,
 		appV1.OperationSeriesServiceListSeries,
+		appV1.OperationFeedServiceListHotKeywords,
+		appV1.OperationSysConfServiceGetSysConf,
 		appV1.OperationUbaServiceReportEvents,
 
 		// shortplay 旧契约认证面（/auth/*）：登录/注册/刷新在认证前到达
@@ -153,6 +155,7 @@ func NewRestServer(
 	spReportService *service.ReportService,
 	spUbaService *service.UbaService,
 	spUserService *service.UserService,
+	spSysConfService *service.SysConfService,
 	notificationService *service.NotificationService,
 
 	// register:param ── 新模块服务形参在此行后注册(make register 工具锚点,勿删)
@@ -225,6 +228,9 @@ func NewRestServer(
 
 	// 消息通知（基座 internal_message 域收件箱薄转发；需登录，不入游客白名单）
 	appV1.RegisterNotificationServiceHTTPServer(srv, notificationService)
+
+	// 系统配置（App 启动拉运营开关与公告；游客白名单）
+	appV1.RegisterSysConfServiceHTTPServer(srv, spSysConfService)
 
 	// 视频创作服务：分片字节路由必须先于生成路由注册（kratos mux 同 pattern
 	// 先注册者优先；body=application/octet-stream 原始字节，生成层只能按

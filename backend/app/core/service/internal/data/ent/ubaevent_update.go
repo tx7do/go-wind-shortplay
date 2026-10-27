@@ -188,6 +188,27 @@ func (_u *UbaEventUpdate) AddWatchPercent(v int32) *UbaEventUpdate {
 	return _u
 }
 
+// SetPositionMs sets the "position_ms" field.
+func (_u *UbaEventUpdate) SetPositionMs(v uint64) *UbaEventUpdate {
+	_u.mutation.ResetPositionMs()
+	_u.mutation.SetPositionMs(v)
+	return _u
+}
+
+// SetNillablePositionMs sets the "position_ms" field if the given value is not nil.
+func (_u *UbaEventUpdate) SetNillablePositionMs(v *uint64) *UbaEventUpdate {
+	if v != nil {
+		_u.SetPositionMs(*v)
+	}
+	return _u
+}
+
+// AddPositionMs adds value to the "position_ms" field.
+func (_u *UbaEventUpdate) AddPositionMs(v int64) *UbaEventUpdate {
+	_u.mutation.AddPositionMs(v)
+	return _u
+}
+
 // SetExtra sets the "extra" field.
 func (_u *UbaEventUpdate) SetExtra(v string) *UbaEventUpdate {
 	_u.mutation.SetExtra(v)
@@ -338,6 +359,12 @@ func (_u *UbaEventUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedWatchPercent(); ok {
 		_spec.AddField(ubaevent.FieldWatchPercent, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.PositionMs(); ok {
+		_spec.SetField(ubaevent.FieldPositionMs, field.TypeUint64, value)
+	}
+	if value, ok := _u.mutation.AddedPositionMs(); ok {
+		_spec.AddField(ubaevent.FieldPositionMs, field.TypeUint64, value)
 	}
 	if value, ok := _u.mutation.Extra(); ok {
 		_spec.SetField(ubaevent.FieldExtra, field.TypeString, value)
@@ -532,6 +559,27 @@ func (_u *UbaEventUpdateOne) AddWatchPercent(v int32) *UbaEventUpdateOne {
 	return _u
 }
 
+// SetPositionMs sets the "position_ms" field.
+func (_u *UbaEventUpdateOne) SetPositionMs(v uint64) *UbaEventUpdateOne {
+	_u.mutation.ResetPositionMs()
+	_u.mutation.SetPositionMs(v)
+	return _u
+}
+
+// SetNillablePositionMs sets the "position_ms" field if the given value is not nil.
+func (_u *UbaEventUpdateOne) SetNillablePositionMs(v *uint64) *UbaEventUpdateOne {
+	if v != nil {
+		_u.SetPositionMs(*v)
+	}
+	return _u
+}
+
+// AddPositionMs adds value to the "position_ms" field.
+func (_u *UbaEventUpdateOne) AddPositionMs(v int64) *UbaEventUpdateOne {
+	_u.mutation.AddPositionMs(v)
+	return _u
+}
+
 // SetExtra sets the "extra" field.
 func (_u *UbaEventUpdateOne) SetExtra(v string) *UbaEventUpdateOne {
 	_u.mutation.SetExtra(v)
@@ -712,6 +760,12 @@ func (_u *UbaEventUpdateOne) sqlSave(ctx context.Context) (_node *UbaEvent, err 
 	}
 	if value, ok := _u.mutation.AddedWatchPercent(); ok {
 		_spec.AddField(ubaevent.FieldWatchPercent, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.PositionMs(); ok {
+		_spec.SetField(ubaevent.FieldPositionMs, field.TypeUint64, value)
+	}
+	if value, ok := _u.mutation.AddedPositionMs(); ok {
+		_spec.AddField(ubaevent.FieldPositionMs, field.TypeUint64, value)
 	}
 	if value, ok := _u.mutation.Extra(); ok {
 		_spec.SetField(ubaevent.FieldExtra, field.TypeString, value)

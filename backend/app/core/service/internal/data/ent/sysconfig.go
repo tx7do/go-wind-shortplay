@@ -45,7 +45,13 @@ type SysConfig struct {
 	SensitiveFilterEnabled bool `json:"sensitive_filter_enabled,omitempty"`
 	// 敏感词表
 	SensitiveWords []string `json:"sensitive_words,omitempty"`
-	selectValues   sql.SelectValues
+	// App 公告横幅开关
+	AnnouncementEnabled bool `json:"announcement_enabled,omitempty"`
+	// 公告文案（空则不展示）
+	AnnouncementText *string `json:"announcement_text,omitempty"`
+	// 公告跳转链接（可空）
+	AnnouncementLink string `json:"announcement_link,omitempty"`
+	selectValues     sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -55,10 +61,12 @@ func (*SysConfig) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case sysconfig.FieldAllowedVideoTypes, sysconfig.FieldSensitiveWords:
 			values[i] = new([]byte)
-		case sysconfig.FieldManualReviewEnabled, sysconfig.FieldRegisterEnabled, sysconfig.FieldSensitiveFilterEnabled:
+		case sysconfig.FieldManualReviewEnabled, sysconfig.FieldRegisterEnabled, sysconfig.FieldSensitiveFilterEnabled, sysconfig.FieldAnnouncementEnabled:
 			values[i] = new(sql.NullBool)
 		case sysconfig.FieldID, sysconfig.FieldCreatedBy, sysconfig.FieldUpdatedBy, sysconfig.FieldDeletedBy, sysconfig.FieldMaxUploadSizeMB, sysconfig.FieldMaxDurationSeconds:
 			values[i] = new(sql.NullInt64)
+		case sysconfig.FieldAnnouncementText, sysconfig.FieldAnnouncementLink:
+			values[i] = new(sql.NullString)
 		case sysconfig.FieldCreatedAt, sysconfig.FieldUpdatedAt, sysconfig.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
@@ -170,6 +178,25 @@ func (_m *SysConfig) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field sensitive_words: %w", err)
 				}
 			}
+		case sysconfig.FieldAnnouncementEnabled:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field announcement_enabled", values[i])
+			} else if value.Valid {
+				_m.AnnouncementEnabled = value.Bool
+			}
+		case sysconfig.FieldAnnouncementText:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field announcement_text", values[i])
+			} else if value.Valid {
+				_m.AnnouncementText = new(string)
+				*_m.AnnouncementText = value.String
+			}
+		case sysconfig.FieldAnnouncementLink:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field announcement_link", values[i])
+			} else if value.Valid {
+				_m.AnnouncementLink = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -256,6 +283,17 @@ func (_m *SysConfig) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("sensitive_words=")
 	builder.WriteString(fmt.Sprintf("%v", _m.SensitiveWords))
+	builder.WriteString(", ")
+	builder.WriteString("announcement_enabled=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AnnouncementEnabled))
+	builder.WriteString(", ")
+	if v := _m.AnnouncementText; v != nil {
+		builder.WriteString("announcement_text=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	builder.WriteString("announcement_link=")
+	builder.WriteString(_m.AnnouncementLink)
 	builder.WriteByte(')')
 	return builder.String()
 }

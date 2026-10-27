@@ -2668,6 +2668,35 @@ var (
 			},
 		},
 	}
+	// SpSeriesFollowsColumns holds the columns for the "sp_series_follows" table.
+	SpSeriesFollowsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id"},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "tenant_id", Type: field.TypeUint32, Nullable: true, Comment: "租户ID", Default: 0},
+		{Name: "follower_id", Type: field.TypeUint32, Comment: "追剧用户ID", Default: 0},
+		{Name: "series_id", Type: field.TypeUint32, Comment: "剧集ID", Default: 0},
+	}
+	// SpSeriesFollowsTable holds the schema information for the "sp_series_follows" table.
+	SpSeriesFollowsTable = &schema.Table{
+		Name:       "sp_series_follows",
+		Comment:    "追剧关系表",
+		Columns:    SpSeriesFollowsColumns,
+		PrimaryKey: []*schema.Column{SpSeriesFollowsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "uix_sp_series_follow_pair",
+				Unique:  true,
+				Columns: []*schema.Column{SpSeriesFollowsColumns[5], SpSeriesFollowsColumns[6]},
+			},
+			{
+				Name:    "idx_sp_series_follow_series",
+				Unique:  false,
+				Columns: []*schema.Column{SpSeriesFollowsColumns[6]},
+			},
+		},
+	}
 	// SpSysConfigsColumns holds the columns for the "sp_sys_configs" table.
 	SpSysConfigsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint32, Increment: true, Comment: "id"},
@@ -2684,6 +2713,9 @@ var (
 		{Name: "allowed_video_types", Type: field.TypeJSON, Nullable: true, Comment: "允许的视频扩展名（小写带点）"},
 		{Name: "sensitive_filter_enabled", Type: field.TypeBool, Comment: "敏感词过滤开关（命中：发布转审核中 / 评论拒绝）", Default: false},
 		{Name: "sensitive_words", Type: field.TypeJSON, Nullable: true, Comment: "敏感词表"},
+		{Name: "announcement_enabled", Type: field.TypeBool, Comment: "App 公告横幅开关", Default: false},
+		{Name: "announcement_text", Type: field.TypeString, Nullable: true, Size: 2147483647, Comment: "公告文案（空则不展示）"},
+		{Name: "announcement_link", Type: field.TypeString, Comment: "公告跳转链接（可空）", Default: ""},
 	}
 	// SpSysConfigsTable holds the schema information for the "sp_sys_configs" table.
 	SpSysConfigsTable = &schema.Table{
@@ -2835,11 +2867,12 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "tenant_id", Type: field.TypeUint32, Nullable: true, Comment: "租户ID", Default: 0},
 		{Name: "user_id", Type: field.TypeUint32, Comment: "行为人用户ID（游客为0）", Default: 0},
-		{Name: "event_type", Type: field.TypeEnum, Comment: "事件类型", Enums: []string{"VIDEO_PLAY", "VIDEO_HEARTBEAT", "VIDEO_COMPLETE", "VIDEO_SWIPE_AWAY", "VIDEO_LIKE", "VIDEO_COLLECT", "COMMENT_CREATE", "FOLLOW_AUTHOR"}, Default: "VIDEO_PLAY"},
+		{Name: "event_type", Type: field.TypeEnum, Comment: "事件类型", Enums: []string{"VIDEO_PLAY", "VIDEO_HEARTBEAT", "VIDEO_COMPLETE", "VIDEO_SWIPE_AWAY", "VIDEO_LIKE", "VIDEO_COLLECT", "COMMENT_CREATE", "FOLLOW_AUTHOR", "VIDEO_DISLIKE"}, Default: "VIDEO_PLAY"},
 		{Name: "video_id", Type: field.TypeUint32, Comment: "视频ID（非视频事件为0）", Default: 0},
 		{Name: "target_user_id", Type: field.TypeUint32, Comment: "对方用户ID（关注事件）", Default: 0},
 		{Name: "duration_ms", Type: field.TypeUint64, Comment: "观看时长（毫秒）", Default: 0},
 		{Name: "watch_percent", Type: field.TypeUint32, Comment: "观看进度百分比（0-100）", Default: 0},
+		{Name: "position_ms", Type: field.TypeUint64, Comment: "播放位置（毫秒，心跳/划走时上报，断点续播用）", Default: 0},
 		{Name: "extra", Type: field.TypeString, Nullable: true, Comment: "扩展参数（JSON 字符串）"},
 		{Name: "occurred_at", Type: field.TypeTime, Nullable: true, Comment: "发生时间"},
 	}
@@ -2853,7 +2886,7 @@ var (
 			{
 				Name:    "idx_sp_uba_event_type_occurred_at",
 				Unique:  false,
-				Columns: []*schema.Column{SpUbaEventsColumns[6], SpUbaEventsColumns[12]},
+				Columns: []*schema.Column{SpUbaEventsColumns[6], SpUbaEventsColumns[13]},
 			},
 			{
 				Name:    "idx_sp_uba_video_event",
@@ -3685,6 +3718,7 @@ var (
 		SysRoleMetadataTable,
 		SysRolePermissionsTable,
 		SpSeriesTable,
+		SpSeriesFollowsTable,
 		SpSysConfigsTable,
 		SysTasksTable,
 		SysTenantsTable,
@@ -3912,6 +3946,11 @@ func init() {
 	}
 	SpSeriesTable.Annotation = &entsql.Annotation{
 		Table:     "sp_series",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_bin",
+	}
+	SpSeriesFollowsTable.Annotation = &entsql.Annotation{
+		Table:     "sp_series_follows",
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_bin",
 	}
