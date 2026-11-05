@@ -56,6 +56,14 @@ export function useGetRole(
   });
 }
 
+export async function fetchGetRole(req: permissionservicev1_GetRoleRequest) {
+  return queryClient.fetchQuery({
+    queryKey: ['getRole', req],
+    queryFn: () => adminHttp.get<permissionservicev1_Role>(`roles/${req.id ?? ''}`),
+    retry: 0,
+  });
+}
+
 export function useCreateRole(
   options?: UseMutationOptions<unknown, Error, permissionservicev1_CreateRoleRequest>,
 ) {
