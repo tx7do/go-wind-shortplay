@@ -120,6 +120,11 @@ func (s *SysConfService) Get(ctx context.Context, req *emptypb.Empty) (*sysconfV
 }
 
 func (s *SysConfService) Update(ctx context.Context, req *sysconfV1.UpdateSysConfRequest) (*sysconfV1.SysConf, error) {
+	// 系统配置是全局配置（含等保口令策略阈值等安全语义），仅平台管理员可改。
+	if err := requirePlatformAdmin(ctx, s.log, "system config management"); err != nil {
+		return nil, err
+	}
+
 	return s.sysConfClient.UpdateSysConf(ctx, req)
 }
 

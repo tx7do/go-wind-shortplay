@@ -184,6 +184,12 @@ func (s *PermissionService) Create(ctx context.Context, req *permissionV1.Create
 		return nil, permissionV1.ErrorBadRequest("invalid parameter")
 	}
 
+	// sys: 保留码不可占用——sys:access_backend 等在登录闸门按码值精确匹配，
+	// 自建同码权限即可伪造登录资格。种子权限走 repo 层内部链路，不受此校验影响。
+	if constants.IsReservedPermissionCode(req.Data.GetCode()) {
+		return nil, permissionV1.ErrorBadRequest("permission code is reserved")
+	}
+
 	if err := s.permissionRepo.Create(ctx, req); err != nil {
 		return nil, err
 	}
@@ -194,6 +200,11 @@ func (s *PermissionService) Create(ctx context.Context, req *permissionV1.Create
 func (s *PermissionService) Update(ctx context.Context, req *permissionV1.UpdatePermissionRequest) (*emptypb.Empty, error) {
 	if req == nil || req.Data == nil {
 		return nil, permissionV1.ErrorBadRequest("invalid parameter")
+	}
+
+	// 与 Create 同口径：保留权限码不可占用。
+	if req.Data.Code != nil && constants.IsReservedPermissionCode(req.Data.GetCode()) {
+		return nil, permissionV1.ErrorBadRequest("permission code is reserved")
 	}
 
 	if err := s.permissionRepo.Update(ctx, req); err != nil {

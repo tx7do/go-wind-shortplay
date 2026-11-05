@@ -199,6 +199,12 @@ func (s *PermissionService) Create(ctx context.Context, req *permissionV1.Create
 
 	req.Data.CreatedBy = trans.Ptr(operator.UserId)
 
+	// 权限是全局定义（权限→API 绑定影响全平台的 authz 策略装载），租户操作者
+	// 不可增删改。sys: 保留码的占用校验在 core 服务实现层，此处拦身份。
+	if err = requirePlatformAdmin(ctx, s.log, "permission management"); err != nil {
+		return nil, err
+	}
+
 	return s.permissionServiceClient.Create(ctx, req)
 }
 
@@ -220,15 +226,32 @@ func (s *PermissionService) Update(ctx context.Context, req *permissionV1.Update
 		req.UpdateMask.Paths = append(req.UpdateMask.Paths, "updated_by")
 	}
 
+	// 与 Create 同口径：全局定义仅平台管理员可改。
+	if err = requirePlatformAdmin(ctx, s.log, "permission management"); err != nil {
+		return nil, err
+	}
+
 	return s.permissionServiceClient.Update(ctx, req)
 }
 
 func (s *PermissionService) Delete(ctx context.Context, req *permissionV1.DeletePermissionRequest) (*emptypb.Empty, error) {
+	// 全局定义仅平台管理员可删（受保护码另有 ProtectedPermissionCodes 拦截）。
+	if err := requirePlatformAdmin(ctx, s.log, "permission management"); err != nil {
+		return nil, err
+	}
+
 	return s.permissionServiceClient.Delete(ctx, req)
 }
 
 // SyncPermissions 同步权限点
 func (s *PermissionService) SyncPermissions(ctx context.Context, req *emptypb.Empty) (*emptypb.Empty, error) {
+	// 权限同步会清空重建全局业务权限树，是平台级运维操作，仅平台管理员可触发。
+	// 注：init() 的启动期自动同步本就以系统上下文无操作者而静默跳过，
+	// 此处加闸门不改变启动期行为。
+	if err := requirePlatformAdmin(ctx, s.log, "permission management"); err != nil {
+		return nil, err
+	}
+
 	// 获取操作人信息
 	operator, err := auth.FromContext(ctx)
 	if err != nil {

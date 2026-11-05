@@ -88,6 +88,12 @@ func (s *TenantService) Create(ctx context.Context, req *identityV1.CreateTenant
 
 	req.Data.CreatedBy = trans.Ptr(operator.UserId)
 
+	// 租户管理是平台专用功能：租户表没有 tenant_id 列、无法靠数据层隔离挡
+	// 跨租户篡改，闸门缺失时租户操作者可改任意租户的套餐/到期/状态。
+	if err = requirePlatformAdmin(ctx, s.log, "tenant management"); err != nil {
+		return nil, err
+	}
+
 	if _, err = s.tenantServiceClient.Create(ctx, req); err != nil {
 		return nil, err
 	}
@@ -113,10 +119,20 @@ func (s *TenantService) Update(ctx context.Context, req *identityV1.UpdateTenant
 		req.UpdateMask.Paths = append(req.UpdateMask.Paths, "updated_by")
 	}
 
+	// 与 Create 同口径：仅平台管理员可改租户。
+	if err = requirePlatformAdmin(ctx, s.log, "tenant management"); err != nil {
+		return nil, err
+	}
+
 	return s.tenantServiceClient.Update(ctx, req)
 }
 
 func (s *TenantService) Delete(ctx context.Context, req *identityV1.DeleteTenantRequest) (*emptypb.Empty, error) {
+	// 删租户是平台级处置动作，仅平台管理员。
+	if err := requirePlatformAdmin(ctx, s.log, "tenant management"); err != nil {
+		return nil, err
+	}
+
 	return s.tenantServiceClient.Delete(ctx, req)
 }
 
@@ -138,6 +154,11 @@ func (s *TenantService) CreateTenantWithAdminUser(ctx context.Context, req *iden
 
 	req.Tenant.CreatedBy = trans.Ptr(operator.UserId)
 	req.User.CreatedBy = trans.Ptr(operator.UserId)
+
+	// 开通租户（连带建管理员账号）是平台专用操作，仅平台管理员。
+	if err = requirePlatformAdmin(ctx, s.log, "tenant management"); err != nil {
+		return nil, err
+	}
 
 	req.OperatorUserId = trans.Ptr(operator.GetUserId())
 
