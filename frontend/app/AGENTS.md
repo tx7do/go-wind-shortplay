@@ -68,7 +68,7 @@ lib/
 
 ## 后端联调
 
-- App BFF：`http://<host>:7700/app/v1`；媒体（MinIO 公开读）：`http://<host>:9000/shortplay`（bucket 缺省 `shortplay`，与后端 `OSS_PUBLIC_ENDPOINT` 同源口径）。
+- App BFF：`http://<host>:7700/app/v1`；媒体（对象存储公开读，推荐 SeaweedFS）：`http://<host>:9000/shortplay`（bucket 缺省 `shortplay`，与后端 `OSS_PUBLIC_ENDPOINT` 同源口径）。
 - 默认 `.dev.env` 指向安卓模拟器（10.0.2.2）；覆盖方式：
   ```
   flutter run --dart-define=API_BASE=http://<局域网IP>:7700 --dart-define=MEDIA_BASE=http://<局域网IP>:9000/shortplay

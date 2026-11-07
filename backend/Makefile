@@ -148,7 +148,7 @@ compose-down:
 
 # use docker compose to run only dependency services like redis, mysql, etc. without backend services.
 compose-up-libs:
-	@echo "shortplay 依赖中间件复用宿主机既有容器（Citus PG/Redis/MinIO/etcd），不提供 libs 编排"
+	@echo "shortplay 依赖中间件复用宿主机既有容器（Citus PG/Redis/对象存储/etcd），不提供 libs 编排"
 
 # build docker image
 docker:

@@ -61,7 +61,7 @@ GoWind ShortPlay is an out-of-the-box, enterprise-grade short-video community ba
 | ORM | [Ent](https://entgo.io/) v0.14 | Schema as code |
 | Database | [PostgreSQL](https://www.postgresql.org/) / [MySQL](https://www.mysql.com/) | Dual support, pgx/v5 driver |
 | Cache | [Redis](https://redis.io/) | Counters / watched-filter / feed dedup |
-| Object Storage | [MinIO](https://min.io/) | Videos / covers (S3-compatible) |
+| Object Storage | [SeaweedFS](https://github.com/seaweedfs/seaweedfs) | Videos / covers (S3-compatible — the replacement after MinIO Community went unmaintained) |
 | Media Processing | FFmpeg | Single-frame cover extraction, in-process, silent fallback when missing |
 | API Definition | [Protobuf](https://protobuf.dev/) + [buf.build](https://buf.build/) | Contract-first |
 | Authentication | HS256 JWT | Issued by core, verified at gateways, propagated via gRPC metadata |
@@ -91,7 +91,7 @@ GoWind ShortPlay is an out-of-the-box, enterprise-grade short-video community ba
 React Admin ──▶ admin-service (BFF :7600, SSE :7601) ──┐
                                                        ├──gRPC──▶ core-service (:7900, single data sink)
 Flutter App ──▶ app-service   (BFF :7700) ─────────────┘              │
-                                            PostgreSQL / Redis / MinIO / FFmpeg
+                                            PostgreSQL / Redis / SeaweedFS / FFmpeg
 ```
 
 - **admin / app are thin BFF gateways** (parameter validation + forwarding); all business logic and data operations converge in core
@@ -108,7 +108,7 @@ Flutter App ──▶ app-service   (BFF :7700) ──────────�
 | :7701 | app BFF (SSE) | App-side SSE channel `/events` (reserved; not consumed by the app yet) |
 | :7900 | core (gRPC) | Single data sink, registered in etcd |
 | :16800 | admin frontend dev server | Vite (`frontend/admin`); backend CORS whitelist allows `localhost:16800` by default |
-| :9000 | MinIO S3 API | Object storage public reads (media URL prefix, `OSS_PUBLIC_ENDPOINT`) |
+| :9000 | Object-storage S3 API (SeaweedFS) | Object storage public reads (media URL prefix, `OSS_PUBLIC_ENDPOINT`) |
 | :8280 | ZLMediaKit HTTP | Local streaming media (reserved for live/transcoding extensions, mapped via `docker run`) |
 
 ## Core Features
@@ -117,7 +117,7 @@ Flutter App ──▶ app-service   (BFF :7700) ──────────�
 
 | Feature | Description |
 |:--------|:------------|
-| Video publishing | Chunked upload (resumable-friendly), merge into MinIO, FFmpeg cover extraction, drafts |
+| Video publishing | Chunked upload (resumable-friendly), merge into object storage, FFmpeg cover extraction, drafts |
 | State machine | Draft → Review → Published / Rejected → Offline, whitelist-validated transitions |
 | Immersive feed | Vertical swipe, three-way rule-based recall (followed-newest / hot-weighted / newest fallback), Redis watched-dedup |
 | Search & aggregation | Fuzzy title + exact tag search, tag aggregation pages, tag list (for publishing / search suggestions) |
@@ -182,7 +182,7 @@ go-wind-shortplay/
 
 ### 1. Prepare Dependency Services
 
-PostgreSQL / Redis / MinIO / etcd are reused from existing containers on the host; ZLMediaKit is created separately via `docker run`, and the `shortplay` database must be created in PostgreSQL:
+PostgreSQL / Redis / object storage (S3-compatible; SeaweedFS recommended) / etcd are reused from existing containers on the host; ZLMediaKit is created separately via `docker run`, and the `shortplay` database must be created in PostgreSQL:
 
 ```bash
 docker run -d --name shortplay-zlmediakit --restart unless-stopped \
@@ -199,7 +199,7 @@ CREATE DATABASE shortplay;
 
 ```bash
 cd backend
-cp .env.example .env    # fill in your local PostgreSQL / Redis / MinIO connection values (.env is gitignored)
+cp .env.example .env    # fill in your local PostgreSQL / Redis / object-storage connection values (.env is gitignored)
 ```
 
 `.env` is picked up automatically by `make run` (via app.mk) and by docker compose; `${VAR:default}` placeholders in each service's `configs/*.yaml` resolve with "environment variable first, default as fallback" (defaults are placeholder strings — you **must** supply real values in `.env` to reach the dependencies). For production, inject via the deployment environment instead; never commit real credentials.
@@ -249,7 +249,7 @@ flutter run --dart-define=API_BASE=http://127.0.0.1:7700   # Android emulator de
 - **Manual review**: the review loop is manual; no machine moderation
 - **Feed ranking**: three-way rule-based recall with weighted scoring, not model ranking
 - **Frontend AES key**: the dev default for login password transport encryption is the public base default (local only); in production rotate it on both ends (`AES_KEY` / `VITE_AES_KEY`)
-- **Bring your own dependencies**: PostgreSQL / Redis / MinIO / etcd instances must be provisioned by you (containers or managed); this repo does not orchestrate them
+- **Bring your own dependencies**: PostgreSQL / Redis / object storage (S3-compatible; SeaweedFS recommended) / etcd instances must be provisioned by you (containers or managed); this repo does not orchestrate them
 
 ### Common Commands
 

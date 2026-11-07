@@ -44,7 +44,7 @@ flutter run --dart-define=API_BASE=http://192.168.x.x:7700 \
 | 变量 | 说明 | 默认（debug） |
 |---|---|---|
 | `API_BASE`（.env 键 `API_BASE_URL`） | app BFF 网关（:7700，路径前缀 /app/v1 由 dio baseUrl 拼好；分享页 `/s/{videoId}` 与其同源） | `http://10.0.2.2:7700` |
-| `MEDIA_BASE`（.env 键 `MEDIA_BASE_URL`） | MinIO 公开访问前缀（对象键拼接），默认桶 `shortplay`（与后端 `OSS_PUBLIC_ENDPOINT` 同端口 9000） | `http://10.0.2.2:9000/shortplay` |
+| `MEDIA_BASE`（.env 键 `MEDIA_BASE_URL`） | 对象存储公开访问前缀（对象键拼接），默认桶 `shortplay`（与后端 `OSS_PUBLIC_ENDPOINT` 同端口 9000） | `http://10.0.2.2:9000/shortplay` |
 | `AES_KEY` | 登录密码 AES 传输加密密钥（key=iv，须与后端 `AES_KEY` 一致；缺省回退 dev key） | dev key「f51d66a73d8a0927」 |
 | `CONNECTION_TIMEOUT` / `RECEIVE_TIMEOUT` | 连接/接收超时（秒） | 15 / 30 |
 

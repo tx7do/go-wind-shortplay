@@ -7,7 +7,7 @@
  * 与 Flutter App 的 MediaUrl.resolve（frontend/app MediaUrl）同一契约。
  */
 
-/** 缺省媒体基地址（本地 MinIO 统一媒体桶，与后端 OSS_DOWNLOAD_HOST / OSS_BUCKET 缺省对齐） */
+/** 缺省媒体基地址（本地对象存储统一媒体桶，与后端 OSS_DOWNLOAD_HOST / OSS_BUCKET 缺省对齐） */
 const DEFAULT_MEDIA_BASE = 'http://127.0.0.1:9000/shortplay';
 
 /**

@@ -28,7 +28,7 @@
 		<true/>
 		<key>NSAppTransportSecurity</key>
 		<dict>
-			<!-- 联调阶段允许 http（API :6700 / MinIO :9100）；上架前收紧为域名例外 -->
+			<!-- 联调阶段允许 http（API :6700 / 对象存储 :9100）；上架前收紧为域名例外 -->
 			<key>NSAllowsArbitraryLoads</key>
 			<true/>
 		</dict>

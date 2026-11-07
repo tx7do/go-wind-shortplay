@@ -240,7 +240,7 @@
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| POST | `/uploads/image` | 图片上传：body=图片原始字节（Content-Type: image/jpeg|png|webp|gif，≤2MB）→ `{url}`（MinIO 公网地址；需登录+接口权限）。App 端同款：`POST :7700/app/v1/uploads/image`（app 端 token） |
+| POST | `/uploads/image` | 图片上传：body=图片原始字节（Content-Type: image/jpeg|png|webp|gif，≤2MB）→ `{url}`（对象存储公网地址；需登录+接口权限）。App 端同款：`POST :7700/app/v1/uploads/image`（app 端 token） |
 | GET | `/videos?authorId=` | 视频列表新增按作者过滤（用户管理"查看作品"用） |
 | GET | `/series?query=&page=&pageSize=` | 剧集列表（`query` 剧名模糊、`authorId=` 过滤） |
 | GET | `/series/{id}` | 剧集详情 `{series, items[]{video}}`：**全集（含未发布各状态）** |

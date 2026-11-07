@@ -14,7 +14,7 @@ GoWind ShortPlay（风印短剧）后端 —— 基于 [go-wind-cms](https://git
 - [OpenTelemetry](https://opentelemetry.io/) -- 分布式可观察系统
 - 手写依赖装配（wiring.go，无 DI 框架）
 - [OpenAPI](https://www.openapis.org/) -- RESTful API 文档（`make openapi`）
-- [MinIO](https://min.io/) -- 对象存储服务器
+- [SeaweedFS](https://github.com/seaweedfs/seaweedfs) -- S3 兼容对象存储服务器（MinIO 社区版停维护后的替代）
 - [Redis](https://redis.io/) -- 缓存 / 验证码 / asynq 队列
 - [PostgreSQL](https://www.postgresql.org/) -- 关系型数据库（pgx/v5）
 - [Ent](https://entgo.io/) -- Golang ORM 框架

@@ -61,7 +61,7 @@
 | ORM | [Ent](https://entgo.io/) v0.14 | スキーマ・アズ・コード |
 | データベース | [PostgreSQL](https://www.postgresql.org/) / [MySQL](https://www.mysql.com/) | 両対応、pgx/v5 ドライバ |
 | キャッシュ | [Redis](https://redis.io/) | カウンタ / 既視フィルタ / フィード重複排除 |
-| オブジェクトストレージ | [MinIO](https://min.io/) | 動画 / カバー画像（S3 互換） |
+| オブジェクトストレージ | [SeaweedFS](https://github.com/seaweedfs/seaweedfs) | 動画 / カバー画像（S3 互換。MinIO コミュニティ版の保守終了後の代替） |
 | メディア処理 | FFmpeg | 単フレームのカバー抽出、プロセス内実行、欠落時は静かにフォールバック |
 | API 定義 | [Protobuf](https://protobuf.dev/) + [buf.build](https://buf.build/) | 契約ファースト |
 | 認証 | HS256 JWT | core で発行、ゲートウェイで検証、gRPC metadata で伝播 |
@@ -91,7 +91,7 @@
 React Admin ──▶ admin-service (BFF :7600, SSE :7601) ──┐
                                                        ├──gRPC──▶ core-service (:7900, 唯一のデータ投影先)
 Flutter App ──▶ app-service   (BFF :7700) ─────────────┘              │
-                                            PostgreSQL / Redis / MinIO / FFmpeg
+                                            PostgreSQL / Redis / SeaweedFS / FFmpeg
 ```
 
 - **admin / app は薄い BFF ゲートウェイ**（パラメータ検証 + 転送）。業務ロジックとデータ操作はすべて core に集約
@@ -108,7 +108,7 @@ Flutter App ──▶ app-service   (BFF :7700) ──────────�
 | :7701 | app BFF（SSE） | アプリ側 SSE チャネル `/events`（予約。アプリは未使用） |
 | :7900 | core（gRPC） | 唯一のデータ投影先。etcd に登録 |
 | :16800 | 管理画面フロントエンド dev サーバー | Vite（`frontend/admin`）。バックエンド CORS 許可リストは既定で `localhost:16800` のみ |
-| :9000 | MinIO S3 API | オブジェクトストレージの公開読み取り（メディア URL プレフィックス、`OSS_PUBLIC_ENDPOINT`） |
+| :9000 | オブジェクトストレージ S3 API（SeaweedFS） | オブジェクトストレージの公開読み取り（メディア URL プレフィックス、`OSS_PUBLIC_ENDPOINT`） |
 | :8280 | ZLMediaKit HTTP | ローカルストリーミングメディア（ライブ / トランスコード拡張の予約、`docker run` でマッピング） |
 
 ## コア機能
@@ -117,7 +117,7 @@ Flutter App ──▶ app-service   (BFF :7700) ──────────�
 
 | 機能 | 説明 |
 |:-----|:-----|
-| 動画投稿 | チャンクアップロード（レジューム対応）、MinIO への統合登録、FFmpeg カバー抽出、下書き |
+| 動画投稿 | チャンクアップロード（レジューム対応）、オブジェクトストレージへの統合登録、FFmpeg カバー抽出、下書き |
 | ステートマシン | 下書き → 審査 → 公開 / 差し戻し → 非公開、遷移ホワイトリスト検証 |
 | 没入型フィード | 縦スワイプ、3 系統のルールベースリコール（フォロー最新 / ホット加重 / 最新フォールバック）、Redis 既視重複排除 |
 | 検索 & 集約 | タイトル部分一致 + タグ完全一致検索、タグ集約ページ、タグ一覧（投稿時選択 / 検索サジェスト） |
@@ -194,7 +194,7 @@ go-wind-shortplay/
 
 ### 1. 依存サービスの準備
 
-PostgreSQL / Redis / MinIO / etcd はホスト上の既存コンテナを再利用します。ZLMediaKit は `docker run` で別途作成し、PostgreSQL に `shortplay` データベースを作成してください：
+PostgreSQL / Redis / オブジェクトストレージ（S3 互換、SeaweedFS 推奨）/ etcd はホスト上の既存コンテナを再利用します。ZLMediaKit は `docker run` で別途作成し、PostgreSQL に `shortplay` データベースを作成してください：
 
 ```bash
 docker run -d --name shortplay-zlmediakit --restart unless-stopped \
@@ -211,7 +211,7 @@ CREATE DATABASE shortplay;
 
 ```bash
 cd backend
-cp .env.example .env    # ローカルの PostgreSQL / Redis / MinIO 接続値を記入（.env は gitignore 済み）
+cp .env.example .env    # ローカルの PostgreSQL / Redis / オブジェクトストレージ接続値を記入（.env は gitignore 済み）
 ```
 
 `.env` は `make run`（app.mk が自動読み込み）と docker compose の両方で拾われます。各サービスの `configs/*.yaml` にある `${VAR:default}` プレースホルダは「環境変数優先、デフォルトはフォールバック」で解決されます（デフォルトはプレースホルダ文字列なので、依存サービスに接続するには `.env` に実値を記入**必須**です）。本番ではデプロイ環境から注入し、実 credentials をコミットしないでください。
@@ -261,7 +261,7 @@ flutter run --dart-define=API_BASE=http://127.0.0.1:7700   # Android エミュ�
 - **手動審査**：審査ループは手動操作。機械審査は未接続
 - **フィード順位**：3 系統のルールベース召回 + 加重スコアリング。モデルランキングではない
 - **フロントエンド AES キー**：ログインパスワード転送暗号化の dev 既定キーはベースの公開既定値（ローカル限定）。本番では前後端で同期変更すること（`AES_KEY` / `VITE_AES_KEY`）
-- **依存サービスは持ち込み**：PostgreSQL / Redis / MinIO / etcd は自身で用意（コンテナまたはマネージド）。本リポジトリはそれらをオーケストレートしない
+- **依存サービスは持ち込み**：PostgreSQL / Redis / オブジェクトストレージ（S3 互換、SeaweedFS 推奨）/ etcd は自身で用意（コンテナまたはマネージド）。本リポジトリはそれらをオーケストレートしない
 
 ### よく使うコマンド
 

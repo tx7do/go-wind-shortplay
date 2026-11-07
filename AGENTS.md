@@ -69,7 +69,7 @@ cd app/core/service && make run   # 本地跑 core（admin/app 同理）
 
 ## 本地验证要点
 
-- **依赖服务**：PostgreSQL / Redis / MinIO / etcd 复用宿主机既有容器；ZLMediaKit 用 `docker run` 单独创建（`shortplay-zlmediakit`）；PostgreSQL 中建库 `shortplay`。连接参数经 `configs/*.yaml` 的 `${ENV:default}` 插值用环境变量覆盖（`DB_HOST` / `REDIS_ADDR` / `OSS_ENDPOINT` 等）；本地真实值放 gitignored 的 `backend/.env`（模板 `backend/.env.example`，`make run` 经 app.mk 自动装载，env 覆盖链路由 `pkg/configenv` 接通），configs 内缺省值为占位串、开源发布前不得回填真实凭据。
+- **依赖服务**：PostgreSQL / Redis / 对象存储（S3 兼容，推荐 SeaweedFS）/ etcd 复用宿主机既有容器；ZLMediaKit 用 `docker run` 单独创建（`shortplay-zlmediakit`）；PostgreSQL 中建库 `shortplay`。连接参数经 `configs/*.yaml` 的 `${ENV:default}` 插值用环境变量覆盖（`DB_HOST` / `REDIS_ADDR` / `OSS_ENDPOINT` 等）；本地真实值放 gitignored 的 `backend/.env`（模板 `backend/.env.example`，`make run` 经 app.mk 自动装载，env 覆盖链路由 `pkg/configenv` 接通），configs 内缺省值为占位串、开源发布前不得回填真实凭据。
 - **端口**：admin REST `:7600`（SSE `:7601`）、app REST `:7700`（SSE `:7701`）、core gRPC `:7900`；admin 前端 dev `:16800`（`.env.development` 的 `VITE_SERVER_PORT`）。
 - **CORS**：admin 后端白名单默认只放行 `localhost:16800` / `127.0.0.1:16800`（`app/admin/service/configs/server.yaml`），换端口联调要同步改。
 - **登录账号**：core 首次启动自动建表并播种管理员 `admin / admin`，**不要**找 SQL 种子脚本；管理端登录需图形验证码，密码 AES 密文传输（dev 缺省 key 见 `backend/.env.example`）。

@@ -61,7 +61,7 @@
 | ORM | [Ent](https://entgo.io/) v0.14 | schema 即代码 |
 | 数据库 | [PostgreSQL](https://www.postgresql.org/) / [MySQL](https://www.mysql.com/) | pgx/v5 驱动，双支持 |
 | 缓存 | [Redis](https://redis.io/) | 计数 / 已看过滤 / Feed 去重 |
-| 对象存储 | [MinIO](https://min.io/) | 视频 / 封面（S3 兼容） |
+| 对象存储 | [SeaweedFS](https://github.com/seaweedfs/seaweedfs) | 视频 / 封面（S3 兼容，MinIO 社区版停维护后的替代） |
 | 媒体处理 | FFmpeg | 单帧抽图封面，进程内执行、缺失静默降级 |
 | API 定义 | [Protobuf](https://protobuf.dev/) + [buf.build](https://buf.build/) | 接口契约优先 |
 | 鉴权 | HS256 JWT | core 签发、网关校验、metadata 透传 |
@@ -94,7 +94,7 @@
 React Admin ──▶ admin-service (BFF :7600, SSE :7601) ──┐
                                                        ├──gRPC──▶ core-service (:7900, 唯一数据落点)
 Flutter App ──▶ app-service   (BFF :7700) ─────────────┘              │
-                                            PostgreSQL / Redis / MinIO / FFmpeg
+                                            PostgreSQL / Redis / SeaweedFS / FFmpeg
 ```
 
 - **admin / app 是瘦网关 BFF**（参数校验 + 转发），所有业务与数据操作收敛在 core
@@ -111,7 +111,7 @@ Flutter App ──▶ app-service   (BFF :7700) ──────────�
 | :7701 | app BFF（SSE） | app 侧 SSE 通道 `/events`（预留，业务当前未消费） |
 | :7900 | core（gRPC） | 唯一数据落点，etcd 注册 |
 | :16800 | admin 前端 dev server | Vite（`frontend/admin`）；后端 CORS 白名单缺省只放行 `localhost:16800` |
-| :9000 | MinIO S3 API | 对象存储公开读（媒体 URL 前缀，`OSS_PUBLIC_ENDPOINT`） |
+| :9000 | 对象存储 S3 API（SeaweedFS） | 对象存储公开读（媒体 URL 前缀，`OSS_PUBLIC_ENDPOINT`） |
 | :8280 | ZLMediaKit HTTP | 本地流媒体（直播/转码扩展预留，`docker run` 映射） |
 
 ## 核心功能
@@ -120,7 +120,7 @@ Flutter App ──▶ app-service   (BFF :7700) ──────────�
 
 | 功能 | 说明 |
 |:-----|:-----|
-| 视频发布 | 分片上传（断点续传友好）、合并入库 MinIO、FFmpeg 抽帧封面、草稿箱 |
+| 视频发布 | 分片上传（断点续传友好）、合并入库对象存储、FFmpeg 抽帧封面、草稿箱 |
 | 状态机 | 草稿 → 审核 → 发布 / 驳回 → 下架，流转白名单校验 |
 | 定时发布 / 下架 | 提交时指定发布时间（到期 asynq 自动上线）；已发布视频可排定时下架，均可取消 |
 | 沉浸式 Feed | 上下滑视频流、三路规则召回（关注最新 / 热门加权 / 最新兜底）、Redis 已看去重、「不感兴趣」负反馈过滤 |
@@ -193,7 +193,7 @@ go-wind-shortplay/
 
 ### 1. 准备依赖服务
 
-PostgreSQL / Redis / MinIO / etcd 复用宿主机既有容器；ZLMediaKit 用 `docker run` 单独创建，并在 PostgreSQL 中建库 `shortplay`：
+PostgreSQL / Redis / 对象存储（S3 兼容，推荐 SeaweedFS）/ etcd 复用宿主机既有容器；ZLMediaKit 用 `docker run` 单独创建，并在 PostgreSQL 中建库 `shortplay`：
 
 ```bash
 docker run -d --name shortplay-zlmediakit --restart unless-stopped \
@@ -210,7 +210,7 @@ CREATE DATABASE shortplay;
 
 ```bash
 cd backend
-cp .env.example .env    # 填入本机 PostgreSQL / Redis / MinIO 连接值（.env 已 gitignore）
+cp .env.example .env    # 填入本机 PostgreSQL / Redis / 对象存储连接值（.env 已 gitignore）
 ```
 
 `.env` 会被 `make run`（app.mk 自动装载）与 docker compose 读取；各服务 `configs/*.yaml` 中的 `${VAR:default}` 占位符按「环境变量优先、缺省值兜底」解析（缺省值为占位串，**必须**在 `.env` 里给真实值才能连上依赖）。生产部署改经部署环境注入，严禁提交真实凭据。
@@ -260,7 +260,7 @@ flutter run --dart-define=API_BASE=http://127.0.0.1:7700   # 安卓模拟器缺�
 - **人工审核**：审核闭环为人工操作，未接机审
 - **Feed 排序**：三路召回为规则加权，非模型排序
 - **前端 AES key**：登录密码传输加密的 dev 缺省 key 为基座公开缺省（仅限本地），生产必须前后端同步更换（`AES_KEY` / `VITE_AES_KEY`）
-- **依赖服务自备**：PostgreSQL / Redis / MinIO / etcd 需自备实例（容器或托管），本仓库不编排它们
+- **依赖服务自备**：PostgreSQL / Redis / 对象存储（S3 兼容，推荐 SeaweedFS）/ etcd 需自备实例（容器或托管），本仓库不编排它们
 
 ### 常用命令
 

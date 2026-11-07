@@ -10,7 +10,7 @@
 
 1. **module 名**：`go-wind-shortplay`（基座 `go-wind-cms`）；`pkg/serviceid.ProjectName = "gowind-shortplay"`（验证码 Redis 键前缀 `gowind-shortplay:captcha:<id>` 等）。
 2. **端口**：admin REST `:7600`（SSE `:7601`）、app REST `:7700`（SSE `:7701`）、core gRPC `:7900`（基座 6600/6601、6700/6701、随机）。config 已支持 `${ADMIN_REST_ADDR}` 等环境变量覆盖。
-3. **数据指向**：外部容器——PostgreSQL `127.0.0.1:5432` 库 `shortplay`（user `postgres`）、Redis `127.0.0.1:6379`（db2 给 asynq）、MinIO `127.0.0.1:9000`；全部支持 `${ENV:default}` 覆盖（`DB_HOST` / `REDIS_ADDR` / `OSS_ENDPOINT` 等）。注册中心用 etcd `localhost:2379`（三服务 gRPC 互相发现）。
+3. **数据指向**：外部容器——PostgreSQL `127.0.0.1:5432` 库 `shortplay`（user `postgres`）、Redis `127.0.0.1:6379`（db2 给 asynq）、对象存储（S3 兼容，推荐 SeaweedFS）`127.0.0.1:9000`；全部支持 `${ENV:default}` 覆盖（`DB_HOST` / `REDIS_ADDR` / `OSS_ENDPOINT` 等）。注册中心用 etcd `localhost:2379`（三服务 gRPC 互相发现）。
 4. **裁剪**：CMS 内容类业务域整体移除（ai / content / site / social / flow / translator / webhook，清单见下节），并新增 shortplay 业务域（video / feed / report / sysconf / uba + identity 域裁剪版承载用户）。
 5. **新增基础设施**（基座没有，同步时勿被覆盖）：
    - `pkg/configenv/`——环境变量覆盖链路：注册名为 `env` 的配置源工厂，使各服务 `configs/*.yaml` 的 `${VAR:default}` 按「环境变量优先、缺省值兜底」解析（基座只注册 file source，环境变量默认不生效）；`OverrideAESKeyFromEnv()` 提供 `AES_KEY` 环境变量统一覆盖登录密码传输加密密钥（基座代码路径直引 `crypto.DefaultAESKey` 包级变量，配置文件的 `aes_key` 不参与解密）。三服务 `main.go` 启动时调用该钩子；各服务 `configs/config.yaml` 声明 `config: { type: env }` 启用。
@@ -42,7 +42,7 @@ proto 域共 **22 个**（`api/protos/<domain>/service/v1/`）：
 
 基于 [go-kratos v2](https://github.com/go-kratos/kratos) 的多租户微服务后端，Protobuf-first（契约驱动）工作流。
 
-**核心技术栈**：go-kratos v2.9.2（HTTP+gRPC+SSE）· Go 1.26 · ent v0.14（privacy/entql/sql-modifier/upsert/lock 五 feature）· 手写装配（wiring.go，无 DI 框架）· PostgreSQL（pgx/v5）· Redis · Asynq · JWT(HS256)+Casbin 鉴权 · MinIO · etcd 服务发现 · zap 日志。
+**核心技术栈**：go-kratos v2.9.2（HTTP+gRPC+SSE）· Go 1.26 · ent v0.14（privacy/entql/sql-modifier/upsert/lock 五 feature）· 手写装配（wiring.go，无 DI 框架）· PostgreSQL（pgx/v5）· Redis · Asynq · JWT(HS256)+Casbin 鉴权 · SeaweedFS（S3 兼容对象存储）· etcd 服务发现 · zap 日志。
 
 ## 三服务架构
 
@@ -51,7 +51,7 @@ HTTP/REST 请求
   └─ admin-service  (后台网关 BFF，REST:7600 / SSE:7601 / gRPC)
        └─ gRPC(etcd 发现) → core-service  (核心业务 + 数据落点, gRPC:7900)
                  ├─ ent ORM → PostgreSQL
-                 ├─ Redis / MinIO
+                 ├─ Redis / SeaweedFS
                  └─ Asynq 异步任务
 
 app-service (前台 BFF，REST:7700 / SSE:7701) ──gRPC──→ core-service
@@ -117,7 +117,7 @@ backend/
 
 ## 本地运行要点
 
-- **依赖**：PostgreSQL `127.0.0.1:5432/shortplay`、Redis `127.0.0.1:6379`（asynq 用 db2）、MinIO `127.0.0.1:9000`、etcd `127.0.0.1:2379`（复用宿主机既有容器）。
+- **依赖**：PostgreSQL `127.0.0.1:5432/shortplay`、Redis `127.0.0.1:6379`（asynq 用 db2）、对象存储（S3 兼容，推荐 SeaweedFS）`127.0.0.1:9000`、etcd `127.0.0.1:2379`（复用宿主机既有容器）。
 - **建库**：PostgreSQL 建库 `shortplay`；表结构由 core 首次启动 `migrate: true` 自动创建。
 - **环境变量**：`cp .env.example .env` 填真实值；`app.mk` 自动装载 `backend/.env` 并 export，`pkg/configenv` 的 env 配置源使各 yaml 的 `${VAR:default}` 按「环境变量优先、缺省值兜底」生效。注意 asynq URI 密码内嵌、走单层 `${ASYNQ_REDIS_URI:...}` 整体插值，不随 `REDIS_PASSWORD` 联动。
 - **种子**：Go 自动初始化，**不要找 SQL 种子脚本**（`sql/README.md`）：

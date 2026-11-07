@@ -10,7 +10,7 @@
 
 1. **生态惯例**：go-wind-cms 的 core 是模块化单体，单进程承载约 20 个领域（identity/content/comment/interaction/media/notify/ai…）。shortplay MVP 仅 3-4 个领域，远低于拆分阈值。
 2. **数据耦合天然**：Feed 一条数据 = 视频元数据 + 作者（关注态）+ 点赞/收藏计数 + 已看过滤。拆开则每页 Feed 跨服务扇出、计数与视频分属两库、删除联动变分布式事务——耦合没消除，只多了网络开销。
-3. **真实瓶颈在字节流**：短视频 MVP 的压力在 MinIO/CDN 带宽，API QPS 对企业内部小流量毫无压力；水平扩容路径是 core 无状态多副本 + LB，不需要拆服务。
+3. **真实瓶颈在字节流**：短视频 MVP 的压力在对象存储（SeaweedFS）/CDN 带宽，API QPS 对企业内部小流量毫无压力；水平扩容路径是 core 无状态多副本 + LB，不需要拆服务。
 4. **开源部署极简**：docker compose 共 5 个容器（postgres/redis/minio/core/admin/app 共 6），再拆就是 9 个，直接劝退自部署用户。
 
 ## 可抽取设计（为 Phase 3 商业包留口子）

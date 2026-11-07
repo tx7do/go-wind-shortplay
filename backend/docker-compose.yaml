@@ -1,6 +1,6 @@
 # 短剧应用服务编排：仅包含三个应用服务。
 #
-# 第三方依赖（Citus PostgreSQL、Redis、MinIO、etcd）复用宿主机既有容器，
+# 第三方依赖（Citus PostgreSQL、Redis、对象存储（S3 兼容，推荐 SeaweedFS）、etcd）复用宿主机既有容器，
 # 不在本文件内创建；ZLMediaKit 经 docker run 单独创建（shortplay-zlmediakit）。
 # 依赖连接经环境变量注入（缺省值见 app/*/service/configs/*.yaml 的 ${ENV:default}）：
 #   DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME、REDIS_ADDR/REDIS_PASSWORD、
