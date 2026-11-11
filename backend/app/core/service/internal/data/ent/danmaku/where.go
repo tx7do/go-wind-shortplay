@@ -10,47 +10,47 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id uint32) predicate.Danmaku {
+func ID(id int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uint32) predicate.Danmaku {
+func IDEQ(id int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uint32) predicate.Danmaku {
+func IDNEQ(id int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uint32) predicate.Danmaku {
+func IDIn(ids ...int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...uint32) predicate.Danmaku {
+func IDNotIn(ids ...int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id uint32) predicate.Danmaku {
+func IDGT(id int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uint32) predicate.Danmaku {
+func IDGTE(id int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id uint32) predicate.Danmaku {
+func IDLT(id int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uint32) predicate.Danmaku {
+func IDLTE(id int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldLTE(FieldID, id))
 }
 
@@ -70,17 +70,17 @@ func DeletedAt(v time.Time) predicate.Danmaku {
 }
 
 // TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
-func TenantID(v uint32) predicate.Danmaku {
+func TenantID(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldEQ(FieldTenantID, v))
 }
 
 // VideoID applies equality check predicate on the "video_id" field. It's identical to VideoIDEQ.
-func VideoID(v uint32) predicate.Danmaku {
+func VideoID(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldEQ(FieldVideoID, v))
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v uint32) predicate.Danmaku {
+func UserID(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldEQ(FieldUserID, v))
 }
 
@@ -245,42 +245,42 @@ func DeletedAtNotNil() predicate.Danmaku {
 }
 
 // TenantIDEQ applies the EQ predicate on the "tenant_id" field.
-func TenantIDEQ(v uint32) predicate.Danmaku {
+func TenantIDEQ(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldEQ(FieldTenantID, v))
 }
 
 // TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
-func TenantIDNEQ(v uint32) predicate.Danmaku {
+func TenantIDNEQ(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldNEQ(FieldTenantID, v))
 }
 
 // TenantIDIn applies the In predicate on the "tenant_id" field.
-func TenantIDIn(vs ...uint32) predicate.Danmaku {
+func TenantIDIn(vs ...int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldIn(FieldTenantID, vs...))
 }
 
 // TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
-func TenantIDNotIn(vs ...uint32) predicate.Danmaku {
+func TenantIDNotIn(vs ...int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldNotIn(FieldTenantID, vs...))
 }
 
 // TenantIDGT applies the GT predicate on the "tenant_id" field.
-func TenantIDGT(v uint32) predicate.Danmaku {
+func TenantIDGT(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldGT(FieldTenantID, v))
 }
 
 // TenantIDGTE applies the GTE predicate on the "tenant_id" field.
-func TenantIDGTE(v uint32) predicate.Danmaku {
+func TenantIDGTE(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldGTE(FieldTenantID, v))
 }
 
 // TenantIDLT applies the LT predicate on the "tenant_id" field.
-func TenantIDLT(v uint32) predicate.Danmaku {
+func TenantIDLT(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldLT(FieldTenantID, v))
 }
 
 // TenantIDLTE applies the LTE predicate on the "tenant_id" field.
-func TenantIDLTE(v uint32) predicate.Danmaku {
+func TenantIDLTE(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldLTE(FieldTenantID, v))
 }
 
@@ -295,82 +295,82 @@ func TenantIDNotNil() predicate.Danmaku {
 }
 
 // VideoIDEQ applies the EQ predicate on the "video_id" field.
-func VideoIDEQ(v uint32) predicate.Danmaku {
+func VideoIDEQ(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldEQ(FieldVideoID, v))
 }
 
 // VideoIDNEQ applies the NEQ predicate on the "video_id" field.
-func VideoIDNEQ(v uint32) predicate.Danmaku {
+func VideoIDNEQ(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldNEQ(FieldVideoID, v))
 }
 
 // VideoIDIn applies the In predicate on the "video_id" field.
-func VideoIDIn(vs ...uint32) predicate.Danmaku {
+func VideoIDIn(vs ...int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldIn(FieldVideoID, vs...))
 }
 
 // VideoIDNotIn applies the NotIn predicate on the "video_id" field.
-func VideoIDNotIn(vs ...uint32) predicate.Danmaku {
+func VideoIDNotIn(vs ...int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldNotIn(FieldVideoID, vs...))
 }
 
 // VideoIDGT applies the GT predicate on the "video_id" field.
-func VideoIDGT(v uint32) predicate.Danmaku {
+func VideoIDGT(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldGT(FieldVideoID, v))
 }
 
 // VideoIDGTE applies the GTE predicate on the "video_id" field.
-func VideoIDGTE(v uint32) predicate.Danmaku {
+func VideoIDGTE(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldGTE(FieldVideoID, v))
 }
 
 // VideoIDLT applies the LT predicate on the "video_id" field.
-func VideoIDLT(v uint32) predicate.Danmaku {
+func VideoIDLT(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldLT(FieldVideoID, v))
 }
 
 // VideoIDLTE applies the LTE predicate on the "video_id" field.
-func VideoIDLTE(v uint32) predicate.Danmaku {
+func VideoIDLTE(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldLTE(FieldVideoID, v))
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v uint32) predicate.Danmaku {
+func UserIDEQ(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v uint32) predicate.Danmaku {
+func UserIDNEQ(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...uint32) predicate.Danmaku {
+func UserIDIn(vs ...int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...uint32) predicate.Danmaku {
+func UserIDNotIn(vs ...int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // UserIDGT applies the GT predicate on the "user_id" field.
-func UserIDGT(v uint32) predicate.Danmaku {
+func UserIDGT(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldGT(FieldUserID, v))
 }
 
 // UserIDGTE applies the GTE predicate on the "user_id" field.
-func UserIDGTE(v uint32) predicate.Danmaku {
+func UserIDGTE(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldGTE(FieldUserID, v))
 }
 
 // UserIDLT applies the LT predicate on the "user_id" field.
-func UserIDLT(v uint32) predicate.Danmaku {
+func UserIDLT(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldLT(FieldUserID, v))
 }
 
 // UserIDLTE applies the LTE predicate on the "user_id" field.
-func UserIDLTE(v uint32) predicate.Danmaku {
+func UserIDLTE(v int64) predicate.Danmaku {
 	return predicate.Danmaku(sql.FieldLTE(FieldUserID, v))
 }
 

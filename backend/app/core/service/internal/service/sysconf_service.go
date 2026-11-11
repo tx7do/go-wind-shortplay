@@ -72,8 +72,8 @@ func (s *SysConfService) UpdateSysConf(ctx context.Context, req *sysconfV1.Updat
 		return nil, sysconfV1.ErrorBadRequest("invalid parameter")
 	}
 	e, err := s.sysConfRepo.Update(ctx, &data.SysConfUpdate{
-		MaxUploadMB:         req.MaxUploadSizeMb,
-		MaxDuration:         req.MaxDurationSeconds,
+		MaxUploadMB:         i64pFromU32(req.MaxUploadSizeMb),
+		MaxDuration:         i64pFromU32(req.MaxDurationSeconds),
 		ManualReview:        req.ManualReviewEnabled,
 		Register:            req.RegisterEnabled,
 		AllowedTypes:        req.AllowedVideoTypes,
@@ -89,4 +89,12 @@ func (s *SysConfService) UpdateSysConf(ctx context.Context, req *sysconfV1.Updat
 		return nil, err
 	}
 	return sysconfEntityToDTO(e), nil
+}
+
+func i64pFromU32(v *uint32) *int64 {
+	if v == nil {
+		return nil
+	}
+	x := int64(*v)
+	return &x
 }

@@ -6,11 +6,11 @@ import (
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/log"
-	paginationV1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
-	"github.com/tx7do/kratos-bootstrap/bootstrap"
 	"github.com/redis/go-redis/v9"
+	paginationV1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
 	"github.com/tx7do/go-utils/timeutil"
 	"github.com/tx7do/go-utils/trans"
+	"github.com/tx7do/kratos-bootstrap/bootstrap"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
@@ -56,9 +56,9 @@ func NewImService(
 }
 
 // userBriefOf 取用户简况（失败返回空简况，展示兜底）
-func (s *ImService) userBriefOf(ctx context.Context, userID uint32) *identityV1.UserBrief {
+func (s *ImService) userBriefOf(ctx context.Context, userID int64) *identityV1.UserBrief {
 	if userID == 0 {
-		return &identityV1.UserBrief{Id: trans.Ptr(uint32(0))}
+		return &identityV1.UserBrief{Id: trans.Ptr(int64(0))}
 	}
 	if u, err := s.userRepo.Get(ctx, &identityV1.GetUserRequest{
 		QueryBy: &identityV1.GetUserRequest_Id{Id: userID},
@@ -69,7 +69,7 @@ func (s *ImService) userBriefOf(ctx context.Context, userID uint32) *identityV1.
 }
 
 // peerOfViewer 会话对端 = 非 viewer 一侧
-func peerOfViewer(e *ent.ImConversation, uid uint32) uint32 {
+func peerOfViewer(e *ent.ImConversation, uid int64) int64 {
 	if uid == e.ParticipantAID {
 		return e.ParticipantBID
 	}
@@ -77,15 +77,15 @@ func peerOfViewer(e *ent.ImConversation, uid uint32) uint32 {
 }
 
 // conversationUnread viewer 侧未读数
-func conversationUnread(e *ent.ImConversation, uid uint32) uint64 {
+func conversationUnread(e *ent.ImConversation, uid int64) int64 {
 	if uid == e.ParticipantAID {
-		return e.AUnreadCount
+		return int64(e.AUnreadCount)
 	}
-	return e.BUnreadCount
+	return int64(e.BUnreadCount)
 }
 
 // conversationToDTO ent 会话 → proto（peer 简况由调用方传入）
-func conversationToDTO(e *ent.ImConversation, uid uint32, peer *identityV1.UserBrief) *imV1.Conversation {
+func conversationToDTO(e *ent.ImConversation, uid int64, peer *identityV1.UserBrief) *imV1.Conversation {
 	return &imV1.Conversation{
 		Id:                 trans.Ptr(e.ID),
 		PeerId:             trans.Ptr(peerOfViewer(e, uid)),
@@ -167,7 +167,7 @@ func (s *ImService) SendMessage(ctx context.Context, req *imV1.SendMessageReques
 }
 
 // publishImEvent 发布私信实时事件（尽力而为，失败仅记日志）
-func (s *ImService) publishImEvent(ctx context.Context, senderID, receiverID, convID, msgID uint32, content string) {
+func (s *ImService) publishImEvent(ctx context.Context, senderID, receiverID, convID, msgID int64, content string) {
 	if s.redis == nil {
 		return
 	}
@@ -187,7 +187,7 @@ func (s *ImService) publishImEvent(ctx context.Context, senderID, receiverID, co
 }
 
 // imPageArgs im 请求分页参数（缺省 1/20，上限 50）
-func imPageArgs(pageNum, pageSize uint32) (uint32, uint32) {
+func imPageArgs(pageNum, pageSize int64) (int64, int64) {
 	if pageNum < 1 {
 		pageNum = 1
 	}
@@ -220,7 +220,7 @@ func (s *ImService) ListConversations(ctx context.Context, req *paginationV1.Pag
 	if err != nil {
 		return nil, err
 	}
-	peerIDs := make([]uint32, 0, len(items))
+	peerIDs := make([]int64, 0, len(items))
 	for _, e := range items {
 		peerIDs = append(peerIDs, peerOfViewer(e, uid))
 	}
@@ -233,8 +233,8 @@ func (s *ImService) ListConversations(ctx context.Context, req *paginationV1.Pag
 }
 
 // userBriefsOf 批量用户简况（失败留空简况）
-func (s *ImService) userBriefsOf(ctx context.Context, userIDs []uint32) map[uint32]*identityV1.UserBrief {
-	out := make(map[uint32]*identityV1.UserBrief, len(userIDs))
+func (s *ImService) userBriefsOf(ctx context.Context, userIDs []int64) map[int64]*identityV1.UserBrief {
+	out := make(map[int64]*identityV1.UserBrief, len(userIDs))
 	for _, id := range userIDs {
 		if id == 0 {
 			continue
@@ -260,7 +260,7 @@ func (s *ImService) ListMessages(ctx context.Context, req *imV1.ListMessagesRequ
 	if uid != conv.ParticipantAID && uid != conv.ParticipantBID {
 		return nil, imV1.ErrorNotConversationParticipant("not conversation participant")
 	}
-	pageNum, pageSize := imPageArgs(req.GetPageNum(), req.GetPageSize())
+	pageNum, pageSize := imPageArgs(int64(req.GetPageNum()), int64(req.GetPageSize()))
 	if pageSize < 20 {
 		pageSize = 20
 	}
@@ -268,7 +268,7 @@ func (s *ImService) ListMessages(ctx context.Context, req *imV1.ListMessagesRequ
 	if err != nil {
 		return nil, err
 	}
-	senderIDs := make([]uint32, 0, len(items))
+	senderIDs := make([]int64, 0, len(items))
 	for _, e := range items {
 		senderIDs = append(senderIDs, e.SenderID)
 	}
@@ -308,7 +308,7 @@ func (s *ImService) AdminList(ctx context.Context, req *paginationV1.PagingReque
 	if err != nil {
 		return nil, err
 	}
-	senderIDs := make([]uint32, 0, len(items))
+	senderIDs := make([]int64, 0, len(items))
 	for _, e := range items {
 		senderIDs = append(senderIDs, e.SenderID)
 	}
@@ -354,5 +354,5 @@ func (s *ImService) CountUnread(ctx context.Context, _ *emptypb.Empty) (*imV1.Co
 	if err != nil {
 		return nil, err
 	}
-	return &imV1.CountUnreadResponse{Count: trans.Ptr(uint64(total))}, nil
+	return &imV1.CountUnreadResponse{Count: trans.Ptr(int64(total))}, nil
 }

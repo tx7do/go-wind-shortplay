@@ -6,9 +6,9 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	paginationV1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
+	"github.com/tx7do/go-utils/trans"
 	"github.com/tx7do/kratos-bootstrap/bootstrap"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"github.com/tx7do/go-utils/trans"
 
 	seriesV1 "go-wind-shortplay/api/gen/go/series/service/v1"
 
@@ -51,7 +51,7 @@ func (s *SeriesService) RegisterNotifier(n InternalMessageNotifier) {
 }
 
 // isSeriesOwner 归属判断：作者本人或管理端（平台/系统上下文）
-func isSeriesOwner(ctx context.Context, authorID uint32) bool {
+func isSeriesOwner(ctx context.Context, authorID int64) bool {
 	if spIsAdminCaller(ctx) {
 		return true
 	}
@@ -107,11 +107,11 @@ func (s *SeriesService) GetSeries(ctx context.Context, req *seriesV1.GetSeriesRe
 	// 追剧人数 + 观看者追剧状态（尽力而为，失败不阻塞详情）
 	if s.seriesFollowRepo != nil {
 		if fc, ferr := s.seriesFollowRepo.FollowerCount(ctx, req.GetId()); ferr == nil {
-			detail.FollowerCount = trans.Ptr(uint64(fc))
-			dto.FollowerCount = trans.Ptr(uint64(fc))
+			detail.FollowerCount = u64FromI64v(fc)
+			dto.FollowerCount = u64FromI64v(fc)
 		}
 		if uid := spViewerUserID(ctx); uid > 0 {
-			st, serr := s.seriesFollowRepo.GetFollowStatus(ctx, uid, []uint32{req.GetId()})
+			st, serr := s.seriesFollowRepo.GetFollowStatus(ctx, uid, []int64{req.GetId()})
 			if serr == nil {
 				detail.ViewerFollowing = trans.Ptr(st[req.GetId()])
 			}
@@ -174,12 +174,12 @@ func (s *SeriesService) ListSeries(ctx context.Context, req *paginationV1.Paging
 func (s *SeriesService) QuerySeries(ctx context.Context, req *seriesV1.QuerySeriesRequest) (*seriesV1.ListSeriesResponse, error) {
 	authorID := req.GetAuthorId()
 	isSelf := authorID > 0 && authorID == spViewerUserID(ctx)
-	return s.seriesRepo.ListByFilter(ctx, req.GetQuery(), authorID, !isSelf, req.GetPageNum(), req.GetPageSize())
+	return s.seriesRepo.ListByFilter(ctx, req.GetQuery(), authorID, !isSelf, int64(req.GetPageNum()), int64(req.GetPageSize()))
 }
 
 // resolveSeriesAttach 校验挂靠请求：剧须存在且为本人所有，返回 (seriesID, episodeNumber)。
 // episodeNumber 缺省（0）时自动排到剧内当前最大集号 +1。
-func (s *SeriesService) ResolveSeriesAttach(ctx context.Context, uid uint32, seriesID, episodeNumber uint32) (uint32, uint32, error) {
+func (s *SeriesService) ResolveSeriesAttach(ctx context.Context, uid int64, seriesID, episodeNumber int64) (int64, int64, error) {
 	se, err := s.seriesRepo.GetEntityRaw(ctx, seriesID)
 	if err != nil {
 		return 0, 0, err
@@ -217,7 +217,7 @@ func (s *SeriesService) FollowSeries(ctx context.Context, req *seriesV1.FollowSe
 	fc, _ := s.seriesFollowRepo.FollowerCount(ctx, req.GetSeriesId())
 	return &seriesV1.FollowSeriesResponse{
 		Following:     trans.Ptr(true),
-		FollowerCount: trans.Ptr(uint64(fc)),
+		FollowerCount: u64FromI64v(fc),
 	}, nil
 }
 
@@ -236,7 +236,7 @@ func (s *SeriesService) UnfollowSeries(ctx context.Context, req *seriesV1.Follow
 	fc, _ := s.seriesFollowRepo.FollowerCount(ctx, req.GetSeriesId())
 	return &seriesV1.FollowSeriesResponse{
 		Following:     trans.Ptr(false),
-		FollowerCount: trans.Ptr(uint64(fc)),
+		FollowerCount: u64FromI64v(fc),
 	}, nil
 }
 
@@ -256,11 +256,11 @@ func (s *SeriesService) ListFollowedSeries(ctx context.Context, req *paginationV
 
 // GetSeriesFollowStatus 批量追剧状态（游客全 false）
 func (s *SeriesService) GetSeriesFollowStatus(ctx context.Context, req *seriesV1.GetSeriesFollowStatusRequest) (*seriesV1.GetSeriesFollowStatusResponse, error) {
-	resp := &seriesV1.GetSeriesFollowStatusResponse{Statuses: make(map[uint32]*seriesV1.SeriesFollowStatus)}
+	resp := &seriesV1.GetSeriesFollowStatusResponse{Statuses: make(map[int64]*seriesV1.SeriesFollowStatus)}
 	if req == nil || len(req.GetSeriesIds()) == 0 {
 		return resp, nil
 	}
-	following := make(map[uint32]bool)
+	following := make(map[int64]bool)
 	if uid := spViewerUserID(ctx); uid > 0 {
 		following, _ = s.seriesFollowRepo.GetFollowStatus(ctx, uid, req.GetSeriesIds())
 	}
@@ -271,16 +271,16 @@ func (s *SeriesService) GetSeriesFollowStatus(ctx context.Context, req *seriesV1
 }
 
 // pageArgsSeriesOf pagination.PagingRequest → (page, pageSize)，缺省 1/10 上限 50。
-func pageArgsOfSeries(req *paginationV1.PagingRequest) (uint32, uint32) {
-	page, pageSize := uint32(1), uint32(10)
+func pageArgsOfSeries(req *paginationV1.PagingRequest) (int64, int64) {
+	page, pageSize := int64(1), int64(10)
 	if req == nil {
 		return page, pageSize
 	}
 	if req.GetPage() > 0 {
-		page = req.GetPage()
+		page = int64(req.GetPage())
 	}
-	if req.GetPageSize() > 0 {
-		pageSize = req.GetPageSize()
+	if int64(req.GetPageSize()) > 0 {
+		pageSize = int64(req.GetPageSize())
 	}
 	if pageSize > 50 {
 		pageSize = 50
@@ -290,12 +290,12 @@ func pageArgsOfSeries(req *paginationV1.PagingRequest) (uint32, uint32) {
 
 // NotifyFollowersNewEpisode 剧集更新通知：新集发布后 fan-out 给追剧者（作者除外，
 // 系统口径无 actor；尽力而为不回滚发布主流程；人数截断到 spSeriesFollowNotifyCap）。
-func (s *SeriesService) NotifyFollowersNewEpisode(ctx context.Context, seriesID, videoID, episodeNumber uint32, videoTitle string, authorID uint32) {
+func (s *SeriesService) NotifyFollowersNewEpisode(ctx context.Context, seriesID, videoID, episodeNumber int64, videoTitle string, authorID int64) {
 	if s.internalMessage == nil || s.seriesFollowRepo == nil || seriesID == 0 || videoID == 0 {
 		return
 	}
 	targets := s.seriesFollowRepo.FollowerUserIDs(ctx, seriesID)
-	filtered := make([]uint32, 0, len(targets))
+	filtered := make([]int64, 0, len(targets))
 	for _, uid := range targets {
 		if uid != 0 && uid != authorID {
 			filtered = append(filtered, uid)
@@ -308,9 +308,14 @@ func (s *SeriesService) NotifyFollowersNewEpisode(ctx context.Context, seriesID,
 	if err != nil {
 		return
 	}
-	body := "你追的剧《" + se.Title + "》更新了：第 " + strconv.FormatUint(uint64(episodeNumber), 10) +
+	body := "你追的剧《" + se.Title + "》更新了：第 " + strconv.FormatInt(int64(episodeNumber), 10) +
 		" 集《" + videoTitle + "》已上线" + spVideoBizMarker(videoID)
 	if _, err := s.internalMessage.SendSystemNotification(ctx, "追更更新", body, filtered); err != nil {
 		s.log.Errorf("notify series followers failed: %s", err.Error())
 	}
+}
+
+func u64FromI64v(v int) *uint64 {
+	x := uint64(v)
+	return &x
 }

@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	crudViewer "github.com/tx7do/go-crud/viewer"
 	"github.com/go-kratos/kratos/v2/log"
+	crudViewer "github.com/tx7do/go-crud/viewer"
 	"github.com/tx7do/go-utils/timeutil"
 	"github.com/tx7do/go-utils/trans"
 	"github.com/tx7do/kratos-bootstrap/bootstrap"
@@ -17,9 +17,9 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent"
 	"go-wind-shortplay/app/core/service/internal/data/ent/videoreport"
 
+	danmakuV1 "go-wind-shortplay/api/gen/go/danmaku/service/v1"
 	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
 	reportV1 "go-wind-shortplay/api/gen/go/report/service/v1"
-	danmakuV1 "go-wind-shortplay/api/gen/go/danmaku/service/v1"
 	videoV1 "go-wind-shortplay/api/gen/go/video/service/v1"
 
 	appViewer "go-wind-shortplay/pkg/entgo/viewer"
@@ -28,18 +28,18 @@ import (
 // InternalMessageNotifier 站内信系统能力（由 InternalMessageService 实现，装配期注入）。
 type InternalMessageNotifier interface {
 	// SendSystemNotification 系统事件通知（基座通知域投递缝，见 internal_message_service.go）。
-	SendSystemNotification(ctx context.Context, title, content string, targetUserIDs []uint32) (uint32, error)
+	SendSystemNotification(ctx context.Context, title, content string, targetUserIDs []int64) (int64, error)
 }
 
 // SuperAdminResolver 超管用户 ID 解析（举报通知收件人，由 RoleService 实现）。
 type SuperAdminResolver interface {
-	ListSuperAdminUserIDs(ctx context.Context) ([]uint32, error)
+	ListSuperAdminUserIDs(ctx context.Context) ([]int64, error)
 }
 
 // VideoModerator 视频处置能力（由 VideoService 实现）：举报处置通过时
 // 联动下架被举报视频——走状态机白名单 + 落驳回原因 + 通知作者。
 type VideoModerator interface {
-	ModerateOffline(ctx context.Context, videoID uint32, reason string) error
+	ModerateOffline(ctx context.Context, videoID int64, reason string) error
 }
 
 type ReportService struct {
@@ -140,7 +140,7 @@ const spBizMarkerPrefix = "\nsp-biz:"
 // 整条链路固定以系统 viewer 执行：举报请求携带租户用户上下文，直接透传会让
 // 消息/收件行被 TenantPrivacy 强注举报者租户（收件人租户归属失真），且超管角色
 // 解析在租户过滤下命不中平台级 platform:admin。
-func (s *ReportService) notifySuperAdmins(ctx context.Context, reportID uint32, req *reportV1.CreateReportRequest) {
+func (s *ReportService) notifySuperAdmins(ctx context.Context, reportID int64, req *reportV1.CreateReportRequest) {
 	if s.internalMessage == nil || s.superAdmins == nil {
 		return
 	}
@@ -151,14 +151,14 @@ func (s *ReportService) notifySuperAdmins(ctx context.Context, reportID uint32, 
 		return
 	}
 	title := "新举报工单待处理"
-	content := "工单 #" + strconv.FormatUint(uint64(reportID), 10) +
+	content := "工单 #" + strconv.FormatInt(reportID, 10) +
 		"：目标类型=" + req.GetTargetType().String() +
-		"，目标ID=" + strconv.FormatUint(uint64(req.GetTargetId()), 10) +
+		"，目标ID=" + strconv.FormatInt(int64(req.GetTargetId()), 10) +
 		"，原因=" + req.GetReason()
 	// 视频举报在 content 末尾追加机器可读尾标记（约定见 spBizMarkerPrefix），
 	// 供客户端点击通知直达视频详情；其余目标类型不带标记。
 	if req.GetTargetType() == reportV1.ReportTargetType_REPORT_TARGET_TYPE_VIDEO {
-		content += spBizMarkerPrefix + `{"videoId":` + strconv.FormatUint(uint64(req.GetTargetId()), 10) + `}`
+		content += spBizMarkerPrefix + `{"videoId":` + strconv.FormatInt(int64(req.GetTargetId()), 10) + `}`
 	}
 	if _, err = s.internalMessage.SendSystemNotification(ctx, title, content, adminIDs); err != nil {
 		s.log.Errorf("report notify super admins failed: %v", err)

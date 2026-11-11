@@ -148,7 +148,7 @@ func (s *AuthenticationService) Register(ctx context.Context, req *authenticatio
 		return nil, authenticationV1.ErrorServiceUnavailable("register unavailable")
 	}
 
-	var tenantID uint32
+	var tenantID int64
 	if hr, ok := khttp.RequestFromServerContext(ctx); ok && hr != nil && hr.Host != "" {
 		if tid, err := s.tenantResolve.ResolveTenantIDByDomain(ctx, hr.Host); err == nil {
 			tenantID = tid
@@ -187,7 +187,7 @@ func (s *AuthenticationService) Register(ctx context.Context, req *authenticatio
 // ── shortplay 旧契约兼容面（/auth/*）──
 
 // authLoginResponseOf 基座登录响应 → 旧契约包装（authenticator + user）
-func (s *AuthenticationService) authLoginResponseOf(ctx context.Context, resp *authenticationV1.LoginResponse, uid uint32) (*appV1.AuthLoginResponse, error) {
+func (s *AuthenticationService) authLoginResponseOf(ctx context.Context, resp *authenticationV1.LoginResponse, uid int64) (*appV1.AuthLoginResponse, error) {
 	out := &appV1.AuthLoginResponse{}
 	if resp != nil {
 		out.Authenticator = &appV1.Authenticator{
@@ -304,7 +304,7 @@ func (s *AuthenticationService) AuthRefresh(ctx context.Context, req *appV1.Auth
 
 // findRefreshBinding 按刷新令牌值反查 Redis 绑定键（gwc:rt:1:{uid}:{jti}）。
 // 有界扫描：刷新是低频操作，活跃会话键量有限。
-func (s *AuthenticationService) findRefreshBinding(ctx context.Context, refreshToken string) (uid uint32, jti string, found bool) {
+func (s *AuthenticationService) findRefreshBinding(ctx context.Context, refreshToken string) (uid int64, jti string, found bool) {
 	if s.redisClient == nil {
 		return 0, "", false
 	}
@@ -326,11 +326,11 @@ func (s *AuthenticationService) findRefreshBinding(ctx context.Context, refreshT
 			if len(parts) != 5 {
 				continue
 			}
-			u64, perr := strconv.ParseUint(parts[3], 10, 32)
+			u64, perr := strconv.ParseInt(parts[3], 10, 64)
 			if perr != nil {
 				continue
 			}
-			return uint32(u64), parts[4], true
+			return int64(u64), parts[4], true
 		}
 		if next == 0 {
 			break
@@ -347,7 +347,7 @@ func (s *AuthenticationService) AuthLogout(ctx context.Context, _ *emptypb.Empty
 
 // spTokenClaims 访问令牌 payload claims（仅取展示字段）
 type spTokenClaims struct {
-	UserId   uint32
+	UserId   int64
 	Username string
 }
 
@@ -371,10 +371,10 @@ func decodeJWTPayloadSP(token string) *spTokenClaims {
 	out := &spTokenClaims{Username: claims.Sub}
 	switch v := claims.UID.(type) {
 	case float64:
-		out.UserId = uint32(v)
+		out.UserId = int64(v)
 	case string:
-		if u64, perr := strconv.ParseUint(v, 10, 32); perr == nil {
-			out.UserId = uint32(u64)
+		if u64, perr := strconv.ParseInt(v, 10, 64); perr == nil {
+			out.UserId = int64(u64)
 		}
 	}
 	return out

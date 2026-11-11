@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/tx7do/kratos-bootstrap/bootstrap"
 	"github.com/tx7do/go-utils/timeutil"
 	"github.com/tx7do/go-utils/trans"
+	"github.com/tx7do/kratos-bootstrap/bootstrap"
 
 	paginationV1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
 	entCrud "github.com/tx7do/go-crud/entgo"
@@ -25,7 +25,7 @@ import (
 const spSeriesEpisodeLimit = 200
 
 // seriesEntityToDTO ent.Series → proto Series（集数为实时派生，由调用方传入）
-func seriesEntityToDTO(e *ent.Series, episodeCount, publishedCount uint64) *seriesV1.Series {
+func seriesEntityToDTO(e *ent.Series, episodeCount, publishedCount int64) *seriesV1.Series {
 	if e == nil {
 		return nil
 	}
@@ -35,8 +35,8 @@ func seriesEntityToDTO(e *ent.Series, episodeCount, publishedCount uint64) *seri
 		Description:    e.Description,
 		CoverUrl:       e.CoverURL,
 		AuthorId:       trans.Ptr(e.AuthorID),
-		EpisodeCount:   trans.Ptr(episodeCount),
-		PublishedCount: trans.Ptr(publishedCount),
+		EpisodeCount:   u64Val(episodeCount),
+		PublishedCount: u64Val(publishedCount),
 		CreatedAt:      timeutil.TimeToTimestamppb(e.CreatedAt),
 		UpdatedAt:      timeutil.TimeToTimestamppb(e.UpdatedAt),
 	}
@@ -45,7 +45,7 @@ func seriesEntityToDTO(e *ent.Series, episodeCount, publishedCount uint64) *seri
 // fillEpisodeCovers 剧集展示封面回退：未设封面的剧批量取第一集（集号最小、已发布优先）的封面回填。
 // 仅回填响应 DTO，不落库；单条查询失败静默跳过（展示冗余字段）。
 func (r *SeriesRepo) fillEpisodeCovers(ctx context.Context, items ...*seriesV1.Series) {
-	ids := make([]uint32, 0, len(items))
+	ids := make([]int64, 0, len(items))
 	for _, it := range items {
 		if it != nil && it.GetCoverUrl() == "" && it.GetId() > 0 {
 			ids = append(ids, it.GetId())
@@ -79,9 +79,9 @@ func (r *SeriesRepo) fillEpisodeCovers(ctx context.Context, items ...*seriesV1.S
 
 // pickEpisodeCovers 纯选取逻辑（可单测）：按集号升序入参扫描，每剧记录
 // 首个带封面的集（firstAny）与首个已发布带封面的集（firstPub）。
-func pickEpisodeCovers(vs []*ent.Video) (firstAny, firstPub map[uint32]string) {
-	firstAny = make(map[uint32]string, len(vs))
-	firstPub = make(map[uint32]string, len(vs))
+func pickEpisodeCovers(vs []*ent.Video) (firstAny, firstPub map[int64]string) {
+	firstAny = make(map[int64]string, len(vs))
+	firstPub = make(map[int64]string, len(vs))
 	for _, v := range vs {
 		if v == nil || v.CoverURL == nil || *v.CoverURL == "" {
 			continue
@@ -101,7 +101,7 @@ func pickEpisodeCovers(vs []*ent.Video) (firstAny, firstPub map[uint32]string) {
 // spSeriesListFilter 列表过滤条件（BFF 翻译 query JSON 后的结构）
 type spSeriesListFilter struct {
 	Title    *string `json:"title___icontains"`
-	AuthorID *uint32 `json:"author_id"`
+	AuthorID *int64  `json:"author_id"`
 }
 
 type SeriesRepo struct {
@@ -117,9 +117,9 @@ func NewSeriesRepo(ctx *bootstrap.Context, entClient *entCrud.EntClient[*ent.Cli
 }
 
 // seriesCountsOf 批量统计剧集的集总数与已发布集数（按 series_id 聚合，免维护计数列）
-func (r *SeriesRepo) seriesCountsOf(ctx context.Context, seriesIDs []uint32) (total, published map[uint32]uint64, err error) {
-	total = make(map[uint32]uint64, len(seriesIDs))
-	published = make(map[uint32]uint64, len(seriesIDs))
+func (r *SeriesRepo) seriesCountsOf(ctx context.Context, seriesIDs []int64) (total, published map[int64]int64, err error) {
+	total = make(map[int64]int64, len(seriesIDs))
+	published = make(map[int64]int64, len(seriesIDs))
 	if len(seriesIDs) == 0 {
 		return
 	}
@@ -140,12 +140,12 @@ func (r *SeriesRepo) seriesCountsOf(ctx context.Context, seriesIDs []uint32) (to
 	return
 }
 
-func (r *SeriesRepo) Get(ctx context.Context, id uint32) (*seriesV1.Series, error) {
+func (r *SeriesRepo) Get(ctx context.Context, id int64) (*seriesV1.Series, error) {
 	e, err := r.GetEntityRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	total, published, err := r.seriesCountsOf(ctx, []uint32{id})
+	total, published, err := r.seriesCountsOf(ctx, []int64{id})
 	if err != nil {
 		return nil, seriesV1.ErrorInternalServerError("get series failed")
 	}
@@ -155,7 +155,7 @@ func (r *SeriesRepo) Get(ctx context.Context, id uint32) (*seriesV1.Series, erro
 }
 
 // GetEntityRaw 内部取实体（服务层归属/可见性判断用）
-func (r *SeriesRepo) GetEntityRaw(ctx context.Context, id uint32) (*ent.Series, error) {
+func (r *SeriesRepo) GetEntityRaw(ctx context.Context, id int64) (*ent.Series, error) {
 	e, err := r.entClient.Client().Series.Query().Where(series.IDEQ(id)).Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -211,7 +211,7 @@ func (r *SeriesRepo) List(ctx context.Context, req *paginationV1.PagingRequest) 
 		return nil, seriesV1.ErrorInternalServerError("count series failed")
 	}
 
-	ids := make([]uint32, 0, len(items))
+	ids := make([]int64, 0, len(items))
 	for _, e := range items {
 		ids = append(ids, e.ID)
 	}
@@ -229,7 +229,7 @@ func (r *SeriesRepo) List(ctx context.Context, req *paginationV1.PagingRequest) 
 }
 
 // ListByIDs 按 ID 列表取剧集（保持入参顺序；onlyPublished 仅含有已发布集的剧）
-func (r *SeriesRepo) ListByIDs(ctx context.Context, ids []uint32, onlyPublished bool, page, pageSize uint32) (*seriesV1.ListSeriesResponse, error) {
+func (r *SeriesRepo) ListByIDs(ctx context.Context, ids []int64, onlyPublished bool, page, pageSize int64) (*seriesV1.ListSeriesResponse, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -247,7 +247,7 @@ func (r *SeriesRepo) ListByIDs(ctx context.Context, ids []uint32, onlyPublished 
 		r.log.Errorf("list series by ids failed: %s", err.Error())
 		return nil, seriesV1.ErrorInternalServerError("list series failed")
 	}
-	byID := make(map[uint32]*ent.Series, len(items))
+	byID := make(map[int64]*ent.Series, len(items))
 	for _, e := range items {
 		byID[e.ID] = e
 	}
@@ -291,7 +291,7 @@ func (r *SeriesRepo) ListByIDs(ctx context.Context, ids []uint32, onlyPublished 
 }
 
 // ListByFilter App 剧集列表（query 剧名模糊 / authorId 过滤；onlyPublished 仅含有已发布集的剧）
-func (r *SeriesRepo) ListByFilter(ctx context.Context, query string, authorID uint32, onlyPublished bool, page, pageSize uint32) (*seriesV1.ListSeriesResponse, error) {
+func (r *SeriesRepo) ListByFilter(ctx context.Context, query string, authorID int64, onlyPublished bool, page, pageSize int64) (*seriesV1.ListSeriesResponse, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -332,7 +332,7 @@ func (r *SeriesRepo) ListByFilter(ctx context.Context, query string, authorID ui
 		return nil, seriesV1.ErrorInternalServerError("list series failed")
 	}
 
-	ids := make([]uint32, 0, len(items))
+	ids := make([]int64, 0, len(items))
 	for _, e := range items {
 		ids = append(ids, e.ID)
 	}
@@ -350,7 +350,7 @@ func (r *SeriesRepo) ListByFilter(ctx context.Context, query string, authorID ui
 }
 
 // publishedSeriesIDs 存在已发布集的剧集 ID 集合（全量派生；行数为有剧的 series 数量级）
-func (r *SeriesRepo) publishedSeriesIDs(ctx context.Context) ([]uint32, error) {
+func (r *SeriesRepo) publishedSeriesIDs(ctx context.Context) ([]int64, error) {
 	vs, err := r.entClient.Client().Video.Query().
 		Where(video.SeriesIDGT(0), video.StatusEQ(video.StatusPublished)).
 		Select(video.FieldSeriesID).
@@ -359,8 +359,8 @@ func (r *SeriesRepo) publishedSeriesIDs(ctx context.Context) ([]uint32, error) {
 		r.log.Errorf("query published series ids failed: %s", err.Error())
 		return nil, seriesV1.ErrorInternalServerError("list series failed")
 	}
-	seen := make(map[uint32]struct{}, len(vs))
-	ids := make([]uint32, 0, len(vs))
+	seen := make(map[int64]struct{}, len(vs))
+	ids := make([]int64, 0, len(vs))
 	for _, v := range vs {
 		if _, dup := seen[v.SeriesID]; !dup {
 			seen[v.SeriesID] = struct{}{}
@@ -371,7 +371,7 @@ func (r *SeriesRepo) publishedSeriesIDs(ctx context.Context) ([]uint32, error) {
 }
 
 // ListVideosOfSeries 剧内选集（episode_number 升序、id 兜底）
-func (r *SeriesRepo) ListVideosOfSeries(ctx context.Context, seriesID uint32, onlyPublished bool) ([]*ent.Video, error) {
+func (r *SeriesRepo) ListVideosOfSeries(ctx context.Context, seriesID int64, onlyPublished bool) ([]*ent.Video, error) {
 	ps := []predicate.Video{video.SeriesIDEQ(seriesID)}
 	if onlyPublished {
 		ps = append(ps, video.StatusEQ(video.StatusPublished))
@@ -383,7 +383,7 @@ func (r *SeriesRepo) ListVideosOfSeries(ctx context.Context, seriesID uint32, on
 }
 
 // NextEpisodeNumber 剧内下一个集号（当前最大 +1；空剧为 1）
-func (r *SeriesRepo) NextEpisodeNumber(ctx context.Context, seriesID uint32) uint32 {
+func (r *SeriesRepo) NextEpisodeNumber(ctx context.Context, seriesID int64) int64 {
 	last, err := r.entClient.Client().Video.Query().
 		Where(video.SeriesIDEQ(seriesID)).
 		Order(ent.Desc(video.FieldEpisodeNumber)).
@@ -391,11 +391,11 @@ func (r *SeriesRepo) NextEpisodeNumber(ctx context.Context, seriesID uint32) uin
 	if err != nil || last == nil {
 		return 1
 	}
-	return last.EpisodeNumber + 1
+	return int64(last.EpisodeNumber + 1)
 }
 
 // Create 创建剧集
-func (r *SeriesRepo) Create(ctx context.Context, dto *seriesV1.Series, authorID uint32) (*seriesV1.Series, error) {
+func (r *SeriesRepo) Create(ctx context.Context, dto *seriesV1.Series, authorID int64) (*seriesV1.Series, error) {
 	if dto == nil || dto.GetTitle() == "" {
 		return nil, seriesV1.ErrorBadRequest("invalid parameter")
 	}
@@ -419,7 +419,7 @@ func (r *SeriesRepo) Create(ctx context.Context, dto *seriesV1.Series, authorID 
 }
 
 // Update 更新剧集（部分字段）
-func (r *SeriesRepo) Update(ctx context.Context, id uint32, dto *seriesV1.Series) (*seriesV1.Series, error) {
+func (r *SeriesRepo) Update(ctx context.Context, id int64, dto *seriesV1.Series) (*seriesV1.Series, error) {
 	builder := r.entClient.Client().Series.UpdateOneID(id)
 	if dto.Title != nil {
 		builder.SetTitle(dto.GetTitle())
@@ -444,7 +444,7 @@ func (r *SeriesRepo) Update(ctx context.Context, id uint32, dto *seriesV1.Series
 }
 
 // Delete 删除剧集行（剧内视频解挂由服务层同事务完成）
-func (r *SeriesRepo) Delete(ctx context.Context, id uint32) error {
+func (r *SeriesRepo) Delete(ctx context.Context, id int64) error {
 	if err := r.entClient.Client().Series.DeleteOneID(id).Exec(ctx); err != nil {
 		if ent.IsNotFound(err) {
 			return seriesV1.ErrorSeriesNotFound("series not found")
@@ -456,7 +456,7 @@ func (r *SeriesRepo) Delete(ctx context.Context, id uint32) error {
 }
 
 // DetachSeriesVideos 解挂剧内全部视频（清 series_id / episode_number）
-func (r *SeriesRepo) DetachSeriesVideos(ctx context.Context, seriesID uint32) error {
+func (r *SeriesRepo) DetachSeriesVideos(ctx context.Context, seriesID int64) error {
 	_, err := r.entClient.Client().Video.Update().
 		Where(video.SeriesIDEQ(seriesID)).
 		SetSeriesID(0).
@@ -467,4 +467,12 @@ func (r *SeriesRepo) DetachSeriesVideos(ctx context.Context, seriesID uint32) er
 		return seriesV1.ErrorInternalServerError("detach series videos failed")
 	}
 	return nil
+}
+
+func u64FromI64(v *int64) *uint64 {
+	if v == nil {
+		return nil
+	}
+	x := uint64(*v)
+	return &x
 }

@@ -17,7 +17,7 @@ type ImConversation struct {
 	config `json:"-"`
 	// ID of the ent.
 	// id
-	ID uint32 `json:"id,omitempty"`
+	ID int64 `json:"id,omitempty"`
 	// 创建时间
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	// 更新时间
@@ -25,11 +25,11 @@ type ImConversation struct {
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 租户ID
-	TenantID *uint32 `json:"tenant_id,omitempty"`
+	TenantID *int64 `json:"tenant_id,omitempty"`
 	// 参与方A（较小用户ID）
-	ParticipantAID uint32 `json:"participant_a_id,omitempty"`
+	ParticipantAID int64 `json:"participant_a_id,omitempty"`
 	// 参与方B（较大用户ID）
-	ParticipantBID uint32 `json:"participant_b_id,omitempty"`
+	ParticipantBID int64 `json:"participant_b_id,omitempty"`
 	// 最近一条消息预览（列表展示冗余）
 	LastMessagePreview string `json:"last_message_preview,omitempty"`
 	// 最近消息时间（空会话为空）
@@ -72,7 +72,7 @@ func (_m *ImConversation) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			_m.ID = uint32(value.Int64)
+			_m.ID = int64(value.Int64)
 		case imconversation.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -98,20 +98,20 @@ func (_m *ImConversation) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
 			} else if value.Valid {
-				_m.TenantID = new(uint32)
-				*_m.TenantID = uint32(value.Int64)
+				_m.TenantID = new(int64)
+				*_m.TenantID = value.Int64
 			}
 		case imconversation.FieldParticipantAID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field participant_a_id", values[i])
 			} else if value.Valid {
-				_m.ParticipantAID = uint32(value.Int64)
+				_m.ParticipantAID = value.Int64
 			}
 		case imconversation.FieldParticipantBID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field participant_b_id", values[i])
 			} else if value.Valid {
-				_m.ParticipantBID = uint32(value.Int64)
+				_m.ParticipantBID = value.Int64
 			}
 		case imconversation.FieldLastMessagePreview:
 			if value, ok := values[i].(*sql.NullString); !ok {

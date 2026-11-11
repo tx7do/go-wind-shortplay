@@ -65,13 +65,13 @@ func (_c *ImMessageCreate) SetNillableDeletedAt(v *time.Time) *ImMessageCreate {
 }
 
 // SetTenantID sets the "tenant_id" field.
-func (_c *ImMessageCreate) SetTenantID(v uint32) *ImMessageCreate {
+func (_c *ImMessageCreate) SetTenantID(v int64) *ImMessageCreate {
 	_c.mutation.SetTenantID(v)
 	return _c
 }
 
 // SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
-func (_c *ImMessageCreate) SetNillableTenantID(v *uint32) *ImMessageCreate {
+func (_c *ImMessageCreate) SetNillableTenantID(v *int64) *ImMessageCreate {
 	if v != nil {
 		_c.SetTenantID(*v)
 	}
@@ -79,13 +79,13 @@ func (_c *ImMessageCreate) SetNillableTenantID(v *uint32) *ImMessageCreate {
 }
 
 // SetConversationID sets the "conversation_id" field.
-func (_c *ImMessageCreate) SetConversationID(v uint32) *ImMessageCreate {
+func (_c *ImMessageCreate) SetConversationID(v int64) *ImMessageCreate {
 	_c.mutation.SetConversationID(v)
 	return _c
 }
 
 // SetNillableConversationID sets the "conversation_id" field if the given value is not nil.
-func (_c *ImMessageCreate) SetNillableConversationID(v *uint32) *ImMessageCreate {
+func (_c *ImMessageCreate) SetNillableConversationID(v *int64) *ImMessageCreate {
 	if v != nil {
 		_c.SetConversationID(*v)
 	}
@@ -93,13 +93,13 @@ func (_c *ImMessageCreate) SetNillableConversationID(v *uint32) *ImMessageCreate
 }
 
 // SetSenderID sets the "sender_id" field.
-func (_c *ImMessageCreate) SetSenderID(v uint32) *ImMessageCreate {
+func (_c *ImMessageCreate) SetSenderID(v int64) *ImMessageCreate {
 	_c.mutation.SetSenderID(v)
 	return _c
 }
 
 // SetNillableSenderID sets the "sender_id" field if the given value is not nil.
-func (_c *ImMessageCreate) SetNillableSenderID(v *uint32) *ImMessageCreate {
+func (_c *ImMessageCreate) SetNillableSenderID(v *int64) *ImMessageCreate {
 	if v != nil {
 		_c.SetSenderID(*v)
 	}
@@ -107,13 +107,13 @@ func (_c *ImMessageCreate) SetNillableSenderID(v *uint32) *ImMessageCreate {
 }
 
 // SetReceiverID sets the "receiver_id" field.
-func (_c *ImMessageCreate) SetReceiverID(v uint32) *ImMessageCreate {
+func (_c *ImMessageCreate) SetReceiverID(v int64) *ImMessageCreate {
 	_c.mutation.SetReceiverID(v)
 	return _c
 }
 
 // SetNillableReceiverID sets the "receiver_id" field if the given value is not nil.
-func (_c *ImMessageCreate) SetNillableReceiverID(v *uint32) *ImMessageCreate {
+func (_c *ImMessageCreate) SetNillableReceiverID(v *int64) *ImMessageCreate {
 	if v != nil {
 		_c.SetReceiverID(*v)
 	}
@@ -135,7 +135,7 @@ func (_c *ImMessageCreate) SetNillableContent(v *string) *ImMessageCreate {
 }
 
 // SetID sets the "id" field.
-func (_c *ImMessageCreate) SetID(v uint32) *ImMessageCreate {
+func (_c *ImMessageCreate) SetID(v int64) *ImMessageCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
@@ -235,7 +235,7 @@ func (_c *ImMessageCreate) sqlSave(ctx context.Context) (*ImMessage, error) {
 	}
 	if _spec.ID.Value != _node.ID {
 		id := _spec.ID.Value.(int64)
-		_node.ID = uint32(id)
+		_node.ID = int64(id)
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
@@ -245,7 +245,7 @@ func (_c *ImMessageCreate) sqlSave(ctx context.Context) (*ImMessage, error) {
 func (_c *ImMessageCreate) createSpec() (*ImMessage, *sqlgraph.CreateSpec) {
 	var (
 		_node = &ImMessage{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(immessage.Table, sqlgraph.NewFieldSpec(immessage.FieldID, field.TypeUint32))
+		_spec = sqlgraph.NewCreateSpec(immessage.Table, sqlgraph.NewFieldSpec(immessage.FieldID, field.TypeInt64))
 	)
 	_spec.OnConflict = _c.conflict
 	if id, ok := _c.mutation.ID(); ok {
@@ -265,19 +265,19 @@ func (_c *ImMessageCreate) createSpec() (*ImMessage, *sqlgraph.CreateSpec) {
 		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.TenantID(); ok {
-		_spec.SetField(immessage.FieldTenantID, field.TypeUint32, value)
+		_spec.SetField(immessage.FieldTenantID, field.TypeInt64, value)
 		_node.TenantID = &value
 	}
 	if value, ok := _c.mutation.ConversationID(); ok {
-		_spec.SetField(immessage.FieldConversationID, field.TypeUint32, value)
+		_spec.SetField(immessage.FieldConversationID, field.TypeInt64, value)
 		_node.ConversationID = value
 	}
 	if value, ok := _c.mutation.SenderID(); ok {
-		_spec.SetField(immessage.FieldSenderID, field.TypeUint32, value)
+		_spec.SetField(immessage.FieldSenderID, field.TypeInt64, value)
 		_node.SenderID = value
 	}
 	if value, ok := _c.mutation.ReceiverID(); ok {
-		_spec.SetField(immessage.FieldReceiverID, field.TypeUint32, value)
+		_spec.SetField(immessage.FieldReceiverID, field.TypeInt64, value)
 		_node.ReceiverID = value
 	}
 	if value, ok := _c.mutation.Content(); ok {
@@ -373,7 +373,7 @@ func (u *ImMessageUpsert) ClearDeletedAt() *ImMessageUpsert {
 }
 
 // SetConversationID sets the "conversation_id" field.
-func (u *ImMessageUpsert) SetConversationID(v uint32) *ImMessageUpsert {
+func (u *ImMessageUpsert) SetConversationID(v int64) *ImMessageUpsert {
 	u.Set(immessage.FieldConversationID, v)
 	return u
 }
@@ -385,13 +385,13 @@ func (u *ImMessageUpsert) UpdateConversationID() *ImMessageUpsert {
 }
 
 // AddConversationID adds v to the "conversation_id" field.
-func (u *ImMessageUpsert) AddConversationID(v uint32) *ImMessageUpsert {
+func (u *ImMessageUpsert) AddConversationID(v int64) *ImMessageUpsert {
 	u.Add(immessage.FieldConversationID, v)
 	return u
 }
 
 // SetSenderID sets the "sender_id" field.
-func (u *ImMessageUpsert) SetSenderID(v uint32) *ImMessageUpsert {
+func (u *ImMessageUpsert) SetSenderID(v int64) *ImMessageUpsert {
 	u.Set(immessage.FieldSenderID, v)
 	return u
 }
@@ -403,13 +403,13 @@ func (u *ImMessageUpsert) UpdateSenderID() *ImMessageUpsert {
 }
 
 // AddSenderID adds v to the "sender_id" field.
-func (u *ImMessageUpsert) AddSenderID(v uint32) *ImMessageUpsert {
+func (u *ImMessageUpsert) AddSenderID(v int64) *ImMessageUpsert {
 	u.Add(immessage.FieldSenderID, v)
 	return u
 }
 
 // SetReceiverID sets the "receiver_id" field.
-func (u *ImMessageUpsert) SetReceiverID(v uint32) *ImMessageUpsert {
+func (u *ImMessageUpsert) SetReceiverID(v int64) *ImMessageUpsert {
 	u.Set(immessage.FieldReceiverID, v)
 	return u
 }
@@ -421,7 +421,7 @@ func (u *ImMessageUpsert) UpdateReceiverID() *ImMessageUpsert {
 }
 
 // AddReceiverID adds v to the "receiver_id" field.
-func (u *ImMessageUpsert) AddReceiverID(v uint32) *ImMessageUpsert {
+func (u *ImMessageUpsert) AddReceiverID(v int64) *ImMessageUpsert {
 	u.Add(immessage.FieldReceiverID, v)
 	return u
 }
@@ -535,14 +535,14 @@ func (u *ImMessageUpsertOne) ClearDeletedAt() *ImMessageUpsertOne {
 }
 
 // SetConversationID sets the "conversation_id" field.
-func (u *ImMessageUpsertOne) SetConversationID(v uint32) *ImMessageUpsertOne {
+func (u *ImMessageUpsertOne) SetConversationID(v int64) *ImMessageUpsertOne {
 	return u.Update(func(s *ImMessageUpsert) {
 		s.SetConversationID(v)
 	})
 }
 
 // AddConversationID adds v to the "conversation_id" field.
-func (u *ImMessageUpsertOne) AddConversationID(v uint32) *ImMessageUpsertOne {
+func (u *ImMessageUpsertOne) AddConversationID(v int64) *ImMessageUpsertOne {
 	return u.Update(func(s *ImMessageUpsert) {
 		s.AddConversationID(v)
 	})
@@ -556,14 +556,14 @@ func (u *ImMessageUpsertOne) UpdateConversationID() *ImMessageUpsertOne {
 }
 
 // SetSenderID sets the "sender_id" field.
-func (u *ImMessageUpsertOne) SetSenderID(v uint32) *ImMessageUpsertOne {
+func (u *ImMessageUpsertOne) SetSenderID(v int64) *ImMessageUpsertOne {
 	return u.Update(func(s *ImMessageUpsert) {
 		s.SetSenderID(v)
 	})
 }
 
 // AddSenderID adds v to the "sender_id" field.
-func (u *ImMessageUpsertOne) AddSenderID(v uint32) *ImMessageUpsertOne {
+func (u *ImMessageUpsertOne) AddSenderID(v int64) *ImMessageUpsertOne {
 	return u.Update(func(s *ImMessageUpsert) {
 		s.AddSenderID(v)
 	})
@@ -577,14 +577,14 @@ func (u *ImMessageUpsertOne) UpdateSenderID() *ImMessageUpsertOne {
 }
 
 // SetReceiverID sets the "receiver_id" field.
-func (u *ImMessageUpsertOne) SetReceiverID(v uint32) *ImMessageUpsertOne {
+func (u *ImMessageUpsertOne) SetReceiverID(v int64) *ImMessageUpsertOne {
 	return u.Update(func(s *ImMessageUpsert) {
 		s.SetReceiverID(v)
 	})
 }
 
 // AddReceiverID adds v to the "receiver_id" field.
-func (u *ImMessageUpsertOne) AddReceiverID(v uint32) *ImMessageUpsertOne {
+func (u *ImMessageUpsertOne) AddReceiverID(v int64) *ImMessageUpsertOne {
 	return u.Update(func(s *ImMessageUpsert) {
 		s.AddReceiverID(v)
 	})
@@ -627,7 +627,7 @@ func (u *ImMessageUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *ImMessageUpsertOne) ID(ctx context.Context) (id uint32, err error) {
+func (u *ImMessageUpsertOne) ID(ctx context.Context) (id int64, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -636,7 +636,7 @@ func (u *ImMessageUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *ImMessageUpsertOne) IDX(ctx context.Context) uint32 {
+func (u *ImMessageUpsertOne) IDX(ctx context.Context) int64 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -693,7 +693,7 @@ func (_c *ImMessageCreateBulk) Save(ctx context.Context) ([]*ImMessage, error) {
 				mutation.id = &nodes[i].ID
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = uint32(id)
+					nodes[i].ID = int64(id)
 				}
 				mutation.done = true
 				return nodes[i], nil
@@ -874,14 +874,14 @@ func (u *ImMessageUpsertBulk) ClearDeletedAt() *ImMessageUpsertBulk {
 }
 
 // SetConversationID sets the "conversation_id" field.
-func (u *ImMessageUpsertBulk) SetConversationID(v uint32) *ImMessageUpsertBulk {
+func (u *ImMessageUpsertBulk) SetConversationID(v int64) *ImMessageUpsertBulk {
 	return u.Update(func(s *ImMessageUpsert) {
 		s.SetConversationID(v)
 	})
 }
 
 // AddConversationID adds v to the "conversation_id" field.
-func (u *ImMessageUpsertBulk) AddConversationID(v uint32) *ImMessageUpsertBulk {
+func (u *ImMessageUpsertBulk) AddConversationID(v int64) *ImMessageUpsertBulk {
 	return u.Update(func(s *ImMessageUpsert) {
 		s.AddConversationID(v)
 	})
@@ -895,14 +895,14 @@ func (u *ImMessageUpsertBulk) UpdateConversationID() *ImMessageUpsertBulk {
 }
 
 // SetSenderID sets the "sender_id" field.
-func (u *ImMessageUpsertBulk) SetSenderID(v uint32) *ImMessageUpsertBulk {
+func (u *ImMessageUpsertBulk) SetSenderID(v int64) *ImMessageUpsertBulk {
 	return u.Update(func(s *ImMessageUpsert) {
 		s.SetSenderID(v)
 	})
 }
 
 // AddSenderID adds v to the "sender_id" field.
-func (u *ImMessageUpsertBulk) AddSenderID(v uint32) *ImMessageUpsertBulk {
+func (u *ImMessageUpsertBulk) AddSenderID(v int64) *ImMessageUpsertBulk {
 	return u.Update(func(s *ImMessageUpsert) {
 		s.AddSenderID(v)
 	})
@@ -916,14 +916,14 @@ func (u *ImMessageUpsertBulk) UpdateSenderID() *ImMessageUpsertBulk {
 }
 
 // SetReceiverID sets the "receiver_id" field.
-func (u *ImMessageUpsertBulk) SetReceiverID(v uint32) *ImMessageUpsertBulk {
+func (u *ImMessageUpsertBulk) SetReceiverID(v int64) *ImMessageUpsertBulk {
 	return u.Update(func(s *ImMessageUpsert) {
 		s.SetReceiverID(v)
 	})
 }
 
 // AddReceiverID adds v to the "receiver_id" field.
-func (u *ImMessageUpsertBulk) AddReceiverID(v uint32) *ImMessageUpsertBulk {
+func (u *ImMessageUpsertBulk) AddReceiverID(v int64) *ImMessageUpsertBulk {
 	return u.Update(func(s *ImMessageUpsert) {
 		s.AddReceiverID(v)
 	})

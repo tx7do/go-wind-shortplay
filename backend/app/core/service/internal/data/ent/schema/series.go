@@ -44,7 +44,7 @@ func (Series) Fields() []ent.Field {
 			Optional().
 			Nillable(),
 
-		field.Uint32("author_id").
+		field.Int64("author_id").
 			Comment("作者用户ID").
 			Default(0),
 	}
@@ -53,10 +53,10 @@ func (Series) Fields() []ent.Field {
 // Mixin of the Series.
 func (Series) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.AutoIncrementId{},
+		mixin.AutoIncrementId64{},
 		mixin.TimeAt{},
-		mixin.OperatorID{},
-		mixin.TenantID[uint32]{},
+		mixin.OperatorID64{},
+		mixin.TenantID[int64]{},
 	}
 }
 

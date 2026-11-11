@@ -70,14 +70,14 @@ func (_u *VideoLikeUpdate) ClearDeletedAt() *VideoLikeUpdate {
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *VideoLikeUpdate) SetUserID(v uint32) *VideoLikeUpdate {
+func (_u *VideoLikeUpdate) SetUserID(v int64) *VideoLikeUpdate {
 	_u.mutation.ResetUserID()
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *VideoLikeUpdate) SetNillableUserID(v *uint32) *VideoLikeUpdate {
+func (_u *VideoLikeUpdate) SetNillableUserID(v *int64) *VideoLikeUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -85,7 +85,7 @@ func (_u *VideoLikeUpdate) SetNillableUserID(v *uint32) *VideoLikeUpdate {
 }
 
 // AddUserID adds value to the "user_id" field.
-func (_u *VideoLikeUpdate) AddUserID(v int32) *VideoLikeUpdate {
+func (_u *VideoLikeUpdate) AddUserID(v int64) *VideoLikeUpdate {
 	_u.mutation.AddUserID(v)
 	return _u
 }
@@ -105,14 +105,14 @@ func (_u *VideoLikeUpdate) SetNillableTargetType(v *videolike.TargetType) *Video
 }
 
 // SetTargetID sets the "target_id" field.
-func (_u *VideoLikeUpdate) SetTargetID(v uint32) *VideoLikeUpdate {
+func (_u *VideoLikeUpdate) SetTargetID(v int64) *VideoLikeUpdate {
 	_u.mutation.ResetTargetID()
 	_u.mutation.SetTargetID(v)
 	return _u
 }
 
 // SetNillableTargetID sets the "target_id" field if the given value is not nil.
-func (_u *VideoLikeUpdate) SetNillableTargetID(v *uint32) *VideoLikeUpdate {
+func (_u *VideoLikeUpdate) SetNillableTargetID(v *int64) *VideoLikeUpdate {
 	if v != nil {
 		_u.SetTargetID(*v)
 	}
@@ -120,7 +120,7 @@ func (_u *VideoLikeUpdate) SetNillableTargetID(v *uint32) *VideoLikeUpdate {
 }
 
 // AddTargetID adds value to the "target_id" field.
-func (_u *VideoLikeUpdate) AddTargetID(v int32) *VideoLikeUpdate {
+func (_u *VideoLikeUpdate) AddTargetID(v int64) *VideoLikeUpdate {
 	_u.mutation.AddTargetID(v)
 	return _u
 }
@@ -177,7 +177,7 @@ func (_u *VideoLikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(videolike.Table, videolike.Columns, sqlgraph.NewFieldSpec(videolike.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(videolike.Table, videolike.Columns, sqlgraph.NewFieldSpec(videolike.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -201,22 +201,22 @@ func (_u *VideoLikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.ClearField(videolike.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(videolike.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(videolike.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(videolike.FieldUserID, field.TypeUint32, value)
+		_spec.SetField(videolike.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(videolike.FieldUserID, field.TypeUint32, value)
+		_spec.AddField(videolike.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.TargetType(); ok {
 		_spec.SetField(videolike.FieldTargetType, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.TargetID(); ok {
-		_spec.SetField(videolike.FieldTargetID, field.TypeUint32, value)
+		_spec.SetField(videolike.FieldTargetID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedTargetID(); ok {
-		_spec.AddField(videolike.FieldTargetID, field.TypeUint32, value)
+		_spec.AddField(videolike.FieldTargetID, field.TypeInt64, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -281,14 +281,14 @@ func (_u *VideoLikeUpdateOne) ClearDeletedAt() *VideoLikeUpdateOne {
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *VideoLikeUpdateOne) SetUserID(v uint32) *VideoLikeUpdateOne {
+func (_u *VideoLikeUpdateOne) SetUserID(v int64) *VideoLikeUpdateOne {
 	_u.mutation.ResetUserID()
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *VideoLikeUpdateOne) SetNillableUserID(v *uint32) *VideoLikeUpdateOne {
+func (_u *VideoLikeUpdateOne) SetNillableUserID(v *int64) *VideoLikeUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -296,7 +296,7 @@ func (_u *VideoLikeUpdateOne) SetNillableUserID(v *uint32) *VideoLikeUpdateOne {
 }
 
 // AddUserID adds value to the "user_id" field.
-func (_u *VideoLikeUpdateOne) AddUserID(v int32) *VideoLikeUpdateOne {
+func (_u *VideoLikeUpdateOne) AddUserID(v int64) *VideoLikeUpdateOne {
 	_u.mutation.AddUserID(v)
 	return _u
 }
@@ -316,14 +316,14 @@ func (_u *VideoLikeUpdateOne) SetNillableTargetType(v *videolike.TargetType) *Vi
 }
 
 // SetTargetID sets the "target_id" field.
-func (_u *VideoLikeUpdateOne) SetTargetID(v uint32) *VideoLikeUpdateOne {
+func (_u *VideoLikeUpdateOne) SetTargetID(v int64) *VideoLikeUpdateOne {
 	_u.mutation.ResetTargetID()
 	_u.mutation.SetTargetID(v)
 	return _u
 }
 
 // SetNillableTargetID sets the "target_id" field if the given value is not nil.
-func (_u *VideoLikeUpdateOne) SetNillableTargetID(v *uint32) *VideoLikeUpdateOne {
+func (_u *VideoLikeUpdateOne) SetNillableTargetID(v *int64) *VideoLikeUpdateOne {
 	if v != nil {
 		_u.SetTargetID(*v)
 	}
@@ -331,7 +331,7 @@ func (_u *VideoLikeUpdateOne) SetNillableTargetID(v *uint32) *VideoLikeUpdateOne
 }
 
 // AddTargetID adds value to the "target_id" field.
-func (_u *VideoLikeUpdateOne) AddTargetID(v int32) *VideoLikeUpdateOne {
+func (_u *VideoLikeUpdateOne) AddTargetID(v int64) *VideoLikeUpdateOne {
 	_u.mutation.AddTargetID(v)
 	return _u
 }
@@ -401,7 +401,7 @@ func (_u *VideoLikeUpdateOne) sqlSave(ctx context.Context) (_node *VideoLike, er
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(videolike.Table, videolike.Columns, sqlgraph.NewFieldSpec(videolike.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(videolike.Table, videolike.Columns, sqlgraph.NewFieldSpec(videolike.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "VideoLike.id" for update`)}
@@ -442,22 +442,22 @@ func (_u *VideoLikeUpdateOne) sqlSave(ctx context.Context) (_node *VideoLike, er
 		_spec.ClearField(videolike.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(videolike.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(videolike.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(videolike.FieldUserID, field.TypeUint32, value)
+		_spec.SetField(videolike.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(videolike.FieldUserID, field.TypeUint32, value)
+		_spec.AddField(videolike.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.TargetType(); ok {
 		_spec.SetField(videolike.FieldTargetType, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.TargetID(); ok {
-		_spec.SetField(videolike.FieldTargetID, field.TypeUint32, value)
+		_spec.SetField(videolike.FieldTargetID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedTargetID(); ok {
-		_spec.AddField(videolike.FieldTargetID, field.TypeUint32, value)
+		_spec.AddField(videolike.FieldTargetID, field.TypeInt64, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &VideoLike{config: _u.config}

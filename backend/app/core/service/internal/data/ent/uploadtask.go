@@ -18,7 +18,7 @@ type UploadTask struct {
 	config `json:"-"`
 	// ID of the ent.
 	// id
-	ID uint32 `json:"id,omitempty"`
+	ID int64 `json:"id,omitempty"`
 	// 创建时间
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	// 更新时间
@@ -26,7 +26,7 @@ type UploadTask struct {
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 租户ID
-	TenantID *uint32 `json:"tenant_id,omitempty"`
+	TenantID *int64 `json:"tenant_id,omitempty"`
 	// 任务号（UUID）
 	TaskID string `json:"task_id,omitempty"`
 	// 原始文件名
@@ -38,15 +38,15 @@ type UploadTask struct {
 	// 总分片数
 	TotalChunks uint32 `json:"total_chunks,omitempty"`
 	// 已上传分片序号
-	UploadedChunks []uint32 `json:"uploaded_chunks,omitempty"`
+	UploadedChunks []int64 `json:"uploaded_chunks,omitempty"`
 	// 任务状态
 	Status uploadtask.Status `json:"status,omitempty"`
 	// 合并后的 MinIO 对象键
 	FileKey *string `json:"file_key,omitempty"`
 	// 关联视频ID
-	VideoID uint32 `json:"video_id,omitempty"`
+	VideoID int64 `json:"video_id,omitempty"`
 	// 上传者用户ID
-	AuthorID     uint32 `json:"author_id,omitempty"`
+	AuthorID     int64 `json:"author_id,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -83,7 +83,7 @@ func (_m *UploadTask) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			_m.ID = uint32(value.Int64)
+			_m.ID = int64(value.Int64)
 		case uploadtask.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -109,8 +109,8 @@ func (_m *UploadTask) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
 			} else if value.Valid {
-				_m.TenantID = new(uint32)
-				*_m.TenantID = uint32(value.Int64)
+				_m.TenantID = new(int64)
+				*_m.TenantID = value.Int64
 			}
 		case uploadtask.FieldTaskID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -167,13 +167,13 @@ func (_m *UploadTask) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field video_id", values[i])
 			} else if value.Valid {
-				_m.VideoID = uint32(value.Int64)
+				_m.VideoID = value.Int64
 			}
 		case uploadtask.FieldAuthorID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field author_id", values[i])
 			} else if value.Valid {
-				_m.AuthorID = uint32(value.Int64)
+				_m.AuthorID = value.Int64
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])

@@ -81,13 +81,13 @@ var (
 	Hooks  [1]ent.Hook
 	Policy ent.Policy
 	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
-	DefaultTenantID uint32
+	DefaultTenantID int64
 	// DefaultUserID holds the default value on creation for the "user_id" field.
-	DefaultUserID uint32
+	DefaultUserID int64
 	// DefaultVideoID holds the default value on creation for the "video_id" field.
-	DefaultVideoID uint32
+	DefaultVideoID int64
 	// DefaultTargetUserID holds the default value on creation for the "target_user_id" field.
-	DefaultTargetUserID uint32
+	DefaultTargetUserID int64
 	// DefaultDurationMs holds the default value on creation for the "duration_ms" field.
 	DefaultDurationMs uint64
 	// DefaultWatchPercent holds the default value on creation for the "watch_percent" field.
@@ -95,7 +95,7 @@ var (
 	// DefaultPositionMs holds the default value on creation for the "position_ms" field.
 	DefaultPositionMs uint64
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(uint32) error
+	IDValidator func(int64) error
 )
 
 // EventType defines the type for the "event_type" enum field.

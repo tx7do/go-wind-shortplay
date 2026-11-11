@@ -31,7 +31,7 @@ func (VideoLike) Annotations() []schema.Annotation {
 // Fields of the VideoLike.
 func (VideoLike) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint32("user_id").
+		field.Int64("user_id").
 			Comment("点赞人用户ID").
 			Default(0),
 
@@ -43,7 +43,7 @@ func (VideoLike) Fields() []ent.Field {
 			).
 			Default("VIDEO"),
 
-		field.Uint32("target_id").
+		field.Int64("target_id").
 			Comment("目标ID").
 			Default(0),
 	}
@@ -52,9 +52,9 @@ func (VideoLike) Fields() []ent.Field {
 // Mixin of the VideoLike.
 func (VideoLike) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.AutoIncrementId{},
+		mixin.AutoIncrementId64{},
 		mixin.TimeAt{},
-		mixin.TenantID[uint32]{},
+		mixin.TenantID[int64]{},
 	}
 }
 

@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
-	sseLib "github.com/tx7do/kratos-transport/transport/sse"
 	"github.com/redis/go-redis/v9"
 	"github.com/tx7do/go-utils/id"
+	sseLib "github.com/tx7do/kratos-transport/transport/sse"
 
 	authenticationV1 "go-wind-shortplay/api/gen/go/authentication/service/v1"
 
@@ -16,9 +16,9 @@ import (
 )
 
 // StartSseEventBridge 订阅 core 服务经 Redis Pub/Sub 发出的实时事件
-//（私信 + 系统通知；落库均在 core 侧完成），转成 SSE 定向推送给目标用户
+// （私信 + 系统通知；落库均在 core 侧完成），转成 SSE 定向推送给目标用户
 // 全部在线 App 会话。落库为准：本协程只管实时性，崩溃/丢失不影响到达
-//（客户端 REST 拉取对账）。
+// （客户端 REST 拉取对账）。
 //
 // streamID 约定与 admin 面一致：以 access token 作为流 ID（连接时
 // /events?streamId=<token>&token=<token>），一个 token 即一个在线端。
@@ -70,7 +70,7 @@ func StartSseEventBridge(
 }
 
 // pushNotifyEventToUser 把一条系统通知推给目标用户全部在线 App 会话
-//（载荷对齐 admin 面 "notification" 事件的收件行 JSON 形态，前端双边约定）。
+// （载荷对齐 admin 面 "notification" 事件的收件行 JSON 形态，前端双边约定）。
 func pushNotifyEventToUser(
 	ctx context.Context,
 	srv *sseLib.Server,

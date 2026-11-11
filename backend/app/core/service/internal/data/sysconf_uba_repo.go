@@ -64,8 +64,8 @@ func (r *SysConfRepo) GetEnsure(ctx context.Context) (*ent.SysConfig, error) {
 
 // SysConfUpdate 系统配置部分更新参数（nil = 不更新该字段）
 type SysConfUpdate struct {
-	MaxUploadMB         *uint32
-	MaxDuration         *uint32
+	MaxUploadMB         *int64
+	MaxDuration         *int64
 	ManualReview        *bool
 	Register            *bool
 	AllowedTypes        []string
@@ -85,10 +85,10 @@ func (r *SysConfRepo) Update(ctx context.Context, u *SysConfUpdate) (*ent.SysCon
 	builder := r.entClient.Client().SysConfig.UpdateOneID(1).SetUpdatedAt(time.Now())
 	if u != nil {
 		if u.MaxUploadMB != nil {
-			builder.SetMaxUploadSizeMB(*u.MaxUploadMB)
+			builder.SetMaxUploadSizeMB(uint32(*u.MaxUploadMB))
 		}
 		if u.MaxDuration != nil {
-			builder.SetMaxDurationSeconds(*u.MaxDuration)
+			builder.SetMaxDurationSeconds(uint32(*u.MaxDuration))
 		}
 		if u.ManualReview != nil {
 			builder.SetManualReviewEnabled(*u.ManualReview)
@@ -167,7 +167,7 @@ func ubaEventTypeEntity(t ubaV1.EventType) ubaevent.EventType {
 }
 
 // CreateBatch 批量落库（尽力而为：单条失败不中断整批）
-func (r *UbaRepo) CreateBatch(ctx context.Context, userID uint32, events []*ubaV1.UbaEvent) (int, error) {
+func (r *UbaRepo) CreateBatch(ctx context.Context, userID int64, events []*ubaV1.UbaEvent) (int, error) {
 	saved := 0
 	for _, ev := range events {
 		if ev == nil {
@@ -204,7 +204,7 @@ func timePtrOfUba(t time.Time, ok bool) *time.Time {
 }
 
 // LatestPosition 用户对单个视频最近一次心跳的播放位置（毫秒；无记录 0）
-func (r *UbaRepo) LatestPosition(ctx context.Context, userID, videoID uint32) (uint64, error) {
+func (r *UbaRepo) LatestPosition(ctx context.Context, userID, videoID int64) (int64, error) {
 	row, err := r.entClient.Client().UbaEvent.Query().
 		Where(
 			ubaevent.UserIDEQ(userID),
@@ -220,13 +220,13 @@ func (r *UbaRepo) LatestPosition(ctx context.Context, userID, videoID uint32) (u
 		}
 		return 0, err
 	}
-	return row.PositionMs, nil
+	return int64(row.PositionMs), nil
 }
 
 // HeartbeatPositions 用户所有视频的最近播放位置（毫秒，历史进度条用）。
 // 单用户心跳量级小，全量取回内存按视频去重（occurred_at 倒序首个即最近）。
-func (r *UbaRepo) HeartbeatPositions(ctx context.Context, userID uint32) map[uint32]uint64 {
-	out := make(map[uint32]uint64)
+func (r *UbaRepo) HeartbeatPositions(ctx context.Context, userID int64) map[int64]int64 {
+	out := make(map[int64]int64)
 	rows, err := r.entClient.Client().UbaEvent.Query().
 		Where(
 			ubaevent.UserIDEQ(userID),
@@ -243,7 +243,7 @@ func (r *UbaRepo) HeartbeatPositions(ctx context.Context, userID uint32) map[uin
 	}
 	for _, row := range rows {
 		if _, dup := out[row.VideoID]; !dup {
-			out[row.VideoID] = row.PositionMs
+			out[row.VideoID] = int64(row.PositionMs)
 		}
 	}
 	return out
@@ -251,13 +251,13 @@ func (r *UbaRepo) HeartbeatPositions(ctx context.Context, userID uint32) map[uin
 
 // WatchedVideo 观看历史条目（派生自播放事件聚合）
 type WatchedVideo struct {
-	VideoID   uint32
+	VideoID   int64
 	WatchedAt time.Time
 }
 
 // ListWatchHistoryPage 观看历史分页：用户 VIDEO_PLAY 事件按视频聚合，
 // 最近观看时间倒序（occurred_at 优先、created_at 兜底）。返回当页 + 去重视频总数。
-func (r *UbaRepo) ListWatchHistoryPage(ctx context.Context, userID uint32, offset, limit int) ([]WatchedVideo, int, error) {
+func (r *UbaRepo) ListWatchHistoryPage(ctx context.Context, userID int64, offset, limit int) ([]WatchedVideo, int, error) {
 	base := r.entClient.Client().UbaEvent.Query().
 		Where(
 			ubaevent.UserIDEQ(userID),
@@ -267,7 +267,7 @@ func (r *UbaRepo) ListWatchHistoryPage(ctx context.Context, userID uint32, offse
 
 	// 单用户看过的视频量级小，一次聚合全量取回后内存分页
 	var rows []struct {
-		VideoID   uint32     `json:"video_id"`
+		VideoID   int64      `json:"video_id"`
 		WatchedAt *time.Time `json:"watched_at"`
 	}
 	err := base.Modify(func(s *sql.Selector) {

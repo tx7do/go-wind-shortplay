@@ -27,9 +27,9 @@ func UbaIdentityInjector(checker auth.AccessTokenChecker) middleware.Middleware 
 					if token != "" {
 						if valid, payload := checker.IsValidAccessToken(ctx, token, false); valid && payload != nil {
 							operator := metadata.NewUserOperator(
-								uint64(payload.GetUserId()),
-								uint64(payload.GetTenantId()),
-								uint64(payload.GetOrgUnitId()),
+								int64(payload.GetUserId()),
+								int64(payload.GetTenantId()),
+								int64(payload.GetOrgUnitId()),
 								payload.GetDataScope(),
 							)
 							// 与 auth.Server 同款两件套：ctx 注入（x-md-global- 前缀

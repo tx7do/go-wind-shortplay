@@ -85,8 +85,8 @@ func (_q *UbaEventQuery) FirstX(ctx context.Context) *UbaEvent {
 
 // FirstID returns the first UbaEvent ID from the query.
 // Returns a *NotFoundError when no UbaEvent ID was found.
-func (_q *UbaEventQuery) FirstID(ctx context.Context) (id uint32, err error) {
-	var ids []uint32
+func (_q *UbaEventQuery) FirstID(ctx context.Context) (id int64, err error) {
+	var ids []int64
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -98,7 +98,7 @@ func (_q *UbaEventQuery) FirstID(ctx context.Context) (id uint32, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *UbaEventQuery) FirstIDX(ctx context.Context) uint32 {
+func (_q *UbaEventQuery) FirstIDX(ctx context.Context) int64 {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -136,8 +136,8 @@ func (_q *UbaEventQuery) OnlyX(ctx context.Context) *UbaEvent {
 // OnlyID is like Only, but returns the only UbaEvent ID in the query.
 // Returns a *NotSingularError when more than one UbaEvent ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *UbaEventQuery) OnlyID(ctx context.Context) (id uint32, err error) {
-	var ids []uint32
+func (_q *UbaEventQuery) OnlyID(ctx context.Context) (id int64, err error) {
+	var ids []int64
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -153,7 +153,7 @@ func (_q *UbaEventQuery) OnlyID(ctx context.Context) (id uint32, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *UbaEventQuery) OnlyIDX(ctx context.Context) uint32 {
+func (_q *UbaEventQuery) OnlyIDX(ctx context.Context) int64 {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -181,7 +181,7 @@ func (_q *UbaEventQuery) AllX(ctx context.Context) []*UbaEvent {
 }
 
 // IDs executes the query and returns a list of UbaEvent IDs.
-func (_q *UbaEventQuery) IDs(ctx context.Context) (ids []uint32, err error) {
+func (_q *UbaEventQuery) IDs(ctx context.Context) (ids []int64, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
@@ -193,7 +193,7 @@ func (_q *UbaEventQuery) IDs(ctx context.Context) (ids []uint32, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *UbaEventQuery) IDsX(ctx context.Context) []uint32 {
+func (_q *UbaEventQuery) IDsX(ctx context.Context) []int64 {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -381,7 +381,7 @@ func (_q *UbaEventQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (_q *UbaEventQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(ubaevent.Table, ubaevent.Columns, sqlgraph.NewFieldSpec(ubaevent.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewQuerySpec(ubaevent.Table, ubaevent.Columns, sqlgraph.NewFieldSpec(ubaevent.FieldID, field.TypeInt64))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

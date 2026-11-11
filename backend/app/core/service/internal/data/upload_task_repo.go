@@ -55,15 +55,15 @@ func (r *UploadTaskRepo) GetByTaskID(ctx context.Context, taskID string) (*ent.U
 	return e, nil
 }
 
-func (r *UploadTaskRepo) Create(ctx context.Context, taskID, fileName string, fileSize uint64, chunkSize, totalChunks uint32) (*ent.UploadTask, error) {
+func (r *UploadTaskRepo) Create(ctx context.Context, taskID, fileName string, fileSize int64, chunkSize, totalChunks int64) (*ent.UploadTask, error) {
 	builder := r.entClient.Client().UploadTask.Create().
 		SetTaskID(taskID).
 		SetFileName(fileName).
-		SetFileSize(fileSize).
-		SetChunkSize(chunkSize).
-		SetTotalChunks(totalChunks).
+		SetFileSize(uint64(fileSize)).
+		SetChunkSize(uint32(chunkSize)).
+		SetTotalChunks(uint32(totalChunks)).
 		SetStatus(uploadtask.StatusUploading).
-		SetUploadedChunks([]uint32{}).
+		SetUploadedChunks([]int64{}).
 		SetCreatedAt(time.Now())
 	if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
 		builder.SetTenantID(tid)
@@ -77,7 +77,7 @@ func (r *UploadTaskRepo) Create(ctx context.Context, taskID, fileName string, fi
 }
 
 // AppendUploadedChunk 追加已上传分片（幂等）
-func (r *UploadTaskRepo) AppendUploadedChunk(ctx context.Context, taskID string, chunkIndex uint32) ([]uint32, error) {
+func (r *UploadTaskRepo) AppendUploadedChunk(ctx context.Context, taskID string, chunkIndex int64) ([]int64, error) {
 	e, err := r.GetByTaskID(ctx, taskID)
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func (r *UploadTaskRepo) AppendUploadedChunk(ctx context.Context, taskID string,
 	return chunks, nil
 }
 
-func (r *UploadTaskRepo) UpdateStatus(ctx context.Context, id uint32, status videoV1.UploadTaskStatus, extra func(*ent.UploadTaskUpdateOne)) error {
+func (r *UploadTaskRepo) UpdateStatus(ctx context.Context, id int64, status videoV1.UploadTaskStatus, extra func(*ent.UploadTaskUpdateOne)) error {
 	builder := r.entClient.Client().UploadTask.UpdateOneID(id).SetStatus(uploadTaskStatusEntity(status))
 	if extra != nil {
 		extra(builder)
@@ -109,7 +109,7 @@ func (r *UploadTaskRepo) UpdateStatus(ctx context.Context, id uint32, status vid
 	return nil
 }
 
-func (r *UploadTaskRepo) SetVideoID(ctx context.Context, id, videoID uint32) error {
+func (r *UploadTaskRepo) SetVideoID(ctx context.Context, id, videoID int64) error {
 	_, err := r.entClient.Client().UploadTask.UpdateOneID(id).SetVideoID(videoID).Save(ctx)
 	return err
 }
@@ -128,7 +128,7 @@ func NewVideoDraftRepo(ctx *bootstrap.Context, entClient *entCrud.EntClient[*ent
 	}
 }
 
-func (r *VideoDraftRepo) Get(ctx context.Context, id uint32) (*ent.VideoDraft, error) {
+func (r *VideoDraftRepo) Get(ctx context.Context, id int64) (*ent.VideoDraft, error) {
 	e, err := r.entClient.Client().VideoDraft.Query().Where(videodraft.IDEQ(id)).Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -141,7 +141,7 @@ func (r *VideoDraftRepo) Get(ctx context.Context, id uint32) (*ent.VideoDraft, e
 }
 
 // ListByAuthor 我的草稿列表
-func (r *VideoDraftRepo) ListByAuthor(ctx context.Context, authorID uint32, page, pageSize uint32) ([]*ent.VideoDraft, int, error) {
+func (r *VideoDraftRepo) ListByAuthor(ctx context.Context, authorID int64, page, pageSize int64) ([]*ent.VideoDraft, int, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -193,7 +193,7 @@ func (r *VideoDraftRepo) Create(ctx context.Context, dto *videoV1.VideoDraft) (*
 	return e, nil
 }
 
-func (r *VideoDraftRepo) Update(ctx context.Context, id uint32, dto *videoV1.VideoDraft) (*ent.VideoDraft, error) {
+func (r *VideoDraftRepo) Update(ctx context.Context, id int64, dto *videoV1.VideoDraft) (*ent.VideoDraft, error) {
 	builder := r.entClient.Client().VideoDraft.UpdateOneID(id).
 		SetTitle(dto.GetTitle()).
 		SetDescription(dto.GetDescription()).
@@ -218,7 +218,7 @@ func (r *VideoDraftRepo) Update(ctx context.Context, id uint32, dto *videoV1.Vid
 	return e, nil
 }
 
-func (r *VideoDraftRepo) Delete(ctx context.Context, id uint32) error {
+func (r *VideoDraftRepo) Delete(ctx context.Context, id int64) error {
 	err := r.entClient.Client().VideoDraft.DeleteOneID(id).Exec(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {

@@ -24,10 +24,10 @@ import (
 	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
 
 	"go-wind-shortplay/pkg/metadata"
-	"go-wind-shortplay/pkg/oss"
 	"go-wind-shortplay/pkg/middleware/auth"
-	applogging "go-wind-shortplay/pkg/middleware/logging"
 	entmiddleware "go-wind-shortplay/pkg/middleware/ent"
+	applogging "go-wind-shortplay/pkg/middleware/logging"
+	"go-wind-shortplay/pkg/oss"
 )
 
 // NewRestMiddleware 创建中间件

@@ -1543,7 +1543,7 @@ func (m *GetSeriesFollowStatusResponse) validate(all bool) error {
 	var errors []error
 
 	{
-		sorted_keys := make([]uint32, len(m.GetStatuses()))
+		sorted_keys := make([]int64, len(m.GetStatuses()))
 		i := 0
 		for key := range m.GetStatuses() {
 			sorted_keys[i] = key

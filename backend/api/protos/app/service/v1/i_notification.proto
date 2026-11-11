@@ -61,11 +61,11 @@ message ListNotificationsRequest {
 // 未读消息数 - 回应
 message GetUnreadCountResponse {
   // 未读收件记录总数
-  uint64 count = 1 [json_name = "count"];
+  int64 count = 1 [json_name = "count"];
 }
 
 // 标记已读 - 请求
 message MarkNotificationsReadRequest {
   // 收件记录 ID 列表（必填，来自列表响应的 id）
-  repeated uint32 recipient_ids = 1 [json_name = "recipientIds"];
+  repeated int64 recipient_ids = 1 [json_name = "recipientIds"];
 }

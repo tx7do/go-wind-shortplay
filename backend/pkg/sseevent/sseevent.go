@@ -14,7 +14,7 @@ const RedisChannelNotify = "go-wind-shortplay:notify:v1"
 
 // NotifyEvent 跨服务通知事件载荷（Redis 内 JSON 序列化）。
 type NotifyEvent struct {
-	UserID  uint32 `json:"user_id"`
+	UserID  int64  `json:"user_id"`
 	Title   string `json:"title"`
 	Content string `json:"content"`
 }
@@ -30,9 +30,9 @@ const RedisChannelIm = "go-wind-shortplay:im:v1"
 // ImEvent 跨服务私信事件载荷（Redis 内 JSON 序列化）。
 // 只推 ID 与预览，客户端收到后按需 REST 拉全文（信封不随消息内容演进膨胀）。
 type ImEvent struct {
-	ReceiverUserID uint32 `json:"receiver_user_id"`
-	SenderUserID   uint32 `json:"sender_user_id"`
-	ConversationID uint32 `json:"conversation_id"`
-	MessageID      uint32 `json:"message_id"`
+	ReceiverUserID int64  `json:"receiver_user_id"`
+	SenderUserID   int64  `json:"sender_user_id"`
+	ConversationID int64  `json:"conversation_id"`
+	MessageID      int64  `json:"message_id"`
 	Preview        string `json:"preview"`
 }

@@ -76,9 +76,9 @@ func videoEntityToDTO(e *ent.Video, tags []string) *videoV1.Video {
 		Height:         trans.Ptr(e.Height),
 		Status:         statusDTOOfVideo(e.Status).Enum(),
 		AuthorId:       trans.Ptr(e.AuthorID),
-		LikeCount:      trans.Ptr(e.LikeCount),
+		LikeCount:      i64FromU64v(e.LikeCount),
 		CollectCount:   trans.Ptr(e.CollectCount),
-		CommentCount:   trans.Ptr(e.CommentCount),
+		CommentCount:   i64FromU64v(e.CommentCount),
 		ViewCount:      trans.Ptr(e.ViewCount),
 		RejectReason:   e.RejectReason,
 		PublishedAt:    timeutil.TimeToTimestamppb(e.PublishedAt),
@@ -101,7 +101,7 @@ func videoEntityToDTO(e *ent.Video, tags []string) *videoV1.Video {
 type spVideoListFilter struct {
 	Title    *string `json:"title___icontains"`
 	Status   *string `json:"status"`
-	AuthorID *uint32 `json:"author_id"`
+	AuthorID *int64  `json:"author_id"`
 }
 
 type VideoRepo struct {
@@ -144,8 +144,8 @@ func (r *VideoRepo) toDTO(ctx context.Context, e *ent.Video) (*videoV1.Video, er
 
 // fillSeriesTitles 批量回填剧集名（展示冗余字段，查询失败静默跳过）
 func (r *VideoRepo) fillSeriesTitles(ctx context.Context, items ...*videoV1.Video) {
-	ids := make([]uint32, 0, len(items))
-	seen := make(map[uint32]struct{}, len(items))
+	ids := make([]int64, 0, len(items))
+	seen := make(map[int64]struct{}, len(items))
 	for _, v := range items {
 		if sid := v.GetSeriesId(); sid > 0 {
 			if _, dup := seen[sid]; !dup {
@@ -161,7 +161,7 @@ func (r *VideoRepo) fillSeriesTitles(ctx context.Context, items ...*videoV1.Vide
 	if err != nil {
 		return
 	}
-	names := make(map[uint32]string, len(ss))
+	names := make(map[int64]string, len(ss))
 	for _, s := range ss {
 		names[s.ID] = s.Title
 	}
@@ -172,7 +172,7 @@ func (r *VideoRepo) fillSeriesTitles(ctx context.Context, items ...*videoV1.Vide
 	}
 }
 
-func (r *VideoRepo) Get(ctx context.Context, id uint32) (*videoV1.Video, error) {
+func (r *VideoRepo) Get(ctx context.Context, id int64) (*videoV1.Video, error) {
 	e, err := r.entClient.Client().Video.Query().Where(video.IDEQ(id)).Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -185,7 +185,7 @@ func (r *VideoRepo) Get(ctx context.Context, id uint32) (*videoV1.Video, error) 
 }
 
 // GetEntityRaw 内部取实体（计数 ledger 等场景）
-func (r *VideoRepo) GetEntityRaw(ctx context.Context, id uint32) (*ent.Video, error) {
+func (r *VideoRepo) GetEntityRaw(ctx context.Context, id int64) (*ent.Video, error) {
 	return r.entClient.Client().Video.Query().Where(video.IDEQ(id)).Only(ctx)
 }
 
@@ -248,7 +248,7 @@ func (r *VideoRepo) List(ctx context.Context, req *paginationV1.PagingRequest) (
 }
 
 // ListPublishedByAuthors 关注召回：指定作者的已发布视频（按发布时间倒序）
-func (r *VideoRepo) ListPublishedByAuthors(ctx context.Context, authorIDs []uint32, limit int) ([]*ent.Video, error) {
+func (r *VideoRepo) ListPublishedByAuthors(ctx context.Context, authorIDs []int64, limit int) ([]*ent.Video, error) {
 	if len(authorIDs) == 0 {
 		return nil, nil
 	}
@@ -314,7 +314,7 @@ func (r *VideoRepo) SearchByKeyword(ctx context.Context, keyword string, limit i
 		return nil, err
 	}
 
-	merged := make(map[uint32]*ent.Video, len(byTitle)+len(byTag))
+	merged := make(map[int64]*ent.Video, len(byTitle)+len(byTag))
 	for _, v := range byTitle {
 		merged[v.ID] = v
 	}
@@ -352,7 +352,7 @@ func (r *VideoRepo) ListByTag(ctx context.Context, tagName string, limit int) ([
 	if len(rels) == 0 {
 		return nil, nil
 	}
-	ids := make([]uint32, 0, len(rels))
+	ids := make([]int64, 0, len(rels))
 	for _, rel := range rels {
 		ids = append(ids, rel.VideoID)
 	}
@@ -362,7 +362,7 @@ func (r *VideoRepo) ListByTag(ctx context.Context, tagName string, limit int) ([
 }
 
 // ListByAuthor 用户主页作品列表。isSelf=本人（含草稿/审核中/驳回/下架），否则仅已发布。
-func (r *VideoRepo) ListByAuthor(ctx context.Context, authorID uint32, isSelf bool, page, pageSize uint32) (*videoV1.ListVideoResponse, error) {
+func (r *VideoRepo) ListByAuthor(ctx context.Context, authorID int64, isSelf bool, page, pageSize int64) (*videoV1.ListVideoResponse, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -397,7 +397,7 @@ func (r *VideoRepo) ListByAuthor(ctx context.Context, authorID uint32, isSelf bo
 }
 
 // ListCollectedByUser 我的收藏（按收藏时间倒序）
-func (r *VideoRepo) ListCollectedByUser(ctx context.Context, videoIDs []uint32) ([]*ent.Video, error) {
+func (r *VideoRepo) ListCollectedByUser(ctx context.Context, videoIDs []int64) ([]*ent.Video, error) {
 	if len(videoIDs) == 0 {
 		return nil, nil
 	}
@@ -466,7 +466,7 @@ func (r *VideoRepo) Create(ctx context.Context, dto *videoV1.Video, tags []strin
 
 // Update 更新视频（部分字段）
 // SetScheduledAt 设置/清空计划发布时间（定时发布排程用；at=nil 取消定时）
-func (r *VideoRepo) SetScheduledAt(ctx context.Context, id uint32, at *time.Time) (*ent.Video, error) {
+func (r *VideoRepo) SetScheduledAt(ctx context.Context, id int64, at *time.Time) (*ent.Video, error) {
 	builder := r.entClient.Client().Video.UpdateOneID(id)
 	if at == nil {
 		builder.ClearScheduledAt()
@@ -500,7 +500,7 @@ func (r *VideoRepo) ScheduledDueVideos(ctx context.Context, due time.Time, limit
 }
 
 // SetScheduledOffAt 设置/清空计划下架时间（定时下架排程用；at=nil 取消）
-func (r *VideoRepo) SetScheduledOffAt(ctx context.Context, id uint32, at *time.Time) (*ent.Video, error) {
+func (r *VideoRepo) SetScheduledOffAt(ctx context.Context, id int64, at *time.Time) (*ent.Video, error) {
 	builder := r.entClient.Client().Video.UpdateOneID(id)
 	if at == nil {
 		builder.ClearScheduledOffAt()
@@ -519,7 +519,7 @@ func (r *VideoRepo) SetScheduledOffAt(ctx context.Context, id uint32, at *time.T
 	return e, nil
 }
 
-func (r *VideoRepo) Update(ctx context.Context, id uint32, dto *videoV1.Video, tags []string) (*videoV1.Video, error) {
+func (r *VideoRepo) Update(ctx context.Context, id int64, dto *videoV1.Video, tags []string) (*videoV1.Video, error) {
 	builder := r.entClient.Client().Video.UpdateOneID(id)
 	if dto.Title != nil {
 		builder.SetTitle(dto.GetTitle())
@@ -579,7 +579,7 @@ func (r *VideoRepo) Update(ctx context.Context, id uint32, dto *videoV1.Video, t
 }
 
 // Delete 删除视频（连带标签关联）
-func (r *VideoRepo) Delete(ctx context.Context, id uint32) error {
+func (r *VideoRepo) Delete(ctx context.Context, id int64) error {
 	if _, err := r.entClient.Client().VideoTagRel.Delete().Where(videotagrel.VideoIDEQ(id)).Exec(ctx); err != nil {
 		r.log.Errorf("delete video tag rels failed: %s", err.Error())
 	}
@@ -596,7 +596,7 @@ func (r *VideoRepo) Delete(ctx context.Context, id uint32) error {
 // ── 计数 ledger：只允许在互动台账事务内经本组方法增减（全仓铁律 5）──
 
 // AddCountDelta 在事务 tx 内对视频计数列做有符号增减（PG BIGINT 列，负增量到 0 截断由调用方保证）。
-func (r *VideoRepo) AddCountDelta(ctx context.Context, tx *ent.Tx, videoID uint32, like, collect, comment int64) error {
+func (r *VideoRepo) AddCountDelta(ctx context.Context, tx *ent.Tx, videoID int64, like, collect, comment int64) error {
 	builder := tx.Video.UpdateOneID(videoID)
 	apply := func(delta int64, add func(int64) *ent.VideoUpdateOne) {
 		if delta != 0 {
@@ -614,7 +614,7 @@ func (r *VideoRepo) AddCountDelta(ctx context.Context, tx *ent.Tx, videoID uint3
 }
 
 // AddViewCount 播放量 +1（详情页调用，容忍丢失）
-func (r *VideoRepo) AddViewCount(ctx context.Context, videoID uint32) error {
+func (r *VideoRepo) AddViewCount(ctx context.Context, videoID int64) error {
 	_, err := r.entClient.Client().Video.Update().Where(video.IDEQ(videoID)).AddViewCount(1).Save(ctx)
 	return err
 }
@@ -634,7 +634,7 @@ func (r *VideoRepo) CountByStatus(ctx context.Context, status video.Status) (int
 }
 
 // SumFieldOverview 运营总览聚合（总量 + 播放/点赞/评论总和）
-func (r *VideoRepo) SumFieldOverview(ctx context.Context) (total int, published int, views uint64, likes uint64, comments uint64, err error) {
+func (r *VideoRepo) SumFieldOverview(ctx context.Context) (total int, published int, views int64, likes int64, comments int64, err error) {
 	var sel []*ent.Video
 	sel, err = r.entClient.Client().Video.Query().All(ctx)
 	if err != nil {
@@ -646,9 +646,9 @@ func (r *VideoRepo) SumFieldOverview(ctx context.Context) (total int, published 
 		if v.Status == video.StatusPublished {
 			published++
 		}
-		views += v.ViewCount
-		likes += v.LikeCount
-		comments += v.CommentCount
+		views += int64(v.ViewCount)
+		likes += int64(v.LikeCount)
+		comments += int64(v.CommentCount)
 	}
 	return
 }
@@ -656,7 +656,7 @@ func (r *VideoRepo) SumFieldOverview(ctx context.Context) (total int, published 
 // ── 标签 ──
 
 // TagsOfVideo 视频标签名列表
-func (r *VideoRepo) TagsOfVideo(ctx context.Context, videoID uint32) ([]string, error) {
+func (r *VideoRepo) TagsOfVideo(ctx context.Context, videoID int64) ([]string, error) {
 	rels, err := r.entClient.Client().VideoTagRel.Query().Where(videotagrel.VideoIDEQ(videoID)).All(ctx)
 	if err != nil {
 		return nil, err
@@ -664,7 +664,7 @@ func (r *VideoRepo) TagsOfVideo(ctx context.Context, videoID uint32) ([]string, 
 	if len(rels) == 0 {
 		return nil, nil
 	}
-	tagIDs := make([]uint32, 0, len(rels))
+	tagIDs := make([]int64, 0, len(rels))
 	for _, rel := range rels {
 		tagIDs = append(tagIDs, rel.TagID)
 	}
@@ -680,18 +680,18 @@ func (r *VideoRepo) TagsOfVideo(ctx context.Context, videoID uint32) ([]string, 
 }
 
 // SetTags 覆盖式设置视频标签（标签不存在则创建；引用计数同步）
-func (r *VideoRepo) SetTags(ctx context.Context, videoID uint32, tags []string) error {
+func (r *VideoRepo) SetTags(ctx context.Context, videoID int64, tags []string) error {
 	oldRels, err := r.entClient.Client().VideoTagRel.Query().Where(videotagrel.VideoIDEQ(videoID)).All(ctx)
 	if err != nil {
 		r.log.Errorf("query old tag rels failed: %s", err.Error())
 		return videoV1.ErrorInternalServerError("query old tag rels failed")
 	}
-	oldTagIDs := make(map[uint32]struct{}, len(oldRels))
+	oldTagIDs := make(map[int64]struct{}, len(oldRels))
 	for _, rel := range oldRels {
 		oldTagIDs[rel.TagID] = struct{}{}
 	}
 
-	newTagIDs := make([]uint32, 0, len(tags))
+	newTagIDs := make([]int64, 0, len(tags))
 	for _, name := range tags {
 		if name == "" {
 			continue
@@ -732,7 +732,7 @@ func (r *VideoRepo) SetTags(ctx context.Context, videoID uint32, tags []string) 
 	return nil
 }
 
-func containsUint32(list []uint32, v uint32) (uint32, bool) {
+func containsUint32(list []int64, v int64) (int64, bool) {
 	for _, item := range list {
 		if item == v {
 			return item, true
@@ -762,7 +762,7 @@ func (r *VideoRepo) ensureTag(ctx context.Context, name string) (*ent.VideoTag, 
 	return tag, nil
 }
 
-func (r *VideoRepo) bumpTagCount(ctx context.Context, tagID uint32, delta int) error {
+func (r *VideoRepo) bumpTagCount(ctx context.Context, tagID int64, delta int) error {
 	_, err := r.entClient.Client().VideoTag.UpdateOneID(tagID).AddVideoCount(int64(delta)).Save(ctx)
 	return err
 }

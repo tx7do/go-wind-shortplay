@@ -19,21 +19,21 @@ import (
 
 	authenticationV1 "go-wind-shortplay/api/gen/go/authentication/service/v1"
 	commentV1 "go-wind-shortplay/api/gen/go/comment/service/v1"
-	feedV1 "go-wind-shortplay/api/gen/go/feed/service/v1"
-	internalMessageV1 "go-wind-shortplay/api/gen/go/internal_message/service/v1"
-	interactionV1 "go-wind-shortplay/api/gen/go/interaction/service/v1"
-	reportV1 "go-wind-shortplay/api/gen/go/report/service/v1"
-	statsV1 "go-wind-shortplay/api/gen/go/stats/service/v1"
-	sysconfV1 "go-wind-shortplay/api/gen/go/sysconf/service/v1"
 	danmakuV1 "go-wind-shortplay/api/gen/go/danmaku/service/v1"
-	imV1 "go-wind-shortplay/api/gen/go/im/service/v1"
-	ubaV1 "go-wind-shortplay/api/gen/go/uba/service/v1"
-	seriesV1 "go-wind-shortplay/api/gen/go/series/service/v1"
-	videoV1 "go-wind-shortplay/api/gen/go/video/service/v1"
+	feedV1 "go-wind-shortplay/api/gen/go/feed/service/v1"
 	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
+	imV1 "go-wind-shortplay/api/gen/go/im/service/v1"
+	interactionV1 "go-wind-shortplay/api/gen/go/interaction/service/v1"
+	internalMessageV1 "go-wind-shortplay/api/gen/go/internal_message/service/v1"
 	mediaV1 "go-wind-shortplay/api/gen/go/media/service/v1"
 	permissionV1 "go-wind-shortplay/api/gen/go/permission/service/v1"
+	reportV1 "go-wind-shortplay/api/gen/go/report/service/v1"
+	seriesV1 "go-wind-shortplay/api/gen/go/series/service/v1"
+	statsV1 "go-wind-shortplay/api/gen/go/stats/service/v1"
 	storageV1 "go-wind-shortplay/api/gen/go/storage/service/v1"
+	sysconfV1 "go-wind-shortplay/api/gen/go/sysconf/service/v1"
+	ubaV1 "go-wind-shortplay/api/gen/go/uba/service/v1"
+	videoV1 "go-wind-shortplay/api/gen/go/video/service/v1"
 
 	"go-wind-shortplay/pkg/oss"
 	"go-wind-shortplay/pkg/serviceid"
@@ -264,7 +264,6 @@ func NewSpDashboardServiceClient(ctx *bootstrap.Context, r registry.Discovery) s
 
 	return statsV1.NewDashboardServiceClient(cli)
 }
-
 
 func NewSpSysConfServiceClient(ctx *bootstrap.Context, r registry.Discovery) sysconfV1.SysConfServiceClient {
 	cli, err := rpc.CreateGrpcClient(ctx.Context(), r, serviceid.NewDiscoveryName(serviceid.CoreService), ctx.GetConfig())

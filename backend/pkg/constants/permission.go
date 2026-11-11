@@ -37,9 +37,9 @@ const (
 	// BizSysConfManagePermissionCode 系统配置权限代码
 	BizSysConfManagePermissionCode = DefaultBizPermissionModule + ":sysconf_manage"
 	// BizSeriesManagePermissionCode 剧集管理权限代码
-	BizSeriesManagePermissionCode = DefaultBizPermissionModule + ":series_manage"
+	BizSeriesManagePermissionCode  = DefaultBizPermissionModule + ":series_manage"
 	BizDanmakuManagePermissionCode = DefaultBizPermissionModule + ":danmaku_manage"
-	BizImManagePermissionCode = DefaultBizPermissionModule + ":im_manage"
+	BizImManagePermissionCode      = DefaultBizPermissionModule + ":im_manage"
 
 	// DefaultBizPermissionModule 业务权限模块标识
 	DefaultBizPermissionModule = "biz"

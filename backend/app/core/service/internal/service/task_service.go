@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -47,7 +47,7 @@ type TaskService struct {
 	taskRepo *data.TaskRepo
 
 	// asynq Redis URI（与 asynq server 同源），用于懒建只读 Inspector 查执行记录
-	asynqRedisURI string
+	asynqRedisURI  string
 	asynqInspector *asynq.Inspector
 }
 
@@ -111,7 +111,7 @@ func (s *TaskService) ListTaskExecutions(ctx context.Context, req *taskV1.ListTa
 
 	const queue = "default"
 
-	fetchSize := int(req.GetPageSize()) * int(req.GetPage())
+	fetchSize := int(int64(req.GetPageSize())) * int(req.GetPage())
 	if fetchSize <= 0 {
 		fetchSize = 30
 	}
@@ -147,14 +147,14 @@ func (s *TaskService) ListTaskExecutions(ctx context.Context, req *taskV1.ListTa
 		infos = filtered
 	}
 
-	total := uint64(len(infos))
+	total := int64(len(infos))
 
 	// 内存分页
 	page := int(req.GetPage())
 	if page <= 0 {
 		page = 1
 	}
-	pageSize := int(req.GetPageSize())
+	pageSize := int(int64(req.GetPageSize()))
 	if pageSize <= 0 {
 		pageSize = 10
 	}
@@ -710,7 +710,7 @@ func (s *TaskService) EnqueueWebhookDeliver(payload *task.WebhookDeliverPayload)
 	return nil
 }
 
-func (s *TaskService) EnqueueAiDocReindex(baseID uint32) error {
+func (s *TaskService) EnqueueAiDocReindex(baseID int64) error {
 	if s.taskScheduler == nil {
 		s.log.Warnf("ai doc reindex skipped: task scheduler not available (base=%d)", baseID)
 		return nil

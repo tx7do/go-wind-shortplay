@@ -70,14 +70,14 @@ func (_u *VideoCollectUpdate) ClearDeletedAt() *VideoCollectUpdate {
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *VideoCollectUpdate) SetUserID(v uint32) *VideoCollectUpdate {
+func (_u *VideoCollectUpdate) SetUserID(v int64) *VideoCollectUpdate {
 	_u.mutation.ResetUserID()
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *VideoCollectUpdate) SetNillableUserID(v *uint32) *VideoCollectUpdate {
+func (_u *VideoCollectUpdate) SetNillableUserID(v *int64) *VideoCollectUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -85,20 +85,20 @@ func (_u *VideoCollectUpdate) SetNillableUserID(v *uint32) *VideoCollectUpdate {
 }
 
 // AddUserID adds value to the "user_id" field.
-func (_u *VideoCollectUpdate) AddUserID(v int32) *VideoCollectUpdate {
+func (_u *VideoCollectUpdate) AddUserID(v int64) *VideoCollectUpdate {
 	_u.mutation.AddUserID(v)
 	return _u
 }
 
 // SetVideoID sets the "video_id" field.
-func (_u *VideoCollectUpdate) SetVideoID(v uint32) *VideoCollectUpdate {
+func (_u *VideoCollectUpdate) SetVideoID(v int64) *VideoCollectUpdate {
 	_u.mutation.ResetVideoID()
 	_u.mutation.SetVideoID(v)
 	return _u
 }
 
 // SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_u *VideoCollectUpdate) SetNillableVideoID(v *uint32) *VideoCollectUpdate {
+func (_u *VideoCollectUpdate) SetNillableVideoID(v *int64) *VideoCollectUpdate {
 	if v != nil {
 		_u.SetVideoID(*v)
 	}
@@ -106,7 +106,7 @@ func (_u *VideoCollectUpdate) SetNillableVideoID(v *uint32) *VideoCollectUpdate 
 }
 
 // AddVideoID adds value to the "video_id" field.
-func (_u *VideoCollectUpdate) AddVideoID(v int32) *VideoCollectUpdate {
+func (_u *VideoCollectUpdate) AddVideoID(v int64) *VideoCollectUpdate {
 	_u.mutation.AddVideoID(v)
 	return _u
 }
@@ -150,7 +150,7 @@ func (_u *VideoCollectUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *V
 }
 
 func (_u *VideoCollectUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(videocollect.Table, videocollect.Columns, sqlgraph.NewFieldSpec(videocollect.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(videocollect.Table, videocollect.Columns, sqlgraph.NewFieldSpec(videocollect.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -174,19 +174,19 @@ func (_u *VideoCollectUpdate) sqlSave(ctx context.Context) (_node int, err error
 		_spec.ClearField(videocollect.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(videocollect.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(videocollect.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(videocollect.FieldUserID, field.TypeUint32, value)
+		_spec.SetField(videocollect.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(videocollect.FieldUserID, field.TypeUint32, value)
+		_spec.AddField(videocollect.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.VideoID(); ok {
-		_spec.SetField(videocollect.FieldVideoID, field.TypeUint32, value)
+		_spec.SetField(videocollect.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedVideoID(); ok {
-		_spec.AddField(videocollect.FieldVideoID, field.TypeUint32, value)
+		_spec.AddField(videocollect.FieldVideoID, field.TypeInt64, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -251,14 +251,14 @@ func (_u *VideoCollectUpdateOne) ClearDeletedAt() *VideoCollectUpdateOne {
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *VideoCollectUpdateOne) SetUserID(v uint32) *VideoCollectUpdateOne {
+func (_u *VideoCollectUpdateOne) SetUserID(v int64) *VideoCollectUpdateOne {
 	_u.mutation.ResetUserID()
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *VideoCollectUpdateOne) SetNillableUserID(v *uint32) *VideoCollectUpdateOne {
+func (_u *VideoCollectUpdateOne) SetNillableUserID(v *int64) *VideoCollectUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -266,20 +266,20 @@ func (_u *VideoCollectUpdateOne) SetNillableUserID(v *uint32) *VideoCollectUpdat
 }
 
 // AddUserID adds value to the "user_id" field.
-func (_u *VideoCollectUpdateOne) AddUserID(v int32) *VideoCollectUpdateOne {
+func (_u *VideoCollectUpdateOne) AddUserID(v int64) *VideoCollectUpdateOne {
 	_u.mutation.AddUserID(v)
 	return _u
 }
 
 // SetVideoID sets the "video_id" field.
-func (_u *VideoCollectUpdateOne) SetVideoID(v uint32) *VideoCollectUpdateOne {
+func (_u *VideoCollectUpdateOne) SetVideoID(v int64) *VideoCollectUpdateOne {
 	_u.mutation.ResetVideoID()
 	_u.mutation.SetVideoID(v)
 	return _u
 }
 
 // SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_u *VideoCollectUpdateOne) SetNillableVideoID(v *uint32) *VideoCollectUpdateOne {
+func (_u *VideoCollectUpdateOne) SetNillableVideoID(v *int64) *VideoCollectUpdateOne {
 	if v != nil {
 		_u.SetVideoID(*v)
 	}
@@ -287,7 +287,7 @@ func (_u *VideoCollectUpdateOne) SetNillableVideoID(v *uint32) *VideoCollectUpda
 }
 
 // AddVideoID adds value to the "video_id" field.
-func (_u *VideoCollectUpdateOne) AddVideoID(v int32) *VideoCollectUpdateOne {
+func (_u *VideoCollectUpdateOne) AddVideoID(v int64) *VideoCollectUpdateOne {
 	_u.mutation.AddVideoID(v)
 	return _u
 }
@@ -344,7 +344,7 @@ func (_u *VideoCollectUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder))
 }
 
 func (_u *VideoCollectUpdateOne) sqlSave(ctx context.Context) (_node *VideoCollect, err error) {
-	_spec := sqlgraph.NewUpdateSpec(videocollect.Table, videocollect.Columns, sqlgraph.NewFieldSpec(videocollect.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(videocollect.Table, videocollect.Columns, sqlgraph.NewFieldSpec(videocollect.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "VideoCollect.id" for update`)}
@@ -385,19 +385,19 @@ func (_u *VideoCollectUpdateOne) sqlSave(ctx context.Context) (_node *VideoColle
 		_spec.ClearField(videocollect.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(videocollect.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(videocollect.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(videocollect.FieldUserID, field.TypeUint32, value)
+		_spec.SetField(videocollect.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(videocollect.FieldUserID, field.TypeUint32, value)
+		_spec.AddField(videocollect.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.VideoID(); ok {
-		_spec.SetField(videocollect.FieldVideoID, field.TypeUint32, value)
+		_spec.SetField(videocollect.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedVideoID(); ok {
-		_spec.AddField(videocollect.FieldVideoID, field.TypeUint32, value)
+		_spec.AddField(videocollect.FieldVideoID, field.TypeInt64, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &VideoCollect{config: _u.config}

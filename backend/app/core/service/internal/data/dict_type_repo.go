@@ -45,10 +45,10 @@ func NewDictTypeRepo(
 	dictEntryRepo *DictEntryRepo,
 ) *DictTypeRepo {
 	repo := &DictTypeRepo{
-		log:       ctx.NewLoggerHelper("dict-type/repo/admin-service"),
-		entClient: entClient,
+		log:           ctx.NewLoggerHelper("dict-type/repo/admin-service"),
+		entClient:     entClient,
 		dictEntryRepo: dictEntryRepo,
-		mapper:    mapper.NewCopierMapper[dictV1.DictType, ent.DictType](),
+		mapper:        mapper.NewCopierMapper[dictV1.DictType, ent.DictType](),
 	}
 
 	repo.init()
@@ -108,7 +108,7 @@ func (r *DictTypeRepo) List(ctx context.Context, req *paginationV1.PagingRequest
 	}, nil
 }
 
-func (r *DictTypeRepo) IsExist(ctx context.Context, id uint32) (bool, error) {
+func (r *DictTypeRepo) IsExist(ctx context.Context, id int64) (bool, error) {
 	exist, err := r.entClient.Client().DictType.Query().
 		Where(dicttype.IDEQ(id)).
 		Exist(ctx)
@@ -264,7 +264,7 @@ func (r *DictTypeRepo) Update(ctx context.Context, req *dictV1.UpdateDictTypeReq
 	return err
 }
 
-func (r *DictTypeRepo) Delete(ctx context.Context, id uint32) (err error) {
+func (r *DictTypeRepo) Delete(ctx context.Context, id int64) (err error) {
 	if id == 0 {
 		return dictV1.ErrorBadRequest("invalid parameter")
 	}
@@ -312,7 +312,7 @@ func (r *DictTypeRepo) Delete(ctx context.Context, id uint32) (err error) {
 	return nil
 }
 
-func (r *DictTypeRepo) BatchDelete(ctx context.Context, ids []uint32) (err error) {
+func (r *DictTypeRepo) BatchDelete(ctx context.Context, ids []int64) (err error) {
 	if len(ids) == 0 {
 		return dictV1.ErrorBadRequest("invalid parameter")
 	}

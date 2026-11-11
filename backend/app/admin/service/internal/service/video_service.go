@@ -90,14 +90,14 @@ func setPagingQuerySP(req *paginationV1.PagingRequest, query string) {
 }
 
 // spQueryAuthorID 从原始 HTTP 查询串解析 authorId（生成层不识别的业务参数）
-func spQueryAuthorID(ctx context.Context) uint32 {
+func spQueryAuthorID(ctx context.Context) int64 {
 	r, ok := khttp.RequestFromServerContext(ctx)
 	if !ok || r == nil {
 		return 0
 	}
 	if v := r.URL.Query().Get("authorId"); v != "" {
-		if id, err := strconv.ParseUint(v, 10, 32); err == nil {
-			return uint32(id)
+		if id, err := strconv.ParseInt(v, 10, 64); err == nil {
+			return int64(id)
 		}
 	}
 	return 0

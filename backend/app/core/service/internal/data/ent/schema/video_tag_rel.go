@@ -30,11 +30,11 @@ func (VideoTagRel) Annotations() []schema.Annotation {
 // Fields of the VideoTagRel.
 func (VideoTagRel) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint32("video_id").
+		field.Int64("video_id").
 			Comment("视频ID").
 			Default(0),
 
-		field.Uint32("tag_id").
+		field.Int64("tag_id").
 			Comment("标签ID").
 			Default(0),
 	}
@@ -43,9 +43,9 @@ func (VideoTagRel) Fields() []ent.Field {
 // Mixin of the VideoTagRel.
 func (VideoTagRel) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.AutoIncrementId{},
+		mixin.AutoIncrementId64{},
 		mixin.TimeAt{},
-		mixin.TenantID[uint32]{},
+		mixin.TenantID[int64]{},
 	}
 }
 

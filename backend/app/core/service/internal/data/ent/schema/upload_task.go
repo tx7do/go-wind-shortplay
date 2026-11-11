@@ -51,7 +51,7 @@ func (UploadTask) Fields() []ent.Field {
 			Comment("总分片数").
 			Default(0),
 
-		field.JSON("uploaded_chunks", []uint32{}).
+		field.JSON("uploaded_chunks", []int64{}).
 			Comment("已上传分片序号").
 			Optional(),
 
@@ -70,11 +70,11 @@ func (UploadTask) Fields() []ent.Field {
 			Optional().
 			Nillable(),
 
-		field.Uint32("video_id").
+		field.Int64("video_id").
 			Comment("关联视频ID").
 			Default(0),
 
-		field.Uint32("author_id").
+		field.Int64("author_id").
 			Comment("上传者用户ID").
 			Default(0),
 	}
@@ -83,9 +83,9 @@ func (UploadTask) Fields() []ent.Field {
 // Mixin of the UploadTask.
 func (UploadTask) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.AutoIncrementId{},
+		mixin.AutoIncrementId64{},
 		mixin.TimeAt{},
-		mixin.TenantID[uint32]{},
+		mixin.TenantID[int64]{},
 	}
 }
 

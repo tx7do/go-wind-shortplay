@@ -73,7 +73,7 @@ func NewAuditExportService(
 		dataAccessClient:       dataAccessClient,
 		permissionClient:       permissionClient,
 		policyEvaluationClient: policyEvaluationClient,
-			log:                    ctx.NewLoggerHelper("audit-export/service/admin-service"),
+		log:                    ctx.NewLoggerHelper("audit-export/service/admin-service"),
 		tokenChecker:           tokenChecker,
 	}
 }
@@ -90,7 +90,7 @@ func (s *AuditExportService) ServeExport(w http.ResponseWriter, r *http.Request)
 	switch q.Get("type") {
 	case "login":
 		s.exportType(ctx, w, q, "login-audit-logs",
-			func(ctx context.Context, page int64) ([]any, uint64, error) {
+			func(ctx context.Context, page int64) ([]any, int64, error) {
 				resp, err := s.loginClient.List(ctx, pagingReq(page, q.Get("query")))
 				if err != nil {
 					return nil, 0, err
@@ -109,7 +109,7 @@ func (s *AuditExportService) ServeExport(w http.ResponseWriter, r *http.Request)
 		)
 	case "api":
 		s.exportType(ctx, w, q, "api-audit-logs",
-			func(ctx context.Context, page int64) ([]any, uint64, error) {
+			func(ctx context.Context, page int64) ([]any, int64, error) {
 				resp, err := s.apiClient.List(ctx, pagingReq(page, q.Get("query")))
 				if err != nil {
 					return nil, 0, err
@@ -130,7 +130,7 @@ func (s *AuditExportService) ServeExport(w http.ResponseWriter, r *http.Request)
 		)
 	case "operation":
 		s.exportType(ctx, w, q, "operation-audit-logs",
-			func(ctx context.Context, page int64) ([]any, uint64, error) {
+			func(ctx context.Context, page int64) ([]any, int64, error) {
 				resp, err := s.operationClient.List(ctx, pagingReq(page, q.Get("query")))
 				if err != nil {
 					return nil, 0, err
@@ -150,7 +150,7 @@ func (s *AuditExportService) ServeExport(w http.ResponseWriter, r *http.Request)
 		)
 	case "data_access":
 		s.exportType(ctx, w, q, "data-access-audit-logs",
-			func(ctx context.Context, page int64) ([]any, uint64, error) {
+			func(ctx context.Context, page int64) ([]any, int64, error) {
 				resp, err := s.dataAccessClient.List(ctx, pagingReq(page, q.Get("query")))
 				if err != nil {
 					return nil, 0, err
@@ -162,14 +162,16 @@ func (s *AuditExportService) ServeExport(w http.ResponseWriter, r *http.Request)
 				{"数据源", func(v any) string { return v.(*auditV1.DataAccessAuditLog).GetDataSource() }},
 				{"表名", func(v any) string { return v.(*auditV1.DataAccessAuditLog).GetTableName() }},
 				{"访问类型", func(v any) string { return v.(*auditV1.DataAccessAuditLog).GetAccessType().String() }},
-				{"影响行数", func(v any) string { return strconv.FormatUint(uint64(v.(*auditV1.DataAccessAuditLog).GetAffectedRows()), 10) }},
+				{"影响行数", func(v any) string {
+					return strconv.FormatUint(uint64(v.(*auditV1.DataAccessAuditLog).GetAffectedRows()), 10)
+				}},
 				{"成功", func(v any) string { return boolStr(v.(*auditV1.DataAccessAuditLog).Success) }},
 				{"时间", func(v any) string { return tsStr(v.(*auditV1.DataAccessAuditLog).CreatedAt) }},
 			},
 		)
 	case "permission":
 		s.exportType(ctx, w, q, "permission-audit-logs",
-			func(ctx context.Context, page int64) ([]any, uint64, error) {
+			func(ctx context.Context, page int64) ([]any, int64, error) {
 				resp, err := s.permissionClient.List(ctx, pagingReq(page, q.Get("query")))
 				if err != nil {
 					return nil, 0, err
@@ -188,7 +190,7 @@ func (s *AuditExportService) ServeExport(w http.ResponseWriter, r *http.Request)
 		)
 	case "policy_evaluation":
 		s.exportType(ctx, w, q, "policy-evaluation-logs",
-			func(ctx context.Context, page int64) ([]any, uint64, error) {
+			func(ctx context.Context, page int64) ([]any, int64, error) {
 				resp, err := s.policyEvaluationClient.List(ctx, pagingReq(page, q.Get("query")))
 				if err != nil {
 					return nil, 0, err
@@ -196,7 +198,9 @@ func (s *AuditExportService) ServeExport(w http.ResponseWriter, r *http.Request)
 				return toAnySlice(resp.GetItems()), resp.GetTotal(), nil
 			},
 			[]colDef{
-				{"用户ID", func(v any) string { return strconv.FormatUint(uint64(v.(*permissionV1.PolicyEvaluationLog).GetUserId()), 10) }},
+				{"用户ID", func(v any) string {
+					return strconv.FormatInt(int64(v.(*permissionV1.PolicyEvaluationLog).GetUserId()), 10)
+				}},
 				{"请求路径", func(v any) string { return v.(*permissionV1.PolicyEvaluationLog).GetRequestPath() }},
 				{"方法", func(v any) string { return v.(*permissionV1.PolicyEvaluationLog).GetRequestMethod() }},
 				{"结果", func(v any) string { return boolStr(v.(*permissionV1.PolicyEvaluationLog).Result) }},
@@ -228,7 +232,7 @@ func (s *AuditExportService) authorize(w http.ResponseWriter, r *http.Request) (
 	}
 
 	ctx, err := appMetadata.NewContext(r.Context(), appMetadata.NewUserOperator(
-		uint64(payload.GetUserId()), uint64(payload.GetTenantId()), 0, identityV1.DataScope_ALL,
+		int64(payload.GetUserId()), int64(payload.GetTenantId()), 0, identityV1.DataScope_ALL,
 	))
 	if err != nil {
 		http.Error(w, "identity error", http.StatusInternalServerError)
@@ -243,7 +247,7 @@ func (s *AuditExportService) exportType(
 	w http.ResponseWriter,
 	q url.Values,
 	fileBase string,
-	fetchPage func(ctx context.Context, page int64) ([]any, uint64, error),
+	fetchPage func(ctx context.Context, page int64) ([]any, int64, error),
 	cols []colDef,
 ) {
 	maxRows := exportMaxRows
@@ -257,7 +261,7 @@ func (s *AuditExportService) exportType(
 	}
 
 	var rows [][]string
-	var total uint64
+	var total int64
 	for page := int64(1); int64(len(rows)) < int64(maxRows); page++ {
 		items, t, err := fetchPage(ctx, page)
 		if err != nil {
@@ -279,7 +283,7 @@ func (s *AuditExportService) exportType(
 			}
 			rows = append(rows, row)
 		}
-		if uint64(page*exportPageSize) >= total {
+		if int64(page*exportPageSize) >= total {
 			break
 		}
 	}

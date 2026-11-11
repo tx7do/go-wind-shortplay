@@ -17,7 +17,7 @@ type VideoCollect struct {
 	config `json:"-"`
 	// ID of the ent.
 	// id
-	ID uint32 `json:"id,omitempty"`
+	ID int64 `json:"id,omitempty"`
 	// 创建时间
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	// 更新时间
@@ -25,11 +25,11 @@ type VideoCollect struct {
 	// 删除时间
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 租户ID
-	TenantID *uint32 `json:"tenant_id,omitempty"`
+	TenantID *int64 `json:"tenant_id,omitempty"`
 	// 收藏人用户ID
-	UserID uint32 `json:"user_id,omitempty"`
+	UserID int64 `json:"user_id,omitempty"`
 	// 视频ID
-	VideoID      uint32 `json:"video_id,omitempty"`
+	VideoID      int64 `json:"video_id,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -62,7 +62,7 @@ func (_m *VideoCollect) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			_m.ID = uint32(value.Int64)
+			_m.ID = int64(value.Int64)
 		case videocollect.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -88,20 +88,20 @@ func (_m *VideoCollect) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
 			} else if value.Valid {
-				_m.TenantID = new(uint32)
-				*_m.TenantID = uint32(value.Int64)
+				_m.TenantID = new(int64)
+				*_m.TenantID = value.Int64
 			}
 		case videocollect.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.UserID = uint32(value.Int64)
+				_m.UserID = value.Int64
 			}
 		case videocollect.FieldVideoID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field video_id", values[i])
 			} else if value.Valid {
-				_m.VideoID = uint32(value.Int64)
+				_m.VideoID = value.Int64
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])

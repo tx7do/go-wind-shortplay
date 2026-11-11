@@ -10,47 +10,47 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id uint32) predicate.VideoComment {
+func ID(id int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uint32) predicate.VideoComment {
+func IDEQ(id int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uint32) predicate.VideoComment {
+func IDNEQ(id int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uint32) predicate.VideoComment {
+func IDIn(ids ...int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...uint32) predicate.VideoComment {
+func IDNotIn(ids ...int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id uint32) predicate.VideoComment {
+func IDGT(id int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uint32) predicate.VideoComment {
+func IDGTE(id int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id uint32) predicate.VideoComment {
+func IDLT(id int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uint32) predicate.VideoComment {
+func IDLTE(id int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLTE(FieldID, id))
 }
 
@@ -70,32 +70,32 @@ func DeletedAt(v time.Time) predicate.VideoComment {
 }
 
 // CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
-func CreatedBy(v uint32) predicate.VideoComment {
+func CreatedBy(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldCreatedBy, v))
 }
 
 // UpdatedBy applies equality check predicate on the "updated_by" field. It's identical to UpdatedByEQ.
-func UpdatedBy(v uint32) predicate.VideoComment {
+func UpdatedBy(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldUpdatedBy, v))
 }
 
 // DeletedBy applies equality check predicate on the "deleted_by" field. It's identical to DeletedByEQ.
-func DeletedBy(v uint32) predicate.VideoComment {
+func DeletedBy(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldDeletedBy, v))
 }
 
 // TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
-func TenantID(v uint32) predicate.VideoComment {
+func TenantID(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldTenantID, v))
 }
 
 // VideoID applies equality check predicate on the "video_id" field. It's identical to VideoIDEQ.
-func VideoID(v uint32) predicate.VideoComment {
+func VideoID(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldVideoID, v))
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v uint32) predicate.VideoComment {
+func UserID(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldUserID, v))
 }
 
@@ -105,7 +105,7 @@ func Content(v string) predicate.VideoComment {
 }
 
 // ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
-func ParentID(v uint32) predicate.VideoComment {
+func ParentID(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldParentID, v))
 }
 
@@ -275,42 +275,42 @@ func DeletedAtNotNil() predicate.VideoComment {
 }
 
 // CreatedByEQ applies the EQ predicate on the "created_by" field.
-func CreatedByEQ(v uint32) predicate.VideoComment {
+func CreatedByEQ(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldCreatedBy, v))
 }
 
 // CreatedByNEQ applies the NEQ predicate on the "created_by" field.
-func CreatedByNEQ(v uint32) predicate.VideoComment {
+func CreatedByNEQ(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldNEQ(FieldCreatedBy, v))
 }
 
 // CreatedByIn applies the In predicate on the "created_by" field.
-func CreatedByIn(vs ...uint32) predicate.VideoComment {
+func CreatedByIn(vs ...int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldIn(FieldCreatedBy, vs...))
 }
 
 // CreatedByNotIn applies the NotIn predicate on the "created_by" field.
-func CreatedByNotIn(vs ...uint32) predicate.VideoComment {
+func CreatedByNotIn(vs ...int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldNotIn(FieldCreatedBy, vs...))
 }
 
 // CreatedByGT applies the GT predicate on the "created_by" field.
-func CreatedByGT(v uint32) predicate.VideoComment {
+func CreatedByGT(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldGT(FieldCreatedBy, v))
 }
 
 // CreatedByGTE applies the GTE predicate on the "created_by" field.
-func CreatedByGTE(v uint32) predicate.VideoComment {
+func CreatedByGTE(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldGTE(FieldCreatedBy, v))
 }
 
 // CreatedByLT applies the LT predicate on the "created_by" field.
-func CreatedByLT(v uint32) predicate.VideoComment {
+func CreatedByLT(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLT(FieldCreatedBy, v))
 }
 
 // CreatedByLTE applies the LTE predicate on the "created_by" field.
-func CreatedByLTE(v uint32) predicate.VideoComment {
+func CreatedByLTE(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLTE(FieldCreatedBy, v))
 }
 
@@ -325,42 +325,42 @@ func CreatedByNotNil() predicate.VideoComment {
 }
 
 // UpdatedByEQ applies the EQ predicate on the "updated_by" field.
-func UpdatedByEQ(v uint32) predicate.VideoComment {
+func UpdatedByEQ(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldUpdatedBy, v))
 }
 
 // UpdatedByNEQ applies the NEQ predicate on the "updated_by" field.
-func UpdatedByNEQ(v uint32) predicate.VideoComment {
+func UpdatedByNEQ(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldNEQ(FieldUpdatedBy, v))
 }
 
 // UpdatedByIn applies the In predicate on the "updated_by" field.
-func UpdatedByIn(vs ...uint32) predicate.VideoComment {
+func UpdatedByIn(vs ...int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldIn(FieldUpdatedBy, vs...))
 }
 
 // UpdatedByNotIn applies the NotIn predicate on the "updated_by" field.
-func UpdatedByNotIn(vs ...uint32) predicate.VideoComment {
+func UpdatedByNotIn(vs ...int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldNotIn(FieldUpdatedBy, vs...))
 }
 
 // UpdatedByGT applies the GT predicate on the "updated_by" field.
-func UpdatedByGT(v uint32) predicate.VideoComment {
+func UpdatedByGT(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldGT(FieldUpdatedBy, v))
 }
 
 // UpdatedByGTE applies the GTE predicate on the "updated_by" field.
-func UpdatedByGTE(v uint32) predicate.VideoComment {
+func UpdatedByGTE(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldGTE(FieldUpdatedBy, v))
 }
 
 // UpdatedByLT applies the LT predicate on the "updated_by" field.
-func UpdatedByLT(v uint32) predicate.VideoComment {
+func UpdatedByLT(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLT(FieldUpdatedBy, v))
 }
 
 // UpdatedByLTE applies the LTE predicate on the "updated_by" field.
-func UpdatedByLTE(v uint32) predicate.VideoComment {
+func UpdatedByLTE(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLTE(FieldUpdatedBy, v))
 }
 
@@ -375,42 +375,42 @@ func UpdatedByNotNil() predicate.VideoComment {
 }
 
 // DeletedByEQ applies the EQ predicate on the "deleted_by" field.
-func DeletedByEQ(v uint32) predicate.VideoComment {
+func DeletedByEQ(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldDeletedBy, v))
 }
 
 // DeletedByNEQ applies the NEQ predicate on the "deleted_by" field.
-func DeletedByNEQ(v uint32) predicate.VideoComment {
+func DeletedByNEQ(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldNEQ(FieldDeletedBy, v))
 }
 
 // DeletedByIn applies the In predicate on the "deleted_by" field.
-func DeletedByIn(vs ...uint32) predicate.VideoComment {
+func DeletedByIn(vs ...int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldIn(FieldDeletedBy, vs...))
 }
 
 // DeletedByNotIn applies the NotIn predicate on the "deleted_by" field.
-func DeletedByNotIn(vs ...uint32) predicate.VideoComment {
+func DeletedByNotIn(vs ...int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldNotIn(FieldDeletedBy, vs...))
 }
 
 // DeletedByGT applies the GT predicate on the "deleted_by" field.
-func DeletedByGT(v uint32) predicate.VideoComment {
+func DeletedByGT(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldGT(FieldDeletedBy, v))
 }
 
 // DeletedByGTE applies the GTE predicate on the "deleted_by" field.
-func DeletedByGTE(v uint32) predicate.VideoComment {
+func DeletedByGTE(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldGTE(FieldDeletedBy, v))
 }
 
 // DeletedByLT applies the LT predicate on the "deleted_by" field.
-func DeletedByLT(v uint32) predicate.VideoComment {
+func DeletedByLT(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLT(FieldDeletedBy, v))
 }
 
 // DeletedByLTE applies the LTE predicate on the "deleted_by" field.
-func DeletedByLTE(v uint32) predicate.VideoComment {
+func DeletedByLTE(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLTE(FieldDeletedBy, v))
 }
 
@@ -425,42 +425,42 @@ func DeletedByNotNil() predicate.VideoComment {
 }
 
 // TenantIDEQ applies the EQ predicate on the "tenant_id" field.
-func TenantIDEQ(v uint32) predicate.VideoComment {
+func TenantIDEQ(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldTenantID, v))
 }
 
 // TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
-func TenantIDNEQ(v uint32) predicate.VideoComment {
+func TenantIDNEQ(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldNEQ(FieldTenantID, v))
 }
 
 // TenantIDIn applies the In predicate on the "tenant_id" field.
-func TenantIDIn(vs ...uint32) predicate.VideoComment {
+func TenantIDIn(vs ...int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldIn(FieldTenantID, vs...))
 }
 
 // TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
-func TenantIDNotIn(vs ...uint32) predicate.VideoComment {
+func TenantIDNotIn(vs ...int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldNotIn(FieldTenantID, vs...))
 }
 
 // TenantIDGT applies the GT predicate on the "tenant_id" field.
-func TenantIDGT(v uint32) predicate.VideoComment {
+func TenantIDGT(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldGT(FieldTenantID, v))
 }
 
 // TenantIDGTE applies the GTE predicate on the "tenant_id" field.
-func TenantIDGTE(v uint32) predicate.VideoComment {
+func TenantIDGTE(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldGTE(FieldTenantID, v))
 }
 
 // TenantIDLT applies the LT predicate on the "tenant_id" field.
-func TenantIDLT(v uint32) predicate.VideoComment {
+func TenantIDLT(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLT(FieldTenantID, v))
 }
 
 // TenantIDLTE applies the LTE predicate on the "tenant_id" field.
-func TenantIDLTE(v uint32) predicate.VideoComment {
+func TenantIDLTE(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLTE(FieldTenantID, v))
 }
 
@@ -475,82 +475,82 @@ func TenantIDNotNil() predicate.VideoComment {
 }
 
 // VideoIDEQ applies the EQ predicate on the "video_id" field.
-func VideoIDEQ(v uint32) predicate.VideoComment {
+func VideoIDEQ(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldVideoID, v))
 }
 
 // VideoIDNEQ applies the NEQ predicate on the "video_id" field.
-func VideoIDNEQ(v uint32) predicate.VideoComment {
+func VideoIDNEQ(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldNEQ(FieldVideoID, v))
 }
 
 // VideoIDIn applies the In predicate on the "video_id" field.
-func VideoIDIn(vs ...uint32) predicate.VideoComment {
+func VideoIDIn(vs ...int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldIn(FieldVideoID, vs...))
 }
 
 // VideoIDNotIn applies the NotIn predicate on the "video_id" field.
-func VideoIDNotIn(vs ...uint32) predicate.VideoComment {
+func VideoIDNotIn(vs ...int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldNotIn(FieldVideoID, vs...))
 }
 
 // VideoIDGT applies the GT predicate on the "video_id" field.
-func VideoIDGT(v uint32) predicate.VideoComment {
+func VideoIDGT(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldGT(FieldVideoID, v))
 }
 
 // VideoIDGTE applies the GTE predicate on the "video_id" field.
-func VideoIDGTE(v uint32) predicate.VideoComment {
+func VideoIDGTE(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldGTE(FieldVideoID, v))
 }
 
 // VideoIDLT applies the LT predicate on the "video_id" field.
-func VideoIDLT(v uint32) predicate.VideoComment {
+func VideoIDLT(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLT(FieldVideoID, v))
 }
 
 // VideoIDLTE applies the LTE predicate on the "video_id" field.
-func VideoIDLTE(v uint32) predicate.VideoComment {
+func VideoIDLTE(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLTE(FieldVideoID, v))
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v uint32) predicate.VideoComment {
+func UserIDEQ(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v uint32) predicate.VideoComment {
+func UserIDNEQ(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...uint32) predicate.VideoComment {
+func UserIDIn(vs ...int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...uint32) predicate.VideoComment {
+func UserIDNotIn(vs ...int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // UserIDGT applies the GT predicate on the "user_id" field.
-func UserIDGT(v uint32) predicate.VideoComment {
+func UserIDGT(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldGT(FieldUserID, v))
 }
 
 // UserIDGTE applies the GTE predicate on the "user_id" field.
-func UserIDGTE(v uint32) predicate.VideoComment {
+func UserIDGTE(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldGTE(FieldUserID, v))
 }
 
 // UserIDLT applies the LT predicate on the "user_id" field.
-func UserIDLT(v uint32) predicate.VideoComment {
+func UserIDLT(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLT(FieldUserID, v))
 }
 
 // UserIDLTE applies the LTE predicate on the "user_id" field.
-func UserIDLTE(v uint32) predicate.VideoComment {
+func UserIDLTE(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLTE(FieldUserID, v))
 }
 
@@ -620,42 +620,42 @@ func ContentContainsFold(v string) predicate.VideoComment {
 }
 
 // ParentIDEQ applies the EQ predicate on the "parent_id" field.
-func ParentIDEQ(v uint32) predicate.VideoComment {
+func ParentIDEQ(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldEQ(FieldParentID, v))
 }
 
 // ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
-func ParentIDNEQ(v uint32) predicate.VideoComment {
+func ParentIDNEQ(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldNEQ(FieldParentID, v))
 }
 
 // ParentIDIn applies the In predicate on the "parent_id" field.
-func ParentIDIn(vs ...uint32) predicate.VideoComment {
+func ParentIDIn(vs ...int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldIn(FieldParentID, vs...))
 }
 
 // ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
-func ParentIDNotIn(vs ...uint32) predicate.VideoComment {
+func ParentIDNotIn(vs ...int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldNotIn(FieldParentID, vs...))
 }
 
 // ParentIDGT applies the GT predicate on the "parent_id" field.
-func ParentIDGT(v uint32) predicate.VideoComment {
+func ParentIDGT(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldGT(FieldParentID, v))
 }
 
 // ParentIDGTE applies the GTE predicate on the "parent_id" field.
-func ParentIDGTE(v uint32) predicate.VideoComment {
+func ParentIDGTE(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldGTE(FieldParentID, v))
 }
 
 // ParentIDLT applies the LT predicate on the "parent_id" field.
-func ParentIDLT(v uint32) predicate.VideoComment {
+func ParentIDLT(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLT(FieldParentID, v))
 }
 
 // ParentIDLTE applies the LTE predicate on the "parent_id" field.
-func ParentIDLTE(v uint32) predicate.VideoComment {
+func ParentIDLTE(v int64) predicate.VideoComment {
 	return predicate.VideoComment(sql.FieldLTE(FieldParentID, v))
 }
 

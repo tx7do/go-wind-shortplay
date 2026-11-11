@@ -10,47 +10,47 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id uint32) predicate.UbaEvent {
+func ID(id int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uint32) predicate.UbaEvent {
+func IDEQ(id int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uint32) predicate.UbaEvent {
+func IDNEQ(id int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uint32) predicate.UbaEvent {
+func IDIn(ids ...int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...uint32) predicate.UbaEvent {
+func IDNotIn(ids ...int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id uint32) predicate.UbaEvent {
+func IDGT(id int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uint32) predicate.UbaEvent {
+func IDGTE(id int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id uint32) predicate.UbaEvent {
+func IDLT(id int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uint32) predicate.UbaEvent {
+func IDLTE(id int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldLTE(FieldID, id))
 }
 
@@ -70,22 +70,22 @@ func DeletedAt(v time.Time) predicate.UbaEvent {
 }
 
 // TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
-func TenantID(v uint32) predicate.UbaEvent {
+func TenantID(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldEQ(FieldTenantID, v))
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v uint32) predicate.UbaEvent {
+func UserID(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldEQ(FieldUserID, v))
 }
 
 // VideoID applies equality check predicate on the "video_id" field. It's identical to VideoIDEQ.
-func VideoID(v uint32) predicate.UbaEvent {
+func VideoID(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldEQ(FieldVideoID, v))
 }
 
 // TargetUserID applies equality check predicate on the "target_user_id" field. It's identical to TargetUserIDEQ.
-func TargetUserID(v uint32) predicate.UbaEvent {
+func TargetUserID(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldEQ(FieldTargetUserID, v))
 }
 
@@ -265,42 +265,42 @@ func DeletedAtNotNil() predicate.UbaEvent {
 }
 
 // TenantIDEQ applies the EQ predicate on the "tenant_id" field.
-func TenantIDEQ(v uint32) predicate.UbaEvent {
+func TenantIDEQ(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldEQ(FieldTenantID, v))
 }
 
 // TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
-func TenantIDNEQ(v uint32) predicate.UbaEvent {
+func TenantIDNEQ(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldNEQ(FieldTenantID, v))
 }
 
 // TenantIDIn applies the In predicate on the "tenant_id" field.
-func TenantIDIn(vs ...uint32) predicate.UbaEvent {
+func TenantIDIn(vs ...int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldIn(FieldTenantID, vs...))
 }
 
 // TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
-func TenantIDNotIn(vs ...uint32) predicate.UbaEvent {
+func TenantIDNotIn(vs ...int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldNotIn(FieldTenantID, vs...))
 }
 
 // TenantIDGT applies the GT predicate on the "tenant_id" field.
-func TenantIDGT(v uint32) predicate.UbaEvent {
+func TenantIDGT(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldGT(FieldTenantID, v))
 }
 
 // TenantIDGTE applies the GTE predicate on the "tenant_id" field.
-func TenantIDGTE(v uint32) predicate.UbaEvent {
+func TenantIDGTE(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldGTE(FieldTenantID, v))
 }
 
 // TenantIDLT applies the LT predicate on the "tenant_id" field.
-func TenantIDLT(v uint32) predicate.UbaEvent {
+func TenantIDLT(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldLT(FieldTenantID, v))
 }
 
 // TenantIDLTE applies the LTE predicate on the "tenant_id" field.
-func TenantIDLTE(v uint32) predicate.UbaEvent {
+func TenantIDLTE(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldLTE(FieldTenantID, v))
 }
 
@@ -315,42 +315,42 @@ func TenantIDNotNil() predicate.UbaEvent {
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v uint32) predicate.UbaEvent {
+func UserIDEQ(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v uint32) predicate.UbaEvent {
+func UserIDNEQ(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...uint32) predicate.UbaEvent {
+func UserIDIn(vs ...int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...uint32) predicate.UbaEvent {
+func UserIDNotIn(vs ...int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // UserIDGT applies the GT predicate on the "user_id" field.
-func UserIDGT(v uint32) predicate.UbaEvent {
+func UserIDGT(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldGT(FieldUserID, v))
 }
 
 // UserIDGTE applies the GTE predicate on the "user_id" field.
-func UserIDGTE(v uint32) predicate.UbaEvent {
+func UserIDGTE(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldGTE(FieldUserID, v))
 }
 
 // UserIDLT applies the LT predicate on the "user_id" field.
-func UserIDLT(v uint32) predicate.UbaEvent {
+func UserIDLT(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldLT(FieldUserID, v))
 }
 
 // UserIDLTE applies the LTE predicate on the "user_id" field.
-func UserIDLTE(v uint32) predicate.UbaEvent {
+func UserIDLTE(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldLTE(FieldUserID, v))
 }
 
@@ -375,82 +375,82 @@ func EventTypeNotIn(vs ...EventType) predicate.UbaEvent {
 }
 
 // VideoIDEQ applies the EQ predicate on the "video_id" field.
-func VideoIDEQ(v uint32) predicate.UbaEvent {
+func VideoIDEQ(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldEQ(FieldVideoID, v))
 }
 
 // VideoIDNEQ applies the NEQ predicate on the "video_id" field.
-func VideoIDNEQ(v uint32) predicate.UbaEvent {
+func VideoIDNEQ(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldNEQ(FieldVideoID, v))
 }
 
 // VideoIDIn applies the In predicate on the "video_id" field.
-func VideoIDIn(vs ...uint32) predicate.UbaEvent {
+func VideoIDIn(vs ...int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldIn(FieldVideoID, vs...))
 }
 
 // VideoIDNotIn applies the NotIn predicate on the "video_id" field.
-func VideoIDNotIn(vs ...uint32) predicate.UbaEvent {
+func VideoIDNotIn(vs ...int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldNotIn(FieldVideoID, vs...))
 }
 
 // VideoIDGT applies the GT predicate on the "video_id" field.
-func VideoIDGT(v uint32) predicate.UbaEvent {
+func VideoIDGT(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldGT(FieldVideoID, v))
 }
 
 // VideoIDGTE applies the GTE predicate on the "video_id" field.
-func VideoIDGTE(v uint32) predicate.UbaEvent {
+func VideoIDGTE(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldGTE(FieldVideoID, v))
 }
 
 // VideoIDLT applies the LT predicate on the "video_id" field.
-func VideoIDLT(v uint32) predicate.UbaEvent {
+func VideoIDLT(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldLT(FieldVideoID, v))
 }
 
 // VideoIDLTE applies the LTE predicate on the "video_id" field.
-func VideoIDLTE(v uint32) predicate.UbaEvent {
+func VideoIDLTE(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldLTE(FieldVideoID, v))
 }
 
 // TargetUserIDEQ applies the EQ predicate on the "target_user_id" field.
-func TargetUserIDEQ(v uint32) predicate.UbaEvent {
+func TargetUserIDEQ(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldEQ(FieldTargetUserID, v))
 }
 
 // TargetUserIDNEQ applies the NEQ predicate on the "target_user_id" field.
-func TargetUserIDNEQ(v uint32) predicate.UbaEvent {
+func TargetUserIDNEQ(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldNEQ(FieldTargetUserID, v))
 }
 
 // TargetUserIDIn applies the In predicate on the "target_user_id" field.
-func TargetUserIDIn(vs ...uint32) predicate.UbaEvent {
+func TargetUserIDIn(vs ...int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldIn(FieldTargetUserID, vs...))
 }
 
 // TargetUserIDNotIn applies the NotIn predicate on the "target_user_id" field.
-func TargetUserIDNotIn(vs ...uint32) predicate.UbaEvent {
+func TargetUserIDNotIn(vs ...int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldNotIn(FieldTargetUserID, vs...))
 }
 
 // TargetUserIDGT applies the GT predicate on the "target_user_id" field.
-func TargetUserIDGT(v uint32) predicate.UbaEvent {
+func TargetUserIDGT(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldGT(FieldTargetUserID, v))
 }
 
 // TargetUserIDGTE applies the GTE predicate on the "target_user_id" field.
-func TargetUserIDGTE(v uint32) predicate.UbaEvent {
+func TargetUserIDGTE(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldGTE(FieldTargetUserID, v))
 }
 
 // TargetUserIDLT applies the LT predicate on the "target_user_id" field.
-func TargetUserIDLT(v uint32) predicate.UbaEvent {
+func TargetUserIDLT(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldLT(FieldTargetUserID, v))
 }
 
 // TargetUserIDLTE applies the LTE predicate on the "target_user_id" field.
-func TargetUserIDLTE(v uint32) predicate.UbaEvent {
+func TargetUserIDLTE(v int64) predicate.UbaEvent {
 	return predicate.UbaEvent(sql.FieldLTE(FieldTargetUserID, v))
 }
 

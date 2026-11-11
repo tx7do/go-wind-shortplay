@@ -35,7 +35,7 @@ message ListCreatorVideoStatsRequest {
 }
 
 message CreatorVideoStat {
-  optional uint32 video_id = 1 [json_name = "videoId"]; // 视频ID
+  optional int64 video_id = 1 [json_name = "videoId"]; // 视频ID
   optional string title = 2 [json_name = "title"];      // 标题
   optional string cover_url = 3 [json_name = "coverUrl"]; // 封面
   optional uint64 plays = 4 [json_name = "plays"];      // 播放
@@ -60,7 +60,7 @@ message ListCreatorTrendsRequest {
 message CreatorOverview {
   optional uint64 video_count = 1 [json_name = "videoCount"];   // 作品数（已发布）
   optional uint64 total_views = 2 [json_name = "totalViews"];   // 累计播放
-  optional uint64 total_likes = 3 [json_name = "totalLikes"];   // 累计获赞
+  optional int64 total_likes = 3 [json_name = "totalLikes"];   // 累计获赞
   optional uint64 total_collects = 4 [json_name = "totalCollects"]; // 累计收藏
   optional uint64 total_comments = 5 [json_name = "totalComments"]; // 累计评论
   optional uint64 follower_count = 6 [json_name = "followerCount"]; // 粉丝数
@@ -74,7 +74,7 @@ message Overview {
   optional uint64 total_videos = 1 [json_name = "totalVideos"];         // 视频总数
   optional uint64 published_videos = 2 [json_name = "publishedVideos"]; // 在线视频数
   optional uint64 total_views = 3 [json_name = "totalViews"];           // 总播放量
-  optional uint64 total_likes = 4 [json_name = "totalLikes"];           // 总点赞数
+  optional int64 total_likes = 4 [json_name = "totalLikes"];           // 总点赞数
   optional uint64 total_comments = 5 [json_name = "totalComments"];     // 总评论数
   optional uint64 total_users = 6 [json_name = "totalUsers"];           // 用户总数
   optional uint64 today_published = 7 [json_name = "todayPublished"];   // 今日发布数

@@ -35,7 +35,7 @@ func authOperatorSP(ctx context.Context) (*authenticationV1.UserTokenPayload, er
 	return op, nil
 }
 
-func trans_U32(v uint32) *uint32 { return &v }
+func trans_U32(v int64) *int64 { return &v }
 
 func trans_Str(v string) *string { return &v }
 
@@ -115,7 +115,7 @@ func (s *InteractionService) Uncollect(ctx context.Context, req *interactionV1.C
 // 游客评论 Create 的可选认证同口径）。
 func (s *InteractionService) GetInteractionStatus(ctx context.Context, req *interactionV1.GetInteractionStatusRequest) (*interactionV1.GetInteractionStatusResponse, error) {
 	if uid := s.optionalUserID(ctx); uid > 0 {
-		if md, err := spmetadata.NewContext(ctx, spmetadata.NewUserOperator(uint64(uid), 0, 0, identityV1.DataScope_ALL)); err == nil {
+		if md, err := spmetadata.NewContext(ctx, spmetadata.NewUserOperator(int64(uid), 0, 0, identityV1.DataScope_ALL)); err == nil {
 			ctx = md
 		}
 	}
@@ -123,7 +123,7 @@ func (s *InteractionService) GetInteractionStatus(ctx context.Context, req *inte
 }
 
 // optionalUserID 可选认证：带有效 bearer 返回 uid，否则 0。
-func (s *InteractionService) optionalUserID(ctx context.Context) uint32 {
+func (s *InteractionService) optionalUserID(ctx context.Context) int64 {
 	token, err := authnEngine.AuthFromMD(ctx, authnEngine.BearerWord, authnEngine.ContextTypeKratosMetaData)
 	if err != nil || s.accessTokenChecker == nil {
 		return 0

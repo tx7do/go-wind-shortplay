@@ -70,14 +70,14 @@ func (_u *ImConversationUpdate) ClearDeletedAt() *ImConversationUpdate {
 }
 
 // SetParticipantAID sets the "participant_a_id" field.
-func (_u *ImConversationUpdate) SetParticipantAID(v uint32) *ImConversationUpdate {
+func (_u *ImConversationUpdate) SetParticipantAID(v int64) *ImConversationUpdate {
 	_u.mutation.ResetParticipantAID()
 	_u.mutation.SetParticipantAID(v)
 	return _u
 }
 
 // SetNillableParticipantAID sets the "participant_a_id" field if the given value is not nil.
-func (_u *ImConversationUpdate) SetNillableParticipantAID(v *uint32) *ImConversationUpdate {
+func (_u *ImConversationUpdate) SetNillableParticipantAID(v *int64) *ImConversationUpdate {
 	if v != nil {
 		_u.SetParticipantAID(*v)
 	}
@@ -85,20 +85,20 @@ func (_u *ImConversationUpdate) SetNillableParticipantAID(v *uint32) *ImConversa
 }
 
 // AddParticipantAID adds value to the "participant_a_id" field.
-func (_u *ImConversationUpdate) AddParticipantAID(v int32) *ImConversationUpdate {
+func (_u *ImConversationUpdate) AddParticipantAID(v int64) *ImConversationUpdate {
 	_u.mutation.AddParticipantAID(v)
 	return _u
 }
 
 // SetParticipantBID sets the "participant_b_id" field.
-func (_u *ImConversationUpdate) SetParticipantBID(v uint32) *ImConversationUpdate {
+func (_u *ImConversationUpdate) SetParticipantBID(v int64) *ImConversationUpdate {
 	_u.mutation.ResetParticipantBID()
 	_u.mutation.SetParticipantBID(v)
 	return _u
 }
 
 // SetNillableParticipantBID sets the "participant_b_id" field if the given value is not nil.
-func (_u *ImConversationUpdate) SetNillableParticipantBID(v *uint32) *ImConversationUpdate {
+func (_u *ImConversationUpdate) SetNillableParticipantBID(v *int64) *ImConversationUpdate {
 	if v != nil {
 		_u.SetParticipantBID(*v)
 	}
@@ -106,7 +106,7 @@ func (_u *ImConversationUpdate) SetNillableParticipantBID(v *uint32) *ImConversa
 }
 
 // AddParticipantBID adds value to the "participant_b_id" field.
-func (_u *ImConversationUpdate) AddParticipantBID(v int32) *ImConversationUpdate {
+func (_u *ImConversationUpdate) AddParticipantBID(v int64) *ImConversationUpdate {
 	_u.mutation.AddParticipantBID(v)
 	return _u
 }
@@ -226,7 +226,7 @@ func (_u *ImConversationUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) 
 }
 
 func (_u *ImConversationUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(imconversation.Table, imconversation.Columns, sqlgraph.NewFieldSpec(imconversation.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(imconversation.Table, imconversation.Columns, sqlgraph.NewFieldSpec(imconversation.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -250,19 +250,19 @@ func (_u *ImConversationUpdate) sqlSave(ctx context.Context) (_node int, err err
 		_spec.ClearField(imconversation.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(imconversation.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(imconversation.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.ParticipantAID(); ok {
-		_spec.SetField(imconversation.FieldParticipantAID, field.TypeUint32, value)
+		_spec.SetField(imconversation.FieldParticipantAID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedParticipantAID(); ok {
-		_spec.AddField(imconversation.FieldParticipantAID, field.TypeUint32, value)
+		_spec.AddField(imconversation.FieldParticipantAID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.ParticipantBID(); ok {
-		_spec.SetField(imconversation.FieldParticipantBID, field.TypeUint32, value)
+		_spec.SetField(imconversation.FieldParticipantBID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedParticipantBID(); ok {
-		_spec.AddField(imconversation.FieldParticipantBID, field.TypeUint32, value)
+		_spec.AddField(imconversation.FieldParticipantBID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.LastMessagePreview(); ok {
 		_spec.SetField(imconversation.FieldLastMessagePreview, field.TypeString, value)
@@ -348,14 +348,14 @@ func (_u *ImConversationUpdateOne) ClearDeletedAt() *ImConversationUpdateOne {
 }
 
 // SetParticipantAID sets the "participant_a_id" field.
-func (_u *ImConversationUpdateOne) SetParticipantAID(v uint32) *ImConversationUpdateOne {
+func (_u *ImConversationUpdateOne) SetParticipantAID(v int64) *ImConversationUpdateOne {
 	_u.mutation.ResetParticipantAID()
 	_u.mutation.SetParticipantAID(v)
 	return _u
 }
 
 // SetNillableParticipantAID sets the "participant_a_id" field if the given value is not nil.
-func (_u *ImConversationUpdateOne) SetNillableParticipantAID(v *uint32) *ImConversationUpdateOne {
+func (_u *ImConversationUpdateOne) SetNillableParticipantAID(v *int64) *ImConversationUpdateOne {
 	if v != nil {
 		_u.SetParticipantAID(*v)
 	}
@@ -363,20 +363,20 @@ func (_u *ImConversationUpdateOne) SetNillableParticipantAID(v *uint32) *ImConve
 }
 
 // AddParticipantAID adds value to the "participant_a_id" field.
-func (_u *ImConversationUpdateOne) AddParticipantAID(v int32) *ImConversationUpdateOne {
+func (_u *ImConversationUpdateOne) AddParticipantAID(v int64) *ImConversationUpdateOne {
 	_u.mutation.AddParticipantAID(v)
 	return _u
 }
 
 // SetParticipantBID sets the "participant_b_id" field.
-func (_u *ImConversationUpdateOne) SetParticipantBID(v uint32) *ImConversationUpdateOne {
+func (_u *ImConversationUpdateOne) SetParticipantBID(v int64) *ImConversationUpdateOne {
 	_u.mutation.ResetParticipantBID()
 	_u.mutation.SetParticipantBID(v)
 	return _u
 }
 
 // SetNillableParticipantBID sets the "participant_b_id" field if the given value is not nil.
-func (_u *ImConversationUpdateOne) SetNillableParticipantBID(v *uint32) *ImConversationUpdateOne {
+func (_u *ImConversationUpdateOne) SetNillableParticipantBID(v *int64) *ImConversationUpdateOne {
 	if v != nil {
 		_u.SetParticipantBID(*v)
 	}
@@ -384,7 +384,7 @@ func (_u *ImConversationUpdateOne) SetNillableParticipantBID(v *uint32) *ImConve
 }
 
 // AddParticipantBID adds value to the "participant_b_id" field.
-func (_u *ImConversationUpdateOne) AddParticipantBID(v int32) *ImConversationUpdateOne {
+func (_u *ImConversationUpdateOne) AddParticipantBID(v int64) *ImConversationUpdateOne {
 	_u.mutation.AddParticipantBID(v)
 	return _u
 }
@@ -517,7 +517,7 @@ func (_u *ImConversationUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder
 }
 
 func (_u *ImConversationUpdateOne) sqlSave(ctx context.Context) (_node *ImConversation, err error) {
-	_spec := sqlgraph.NewUpdateSpec(imconversation.Table, imconversation.Columns, sqlgraph.NewFieldSpec(imconversation.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(imconversation.Table, imconversation.Columns, sqlgraph.NewFieldSpec(imconversation.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "ImConversation.id" for update`)}
@@ -558,19 +558,19 @@ func (_u *ImConversationUpdateOne) sqlSave(ctx context.Context) (_node *ImConver
 		_spec.ClearField(imconversation.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(imconversation.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(imconversation.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.ParticipantAID(); ok {
-		_spec.SetField(imconversation.FieldParticipantAID, field.TypeUint32, value)
+		_spec.SetField(imconversation.FieldParticipantAID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedParticipantAID(); ok {
-		_spec.AddField(imconversation.FieldParticipantAID, field.TypeUint32, value)
+		_spec.AddField(imconversation.FieldParticipantAID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.ParticipantBID(); ok {
-		_spec.SetField(imconversation.FieldParticipantBID, field.TypeUint32, value)
+		_spec.SetField(imconversation.FieldParticipantBID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedParticipantBID(); ok {
-		_spec.AddField(imconversation.FieldParticipantBID, field.TypeUint32, value)
+		_spec.AddField(imconversation.FieldParticipantBID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.LastMessagePreview(); ok {
 		_spec.SetField(imconversation.FieldLastMessagePreview, field.TypeString, value)

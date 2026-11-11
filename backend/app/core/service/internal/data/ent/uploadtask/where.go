@@ -10,47 +10,47 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id uint32) predicate.UploadTask {
+func ID(id int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uint32) predicate.UploadTask {
+func IDEQ(id int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uint32) predicate.UploadTask {
+func IDNEQ(id int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uint32) predicate.UploadTask {
+func IDIn(ids ...int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...uint32) predicate.UploadTask {
+func IDNotIn(ids ...int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id uint32) predicate.UploadTask {
+func IDGT(id int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uint32) predicate.UploadTask {
+func IDGTE(id int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id uint32) predicate.UploadTask {
+func IDLT(id int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uint32) predicate.UploadTask {
+func IDLTE(id int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldLTE(FieldID, id))
 }
 
@@ -70,7 +70,7 @@ func DeletedAt(v time.Time) predicate.UploadTask {
 }
 
 // TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
-func TenantID(v uint32) predicate.UploadTask {
+func TenantID(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldTenantID, v))
 }
 
@@ -105,12 +105,12 @@ func FileKey(v string) predicate.UploadTask {
 }
 
 // VideoID applies equality check predicate on the "video_id" field. It's identical to VideoIDEQ.
-func VideoID(v uint32) predicate.UploadTask {
+func VideoID(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldVideoID, v))
 }
 
 // AuthorID applies equality check predicate on the "author_id" field. It's identical to AuthorIDEQ.
-func AuthorID(v uint32) predicate.UploadTask {
+func AuthorID(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldAuthorID, v))
 }
 
@@ -265,42 +265,42 @@ func DeletedAtNotNil() predicate.UploadTask {
 }
 
 // TenantIDEQ applies the EQ predicate on the "tenant_id" field.
-func TenantIDEQ(v uint32) predicate.UploadTask {
+func TenantIDEQ(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldTenantID, v))
 }
 
 // TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
-func TenantIDNEQ(v uint32) predicate.UploadTask {
+func TenantIDNEQ(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldNEQ(FieldTenantID, v))
 }
 
 // TenantIDIn applies the In predicate on the "tenant_id" field.
-func TenantIDIn(vs ...uint32) predicate.UploadTask {
+func TenantIDIn(vs ...int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldIn(FieldTenantID, vs...))
 }
 
 // TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
-func TenantIDNotIn(vs ...uint32) predicate.UploadTask {
+func TenantIDNotIn(vs ...int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldNotIn(FieldTenantID, vs...))
 }
 
 // TenantIDGT applies the GT predicate on the "tenant_id" field.
-func TenantIDGT(v uint32) predicate.UploadTask {
+func TenantIDGT(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldGT(FieldTenantID, v))
 }
 
 // TenantIDGTE applies the GTE predicate on the "tenant_id" field.
-func TenantIDGTE(v uint32) predicate.UploadTask {
+func TenantIDGTE(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldGTE(FieldTenantID, v))
 }
 
 // TenantIDLT applies the LT predicate on the "tenant_id" field.
-func TenantIDLT(v uint32) predicate.UploadTask {
+func TenantIDLT(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldLT(FieldTenantID, v))
 }
 
 // TenantIDLTE applies the LTE predicate on the "tenant_id" field.
-func TenantIDLTE(v uint32) predicate.UploadTask {
+func TenantIDLTE(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldLTE(FieldTenantID, v))
 }
 
@@ -670,82 +670,82 @@ func FileKeyContainsFold(v string) predicate.UploadTask {
 }
 
 // VideoIDEQ applies the EQ predicate on the "video_id" field.
-func VideoIDEQ(v uint32) predicate.UploadTask {
+func VideoIDEQ(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldVideoID, v))
 }
 
 // VideoIDNEQ applies the NEQ predicate on the "video_id" field.
-func VideoIDNEQ(v uint32) predicate.UploadTask {
+func VideoIDNEQ(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldNEQ(FieldVideoID, v))
 }
 
 // VideoIDIn applies the In predicate on the "video_id" field.
-func VideoIDIn(vs ...uint32) predicate.UploadTask {
+func VideoIDIn(vs ...int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldIn(FieldVideoID, vs...))
 }
 
 // VideoIDNotIn applies the NotIn predicate on the "video_id" field.
-func VideoIDNotIn(vs ...uint32) predicate.UploadTask {
+func VideoIDNotIn(vs ...int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldNotIn(FieldVideoID, vs...))
 }
 
 // VideoIDGT applies the GT predicate on the "video_id" field.
-func VideoIDGT(v uint32) predicate.UploadTask {
+func VideoIDGT(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldGT(FieldVideoID, v))
 }
 
 // VideoIDGTE applies the GTE predicate on the "video_id" field.
-func VideoIDGTE(v uint32) predicate.UploadTask {
+func VideoIDGTE(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldGTE(FieldVideoID, v))
 }
 
 // VideoIDLT applies the LT predicate on the "video_id" field.
-func VideoIDLT(v uint32) predicate.UploadTask {
+func VideoIDLT(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldLT(FieldVideoID, v))
 }
 
 // VideoIDLTE applies the LTE predicate on the "video_id" field.
-func VideoIDLTE(v uint32) predicate.UploadTask {
+func VideoIDLTE(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldLTE(FieldVideoID, v))
 }
 
 // AuthorIDEQ applies the EQ predicate on the "author_id" field.
-func AuthorIDEQ(v uint32) predicate.UploadTask {
+func AuthorIDEQ(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldEQ(FieldAuthorID, v))
 }
 
 // AuthorIDNEQ applies the NEQ predicate on the "author_id" field.
-func AuthorIDNEQ(v uint32) predicate.UploadTask {
+func AuthorIDNEQ(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldNEQ(FieldAuthorID, v))
 }
 
 // AuthorIDIn applies the In predicate on the "author_id" field.
-func AuthorIDIn(vs ...uint32) predicate.UploadTask {
+func AuthorIDIn(vs ...int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldIn(FieldAuthorID, vs...))
 }
 
 // AuthorIDNotIn applies the NotIn predicate on the "author_id" field.
-func AuthorIDNotIn(vs ...uint32) predicate.UploadTask {
+func AuthorIDNotIn(vs ...int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldNotIn(FieldAuthorID, vs...))
 }
 
 // AuthorIDGT applies the GT predicate on the "author_id" field.
-func AuthorIDGT(v uint32) predicate.UploadTask {
+func AuthorIDGT(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldGT(FieldAuthorID, v))
 }
 
 // AuthorIDGTE applies the GTE predicate on the "author_id" field.
-func AuthorIDGTE(v uint32) predicate.UploadTask {
+func AuthorIDGTE(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldGTE(FieldAuthorID, v))
 }
 
 // AuthorIDLT applies the LT predicate on the "author_id" field.
-func AuthorIDLT(v uint32) predicate.UploadTask {
+func AuthorIDLT(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldLT(FieldAuthorID, v))
 }
 
 // AuthorIDLTE applies the LTE predicate on the "author_id" field.
-func AuthorIDLTE(v uint32) predicate.UploadTask {
+func AuthorIDLTE(v int64) predicate.UploadTask {
 	return predicate.UploadTask(sql.FieldLTE(FieldAuthorID, v))
 }
 

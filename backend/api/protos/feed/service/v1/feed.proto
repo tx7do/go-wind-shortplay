@@ -70,7 +70,7 @@ message VideoDetail {
 }
 
 message GetVideoDetailRequest {
-  uint32 video_id = 1 [json_name = "videoId"]; // 视频ID
+  int64 video_id = 1 [json_name = "videoId"]; // 视频ID
 }
 
 message SearchVideosRequest {

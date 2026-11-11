@@ -10,8 +10,8 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	adminV1 "go-wind-shortplay/api/gen/go/admin/service/v1"
-	imV1 "go-wind-shortplay/api/gen/go/im/service/v1"
 	danmakuV1 "go-wind-shortplay/api/gen/go/danmaku/service/v1"
+	imV1 "go-wind-shortplay/api/gen/go/im/service/v1"
 	interactionV1 "go-wind-shortplay/api/gen/go/interaction/service/v1"
 	reportV1 "go-wind-shortplay/api/gen/go/report/service/v1"
 	statsV1 "go-wind-shortplay/api/gen/go/stats/service/v1"

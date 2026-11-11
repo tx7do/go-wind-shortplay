@@ -65,13 +65,13 @@ func (_c *ImConversationCreate) SetNillableDeletedAt(v *time.Time) *ImConversati
 }
 
 // SetTenantID sets the "tenant_id" field.
-func (_c *ImConversationCreate) SetTenantID(v uint32) *ImConversationCreate {
+func (_c *ImConversationCreate) SetTenantID(v int64) *ImConversationCreate {
 	_c.mutation.SetTenantID(v)
 	return _c
 }
 
 // SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
-func (_c *ImConversationCreate) SetNillableTenantID(v *uint32) *ImConversationCreate {
+func (_c *ImConversationCreate) SetNillableTenantID(v *int64) *ImConversationCreate {
 	if v != nil {
 		_c.SetTenantID(*v)
 	}
@@ -79,13 +79,13 @@ func (_c *ImConversationCreate) SetNillableTenantID(v *uint32) *ImConversationCr
 }
 
 // SetParticipantAID sets the "participant_a_id" field.
-func (_c *ImConversationCreate) SetParticipantAID(v uint32) *ImConversationCreate {
+func (_c *ImConversationCreate) SetParticipantAID(v int64) *ImConversationCreate {
 	_c.mutation.SetParticipantAID(v)
 	return _c
 }
 
 // SetNillableParticipantAID sets the "participant_a_id" field if the given value is not nil.
-func (_c *ImConversationCreate) SetNillableParticipantAID(v *uint32) *ImConversationCreate {
+func (_c *ImConversationCreate) SetNillableParticipantAID(v *int64) *ImConversationCreate {
 	if v != nil {
 		_c.SetParticipantAID(*v)
 	}
@@ -93,13 +93,13 @@ func (_c *ImConversationCreate) SetNillableParticipantAID(v *uint32) *ImConversa
 }
 
 // SetParticipantBID sets the "participant_b_id" field.
-func (_c *ImConversationCreate) SetParticipantBID(v uint32) *ImConversationCreate {
+func (_c *ImConversationCreate) SetParticipantBID(v int64) *ImConversationCreate {
 	_c.mutation.SetParticipantBID(v)
 	return _c
 }
 
 // SetNillableParticipantBID sets the "participant_b_id" field if the given value is not nil.
-func (_c *ImConversationCreate) SetNillableParticipantBID(v *uint32) *ImConversationCreate {
+func (_c *ImConversationCreate) SetNillableParticipantBID(v *int64) *ImConversationCreate {
 	if v != nil {
 		_c.SetParticipantBID(*v)
 	}
@@ -163,7 +163,7 @@ func (_c *ImConversationCreate) SetNillableBUnreadCount(v *uint64) *ImConversati
 }
 
 // SetID sets the "id" field.
-func (_c *ImConversationCreate) SetID(v uint32) *ImConversationCreate {
+func (_c *ImConversationCreate) SetID(v int64) *ImConversationCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
@@ -270,7 +270,7 @@ func (_c *ImConversationCreate) sqlSave(ctx context.Context) (*ImConversation, e
 	}
 	if _spec.ID.Value != _node.ID {
 		id := _spec.ID.Value.(int64)
-		_node.ID = uint32(id)
+		_node.ID = int64(id)
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
@@ -280,7 +280,7 @@ func (_c *ImConversationCreate) sqlSave(ctx context.Context) (*ImConversation, e
 func (_c *ImConversationCreate) createSpec() (*ImConversation, *sqlgraph.CreateSpec) {
 	var (
 		_node = &ImConversation{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(imconversation.Table, sqlgraph.NewFieldSpec(imconversation.FieldID, field.TypeUint32))
+		_spec = sqlgraph.NewCreateSpec(imconversation.Table, sqlgraph.NewFieldSpec(imconversation.FieldID, field.TypeInt64))
 	)
 	_spec.OnConflict = _c.conflict
 	if id, ok := _c.mutation.ID(); ok {
@@ -300,15 +300,15 @@ func (_c *ImConversationCreate) createSpec() (*ImConversation, *sqlgraph.CreateS
 		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.TenantID(); ok {
-		_spec.SetField(imconversation.FieldTenantID, field.TypeUint32, value)
+		_spec.SetField(imconversation.FieldTenantID, field.TypeInt64, value)
 		_node.TenantID = &value
 	}
 	if value, ok := _c.mutation.ParticipantAID(); ok {
-		_spec.SetField(imconversation.FieldParticipantAID, field.TypeUint32, value)
+		_spec.SetField(imconversation.FieldParticipantAID, field.TypeInt64, value)
 		_node.ParticipantAID = value
 	}
 	if value, ok := _c.mutation.ParticipantBID(); ok {
-		_spec.SetField(imconversation.FieldParticipantBID, field.TypeUint32, value)
+		_spec.SetField(imconversation.FieldParticipantBID, field.TypeInt64, value)
 		_node.ParticipantBID = value
 	}
 	if value, ok := _c.mutation.LastMessagePreview(); ok {
@@ -416,7 +416,7 @@ func (u *ImConversationUpsert) ClearDeletedAt() *ImConversationUpsert {
 }
 
 // SetParticipantAID sets the "participant_a_id" field.
-func (u *ImConversationUpsert) SetParticipantAID(v uint32) *ImConversationUpsert {
+func (u *ImConversationUpsert) SetParticipantAID(v int64) *ImConversationUpsert {
 	u.Set(imconversation.FieldParticipantAID, v)
 	return u
 }
@@ -428,13 +428,13 @@ func (u *ImConversationUpsert) UpdateParticipantAID() *ImConversationUpsert {
 }
 
 // AddParticipantAID adds v to the "participant_a_id" field.
-func (u *ImConversationUpsert) AddParticipantAID(v uint32) *ImConversationUpsert {
+func (u *ImConversationUpsert) AddParticipantAID(v int64) *ImConversationUpsert {
 	u.Add(imconversation.FieldParticipantAID, v)
 	return u
 }
 
 // SetParticipantBID sets the "participant_b_id" field.
-func (u *ImConversationUpsert) SetParticipantBID(v uint32) *ImConversationUpsert {
+func (u *ImConversationUpsert) SetParticipantBID(v int64) *ImConversationUpsert {
 	u.Set(imconversation.FieldParticipantBID, v)
 	return u
 }
@@ -446,7 +446,7 @@ func (u *ImConversationUpsert) UpdateParticipantBID() *ImConversationUpsert {
 }
 
 // AddParticipantBID adds v to the "participant_b_id" field.
-func (u *ImConversationUpsert) AddParticipantBID(v uint32) *ImConversationUpsert {
+func (u *ImConversationUpsert) AddParticipantBID(v int64) *ImConversationUpsert {
 	u.Add(imconversation.FieldParticipantBID, v)
 	return u
 }
@@ -614,14 +614,14 @@ func (u *ImConversationUpsertOne) ClearDeletedAt() *ImConversationUpsertOne {
 }
 
 // SetParticipantAID sets the "participant_a_id" field.
-func (u *ImConversationUpsertOne) SetParticipantAID(v uint32) *ImConversationUpsertOne {
+func (u *ImConversationUpsertOne) SetParticipantAID(v int64) *ImConversationUpsertOne {
 	return u.Update(func(s *ImConversationUpsert) {
 		s.SetParticipantAID(v)
 	})
 }
 
 // AddParticipantAID adds v to the "participant_a_id" field.
-func (u *ImConversationUpsertOne) AddParticipantAID(v uint32) *ImConversationUpsertOne {
+func (u *ImConversationUpsertOne) AddParticipantAID(v int64) *ImConversationUpsertOne {
 	return u.Update(func(s *ImConversationUpsert) {
 		s.AddParticipantAID(v)
 	})
@@ -635,14 +635,14 @@ func (u *ImConversationUpsertOne) UpdateParticipantAID() *ImConversationUpsertOn
 }
 
 // SetParticipantBID sets the "participant_b_id" field.
-func (u *ImConversationUpsertOne) SetParticipantBID(v uint32) *ImConversationUpsertOne {
+func (u *ImConversationUpsertOne) SetParticipantBID(v int64) *ImConversationUpsertOne {
 	return u.Update(func(s *ImConversationUpsert) {
 		s.SetParticipantBID(v)
 	})
 }
 
 // AddParticipantBID adds v to the "participant_b_id" field.
-func (u *ImConversationUpsertOne) AddParticipantBID(v uint32) *ImConversationUpsertOne {
+func (u *ImConversationUpsertOne) AddParticipantBID(v int64) *ImConversationUpsertOne {
 	return u.Update(func(s *ImConversationUpsert) {
 		s.AddParticipantBID(v)
 	})
@@ -748,7 +748,7 @@ func (u *ImConversationUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *ImConversationUpsertOne) ID(ctx context.Context) (id uint32, err error) {
+func (u *ImConversationUpsertOne) ID(ctx context.Context) (id int64, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -757,7 +757,7 @@ func (u *ImConversationUpsertOne) ID(ctx context.Context) (id uint32, err error)
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *ImConversationUpsertOne) IDX(ctx context.Context) uint32 {
+func (u *ImConversationUpsertOne) IDX(ctx context.Context) int64 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -814,7 +814,7 @@ func (_c *ImConversationCreateBulk) Save(ctx context.Context) ([]*ImConversation
 				mutation.id = &nodes[i].ID
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = uint32(id)
+					nodes[i].ID = int64(id)
 				}
 				mutation.done = true
 				return nodes[i], nil
@@ -995,14 +995,14 @@ func (u *ImConversationUpsertBulk) ClearDeletedAt() *ImConversationUpsertBulk {
 }
 
 // SetParticipantAID sets the "participant_a_id" field.
-func (u *ImConversationUpsertBulk) SetParticipantAID(v uint32) *ImConversationUpsertBulk {
+func (u *ImConversationUpsertBulk) SetParticipantAID(v int64) *ImConversationUpsertBulk {
 	return u.Update(func(s *ImConversationUpsert) {
 		s.SetParticipantAID(v)
 	})
 }
 
 // AddParticipantAID adds v to the "participant_a_id" field.
-func (u *ImConversationUpsertBulk) AddParticipantAID(v uint32) *ImConversationUpsertBulk {
+func (u *ImConversationUpsertBulk) AddParticipantAID(v int64) *ImConversationUpsertBulk {
 	return u.Update(func(s *ImConversationUpsert) {
 		s.AddParticipantAID(v)
 	})
@@ -1016,14 +1016,14 @@ func (u *ImConversationUpsertBulk) UpdateParticipantAID() *ImConversationUpsertB
 }
 
 // SetParticipantBID sets the "participant_b_id" field.
-func (u *ImConversationUpsertBulk) SetParticipantBID(v uint32) *ImConversationUpsertBulk {
+func (u *ImConversationUpsertBulk) SetParticipantBID(v int64) *ImConversationUpsertBulk {
 	return u.Update(func(s *ImConversationUpsert) {
 		s.SetParticipantBID(v)
 	})
 }
 
 // AddParticipantBID adds v to the "participant_b_id" field.
-func (u *ImConversationUpsertBulk) AddParticipantBID(v uint32) *ImConversationUpsertBulk {
+func (u *ImConversationUpsertBulk) AddParticipantBID(v int64) *ImConversationUpsertBulk {
 	return u.Update(func(s *ImConversationUpsert) {
 		s.AddParticipantBID(v)
 	})

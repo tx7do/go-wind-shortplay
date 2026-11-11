@@ -61,10 +61,10 @@ func (VideoDraft) Fields() []ent.Field {
 			Comment("关联上传任务号").
 			Optional().
 			Nillable(),
-		field.Uint32("author_id").
+		field.Int64("author_id").
 			Comment("作者用户ID").
 			Default(0),
-		field.Uint32("series_id").
+		field.Int64("series_id").
 			Comment("挂靠剧集ID（提交发布时挂靠，0=不挂靠）").
 			Default(0),
 		field.Uint32("episode_number").
@@ -76,10 +76,10 @@ func (VideoDraft) Fields() []ent.Field {
 // Mixin of the VideoDraft.
 func (VideoDraft) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.AutoIncrementId{},
+		mixin.AutoIncrementId64{},
 		mixin.TimeAt{},
-		mixin.OperatorID{},
-		mixin.TenantID[uint32]{},
+		mixin.OperatorID64{},
+		mixin.TenantID[int64]{},
 	}
 }
 

@@ -30,7 +30,7 @@ func (UbaEvent) Annotations() []schema.Annotation {
 // Fields of the UbaEvent.
 func (UbaEvent) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint32("user_id").
+		field.Int64("user_id").
 			Comment("行为人用户ID（游客为0）").
 			Default(0),
 
@@ -49,11 +49,11 @@ func (UbaEvent) Fields() []ent.Field {
 			).
 			Default("VIDEO_PLAY"),
 
-		field.Uint32("video_id").
+		field.Int64("video_id").
 			Comment("视频ID（非视频事件为0）").
 			Default(0),
 
-		field.Uint32("target_user_id").
+		field.Int64("target_user_id").
 			Comment("对方用户ID（关注事件）").
 			Default(0),
 
@@ -84,9 +84,9 @@ func (UbaEvent) Fields() []ent.Field {
 // Mixin of the UbaEvent.
 func (UbaEvent) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.AutoIncrementId{},
+		mixin.AutoIncrementId64{},
 		mixin.TimeAt{},
-		mixin.TenantID[uint32]{},
+		mixin.TenantID[int64]{},
 	}
 }
 

@@ -70,14 +70,14 @@ func (_u *VideoTagRelUpdate) ClearDeletedAt() *VideoTagRelUpdate {
 }
 
 // SetVideoID sets the "video_id" field.
-func (_u *VideoTagRelUpdate) SetVideoID(v uint32) *VideoTagRelUpdate {
+func (_u *VideoTagRelUpdate) SetVideoID(v int64) *VideoTagRelUpdate {
 	_u.mutation.ResetVideoID()
 	_u.mutation.SetVideoID(v)
 	return _u
 }
 
 // SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_u *VideoTagRelUpdate) SetNillableVideoID(v *uint32) *VideoTagRelUpdate {
+func (_u *VideoTagRelUpdate) SetNillableVideoID(v *int64) *VideoTagRelUpdate {
 	if v != nil {
 		_u.SetVideoID(*v)
 	}
@@ -85,20 +85,20 @@ func (_u *VideoTagRelUpdate) SetNillableVideoID(v *uint32) *VideoTagRelUpdate {
 }
 
 // AddVideoID adds value to the "video_id" field.
-func (_u *VideoTagRelUpdate) AddVideoID(v int32) *VideoTagRelUpdate {
+func (_u *VideoTagRelUpdate) AddVideoID(v int64) *VideoTagRelUpdate {
 	_u.mutation.AddVideoID(v)
 	return _u
 }
 
 // SetTagID sets the "tag_id" field.
-func (_u *VideoTagRelUpdate) SetTagID(v uint32) *VideoTagRelUpdate {
+func (_u *VideoTagRelUpdate) SetTagID(v int64) *VideoTagRelUpdate {
 	_u.mutation.ResetTagID()
 	_u.mutation.SetTagID(v)
 	return _u
 }
 
 // SetNillableTagID sets the "tag_id" field if the given value is not nil.
-func (_u *VideoTagRelUpdate) SetNillableTagID(v *uint32) *VideoTagRelUpdate {
+func (_u *VideoTagRelUpdate) SetNillableTagID(v *int64) *VideoTagRelUpdate {
 	if v != nil {
 		_u.SetTagID(*v)
 	}
@@ -106,7 +106,7 @@ func (_u *VideoTagRelUpdate) SetNillableTagID(v *uint32) *VideoTagRelUpdate {
 }
 
 // AddTagID adds value to the "tag_id" field.
-func (_u *VideoTagRelUpdate) AddTagID(v int32) *VideoTagRelUpdate {
+func (_u *VideoTagRelUpdate) AddTagID(v int64) *VideoTagRelUpdate {
 	_u.mutation.AddTagID(v)
 	return _u
 }
@@ -150,7 +150,7 @@ func (_u *VideoTagRelUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Vi
 }
 
 func (_u *VideoTagRelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(videotagrel.Table, videotagrel.Columns, sqlgraph.NewFieldSpec(videotagrel.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(videotagrel.Table, videotagrel.Columns, sqlgraph.NewFieldSpec(videotagrel.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -174,19 +174,19 @@ func (_u *VideoTagRelUpdate) sqlSave(ctx context.Context) (_node int, err error)
 		_spec.ClearField(videotagrel.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(videotagrel.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(videotagrel.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.VideoID(); ok {
-		_spec.SetField(videotagrel.FieldVideoID, field.TypeUint32, value)
+		_spec.SetField(videotagrel.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedVideoID(); ok {
-		_spec.AddField(videotagrel.FieldVideoID, field.TypeUint32, value)
+		_spec.AddField(videotagrel.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.TagID(); ok {
-		_spec.SetField(videotagrel.FieldTagID, field.TypeUint32, value)
+		_spec.SetField(videotagrel.FieldTagID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedTagID(); ok {
-		_spec.AddField(videotagrel.FieldTagID, field.TypeUint32, value)
+		_spec.AddField(videotagrel.FieldTagID, field.TypeInt64, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -251,14 +251,14 @@ func (_u *VideoTagRelUpdateOne) ClearDeletedAt() *VideoTagRelUpdateOne {
 }
 
 // SetVideoID sets the "video_id" field.
-func (_u *VideoTagRelUpdateOne) SetVideoID(v uint32) *VideoTagRelUpdateOne {
+func (_u *VideoTagRelUpdateOne) SetVideoID(v int64) *VideoTagRelUpdateOne {
 	_u.mutation.ResetVideoID()
 	_u.mutation.SetVideoID(v)
 	return _u
 }
 
 // SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_u *VideoTagRelUpdateOne) SetNillableVideoID(v *uint32) *VideoTagRelUpdateOne {
+func (_u *VideoTagRelUpdateOne) SetNillableVideoID(v *int64) *VideoTagRelUpdateOne {
 	if v != nil {
 		_u.SetVideoID(*v)
 	}
@@ -266,20 +266,20 @@ func (_u *VideoTagRelUpdateOne) SetNillableVideoID(v *uint32) *VideoTagRelUpdate
 }
 
 // AddVideoID adds value to the "video_id" field.
-func (_u *VideoTagRelUpdateOne) AddVideoID(v int32) *VideoTagRelUpdateOne {
+func (_u *VideoTagRelUpdateOne) AddVideoID(v int64) *VideoTagRelUpdateOne {
 	_u.mutation.AddVideoID(v)
 	return _u
 }
 
 // SetTagID sets the "tag_id" field.
-func (_u *VideoTagRelUpdateOne) SetTagID(v uint32) *VideoTagRelUpdateOne {
+func (_u *VideoTagRelUpdateOne) SetTagID(v int64) *VideoTagRelUpdateOne {
 	_u.mutation.ResetTagID()
 	_u.mutation.SetTagID(v)
 	return _u
 }
 
 // SetNillableTagID sets the "tag_id" field if the given value is not nil.
-func (_u *VideoTagRelUpdateOne) SetNillableTagID(v *uint32) *VideoTagRelUpdateOne {
+func (_u *VideoTagRelUpdateOne) SetNillableTagID(v *int64) *VideoTagRelUpdateOne {
 	if v != nil {
 		_u.SetTagID(*v)
 	}
@@ -287,7 +287,7 @@ func (_u *VideoTagRelUpdateOne) SetNillableTagID(v *uint32) *VideoTagRelUpdateOn
 }
 
 // AddTagID adds value to the "tag_id" field.
-func (_u *VideoTagRelUpdateOne) AddTagID(v int32) *VideoTagRelUpdateOne {
+func (_u *VideoTagRelUpdateOne) AddTagID(v int64) *VideoTagRelUpdateOne {
 	_u.mutation.AddTagID(v)
 	return _u
 }
@@ -344,7 +344,7 @@ func (_u *VideoTagRelUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) 
 }
 
 func (_u *VideoTagRelUpdateOne) sqlSave(ctx context.Context) (_node *VideoTagRel, err error) {
-	_spec := sqlgraph.NewUpdateSpec(videotagrel.Table, videotagrel.Columns, sqlgraph.NewFieldSpec(videotagrel.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(videotagrel.Table, videotagrel.Columns, sqlgraph.NewFieldSpec(videotagrel.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "VideoTagRel.id" for update`)}
@@ -385,19 +385,19 @@ func (_u *VideoTagRelUpdateOne) sqlSave(ctx context.Context) (_node *VideoTagRel
 		_spec.ClearField(videotagrel.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(videotagrel.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(videotagrel.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.VideoID(); ok {
-		_spec.SetField(videotagrel.FieldVideoID, field.TypeUint32, value)
+		_spec.SetField(videotagrel.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedVideoID(); ok {
-		_spec.AddField(videotagrel.FieldVideoID, field.TypeUint32, value)
+		_spec.AddField(videotagrel.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.TagID(); ok {
-		_spec.SetField(videotagrel.FieldTagID, field.TypeUint32, value)
+		_spec.SetField(videotagrel.FieldTagID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedTagID(); ok {
-		_spec.AddField(videotagrel.FieldTagID, field.TypeUint32, value)
+		_spec.AddField(videotagrel.FieldTagID, field.TypeInt64, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &VideoTagRel{config: _u.config}

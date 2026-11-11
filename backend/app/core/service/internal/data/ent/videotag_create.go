@@ -65,13 +65,13 @@ func (_c *VideoTagCreate) SetNillableDeletedAt(v *time.Time) *VideoTagCreate {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_c *VideoTagCreate) SetCreatedBy(v uint32) *VideoTagCreate {
+func (_c *VideoTagCreate) SetCreatedBy(v int64) *VideoTagCreate {
 	_c.mutation.SetCreatedBy(v)
 	return _c
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_c *VideoTagCreate) SetNillableCreatedBy(v *uint32) *VideoTagCreate {
+func (_c *VideoTagCreate) SetNillableCreatedBy(v *int64) *VideoTagCreate {
 	if v != nil {
 		_c.SetCreatedBy(*v)
 	}
@@ -79,13 +79,13 @@ func (_c *VideoTagCreate) SetNillableCreatedBy(v *uint32) *VideoTagCreate {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_c *VideoTagCreate) SetUpdatedBy(v uint32) *VideoTagCreate {
+func (_c *VideoTagCreate) SetUpdatedBy(v int64) *VideoTagCreate {
 	_c.mutation.SetUpdatedBy(v)
 	return _c
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_c *VideoTagCreate) SetNillableUpdatedBy(v *uint32) *VideoTagCreate {
+func (_c *VideoTagCreate) SetNillableUpdatedBy(v *int64) *VideoTagCreate {
 	if v != nil {
 		_c.SetUpdatedBy(*v)
 	}
@@ -93,13 +93,13 @@ func (_c *VideoTagCreate) SetNillableUpdatedBy(v *uint32) *VideoTagCreate {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (_c *VideoTagCreate) SetDeletedBy(v uint32) *VideoTagCreate {
+func (_c *VideoTagCreate) SetDeletedBy(v int64) *VideoTagCreate {
 	_c.mutation.SetDeletedBy(v)
 	return _c
 }
 
 // SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
-func (_c *VideoTagCreate) SetNillableDeletedBy(v *uint32) *VideoTagCreate {
+func (_c *VideoTagCreate) SetNillableDeletedBy(v *int64) *VideoTagCreate {
 	if v != nil {
 		_c.SetDeletedBy(*v)
 	}
@@ -107,13 +107,13 @@ func (_c *VideoTagCreate) SetNillableDeletedBy(v *uint32) *VideoTagCreate {
 }
 
 // SetTenantID sets the "tenant_id" field.
-func (_c *VideoTagCreate) SetTenantID(v uint32) *VideoTagCreate {
+func (_c *VideoTagCreate) SetTenantID(v int64) *VideoTagCreate {
 	_c.mutation.SetTenantID(v)
 	return _c
 }
 
 // SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
-func (_c *VideoTagCreate) SetNillableTenantID(v *uint32) *VideoTagCreate {
+func (_c *VideoTagCreate) SetNillableTenantID(v *int64) *VideoTagCreate {
 	if v != nil {
 		_c.SetTenantID(*v)
 	}
@@ -141,7 +141,7 @@ func (_c *VideoTagCreate) SetNillableVideoCount(v *uint64) *VideoTagCreate {
 }
 
 // SetID sets the "id" field.
-func (_c *VideoTagCreate) SetID(v uint32) *VideoTagCreate {
+func (_c *VideoTagCreate) SetID(v int64) *VideoTagCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
@@ -228,7 +228,7 @@ func (_c *VideoTagCreate) sqlSave(ctx context.Context) (*VideoTag, error) {
 	}
 	if _spec.ID.Value != _node.ID {
 		id := _spec.ID.Value.(int64)
-		_node.ID = uint32(id)
+		_node.ID = int64(id)
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
@@ -238,7 +238,7 @@ func (_c *VideoTagCreate) sqlSave(ctx context.Context) (*VideoTag, error) {
 func (_c *VideoTagCreate) createSpec() (*VideoTag, *sqlgraph.CreateSpec) {
 	var (
 		_node = &VideoTag{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(videotag.Table, sqlgraph.NewFieldSpec(videotag.FieldID, field.TypeUint32))
+		_spec = sqlgraph.NewCreateSpec(videotag.Table, sqlgraph.NewFieldSpec(videotag.FieldID, field.TypeInt64))
 	)
 	_spec.OnConflict = _c.conflict
 	if id, ok := _c.mutation.ID(); ok {
@@ -258,19 +258,19 @@ func (_c *VideoTagCreate) createSpec() (*VideoTag, *sqlgraph.CreateSpec) {
 		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.CreatedBy(); ok {
-		_spec.SetField(videotag.FieldCreatedBy, field.TypeUint32, value)
+		_spec.SetField(videotag.FieldCreatedBy, field.TypeInt64, value)
 		_node.CreatedBy = &value
 	}
 	if value, ok := _c.mutation.UpdatedBy(); ok {
-		_spec.SetField(videotag.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.SetField(videotag.FieldUpdatedBy, field.TypeInt64, value)
 		_node.UpdatedBy = &value
 	}
 	if value, ok := _c.mutation.DeletedBy(); ok {
-		_spec.SetField(videotag.FieldDeletedBy, field.TypeUint32, value)
+		_spec.SetField(videotag.FieldDeletedBy, field.TypeInt64, value)
 		_node.DeletedBy = &value
 	}
 	if value, ok := _c.mutation.TenantID(); ok {
-		_spec.SetField(videotag.FieldTenantID, field.TypeUint32, value)
+		_spec.SetField(videotag.FieldTenantID, field.TypeInt64, value)
 		_node.TenantID = &value
 	}
 	if value, ok := _c.mutation.Name(); ok {
@@ -370,7 +370,7 @@ func (u *VideoTagUpsert) ClearDeletedAt() *VideoTagUpsert {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (u *VideoTagUpsert) SetCreatedBy(v uint32) *VideoTagUpsert {
+func (u *VideoTagUpsert) SetCreatedBy(v int64) *VideoTagUpsert {
 	u.Set(videotag.FieldCreatedBy, v)
 	return u
 }
@@ -382,7 +382,7 @@ func (u *VideoTagUpsert) UpdateCreatedBy() *VideoTagUpsert {
 }
 
 // AddCreatedBy adds v to the "created_by" field.
-func (u *VideoTagUpsert) AddCreatedBy(v uint32) *VideoTagUpsert {
+func (u *VideoTagUpsert) AddCreatedBy(v int64) *VideoTagUpsert {
 	u.Add(videotag.FieldCreatedBy, v)
 	return u
 }
@@ -394,7 +394,7 @@ func (u *VideoTagUpsert) ClearCreatedBy() *VideoTagUpsert {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (u *VideoTagUpsert) SetUpdatedBy(v uint32) *VideoTagUpsert {
+func (u *VideoTagUpsert) SetUpdatedBy(v int64) *VideoTagUpsert {
 	u.Set(videotag.FieldUpdatedBy, v)
 	return u
 }
@@ -406,7 +406,7 @@ func (u *VideoTagUpsert) UpdateUpdatedBy() *VideoTagUpsert {
 }
 
 // AddUpdatedBy adds v to the "updated_by" field.
-func (u *VideoTagUpsert) AddUpdatedBy(v uint32) *VideoTagUpsert {
+func (u *VideoTagUpsert) AddUpdatedBy(v int64) *VideoTagUpsert {
 	u.Add(videotag.FieldUpdatedBy, v)
 	return u
 }
@@ -418,7 +418,7 @@ func (u *VideoTagUpsert) ClearUpdatedBy() *VideoTagUpsert {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (u *VideoTagUpsert) SetDeletedBy(v uint32) *VideoTagUpsert {
+func (u *VideoTagUpsert) SetDeletedBy(v int64) *VideoTagUpsert {
 	u.Set(videotag.FieldDeletedBy, v)
 	return u
 }
@@ -430,7 +430,7 @@ func (u *VideoTagUpsert) UpdateDeletedBy() *VideoTagUpsert {
 }
 
 // AddDeletedBy adds v to the "deleted_by" field.
-func (u *VideoTagUpsert) AddDeletedBy(v uint32) *VideoTagUpsert {
+func (u *VideoTagUpsert) AddDeletedBy(v int64) *VideoTagUpsert {
 	u.Add(videotag.FieldDeletedBy, v)
 	return u
 }
@@ -568,14 +568,14 @@ func (u *VideoTagUpsertOne) ClearDeletedAt() *VideoTagUpsertOne {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (u *VideoTagUpsertOne) SetCreatedBy(v uint32) *VideoTagUpsertOne {
+func (u *VideoTagUpsertOne) SetCreatedBy(v int64) *VideoTagUpsertOne {
 	return u.Update(func(s *VideoTagUpsert) {
 		s.SetCreatedBy(v)
 	})
 }
 
 // AddCreatedBy adds v to the "created_by" field.
-func (u *VideoTagUpsertOne) AddCreatedBy(v uint32) *VideoTagUpsertOne {
+func (u *VideoTagUpsertOne) AddCreatedBy(v int64) *VideoTagUpsertOne {
 	return u.Update(func(s *VideoTagUpsert) {
 		s.AddCreatedBy(v)
 	})
@@ -596,14 +596,14 @@ func (u *VideoTagUpsertOne) ClearCreatedBy() *VideoTagUpsertOne {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (u *VideoTagUpsertOne) SetUpdatedBy(v uint32) *VideoTagUpsertOne {
+func (u *VideoTagUpsertOne) SetUpdatedBy(v int64) *VideoTagUpsertOne {
 	return u.Update(func(s *VideoTagUpsert) {
 		s.SetUpdatedBy(v)
 	})
 }
 
 // AddUpdatedBy adds v to the "updated_by" field.
-func (u *VideoTagUpsertOne) AddUpdatedBy(v uint32) *VideoTagUpsertOne {
+func (u *VideoTagUpsertOne) AddUpdatedBy(v int64) *VideoTagUpsertOne {
 	return u.Update(func(s *VideoTagUpsert) {
 		s.AddUpdatedBy(v)
 	})
@@ -624,14 +624,14 @@ func (u *VideoTagUpsertOne) ClearUpdatedBy() *VideoTagUpsertOne {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (u *VideoTagUpsertOne) SetDeletedBy(v uint32) *VideoTagUpsertOne {
+func (u *VideoTagUpsertOne) SetDeletedBy(v int64) *VideoTagUpsertOne {
 	return u.Update(func(s *VideoTagUpsert) {
 		s.SetDeletedBy(v)
 	})
 }
 
 // AddDeletedBy adds v to the "deleted_by" field.
-func (u *VideoTagUpsertOne) AddDeletedBy(v uint32) *VideoTagUpsertOne {
+func (u *VideoTagUpsertOne) AddDeletedBy(v int64) *VideoTagUpsertOne {
 	return u.Update(func(s *VideoTagUpsert) {
 		s.AddDeletedBy(v)
 	})
@@ -702,7 +702,7 @@ func (u *VideoTagUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *VideoTagUpsertOne) ID(ctx context.Context) (id uint32, err error) {
+func (u *VideoTagUpsertOne) ID(ctx context.Context) (id int64, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -711,7 +711,7 @@ func (u *VideoTagUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *VideoTagUpsertOne) IDX(ctx context.Context) uint32 {
+func (u *VideoTagUpsertOne) IDX(ctx context.Context) int64 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -768,7 +768,7 @@ func (_c *VideoTagCreateBulk) Save(ctx context.Context) ([]*VideoTag, error) {
 				mutation.id = &nodes[i].ID
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = uint32(id)
+					nodes[i].ID = int64(id)
 				}
 				mutation.done = true
 				return nodes[i], nil
@@ -949,14 +949,14 @@ func (u *VideoTagUpsertBulk) ClearDeletedAt() *VideoTagUpsertBulk {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (u *VideoTagUpsertBulk) SetCreatedBy(v uint32) *VideoTagUpsertBulk {
+func (u *VideoTagUpsertBulk) SetCreatedBy(v int64) *VideoTagUpsertBulk {
 	return u.Update(func(s *VideoTagUpsert) {
 		s.SetCreatedBy(v)
 	})
 }
 
 // AddCreatedBy adds v to the "created_by" field.
-func (u *VideoTagUpsertBulk) AddCreatedBy(v uint32) *VideoTagUpsertBulk {
+func (u *VideoTagUpsertBulk) AddCreatedBy(v int64) *VideoTagUpsertBulk {
 	return u.Update(func(s *VideoTagUpsert) {
 		s.AddCreatedBy(v)
 	})
@@ -977,14 +977,14 @@ func (u *VideoTagUpsertBulk) ClearCreatedBy() *VideoTagUpsertBulk {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (u *VideoTagUpsertBulk) SetUpdatedBy(v uint32) *VideoTagUpsertBulk {
+func (u *VideoTagUpsertBulk) SetUpdatedBy(v int64) *VideoTagUpsertBulk {
 	return u.Update(func(s *VideoTagUpsert) {
 		s.SetUpdatedBy(v)
 	})
 }
 
 // AddUpdatedBy adds v to the "updated_by" field.
-func (u *VideoTagUpsertBulk) AddUpdatedBy(v uint32) *VideoTagUpsertBulk {
+func (u *VideoTagUpsertBulk) AddUpdatedBy(v int64) *VideoTagUpsertBulk {
 	return u.Update(func(s *VideoTagUpsert) {
 		s.AddUpdatedBy(v)
 	})
@@ -1005,14 +1005,14 @@ func (u *VideoTagUpsertBulk) ClearUpdatedBy() *VideoTagUpsertBulk {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (u *VideoTagUpsertBulk) SetDeletedBy(v uint32) *VideoTagUpsertBulk {
+func (u *VideoTagUpsertBulk) SetDeletedBy(v int64) *VideoTagUpsertBulk {
 	return u.Update(func(s *VideoTagUpsert) {
 		s.SetDeletedBy(v)
 	})
 }
 
 // AddDeletedBy adds v to the "deleted_by" field.
-func (u *VideoTagUpsertBulk) AddDeletedBy(v uint32) *VideoTagUpsertBulk {
+func (u *VideoTagUpsertBulk) AddDeletedBy(v int64) *VideoTagUpsertBulk {
 	return u.Update(func(s *VideoTagUpsert) {
 		s.AddDeletedBy(v)
 	})

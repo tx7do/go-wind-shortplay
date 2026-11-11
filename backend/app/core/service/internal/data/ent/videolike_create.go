@@ -65,13 +65,13 @@ func (_c *VideoLikeCreate) SetNillableDeletedAt(v *time.Time) *VideoLikeCreate {
 }
 
 // SetTenantID sets the "tenant_id" field.
-func (_c *VideoLikeCreate) SetTenantID(v uint32) *VideoLikeCreate {
+func (_c *VideoLikeCreate) SetTenantID(v int64) *VideoLikeCreate {
 	_c.mutation.SetTenantID(v)
 	return _c
 }
 
 // SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
-func (_c *VideoLikeCreate) SetNillableTenantID(v *uint32) *VideoLikeCreate {
+func (_c *VideoLikeCreate) SetNillableTenantID(v *int64) *VideoLikeCreate {
 	if v != nil {
 		_c.SetTenantID(*v)
 	}
@@ -79,13 +79,13 @@ func (_c *VideoLikeCreate) SetNillableTenantID(v *uint32) *VideoLikeCreate {
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *VideoLikeCreate) SetUserID(v uint32) *VideoLikeCreate {
+func (_c *VideoLikeCreate) SetUserID(v int64) *VideoLikeCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_c *VideoLikeCreate) SetNillableUserID(v *uint32) *VideoLikeCreate {
+func (_c *VideoLikeCreate) SetNillableUserID(v *int64) *VideoLikeCreate {
 	if v != nil {
 		_c.SetUserID(*v)
 	}
@@ -107,13 +107,13 @@ func (_c *VideoLikeCreate) SetNillableTargetType(v *videolike.TargetType) *Video
 }
 
 // SetTargetID sets the "target_id" field.
-func (_c *VideoLikeCreate) SetTargetID(v uint32) *VideoLikeCreate {
+func (_c *VideoLikeCreate) SetTargetID(v int64) *VideoLikeCreate {
 	_c.mutation.SetTargetID(v)
 	return _c
 }
 
 // SetNillableTargetID sets the "target_id" field if the given value is not nil.
-func (_c *VideoLikeCreate) SetNillableTargetID(v *uint32) *VideoLikeCreate {
+func (_c *VideoLikeCreate) SetNillableTargetID(v *int64) *VideoLikeCreate {
 	if v != nil {
 		_c.SetTargetID(*v)
 	}
@@ -121,7 +121,7 @@ func (_c *VideoLikeCreate) SetNillableTargetID(v *uint32) *VideoLikeCreate {
 }
 
 // SetID sets the "id" field.
-func (_c *VideoLikeCreate) SetID(v uint32) *VideoLikeCreate {
+func (_c *VideoLikeCreate) SetID(v int64) *VideoLikeCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
@@ -219,7 +219,7 @@ func (_c *VideoLikeCreate) sqlSave(ctx context.Context) (*VideoLike, error) {
 	}
 	if _spec.ID.Value != _node.ID {
 		id := _spec.ID.Value.(int64)
-		_node.ID = uint32(id)
+		_node.ID = int64(id)
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
@@ -229,7 +229,7 @@ func (_c *VideoLikeCreate) sqlSave(ctx context.Context) (*VideoLike, error) {
 func (_c *VideoLikeCreate) createSpec() (*VideoLike, *sqlgraph.CreateSpec) {
 	var (
 		_node = &VideoLike{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(videolike.Table, sqlgraph.NewFieldSpec(videolike.FieldID, field.TypeUint32))
+		_spec = sqlgraph.NewCreateSpec(videolike.Table, sqlgraph.NewFieldSpec(videolike.FieldID, field.TypeInt64))
 	)
 	_spec.OnConflict = _c.conflict
 	if id, ok := _c.mutation.ID(); ok {
@@ -249,11 +249,11 @@ func (_c *VideoLikeCreate) createSpec() (*VideoLike, *sqlgraph.CreateSpec) {
 		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.TenantID(); ok {
-		_spec.SetField(videolike.FieldTenantID, field.TypeUint32, value)
+		_spec.SetField(videolike.FieldTenantID, field.TypeInt64, value)
 		_node.TenantID = &value
 	}
 	if value, ok := _c.mutation.UserID(); ok {
-		_spec.SetField(videolike.FieldUserID, field.TypeUint32, value)
+		_spec.SetField(videolike.FieldUserID, field.TypeInt64, value)
 		_node.UserID = value
 	}
 	if value, ok := _c.mutation.TargetType(); ok {
@@ -261,7 +261,7 @@ func (_c *VideoLikeCreate) createSpec() (*VideoLike, *sqlgraph.CreateSpec) {
 		_node.TargetType = value
 	}
 	if value, ok := _c.mutation.TargetID(); ok {
-		_spec.SetField(videolike.FieldTargetID, field.TypeUint32, value)
+		_spec.SetField(videolike.FieldTargetID, field.TypeInt64, value)
 		_node.TargetID = value
 	}
 	return _node, _spec
@@ -353,7 +353,7 @@ func (u *VideoLikeUpsert) ClearDeletedAt() *VideoLikeUpsert {
 }
 
 // SetUserID sets the "user_id" field.
-func (u *VideoLikeUpsert) SetUserID(v uint32) *VideoLikeUpsert {
+func (u *VideoLikeUpsert) SetUserID(v int64) *VideoLikeUpsert {
 	u.Set(videolike.FieldUserID, v)
 	return u
 }
@@ -365,7 +365,7 @@ func (u *VideoLikeUpsert) UpdateUserID() *VideoLikeUpsert {
 }
 
 // AddUserID adds v to the "user_id" field.
-func (u *VideoLikeUpsert) AddUserID(v uint32) *VideoLikeUpsert {
+func (u *VideoLikeUpsert) AddUserID(v int64) *VideoLikeUpsert {
 	u.Add(videolike.FieldUserID, v)
 	return u
 }
@@ -383,7 +383,7 @@ func (u *VideoLikeUpsert) UpdateTargetType() *VideoLikeUpsert {
 }
 
 // SetTargetID sets the "target_id" field.
-func (u *VideoLikeUpsert) SetTargetID(v uint32) *VideoLikeUpsert {
+func (u *VideoLikeUpsert) SetTargetID(v int64) *VideoLikeUpsert {
 	u.Set(videolike.FieldTargetID, v)
 	return u
 }
@@ -395,7 +395,7 @@ func (u *VideoLikeUpsert) UpdateTargetID() *VideoLikeUpsert {
 }
 
 // AddTargetID adds v to the "target_id" field.
-func (u *VideoLikeUpsert) AddTargetID(v uint32) *VideoLikeUpsert {
+func (u *VideoLikeUpsert) AddTargetID(v int64) *VideoLikeUpsert {
 	u.Add(videolike.FieldTargetID, v)
 	return u
 }
@@ -497,14 +497,14 @@ func (u *VideoLikeUpsertOne) ClearDeletedAt() *VideoLikeUpsertOne {
 }
 
 // SetUserID sets the "user_id" field.
-func (u *VideoLikeUpsertOne) SetUserID(v uint32) *VideoLikeUpsertOne {
+func (u *VideoLikeUpsertOne) SetUserID(v int64) *VideoLikeUpsertOne {
 	return u.Update(func(s *VideoLikeUpsert) {
 		s.SetUserID(v)
 	})
 }
 
 // AddUserID adds v to the "user_id" field.
-func (u *VideoLikeUpsertOne) AddUserID(v uint32) *VideoLikeUpsertOne {
+func (u *VideoLikeUpsertOne) AddUserID(v int64) *VideoLikeUpsertOne {
 	return u.Update(func(s *VideoLikeUpsert) {
 		s.AddUserID(v)
 	})
@@ -532,14 +532,14 @@ func (u *VideoLikeUpsertOne) UpdateTargetType() *VideoLikeUpsertOne {
 }
 
 // SetTargetID sets the "target_id" field.
-func (u *VideoLikeUpsertOne) SetTargetID(v uint32) *VideoLikeUpsertOne {
+func (u *VideoLikeUpsertOne) SetTargetID(v int64) *VideoLikeUpsertOne {
 	return u.Update(func(s *VideoLikeUpsert) {
 		s.SetTargetID(v)
 	})
 }
 
 // AddTargetID adds v to the "target_id" field.
-func (u *VideoLikeUpsertOne) AddTargetID(v uint32) *VideoLikeUpsertOne {
+func (u *VideoLikeUpsertOne) AddTargetID(v int64) *VideoLikeUpsertOne {
 	return u.Update(func(s *VideoLikeUpsert) {
 		s.AddTargetID(v)
 	})
@@ -568,7 +568,7 @@ func (u *VideoLikeUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *VideoLikeUpsertOne) ID(ctx context.Context) (id uint32, err error) {
+func (u *VideoLikeUpsertOne) ID(ctx context.Context) (id int64, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -577,7 +577,7 @@ func (u *VideoLikeUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *VideoLikeUpsertOne) IDX(ctx context.Context) uint32 {
+func (u *VideoLikeUpsertOne) IDX(ctx context.Context) int64 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -634,7 +634,7 @@ func (_c *VideoLikeCreateBulk) Save(ctx context.Context) ([]*VideoLike, error) {
 				mutation.id = &nodes[i].ID
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = uint32(id)
+					nodes[i].ID = int64(id)
 				}
 				mutation.done = true
 				return nodes[i], nil
@@ -815,14 +815,14 @@ func (u *VideoLikeUpsertBulk) ClearDeletedAt() *VideoLikeUpsertBulk {
 }
 
 // SetUserID sets the "user_id" field.
-func (u *VideoLikeUpsertBulk) SetUserID(v uint32) *VideoLikeUpsertBulk {
+func (u *VideoLikeUpsertBulk) SetUserID(v int64) *VideoLikeUpsertBulk {
 	return u.Update(func(s *VideoLikeUpsert) {
 		s.SetUserID(v)
 	})
 }
 
 // AddUserID adds v to the "user_id" field.
-func (u *VideoLikeUpsertBulk) AddUserID(v uint32) *VideoLikeUpsertBulk {
+func (u *VideoLikeUpsertBulk) AddUserID(v int64) *VideoLikeUpsertBulk {
 	return u.Update(func(s *VideoLikeUpsert) {
 		s.AddUserID(v)
 	})
@@ -850,14 +850,14 @@ func (u *VideoLikeUpsertBulk) UpdateTargetType() *VideoLikeUpsertBulk {
 }
 
 // SetTargetID sets the "target_id" field.
-func (u *VideoLikeUpsertBulk) SetTargetID(v uint32) *VideoLikeUpsertBulk {
+func (u *VideoLikeUpsertBulk) SetTargetID(v int64) *VideoLikeUpsertBulk {
 	return u.Update(func(s *VideoLikeUpsert) {
 		s.SetTargetID(v)
 	})
 }
 
 // AddTargetID adds v to the "target_id" field.
-func (u *VideoLikeUpsertBulk) AddTargetID(v uint32) *VideoLikeUpsertBulk {
+func (u *VideoLikeUpsertBulk) AddTargetID(v int64) *VideoLikeUpsertBulk {
 	return u.Update(func(s *VideoLikeUpsert) {
 		s.AddTargetID(v)
 	})

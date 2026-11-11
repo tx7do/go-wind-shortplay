@@ -65,13 +65,13 @@ func (_c *UploadTaskCreate) SetNillableDeletedAt(v *time.Time) *UploadTaskCreate
 }
 
 // SetTenantID sets the "tenant_id" field.
-func (_c *UploadTaskCreate) SetTenantID(v uint32) *UploadTaskCreate {
+func (_c *UploadTaskCreate) SetTenantID(v int64) *UploadTaskCreate {
 	_c.mutation.SetTenantID(v)
 	return _c
 }
 
 // SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
-func (_c *UploadTaskCreate) SetNillableTenantID(v *uint32) *UploadTaskCreate {
+func (_c *UploadTaskCreate) SetNillableTenantID(v *int64) *UploadTaskCreate {
 	if v != nil {
 		_c.SetTenantID(*v)
 	}
@@ -133,7 +133,7 @@ func (_c *UploadTaskCreate) SetNillableTotalChunks(v *uint32) *UploadTaskCreate 
 }
 
 // SetUploadedChunks sets the "uploaded_chunks" field.
-func (_c *UploadTaskCreate) SetUploadedChunks(v []uint32) *UploadTaskCreate {
+func (_c *UploadTaskCreate) SetUploadedChunks(v []int64) *UploadTaskCreate {
 	_c.mutation.SetUploadedChunks(v)
 	return _c
 }
@@ -167,13 +167,13 @@ func (_c *UploadTaskCreate) SetNillableFileKey(v *string) *UploadTaskCreate {
 }
 
 // SetVideoID sets the "video_id" field.
-func (_c *UploadTaskCreate) SetVideoID(v uint32) *UploadTaskCreate {
+func (_c *UploadTaskCreate) SetVideoID(v int64) *UploadTaskCreate {
 	_c.mutation.SetVideoID(v)
 	return _c
 }
 
 // SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_c *UploadTaskCreate) SetNillableVideoID(v *uint32) *UploadTaskCreate {
+func (_c *UploadTaskCreate) SetNillableVideoID(v *int64) *UploadTaskCreate {
 	if v != nil {
 		_c.SetVideoID(*v)
 	}
@@ -181,13 +181,13 @@ func (_c *UploadTaskCreate) SetNillableVideoID(v *uint32) *UploadTaskCreate {
 }
 
 // SetAuthorID sets the "author_id" field.
-func (_c *UploadTaskCreate) SetAuthorID(v uint32) *UploadTaskCreate {
+func (_c *UploadTaskCreate) SetAuthorID(v int64) *UploadTaskCreate {
 	_c.mutation.SetAuthorID(v)
 	return _c
 }
 
 // SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (_c *UploadTaskCreate) SetNillableAuthorID(v *uint32) *UploadTaskCreate {
+func (_c *UploadTaskCreate) SetNillableAuthorID(v *int64) *UploadTaskCreate {
 	if v != nil {
 		_c.SetAuthorID(*v)
 	}
@@ -195,7 +195,7 @@ func (_c *UploadTaskCreate) SetNillableAuthorID(v *uint32) *UploadTaskCreate {
 }
 
 // SetID sets the "id" field.
-func (_c *UploadTaskCreate) SetID(v uint32) *UploadTaskCreate {
+func (_c *UploadTaskCreate) SetID(v int64) *UploadTaskCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
@@ -330,7 +330,7 @@ func (_c *UploadTaskCreate) sqlSave(ctx context.Context) (*UploadTask, error) {
 	}
 	if _spec.ID.Value != _node.ID {
 		id := _spec.ID.Value.(int64)
-		_node.ID = uint32(id)
+		_node.ID = int64(id)
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
@@ -340,7 +340,7 @@ func (_c *UploadTaskCreate) sqlSave(ctx context.Context) (*UploadTask, error) {
 func (_c *UploadTaskCreate) createSpec() (*UploadTask, *sqlgraph.CreateSpec) {
 	var (
 		_node = &UploadTask{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(uploadtask.Table, sqlgraph.NewFieldSpec(uploadtask.FieldID, field.TypeUint32))
+		_spec = sqlgraph.NewCreateSpec(uploadtask.Table, sqlgraph.NewFieldSpec(uploadtask.FieldID, field.TypeInt64))
 	)
 	_spec.OnConflict = _c.conflict
 	if id, ok := _c.mutation.ID(); ok {
@@ -360,7 +360,7 @@ func (_c *UploadTaskCreate) createSpec() (*UploadTask, *sqlgraph.CreateSpec) {
 		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.TenantID(); ok {
-		_spec.SetField(uploadtask.FieldTenantID, field.TypeUint32, value)
+		_spec.SetField(uploadtask.FieldTenantID, field.TypeInt64, value)
 		_node.TenantID = &value
 	}
 	if value, ok := _c.mutation.TaskID(); ok {
@@ -396,11 +396,11 @@ func (_c *UploadTaskCreate) createSpec() (*UploadTask, *sqlgraph.CreateSpec) {
 		_node.FileKey = &value
 	}
 	if value, ok := _c.mutation.VideoID(); ok {
-		_spec.SetField(uploadtask.FieldVideoID, field.TypeUint32, value)
+		_spec.SetField(uploadtask.FieldVideoID, field.TypeInt64, value)
 		_node.VideoID = value
 	}
 	if value, ok := _c.mutation.AuthorID(); ok {
-		_spec.SetField(uploadtask.FieldAuthorID, field.TypeUint32, value)
+		_spec.SetField(uploadtask.FieldAuthorID, field.TypeInt64, value)
 		_node.AuthorID = value
 	}
 	return _node, _spec
@@ -570,7 +570,7 @@ func (u *UploadTaskUpsert) AddTotalChunks(v uint32) *UploadTaskUpsert {
 }
 
 // SetUploadedChunks sets the "uploaded_chunks" field.
-func (u *UploadTaskUpsert) SetUploadedChunks(v []uint32) *UploadTaskUpsert {
+func (u *UploadTaskUpsert) SetUploadedChunks(v []int64) *UploadTaskUpsert {
 	u.Set(uploadtask.FieldUploadedChunks, v)
 	return u
 }
@@ -618,7 +618,7 @@ func (u *UploadTaskUpsert) ClearFileKey() *UploadTaskUpsert {
 }
 
 // SetVideoID sets the "video_id" field.
-func (u *UploadTaskUpsert) SetVideoID(v uint32) *UploadTaskUpsert {
+func (u *UploadTaskUpsert) SetVideoID(v int64) *UploadTaskUpsert {
 	u.Set(uploadtask.FieldVideoID, v)
 	return u
 }
@@ -630,13 +630,13 @@ func (u *UploadTaskUpsert) UpdateVideoID() *UploadTaskUpsert {
 }
 
 // AddVideoID adds v to the "video_id" field.
-func (u *UploadTaskUpsert) AddVideoID(v uint32) *UploadTaskUpsert {
+func (u *UploadTaskUpsert) AddVideoID(v int64) *UploadTaskUpsert {
 	u.Add(uploadtask.FieldVideoID, v)
 	return u
 }
 
 // SetAuthorID sets the "author_id" field.
-func (u *UploadTaskUpsert) SetAuthorID(v uint32) *UploadTaskUpsert {
+func (u *UploadTaskUpsert) SetAuthorID(v int64) *UploadTaskUpsert {
 	u.Set(uploadtask.FieldAuthorID, v)
 	return u
 }
@@ -648,7 +648,7 @@ func (u *UploadTaskUpsert) UpdateAuthorID() *UploadTaskUpsert {
 }
 
 // AddAuthorID adds v to the "author_id" field.
-func (u *UploadTaskUpsert) AddAuthorID(v uint32) *UploadTaskUpsert {
+func (u *UploadTaskUpsert) AddAuthorID(v int64) *UploadTaskUpsert {
 	u.Add(uploadtask.FieldAuthorID, v)
 	return u
 }
@@ -841,7 +841,7 @@ func (u *UploadTaskUpsertOne) UpdateTotalChunks() *UploadTaskUpsertOne {
 }
 
 // SetUploadedChunks sets the "uploaded_chunks" field.
-func (u *UploadTaskUpsertOne) SetUploadedChunks(v []uint32) *UploadTaskUpsertOne {
+func (u *UploadTaskUpsertOne) SetUploadedChunks(v []int64) *UploadTaskUpsertOne {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.SetUploadedChunks(v)
 	})
@@ -897,14 +897,14 @@ func (u *UploadTaskUpsertOne) ClearFileKey() *UploadTaskUpsertOne {
 }
 
 // SetVideoID sets the "video_id" field.
-func (u *UploadTaskUpsertOne) SetVideoID(v uint32) *UploadTaskUpsertOne {
+func (u *UploadTaskUpsertOne) SetVideoID(v int64) *UploadTaskUpsertOne {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.SetVideoID(v)
 	})
 }
 
 // AddVideoID adds v to the "video_id" field.
-func (u *UploadTaskUpsertOne) AddVideoID(v uint32) *UploadTaskUpsertOne {
+func (u *UploadTaskUpsertOne) AddVideoID(v int64) *UploadTaskUpsertOne {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.AddVideoID(v)
 	})
@@ -918,14 +918,14 @@ func (u *UploadTaskUpsertOne) UpdateVideoID() *UploadTaskUpsertOne {
 }
 
 // SetAuthorID sets the "author_id" field.
-func (u *UploadTaskUpsertOne) SetAuthorID(v uint32) *UploadTaskUpsertOne {
+func (u *UploadTaskUpsertOne) SetAuthorID(v int64) *UploadTaskUpsertOne {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.SetAuthorID(v)
 	})
 }
 
 // AddAuthorID adds v to the "author_id" field.
-func (u *UploadTaskUpsertOne) AddAuthorID(v uint32) *UploadTaskUpsertOne {
+func (u *UploadTaskUpsertOne) AddAuthorID(v int64) *UploadTaskUpsertOne {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.AddAuthorID(v)
 	})
@@ -954,7 +954,7 @@ func (u *UploadTaskUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *UploadTaskUpsertOne) ID(ctx context.Context) (id uint32, err error) {
+func (u *UploadTaskUpsertOne) ID(ctx context.Context) (id int64, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -963,7 +963,7 @@ func (u *UploadTaskUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *UploadTaskUpsertOne) IDX(ctx context.Context) uint32 {
+func (u *UploadTaskUpsertOne) IDX(ctx context.Context) int64 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -1020,7 +1020,7 @@ func (_c *UploadTaskCreateBulk) Save(ctx context.Context) ([]*UploadTask, error)
 				mutation.id = &nodes[i].ID
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = uint32(id)
+					nodes[i].ID = int64(id)
 				}
 				mutation.done = true
 				return nodes[i], nil
@@ -1292,7 +1292,7 @@ func (u *UploadTaskUpsertBulk) UpdateTotalChunks() *UploadTaskUpsertBulk {
 }
 
 // SetUploadedChunks sets the "uploaded_chunks" field.
-func (u *UploadTaskUpsertBulk) SetUploadedChunks(v []uint32) *UploadTaskUpsertBulk {
+func (u *UploadTaskUpsertBulk) SetUploadedChunks(v []int64) *UploadTaskUpsertBulk {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.SetUploadedChunks(v)
 	})
@@ -1348,14 +1348,14 @@ func (u *UploadTaskUpsertBulk) ClearFileKey() *UploadTaskUpsertBulk {
 }
 
 // SetVideoID sets the "video_id" field.
-func (u *UploadTaskUpsertBulk) SetVideoID(v uint32) *UploadTaskUpsertBulk {
+func (u *UploadTaskUpsertBulk) SetVideoID(v int64) *UploadTaskUpsertBulk {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.SetVideoID(v)
 	})
 }
 
 // AddVideoID adds v to the "video_id" field.
-func (u *UploadTaskUpsertBulk) AddVideoID(v uint32) *UploadTaskUpsertBulk {
+func (u *UploadTaskUpsertBulk) AddVideoID(v int64) *UploadTaskUpsertBulk {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.AddVideoID(v)
 	})
@@ -1369,14 +1369,14 @@ func (u *UploadTaskUpsertBulk) UpdateVideoID() *UploadTaskUpsertBulk {
 }
 
 // SetAuthorID sets the "author_id" field.
-func (u *UploadTaskUpsertBulk) SetAuthorID(v uint32) *UploadTaskUpsertBulk {
+func (u *UploadTaskUpsertBulk) SetAuthorID(v int64) *UploadTaskUpsertBulk {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.SetAuthorID(v)
 	})
 }
 
 // AddAuthorID adds v to the "author_id" field.
-func (u *UploadTaskUpsertBulk) AddAuthorID(v uint32) *UploadTaskUpsertBulk {
+func (u *UploadTaskUpsertBulk) AddAuthorID(v int64) *UploadTaskUpsertBulk {
 	return u.Update(func(s *UploadTaskUpsert) {
 		s.AddAuthorID(v)
 	})

@@ -19,7 +19,7 @@ import (
 // 跳转标记沿用 sp-biz 尾行约定（App 端解析 videoId 直达；关注类无跳转不加标记）。
 
 // spNicknameOf 取用户昵称（失败回退 "有人"，通知文案兜底）。
-func spNicknameOf(ctx context.Context, userRepo data.UserRepo, userID uint32) string {
+func spNicknameOf(ctx context.Context, userRepo data.UserRepo, userID int64) string {
 	if userRepo == nil || userID == 0 {
 		return "有人"
 	}
@@ -37,11 +37,11 @@ func spNicknameOf(ctx context.Context, userRepo data.UserRepo, userID uint32) st
 
 // spSendUserNotice 尽力而为发送站内信（系统/事件口径，零值目标忽略；
 // 互动事件的"自己不通知自己"由调用方在钩子处过滤）。
-func spSendUserNotice(ctx context.Context, n InternalMessageNotifier, lh *log.Helper, title, content string, targetID uint32) {
+func spSendUserNotice(ctx context.Context, n InternalMessageNotifier, lh *log.Helper, title, content string, targetID int64) {
 	if n == nil || targetID == 0 {
 		return
 	}
-	if _, err := n.SendSystemNotification(ctx, title, content, []uint32{targetID}); err != nil {
+	if _, err := n.SendSystemNotification(ctx, title, content, []int64{targetID}); err != nil {
 		if lh != nil {
 			lh.Errorf("send %q notification to %d failed: %s", title, targetID, err.Error())
 		}
@@ -49,8 +49,8 @@ func spSendUserNotice(ctx context.Context, n InternalMessageNotifier, lh *log.He
 }
 
 // spVideoBizMarker 视频跳转标记（约定见 report_service.go 的 spBizMarkerPrefix）。
-func spVideoBizMarker(videoID uint32) string {
-	return spBizMarkerPrefix + `{"videoId":` + strconv.FormatUint(uint64(videoID), 10) + `}`
+func spVideoBizMarker(videoID int64) string {
+	return spBizMarkerPrefix + `{"videoId":` + strconv.FormatInt(int64(videoID), 10) + `}`
 }
 
 // ── 注入缝：三个服务共用基座 InternalMessageService ──
@@ -73,7 +73,7 @@ func (s *VideoService) RegisterNotifier(n InternalMessageNotifier) {
 // ── 事件钩子（在各写操作成功后调用）──
 
 // notifyVideoLiked 视频被赞通知作者（actor=点赞人）。
-func (s *InteractionService) notifyVideoLiked(ctx context.Context, actorID uint32, v *ent.Video) {
+func (s *InteractionService) notifyVideoLiked(ctx context.Context, actorID int64, v *ent.Video) {
 	if s.internalMessage == nil || v == nil || v.AuthorID == 0 || v.AuthorID == actorID {
 		return
 	}
@@ -83,7 +83,7 @@ func (s *InteractionService) notifyVideoLiked(ctx context.Context, actorID uint3
 }
 
 // notifyFollowed 新关注通知被关注人（CreateFollow 仅在新建关系时返回 true）。
-func (s *InteractionService) notifyFollowed(ctx context.Context, actorID, followeeID uint32) {
+func (s *InteractionService) notifyFollowed(ctx context.Context, actorID, followeeID int64) {
 	if s.internalMessage == nil || followeeID == 0 || followeeID == actorID {
 		return
 	}
@@ -92,7 +92,7 @@ func (s *InteractionService) notifyFollowed(ctx context.Context, actorID, follow
 }
 
 // notifyCommentCreated 评论/回复通知：视频作者 + 楼中楼父评论作者（同人去重、跳视频）。
-func (s *VideoCommentService) notifyCommentCreated(ctx context.Context, actorID, videoAuthorID, parentAuthorID, videoID uint32, videoTitle, content string) {
+func (s *VideoCommentService) notifyCommentCreated(ctx context.Context, actorID, videoAuthorID, parentAuthorID, videoID int64, videoTitle, content string) {
 	if s.internalMessage == nil {
 		return
 	}
@@ -108,7 +108,7 @@ func (s *VideoCommentService) notifyCommentCreated(ctx context.Context, actorID,
 }
 
 // notifyVideoReviewed 审核结果通知作者（系统口径，无 actor）。
-func (s *VideoService) notifyVideoReviewed(ctx context.Context, authorID, videoID uint32, title, reason string, outcome videoReviewOutcome) {
+func (s *VideoService) notifyVideoReviewed(ctx context.Context, authorID, videoID int64, title, reason string, outcome videoReviewOutcome) {
 	if s.internalMessage == nil || authorID == 0 {
 		return
 	}

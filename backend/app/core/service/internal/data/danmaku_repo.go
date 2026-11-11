@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/tx7do/kratos-bootstrap/bootstrap"
 	"github.com/tx7do/go-utils/timeutil"
 	"github.com/tx7do/go-utils/trans"
+	"github.com/tx7do/kratos-bootstrap/bootstrap"
 
 	paginationV1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
 	entCrud "github.com/tx7do/go-crud/entgo"
@@ -69,12 +69,12 @@ func NewDanmakuRepo(ctx *bootstrap.Context, entClient *entCrud.EntClient[*ent.Cl
 }
 
 // Create 落一条弹幕
-func (r *DanmakuRepo) Create(ctx context.Context, videoID, userID uint32, content string, timeOffsetMs uint64) (*ent.Danmaku, error) {
+func (r *DanmakuRepo) Create(ctx context.Context, videoID, userID int64, content string, timeOffsetMs int64) (*ent.Danmaku, error) {
 	builder := r.entClient.Client().Danmaku.Create().
 		SetVideoID(videoID).
 		SetUserID(userID).
 		SetContent(content).
-		SetTimeOffsetMs(timeOffsetMs).
+		SetTimeOffsetMs(uint64(timeOffsetMs)).
 		SetStatus(danmaku.StatusVisible).
 		SetCreatedAt(time.Now())
 	if tid, hasTenant := businessTenantID(ctx, r.entClient.Client()); hasTenant {
@@ -89,7 +89,7 @@ func (r *DanmakuRepo) Create(ctx context.Context, videoID, userID uint32, conten
 }
 
 // ListByVideo 视频弹幕（VISIBLE，按 time_offset 升序、id 兜底；超上限截断）
-func (r *DanmakuRepo) ListByVideo(ctx context.Context, videoID uint32, limit uint32) ([]*ent.Danmaku, int, error) {
+func (r *DanmakuRepo) ListByVideo(ctx context.Context, videoID int64, limit int64) ([]*ent.Danmaku, int, error) {
 	if limit <= 0 {
 		limit = 500
 	}
@@ -118,7 +118,7 @@ func (r *DanmakuRepo) ListByVideo(ctx context.Context, videoID uint32, limit uin
 // spDanmakuAdminFilter 管理端弹幕列表过滤
 type spDanmakuAdminFilter struct {
 	Content *string `json:"content___icontains"`
-	VideoID *uint32 `json:"video_id"`
+	VideoID *int64  `json:"video_id"`
 	Status  *string `json:"status"`
 }
 
@@ -170,7 +170,7 @@ func (r *DanmakuRepo) ListAdmin(ctx context.Context, req *paginationV1.PagingReq
 }
 
 // Get 取单条（服务层归属判断用）
-func (r *DanmakuRepo) Get(ctx context.Context, id uint32) (*ent.Danmaku, error) {
+func (r *DanmakuRepo) Get(ctx context.Context, id int64) (*ent.Danmaku, error) {
 	e, err := r.entClient.Client().Danmaku.Query().Where(danmaku.IDEQ(id)).Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -183,7 +183,7 @@ func (r *DanmakuRepo) Get(ctx context.Context, id uint32) (*ent.Danmaku, error) 
 }
 
 // Delete 删除弹幕
-func (r *DanmakuRepo) Delete(ctx context.Context, id uint32) error {
+func (r *DanmakuRepo) Delete(ctx context.Context, id int64) error {
 	if err := r.entClient.Client().Danmaku.DeleteOneID(id).Exec(ctx); err != nil {
 		if ent.IsNotFound(err) {
 			return danmakuV1.ErrorDanmakuNotFound("danmaku not found")
@@ -195,7 +195,7 @@ func (r *DanmakuRepo) Delete(ctx context.Context, id uint32) error {
 }
 
 // SetStatus 隐藏/恢复弹幕
-func (r *DanmakuRepo) SetStatus(ctx context.Context, id uint32, status danmakuV1.DanmakuStatus) (*ent.Danmaku, error) {
+func (r *DanmakuRepo) SetStatus(ctx context.Context, id int64, status danmakuV1.DanmakuStatus) (*ent.Danmaku, error) {
 	e, err := r.entClient.Client().Danmaku.UpdateOneID(id).
 		SetStatus(danmakuStatusEntity(status)).
 		SetUpdatedAt(time.Now()).
@@ -211,14 +211,14 @@ func (r *DanmakuRepo) SetStatus(ctx context.Context, id uint32, status danmakuV1
 }
 
 // UserIDsOf 批量补全发送人昵称头像用（取一页弹幕的去重用户 ID）
-func (r *DanmakuRepo) UserIDsOf(items []*ent.Danmaku) []uint32 {
-	ids := make(map[uint32]struct{}, len(items))
+func (r *DanmakuRepo) UserIDsOf(items []*ent.Danmaku) []int64 {
+	ids := make(map[int64]struct{}, len(items))
 	for _, e := range items {
 		if e.UserID > 0 {
 			ids[e.UserID] = struct{}{}
 		}
 	}
-	out := make([]uint32, 0, len(ids))
+	out := make([]int64, 0, len(ids))
 	for id := range ids {
 		out = append(out, id)
 	}

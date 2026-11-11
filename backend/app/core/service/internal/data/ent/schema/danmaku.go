@@ -30,11 +30,11 @@ func (Danmaku) Annotations() []schema.Annotation {
 // Fields of the Danmaku.
 func (Danmaku) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint32("video_id").
+		field.Int64("video_id").
 			Comment("视频ID").
 			Default(0),
 
-		field.Uint32("user_id").
+		field.Int64("user_id").
 			Comment("发送人用户ID").
 			Default(0),
 
@@ -59,9 +59,9 @@ func (Danmaku) Fields() []ent.Field {
 // Mixin of the Danmaku.
 func (Danmaku) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.AutoIncrementId{},
+		mixin.AutoIncrementId64{},
 		mixin.TimeAt{},
-		mixin.TenantID[uint32]{},
+		mixin.TenantID[int64]{},
 	}
 }
 

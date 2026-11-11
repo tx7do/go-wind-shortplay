@@ -70,14 +70,14 @@ func (_u *VideoCommentUpdate) ClearDeletedAt() *VideoCommentUpdate {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_u *VideoCommentUpdate) SetCreatedBy(v uint32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) SetCreatedBy(v int64) *VideoCommentUpdate {
 	_u.mutation.ResetCreatedBy()
 	_u.mutation.SetCreatedBy(v)
 	return _u
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *VideoCommentUpdate) SetNillableCreatedBy(v *uint32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) SetNillableCreatedBy(v *int64) *VideoCommentUpdate {
 	if v != nil {
 		_u.SetCreatedBy(*v)
 	}
@@ -85,7 +85,7 @@ func (_u *VideoCommentUpdate) SetNillableCreatedBy(v *uint32) *VideoCommentUpdat
 }
 
 // AddCreatedBy adds value to the "created_by" field.
-func (_u *VideoCommentUpdate) AddCreatedBy(v int32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) AddCreatedBy(v int64) *VideoCommentUpdate {
 	_u.mutation.AddCreatedBy(v)
 	return _u
 }
@@ -97,14 +97,14 @@ func (_u *VideoCommentUpdate) ClearCreatedBy() *VideoCommentUpdate {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_u *VideoCommentUpdate) SetUpdatedBy(v uint32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) SetUpdatedBy(v int64) *VideoCommentUpdate {
 	_u.mutation.ResetUpdatedBy()
 	_u.mutation.SetUpdatedBy(v)
 	return _u
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *VideoCommentUpdate) SetNillableUpdatedBy(v *uint32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) SetNillableUpdatedBy(v *int64) *VideoCommentUpdate {
 	if v != nil {
 		_u.SetUpdatedBy(*v)
 	}
@@ -112,7 +112,7 @@ func (_u *VideoCommentUpdate) SetNillableUpdatedBy(v *uint32) *VideoCommentUpdat
 }
 
 // AddUpdatedBy adds value to the "updated_by" field.
-func (_u *VideoCommentUpdate) AddUpdatedBy(v int32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) AddUpdatedBy(v int64) *VideoCommentUpdate {
 	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
@@ -124,14 +124,14 @@ func (_u *VideoCommentUpdate) ClearUpdatedBy() *VideoCommentUpdate {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (_u *VideoCommentUpdate) SetDeletedBy(v uint32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) SetDeletedBy(v int64) *VideoCommentUpdate {
 	_u.mutation.ResetDeletedBy()
 	_u.mutation.SetDeletedBy(v)
 	return _u
 }
 
 // SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
-func (_u *VideoCommentUpdate) SetNillableDeletedBy(v *uint32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) SetNillableDeletedBy(v *int64) *VideoCommentUpdate {
 	if v != nil {
 		_u.SetDeletedBy(*v)
 	}
@@ -139,7 +139,7 @@ func (_u *VideoCommentUpdate) SetNillableDeletedBy(v *uint32) *VideoCommentUpdat
 }
 
 // AddDeletedBy adds value to the "deleted_by" field.
-func (_u *VideoCommentUpdate) AddDeletedBy(v int32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) AddDeletedBy(v int64) *VideoCommentUpdate {
 	_u.mutation.AddDeletedBy(v)
 	return _u
 }
@@ -151,14 +151,14 @@ func (_u *VideoCommentUpdate) ClearDeletedBy() *VideoCommentUpdate {
 }
 
 // SetVideoID sets the "video_id" field.
-func (_u *VideoCommentUpdate) SetVideoID(v uint32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) SetVideoID(v int64) *VideoCommentUpdate {
 	_u.mutation.ResetVideoID()
 	_u.mutation.SetVideoID(v)
 	return _u
 }
 
 // SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_u *VideoCommentUpdate) SetNillableVideoID(v *uint32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) SetNillableVideoID(v *int64) *VideoCommentUpdate {
 	if v != nil {
 		_u.SetVideoID(*v)
 	}
@@ -166,20 +166,20 @@ func (_u *VideoCommentUpdate) SetNillableVideoID(v *uint32) *VideoCommentUpdate 
 }
 
 // AddVideoID adds value to the "video_id" field.
-func (_u *VideoCommentUpdate) AddVideoID(v int32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) AddVideoID(v int64) *VideoCommentUpdate {
 	_u.mutation.AddVideoID(v)
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *VideoCommentUpdate) SetUserID(v uint32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) SetUserID(v int64) *VideoCommentUpdate {
 	_u.mutation.ResetUserID()
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *VideoCommentUpdate) SetNillableUserID(v *uint32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) SetNillableUserID(v *int64) *VideoCommentUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -187,7 +187,7 @@ func (_u *VideoCommentUpdate) SetNillableUserID(v *uint32) *VideoCommentUpdate {
 }
 
 // AddUserID adds value to the "user_id" field.
-func (_u *VideoCommentUpdate) AddUserID(v int32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) AddUserID(v int64) *VideoCommentUpdate {
 	_u.mutation.AddUserID(v)
 	return _u
 }
@@ -207,14 +207,14 @@ func (_u *VideoCommentUpdate) SetNillableContent(v *string) *VideoCommentUpdate 
 }
 
 // SetParentID sets the "parent_id" field.
-func (_u *VideoCommentUpdate) SetParentID(v uint32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) SetParentID(v int64) *VideoCommentUpdate {
 	_u.mutation.ResetParentID()
 	_u.mutation.SetParentID(v)
 	return _u
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_u *VideoCommentUpdate) SetNillableParentID(v *uint32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) SetNillableParentID(v *int64) *VideoCommentUpdate {
 	if v != nil {
 		_u.SetParentID(*v)
 	}
@@ -222,7 +222,7 @@ func (_u *VideoCommentUpdate) SetNillableParentID(v *uint32) *VideoCommentUpdate
 }
 
 // AddParentID adds value to the "parent_id" field.
-func (_u *VideoCommentUpdate) AddParentID(v int32) *VideoCommentUpdate {
+func (_u *VideoCommentUpdate) AddParentID(v int64) *VideoCommentUpdate {
 	_u.mutation.AddParentID(v)
 	return _u
 }
@@ -322,7 +322,7 @@ func (_u *VideoCommentUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *V
 }
 
 func (_u *VideoCommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(videocomment.Table, videocomment.Columns, sqlgraph.NewFieldSpec(videocomment.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(videocomment.Table, videocomment.Columns, sqlgraph.NewFieldSpec(videocomment.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -346,55 +346,55 @@ func (_u *VideoCommentUpdate) sqlSave(ctx context.Context) (_node int, err error
 		_spec.ClearField(videocomment.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(videocomment.FieldCreatedBy, field.TypeUint32, value)
+		_spec.SetField(videocomment.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(videocomment.FieldCreatedBy, field.TypeUint32, value)
+		_spec.AddField(videocomment.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(videocomment.FieldCreatedBy, field.TypeUint32)
+		_spec.ClearField(videocomment.FieldCreatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(videocomment.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.SetField(videocomment.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(videocomment.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.AddField(videocomment.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(videocomment.FieldUpdatedBy, field.TypeUint32)
+		_spec.ClearField(videocomment.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.DeletedBy(); ok {
-		_spec.SetField(videocomment.FieldDeletedBy, field.TypeUint32, value)
+		_spec.SetField(videocomment.FieldDeletedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedDeletedBy(); ok {
-		_spec.AddField(videocomment.FieldDeletedBy, field.TypeUint32, value)
+		_spec.AddField(videocomment.FieldDeletedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.DeletedByCleared() {
-		_spec.ClearField(videocomment.FieldDeletedBy, field.TypeUint32)
+		_spec.ClearField(videocomment.FieldDeletedBy, field.TypeInt64)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(videocomment.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(videocomment.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.VideoID(); ok {
-		_spec.SetField(videocomment.FieldVideoID, field.TypeUint32, value)
+		_spec.SetField(videocomment.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedVideoID(); ok {
-		_spec.AddField(videocomment.FieldVideoID, field.TypeUint32, value)
+		_spec.AddField(videocomment.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(videocomment.FieldUserID, field.TypeUint32, value)
+		_spec.SetField(videocomment.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(videocomment.FieldUserID, field.TypeUint32, value)
+		_spec.AddField(videocomment.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.Content(); ok {
 		_spec.SetField(videocomment.FieldContent, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ParentID(); ok {
-		_spec.SetField(videocomment.FieldParentID, field.TypeUint32, value)
+		_spec.SetField(videocomment.FieldParentID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedParentID(); ok {
-		_spec.AddField(videocomment.FieldParentID, field.TypeUint32, value)
+		_spec.AddField(videocomment.FieldParentID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.LikeCount(); ok {
 		_spec.SetField(videocomment.FieldLikeCount, field.TypeUint64, value)
@@ -474,14 +474,14 @@ func (_u *VideoCommentUpdateOne) ClearDeletedAt() *VideoCommentUpdateOne {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_u *VideoCommentUpdateOne) SetCreatedBy(v uint32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) SetCreatedBy(v int64) *VideoCommentUpdateOne {
 	_u.mutation.ResetCreatedBy()
 	_u.mutation.SetCreatedBy(v)
 	return _u
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *VideoCommentUpdateOne) SetNillableCreatedBy(v *uint32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) SetNillableCreatedBy(v *int64) *VideoCommentUpdateOne {
 	if v != nil {
 		_u.SetCreatedBy(*v)
 	}
@@ -489,7 +489,7 @@ func (_u *VideoCommentUpdateOne) SetNillableCreatedBy(v *uint32) *VideoCommentUp
 }
 
 // AddCreatedBy adds value to the "created_by" field.
-func (_u *VideoCommentUpdateOne) AddCreatedBy(v int32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) AddCreatedBy(v int64) *VideoCommentUpdateOne {
 	_u.mutation.AddCreatedBy(v)
 	return _u
 }
@@ -501,14 +501,14 @@ func (_u *VideoCommentUpdateOne) ClearCreatedBy() *VideoCommentUpdateOne {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_u *VideoCommentUpdateOne) SetUpdatedBy(v uint32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) SetUpdatedBy(v int64) *VideoCommentUpdateOne {
 	_u.mutation.ResetUpdatedBy()
 	_u.mutation.SetUpdatedBy(v)
 	return _u
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *VideoCommentUpdateOne) SetNillableUpdatedBy(v *uint32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) SetNillableUpdatedBy(v *int64) *VideoCommentUpdateOne {
 	if v != nil {
 		_u.SetUpdatedBy(*v)
 	}
@@ -516,7 +516,7 @@ func (_u *VideoCommentUpdateOne) SetNillableUpdatedBy(v *uint32) *VideoCommentUp
 }
 
 // AddUpdatedBy adds value to the "updated_by" field.
-func (_u *VideoCommentUpdateOne) AddUpdatedBy(v int32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) AddUpdatedBy(v int64) *VideoCommentUpdateOne {
 	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
@@ -528,14 +528,14 @@ func (_u *VideoCommentUpdateOne) ClearUpdatedBy() *VideoCommentUpdateOne {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (_u *VideoCommentUpdateOne) SetDeletedBy(v uint32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) SetDeletedBy(v int64) *VideoCommentUpdateOne {
 	_u.mutation.ResetDeletedBy()
 	_u.mutation.SetDeletedBy(v)
 	return _u
 }
 
 // SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
-func (_u *VideoCommentUpdateOne) SetNillableDeletedBy(v *uint32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) SetNillableDeletedBy(v *int64) *VideoCommentUpdateOne {
 	if v != nil {
 		_u.SetDeletedBy(*v)
 	}
@@ -543,7 +543,7 @@ func (_u *VideoCommentUpdateOne) SetNillableDeletedBy(v *uint32) *VideoCommentUp
 }
 
 // AddDeletedBy adds value to the "deleted_by" field.
-func (_u *VideoCommentUpdateOne) AddDeletedBy(v int32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) AddDeletedBy(v int64) *VideoCommentUpdateOne {
 	_u.mutation.AddDeletedBy(v)
 	return _u
 }
@@ -555,14 +555,14 @@ func (_u *VideoCommentUpdateOne) ClearDeletedBy() *VideoCommentUpdateOne {
 }
 
 // SetVideoID sets the "video_id" field.
-func (_u *VideoCommentUpdateOne) SetVideoID(v uint32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) SetVideoID(v int64) *VideoCommentUpdateOne {
 	_u.mutation.ResetVideoID()
 	_u.mutation.SetVideoID(v)
 	return _u
 }
 
 // SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_u *VideoCommentUpdateOne) SetNillableVideoID(v *uint32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) SetNillableVideoID(v *int64) *VideoCommentUpdateOne {
 	if v != nil {
 		_u.SetVideoID(*v)
 	}
@@ -570,20 +570,20 @@ func (_u *VideoCommentUpdateOne) SetNillableVideoID(v *uint32) *VideoCommentUpda
 }
 
 // AddVideoID adds value to the "video_id" field.
-func (_u *VideoCommentUpdateOne) AddVideoID(v int32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) AddVideoID(v int64) *VideoCommentUpdateOne {
 	_u.mutation.AddVideoID(v)
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *VideoCommentUpdateOne) SetUserID(v uint32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) SetUserID(v int64) *VideoCommentUpdateOne {
 	_u.mutation.ResetUserID()
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *VideoCommentUpdateOne) SetNillableUserID(v *uint32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) SetNillableUserID(v *int64) *VideoCommentUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -591,7 +591,7 @@ func (_u *VideoCommentUpdateOne) SetNillableUserID(v *uint32) *VideoCommentUpdat
 }
 
 // AddUserID adds value to the "user_id" field.
-func (_u *VideoCommentUpdateOne) AddUserID(v int32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) AddUserID(v int64) *VideoCommentUpdateOne {
 	_u.mutation.AddUserID(v)
 	return _u
 }
@@ -611,14 +611,14 @@ func (_u *VideoCommentUpdateOne) SetNillableContent(v *string) *VideoCommentUpda
 }
 
 // SetParentID sets the "parent_id" field.
-func (_u *VideoCommentUpdateOne) SetParentID(v uint32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) SetParentID(v int64) *VideoCommentUpdateOne {
 	_u.mutation.ResetParentID()
 	_u.mutation.SetParentID(v)
 	return _u
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_u *VideoCommentUpdateOne) SetNillableParentID(v *uint32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) SetNillableParentID(v *int64) *VideoCommentUpdateOne {
 	if v != nil {
 		_u.SetParentID(*v)
 	}
@@ -626,7 +626,7 @@ func (_u *VideoCommentUpdateOne) SetNillableParentID(v *uint32) *VideoCommentUpd
 }
 
 // AddParentID adds value to the "parent_id" field.
-func (_u *VideoCommentUpdateOne) AddParentID(v int32) *VideoCommentUpdateOne {
+func (_u *VideoCommentUpdateOne) AddParentID(v int64) *VideoCommentUpdateOne {
 	_u.mutation.AddParentID(v)
 	return _u
 }
@@ -739,7 +739,7 @@ func (_u *VideoCommentUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder))
 }
 
 func (_u *VideoCommentUpdateOne) sqlSave(ctx context.Context) (_node *VideoComment, err error) {
-	_spec := sqlgraph.NewUpdateSpec(videocomment.Table, videocomment.Columns, sqlgraph.NewFieldSpec(videocomment.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(videocomment.Table, videocomment.Columns, sqlgraph.NewFieldSpec(videocomment.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "VideoComment.id" for update`)}
@@ -780,55 +780,55 @@ func (_u *VideoCommentUpdateOne) sqlSave(ctx context.Context) (_node *VideoComme
 		_spec.ClearField(videocomment.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(videocomment.FieldCreatedBy, field.TypeUint32, value)
+		_spec.SetField(videocomment.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(videocomment.FieldCreatedBy, field.TypeUint32, value)
+		_spec.AddField(videocomment.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(videocomment.FieldCreatedBy, field.TypeUint32)
+		_spec.ClearField(videocomment.FieldCreatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(videocomment.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.SetField(videocomment.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(videocomment.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.AddField(videocomment.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(videocomment.FieldUpdatedBy, field.TypeUint32)
+		_spec.ClearField(videocomment.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.DeletedBy(); ok {
-		_spec.SetField(videocomment.FieldDeletedBy, field.TypeUint32, value)
+		_spec.SetField(videocomment.FieldDeletedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedDeletedBy(); ok {
-		_spec.AddField(videocomment.FieldDeletedBy, field.TypeUint32, value)
+		_spec.AddField(videocomment.FieldDeletedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.DeletedByCleared() {
-		_spec.ClearField(videocomment.FieldDeletedBy, field.TypeUint32)
+		_spec.ClearField(videocomment.FieldDeletedBy, field.TypeInt64)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(videocomment.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(videocomment.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.VideoID(); ok {
-		_spec.SetField(videocomment.FieldVideoID, field.TypeUint32, value)
+		_spec.SetField(videocomment.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedVideoID(); ok {
-		_spec.AddField(videocomment.FieldVideoID, field.TypeUint32, value)
+		_spec.AddField(videocomment.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(videocomment.FieldUserID, field.TypeUint32, value)
+		_spec.SetField(videocomment.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(videocomment.FieldUserID, field.TypeUint32, value)
+		_spec.AddField(videocomment.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.Content(); ok {
 		_spec.SetField(videocomment.FieldContent, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ParentID(); ok {
-		_spec.SetField(videocomment.FieldParentID, field.TypeUint32, value)
+		_spec.SetField(videocomment.FieldParentID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedParentID(); ok {
-		_spec.AddField(videocomment.FieldParentID, field.TypeUint32, value)
+		_spec.AddField(videocomment.FieldParentID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.LikeCount(); ok {
 		_spec.SetField(videocomment.FieldLikeCount, field.TypeUint64, value)

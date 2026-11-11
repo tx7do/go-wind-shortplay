@@ -65,13 +65,13 @@ func (_c *VideoReportCreate) SetNillableDeletedAt(v *time.Time) *VideoReportCrea
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_c *VideoReportCreate) SetCreatedBy(v uint32) *VideoReportCreate {
+func (_c *VideoReportCreate) SetCreatedBy(v int64) *VideoReportCreate {
 	_c.mutation.SetCreatedBy(v)
 	return _c
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_c *VideoReportCreate) SetNillableCreatedBy(v *uint32) *VideoReportCreate {
+func (_c *VideoReportCreate) SetNillableCreatedBy(v *int64) *VideoReportCreate {
 	if v != nil {
 		_c.SetCreatedBy(*v)
 	}
@@ -79,13 +79,13 @@ func (_c *VideoReportCreate) SetNillableCreatedBy(v *uint32) *VideoReportCreate 
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_c *VideoReportCreate) SetUpdatedBy(v uint32) *VideoReportCreate {
+func (_c *VideoReportCreate) SetUpdatedBy(v int64) *VideoReportCreate {
 	_c.mutation.SetUpdatedBy(v)
 	return _c
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_c *VideoReportCreate) SetNillableUpdatedBy(v *uint32) *VideoReportCreate {
+func (_c *VideoReportCreate) SetNillableUpdatedBy(v *int64) *VideoReportCreate {
 	if v != nil {
 		_c.SetUpdatedBy(*v)
 	}
@@ -93,13 +93,13 @@ func (_c *VideoReportCreate) SetNillableUpdatedBy(v *uint32) *VideoReportCreate 
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (_c *VideoReportCreate) SetDeletedBy(v uint32) *VideoReportCreate {
+func (_c *VideoReportCreate) SetDeletedBy(v int64) *VideoReportCreate {
 	_c.mutation.SetDeletedBy(v)
 	return _c
 }
 
 // SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
-func (_c *VideoReportCreate) SetNillableDeletedBy(v *uint32) *VideoReportCreate {
+func (_c *VideoReportCreate) SetNillableDeletedBy(v *int64) *VideoReportCreate {
 	if v != nil {
 		_c.SetDeletedBy(*v)
 	}
@@ -107,13 +107,13 @@ func (_c *VideoReportCreate) SetNillableDeletedBy(v *uint32) *VideoReportCreate 
 }
 
 // SetTenantID sets the "tenant_id" field.
-func (_c *VideoReportCreate) SetTenantID(v uint32) *VideoReportCreate {
+func (_c *VideoReportCreate) SetTenantID(v int64) *VideoReportCreate {
 	_c.mutation.SetTenantID(v)
 	return _c
 }
 
 // SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
-func (_c *VideoReportCreate) SetNillableTenantID(v *uint32) *VideoReportCreate {
+func (_c *VideoReportCreate) SetNillableTenantID(v *int64) *VideoReportCreate {
 	if v != nil {
 		_c.SetTenantID(*v)
 	}
@@ -121,13 +121,13 @@ func (_c *VideoReportCreate) SetNillableTenantID(v *uint32) *VideoReportCreate {
 }
 
 // SetReporterID sets the "reporter_id" field.
-func (_c *VideoReportCreate) SetReporterID(v uint32) *VideoReportCreate {
+func (_c *VideoReportCreate) SetReporterID(v int64) *VideoReportCreate {
 	_c.mutation.SetReporterID(v)
 	return _c
 }
 
 // SetNillableReporterID sets the "reporter_id" field if the given value is not nil.
-func (_c *VideoReportCreate) SetNillableReporterID(v *uint32) *VideoReportCreate {
+func (_c *VideoReportCreate) SetNillableReporterID(v *int64) *VideoReportCreate {
 	if v != nil {
 		_c.SetReporterID(*v)
 	}
@@ -149,13 +149,13 @@ func (_c *VideoReportCreate) SetNillableTargetType(v *videoreport.TargetType) *V
 }
 
 // SetTargetID sets the "target_id" field.
-func (_c *VideoReportCreate) SetTargetID(v uint32) *VideoReportCreate {
+func (_c *VideoReportCreate) SetTargetID(v int64) *VideoReportCreate {
 	_c.mutation.SetTargetID(v)
 	return _c
 }
 
 // SetNillableTargetID sets the "target_id" field if the given value is not nil.
-func (_c *VideoReportCreate) SetNillableTargetID(v *uint32) *VideoReportCreate {
+func (_c *VideoReportCreate) SetNillableTargetID(v *int64) *VideoReportCreate {
 	if v != nil {
 		_c.SetTargetID(*v)
 	}
@@ -197,13 +197,13 @@ func (_c *VideoReportCreate) SetNillableStatus(v *videoreport.Status) *VideoRepo
 }
 
 // SetHandledBy sets the "handled_by" field.
-func (_c *VideoReportCreate) SetHandledBy(v uint32) *VideoReportCreate {
+func (_c *VideoReportCreate) SetHandledBy(v int64) *VideoReportCreate {
 	_c.mutation.SetHandledBy(v)
 	return _c
 }
 
 // SetNillableHandledBy sets the "handled_by" field if the given value is not nil.
-func (_c *VideoReportCreate) SetNillableHandledBy(v *uint32) *VideoReportCreate {
+func (_c *VideoReportCreate) SetNillableHandledBy(v *int64) *VideoReportCreate {
 	if v != nil {
 		_c.SetHandledBy(*v)
 	}
@@ -239,7 +239,7 @@ func (_c *VideoReportCreate) SetNillableHandledAt(v *time.Time) *VideoReportCrea
 }
 
 // SetID sets the "id" field.
-func (_c *VideoReportCreate) SetID(v uint32) *VideoReportCreate {
+func (_c *VideoReportCreate) SetID(v int64) *VideoReportCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
@@ -364,7 +364,7 @@ func (_c *VideoReportCreate) sqlSave(ctx context.Context) (*VideoReport, error) 
 	}
 	if _spec.ID.Value != _node.ID {
 		id := _spec.ID.Value.(int64)
-		_node.ID = uint32(id)
+		_node.ID = int64(id)
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
@@ -374,7 +374,7 @@ func (_c *VideoReportCreate) sqlSave(ctx context.Context) (*VideoReport, error) 
 func (_c *VideoReportCreate) createSpec() (*VideoReport, *sqlgraph.CreateSpec) {
 	var (
 		_node = &VideoReport{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(videoreport.Table, sqlgraph.NewFieldSpec(videoreport.FieldID, field.TypeUint32))
+		_spec = sqlgraph.NewCreateSpec(videoreport.Table, sqlgraph.NewFieldSpec(videoreport.FieldID, field.TypeInt64))
 	)
 	_spec.OnConflict = _c.conflict
 	if id, ok := _c.mutation.ID(); ok {
@@ -394,23 +394,23 @@ func (_c *VideoReportCreate) createSpec() (*VideoReport, *sqlgraph.CreateSpec) {
 		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.CreatedBy(); ok {
-		_spec.SetField(videoreport.FieldCreatedBy, field.TypeUint32, value)
+		_spec.SetField(videoreport.FieldCreatedBy, field.TypeInt64, value)
 		_node.CreatedBy = &value
 	}
 	if value, ok := _c.mutation.UpdatedBy(); ok {
-		_spec.SetField(videoreport.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.SetField(videoreport.FieldUpdatedBy, field.TypeInt64, value)
 		_node.UpdatedBy = &value
 	}
 	if value, ok := _c.mutation.DeletedBy(); ok {
-		_spec.SetField(videoreport.FieldDeletedBy, field.TypeUint32, value)
+		_spec.SetField(videoreport.FieldDeletedBy, field.TypeInt64, value)
 		_node.DeletedBy = &value
 	}
 	if value, ok := _c.mutation.TenantID(); ok {
-		_spec.SetField(videoreport.FieldTenantID, field.TypeUint32, value)
+		_spec.SetField(videoreport.FieldTenantID, field.TypeInt64, value)
 		_node.TenantID = &value
 	}
 	if value, ok := _c.mutation.ReporterID(); ok {
-		_spec.SetField(videoreport.FieldReporterID, field.TypeUint32, value)
+		_spec.SetField(videoreport.FieldReporterID, field.TypeInt64, value)
 		_node.ReporterID = value
 	}
 	if value, ok := _c.mutation.TargetType(); ok {
@@ -418,7 +418,7 @@ func (_c *VideoReportCreate) createSpec() (*VideoReport, *sqlgraph.CreateSpec) {
 		_node.TargetType = value
 	}
 	if value, ok := _c.mutation.TargetID(); ok {
-		_spec.SetField(videoreport.FieldTargetID, field.TypeUint32, value)
+		_spec.SetField(videoreport.FieldTargetID, field.TypeInt64, value)
 		_node.TargetID = value
 	}
 	if value, ok := _c.mutation.Reason(); ok {
@@ -434,7 +434,7 @@ func (_c *VideoReportCreate) createSpec() (*VideoReport, *sqlgraph.CreateSpec) {
 		_node.Status = value
 	}
 	if value, ok := _c.mutation.HandledBy(); ok {
-		_spec.SetField(videoreport.FieldHandledBy, field.TypeUint32, value)
+		_spec.SetField(videoreport.FieldHandledBy, field.TypeInt64, value)
 		_node.HandledBy = value
 	}
 	if value, ok := _c.mutation.HandleNote(); ok {
@@ -534,7 +534,7 @@ func (u *VideoReportUpsert) ClearDeletedAt() *VideoReportUpsert {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (u *VideoReportUpsert) SetCreatedBy(v uint32) *VideoReportUpsert {
+func (u *VideoReportUpsert) SetCreatedBy(v int64) *VideoReportUpsert {
 	u.Set(videoreport.FieldCreatedBy, v)
 	return u
 }
@@ -546,7 +546,7 @@ func (u *VideoReportUpsert) UpdateCreatedBy() *VideoReportUpsert {
 }
 
 // AddCreatedBy adds v to the "created_by" field.
-func (u *VideoReportUpsert) AddCreatedBy(v uint32) *VideoReportUpsert {
+func (u *VideoReportUpsert) AddCreatedBy(v int64) *VideoReportUpsert {
 	u.Add(videoreport.FieldCreatedBy, v)
 	return u
 }
@@ -558,7 +558,7 @@ func (u *VideoReportUpsert) ClearCreatedBy() *VideoReportUpsert {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (u *VideoReportUpsert) SetUpdatedBy(v uint32) *VideoReportUpsert {
+func (u *VideoReportUpsert) SetUpdatedBy(v int64) *VideoReportUpsert {
 	u.Set(videoreport.FieldUpdatedBy, v)
 	return u
 }
@@ -570,7 +570,7 @@ func (u *VideoReportUpsert) UpdateUpdatedBy() *VideoReportUpsert {
 }
 
 // AddUpdatedBy adds v to the "updated_by" field.
-func (u *VideoReportUpsert) AddUpdatedBy(v uint32) *VideoReportUpsert {
+func (u *VideoReportUpsert) AddUpdatedBy(v int64) *VideoReportUpsert {
 	u.Add(videoreport.FieldUpdatedBy, v)
 	return u
 }
@@ -582,7 +582,7 @@ func (u *VideoReportUpsert) ClearUpdatedBy() *VideoReportUpsert {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (u *VideoReportUpsert) SetDeletedBy(v uint32) *VideoReportUpsert {
+func (u *VideoReportUpsert) SetDeletedBy(v int64) *VideoReportUpsert {
 	u.Set(videoreport.FieldDeletedBy, v)
 	return u
 }
@@ -594,7 +594,7 @@ func (u *VideoReportUpsert) UpdateDeletedBy() *VideoReportUpsert {
 }
 
 // AddDeletedBy adds v to the "deleted_by" field.
-func (u *VideoReportUpsert) AddDeletedBy(v uint32) *VideoReportUpsert {
+func (u *VideoReportUpsert) AddDeletedBy(v int64) *VideoReportUpsert {
 	u.Add(videoreport.FieldDeletedBy, v)
 	return u
 }
@@ -606,7 +606,7 @@ func (u *VideoReportUpsert) ClearDeletedBy() *VideoReportUpsert {
 }
 
 // SetReporterID sets the "reporter_id" field.
-func (u *VideoReportUpsert) SetReporterID(v uint32) *VideoReportUpsert {
+func (u *VideoReportUpsert) SetReporterID(v int64) *VideoReportUpsert {
 	u.Set(videoreport.FieldReporterID, v)
 	return u
 }
@@ -618,7 +618,7 @@ func (u *VideoReportUpsert) UpdateReporterID() *VideoReportUpsert {
 }
 
 // AddReporterID adds v to the "reporter_id" field.
-func (u *VideoReportUpsert) AddReporterID(v uint32) *VideoReportUpsert {
+func (u *VideoReportUpsert) AddReporterID(v int64) *VideoReportUpsert {
 	u.Add(videoreport.FieldReporterID, v)
 	return u
 }
@@ -636,7 +636,7 @@ func (u *VideoReportUpsert) UpdateTargetType() *VideoReportUpsert {
 }
 
 // SetTargetID sets the "target_id" field.
-func (u *VideoReportUpsert) SetTargetID(v uint32) *VideoReportUpsert {
+func (u *VideoReportUpsert) SetTargetID(v int64) *VideoReportUpsert {
 	u.Set(videoreport.FieldTargetID, v)
 	return u
 }
@@ -648,7 +648,7 @@ func (u *VideoReportUpsert) UpdateTargetID() *VideoReportUpsert {
 }
 
 // AddTargetID adds v to the "target_id" field.
-func (u *VideoReportUpsert) AddTargetID(v uint32) *VideoReportUpsert {
+func (u *VideoReportUpsert) AddTargetID(v int64) *VideoReportUpsert {
 	u.Add(videoreport.FieldTargetID, v)
 	return u
 }
@@ -696,7 +696,7 @@ func (u *VideoReportUpsert) UpdateStatus() *VideoReportUpsert {
 }
 
 // SetHandledBy sets the "handled_by" field.
-func (u *VideoReportUpsert) SetHandledBy(v uint32) *VideoReportUpsert {
+func (u *VideoReportUpsert) SetHandledBy(v int64) *VideoReportUpsert {
 	u.Set(videoreport.FieldHandledBy, v)
 	return u
 }
@@ -708,7 +708,7 @@ func (u *VideoReportUpsert) UpdateHandledBy() *VideoReportUpsert {
 }
 
 // AddHandledBy adds v to the "handled_by" field.
-func (u *VideoReportUpsert) AddHandledBy(v uint32) *VideoReportUpsert {
+func (u *VideoReportUpsert) AddHandledBy(v int64) *VideoReportUpsert {
 	u.Add(videoreport.FieldHandledBy, v)
 	return u
 }
@@ -846,14 +846,14 @@ func (u *VideoReportUpsertOne) ClearDeletedAt() *VideoReportUpsertOne {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (u *VideoReportUpsertOne) SetCreatedBy(v uint32) *VideoReportUpsertOne {
+func (u *VideoReportUpsertOne) SetCreatedBy(v int64) *VideoReportUpsertOne {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.SetCreatedBy(v)
 	})
 }
 
 // AddCreatedBy adds v to the "created_by" field.
-func (u *VideoReportUpsertOne) AddCreatedBy(v uint32) *VideoReportUpsertOne {
+func (u *VideoReportUpsertOne) AddCreatedBy(v int64) *VideoReportUpsertOne {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.AddCreatedBy(v)
 	})
@@ -874,14 +874,14 @@ func (u *VideoReportUpsertOne) ClearCreatedBy() *VideoReportUpsertOne {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (u *VideoReportUpsertOne) SetUpdatedBy(v uint32) *VideoReportUpsertOne {
+func (u *VideoReportUpsertOne) SetUpdatedBy(v int64) *VideoReportUpsertOne {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.SetUpdatedBy(v)
 	})
 }
 
 // AddUpdatedBy adds v to the "updated_by" field.
-func (u *VideoReportUpsertOne) AddUpdatedBy(v uint32) *VideoReportUpsertOne {
+func (u *VideoReportUpsertOne) AddUpdatedBy(v int64) *VideoReportUpsertOne {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.AddUpdatedBy(v)
 	})
@@ -902,14 +902,14 @@ func (u *VideoReportUpsertOne) ClearUpdatedBy() *VideoReportUpsertOne {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (u *VideoReportUpsertOne) SetDeletedBy(v uint32) *VideoReportUpsertOne {
+func (u *VideoReportUpsertOne) SetDeletedBy(v int64) *VideoReportUpsertOne {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.SetDeletedBy(v)
 	})
 }
 
 // AddDeletedBy adds v to the "deleted_by" field.
-func (u *VideoReportUpsertOne) AddDeletedBy(v uint32) *VideoReportUpsertOne {
+func (u *VideoReportUpsertOne) AddDeletedBy(v int64) *VideoReportUpsertOne {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.AddDeletedBy(v)
 	})
@@ -930,14 +930,14 @@ func (u *VideoReportUpsertOne) ClearDeletedBy() *VideoReportUpsertOne {
 }
 
 // SetReporterID sets the "reporter_id" field.
-func (u *VideoReportUpsertOne) SetReporterID(v uint32) *VideoReportUpsertOne {
+func (u *VideoReportUpsertOne) SetReporterID(v int64) *VideoReportUpsertOne {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.SetReporterID(v)
 	})
 }
 
 // AddReporterID adds v to the "reporter_id" field.
-func (u *VideoReportUpsertOne) AddReporterID(v uint32) *VideoReportUpsertOne {
+func (u *VideoReportUpsertOne) AddReporterID(v int64) *VideoReportUpsertOne {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.AddReporterID(v)
 	})
@@ -965,14 +965,14 @@ func (u *VideoReportUpsertOne) UpdateTargetType() *VideoReportUpsertOne {
 }
 
 // SetTargetID sets the "target_id" field.
-func (u *VideoReportUpsertOne) SetTargetID(v uint32) *VideoReportUpsertOne {
+func (u *VideoReportUpsertOne) SetTargetID(v int64) *VideoReportUpsertOne {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.SetTargetID(v)
 	})
 }
 
 // AddTargetID adds v to the "target_id" field.
-func (u *VideoReportUpsertOne) AddTargetID(v uint32) *VideoReportUpsertOne {
+func (u *VideoReportUpsertOne) AddTargetID(v int64) *VideoReportUpsertOne {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.AddTargetID(v)
 	})
@@ -1035,14 +1035,14 @@ func (u *VideoReportUpsertOne) UpdateStatus() *VideoReportUpsertOne {
 }
 
 // SetHandledBy sets the "handled_by" field.
-func (u *VideoReportUpsertOne) SetHandledBy(v uint32) *VideoReportUpsertOne {
+func (u *VideoReportUpsertOne) SetHandledBy(v int64) *VideoReportUpsertOne {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.SetHandledBy(v)
 	})
 }
 
 // AddHandledBy adds v to the "handled_by" field.
-func (u *VideoReportUpsertOne) AddHandledBy(v uint32) *VideoReportUpsertOne {
+func (u *VideoReportUpsertOne) AddHandledBy(v int64) *VideoReportUpsertOne {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.AddHandledBy(v)
 	})
@@ -1113,7 +1113,7 @@ func (u *VideoReportUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *VideoReportUpsertOne) ID(ctx context.Context) (id uint32, err error) {
+func (u *VideoReportUpsertOne) ID(ctx context.Context) (id int64, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -1122,7 +1122,7 @@ func (u *VideoReportUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *VideoReportUpsertOne) IDX(ctx context.Context) uint32 {
+func (u *VideoReportUpsertOne) IDX(ctx context.Context) int64 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -1179,7 +1179,7 @@ func (_c *VideoReportCreateBulk) Save(ctx context.Context) ([]*VideoReport, erro
 				mutation.id = &nodes[i].ID
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = uint32(id)
+					nodes[i].ID = int64(id)
 				}
 				mutation.done = true
 				return nodes[i], nil
@@ -1360,14 +1360,14 @@ func (u *VideoReportUpsertBulk) ClearDeletedAt() *VideoReportUpsertBulk {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (u *VideoReportUpsertBulk) SetCreatedBy(v uint32) *VideoReportUpsertBulk {
+func (u *VideoReportUpsertBulk) SetCreatedBy(v int64) *VideoReportUpsertBulk {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.SetCreatedBy(v)
 	})
 }
 
 // AddCreatedBy adds v to the "created_by" field.
-func (u *VideoReportUpsertBulk) AddCreatedBy(v uint32) *VideoReportUpsertBulk {
+func (u *VideoReportUpsertBulk) AddCreatedBy(v int64) *VideoReportUpsertBulk {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.AddCreatedBy(v)
 	})
@@ -1388,14 +1388,14 @@ func (u *VideoReportUpsertBulk) ClearCreatedBy() *VideoReportUpsertBulk {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (u *VideoReportUpsertBulk) SetUpdatedBy(v uint32) *VideoReportUpsertBulk {
+func (u *VideoReportUpsertBulk) SetUpdatedBy(v int64) *VideoReportUpsertBulk {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.SetUpdatedBy(v)
 	})
 }
 
 // AddUpdatedBy adds v to the "updated_by" field.
-func (u *VideoReportUpsertBulk) AddUpdatedBy(v uint32) *VideoReportUpsertBulk {
+func (u *VideoReportUpsertBulk) AddUpdatedBy(v int64) *VideoReportUpsertBulk {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.AddUpdatedBy(v)
 	})
@@ -1416,14 +1416,14 @@ func (u *VideoReportUpsertBulk) ClearUpdatedBy() *VideoReportUpsertBulk {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (u *VideoReportUpsertBulk) SetDeletedBy(v uint32) *VideoReportUpsertBulk {
+func (u *VideoReportUpsertBulk) SetDeletedBy(v int64) *VideoReportUpsertBulk {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.SetDeletedBy(v)
 	})
 }
 
 // AddDeletedBy adds v to the "deleted_by" field.
-func (u *VideoReportUpsertBulk) AddDeletedBy(v uint32) *VideoReportUpsertBulk {
+func (u *VideoReportUpsertBulk) AddDeletedBy(v int64) *VideoReportUpsertBulk {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.AddDeletedBy(v)
 	})
@@ -1444,14 +1444,14 @@ func (u *VideoReportUpsertBulk) ClearDeletedBy() *VideoReportUpsertBulk {
 }
 
 // SetReporterID sets the "reporter_id" field.
-func (u *VideoReportUpsertBulk) SetReporterID(v uint32) *VideoReportUpsertBulk {
+func (u *VideoReportUpsertBulk) SetReporterID(v int64) *VideoReportUpsertBulk {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.SetReporterID(v)
 	})
 }
 
 // AddReporterID adds v to the "reporter_id" field.
-func (u *VideoReportUpsertBulk) AddReporterID(v uint32) *VideoReportUpsertBulk {
+func (u *VideoReportUpsertBulk) AddReporterID(v int64) *VideoReportUpsertBulk {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.AddReporterID(v)
 	})
@@ -1479,14 +1479,14 @@ func (u *VideoReportUpsertBulk) UpdateTargetType() *VideoReportUpsertBulk {
 }
 
 // SetTargetID sets the "target_id" field.
-func (u *VideoReportUpsertBulk) SetTargetID(v uint32) *VideoReportUpsertBulk {
+func (u *VideoReportUpsertBulk) SetTargetID(v int64) *VideoReportUpsertBulk {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.SetTargetID(v)
 	})
 }
 
 // AddTargetID adds v to the "target_id" field.
-func (u *VideoReportUpsertBulk) AddTargetID(v uint32) *VideoReportUpsertBulk {
+func (u *VideoReportUpsertBulk) AddTargetID(v int64) *VideoReportUpsertBulk {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.AddTargetID(v)
 	})
@@ -1549,14 +1549,14 @@ func (u *VideoReportUpsertBulk) UpdateStatus() *VideoReportUpsertBulk {
 }
 
 // SetHandledBy sets the "handled_by" field.
-func (u *VideoReportUpsertBulk) SetHandledBy(v uint32) *VideoReportUpsertBulk {
+func (u *VideoReportUpsertBulk) SetHandledBy(v int64) *VideoReportUpsertBulk {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.SetHandledBy(v)
 	})
 }
 
 // AddHandledBy adds v to the "handled_by" field.
-func (u *VideoReportUpsertBulk) AddHandledBy(v uint32) *VideoReportUpsertBulk {
+func (u *VideoReportUpsertBulk) AddHandledBy(v int64) *VideoReportUpsertBulk {
 	return u.Update(func(s *VideoReportUpsert) {
 		s.AddHandledBy(v)
 	})

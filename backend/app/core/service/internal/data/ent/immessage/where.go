@@ -10,47 +10,47 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id uint32) predicate.ImMessage {
+func ID(id int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uint32) predicate.ImMessage {
+func IDEQ(id int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uint32) predicate.ImMessage {
+func IDNEQ(id int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uint32) predicate.ImMessage {
+func IDIn(ids ...int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...uint32) predicate.ImMessage {
+func IDNotIn(ids ...int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id uint32) predicate.ImMessage {
+func IDGT(id int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uint32) predicate.ImMessage {
+func IDGTE(id int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id uint32) predicate.ImMessage {
+func IDLT(id int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uint32) predicate.ImMessage {
+func IDLTE(id int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldLTE(FieldID, id))
 }
 
@@ -70,22 +70,22 @@ func DeletedAt(v time.Time) predicate.ImMessage {
 }
 
 // TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
-func TenantID(v uint32) predicate.ImMessage {
+func TenantID(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldEQ(FieldTenantID, v))
 }
 
 // ConversationID applies equality check predicate on the "conversation_id" field. It's identical to ConversationIDEQ.
-func ConversationID(v uint32) predicate.ImMessage {
+func ConversationID(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldEQ(FieldConversationID, v))
 }
 
 // SenderID applies equality check predicate on the "sender_id" field. It's identical to SenderIDEQ.
-func SenderID(v uint32) predicate.ImMessage {
+func SenderID(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldEQ(FieldSenderID, v))
 }
 
 // ReceiverID applies equality check predicate on the "receiver_id" field. It's identical to ReceiverIDEQ.
-func ReceiverID(v uint32) predicate.ImMessage {
+func ReceiverID(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldEQ(FieldReceiverID, v))
 }
 
@@ -245,42 +245,42 @@ func DeletedAtNotNil() predicate.ImMessage {
 }
 
 // TenantIDEQ applies the EQ predicate on the "tenant_id" field.
-func TenantIDEQ(v uint32) predicate.ImMessage {
+func TenantIDEQ(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldEQ(FieldTenantID, v))
 }
 
 // TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
-func TenantIDNEQ(v uint32) predicate.ImMessage {
+func TenantIDNEQ(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldNEQ(FieldTenantID, v))
 }
 
 // TenantIDIn applies the In predicate on the "tenant_id" field.
-func TenantIDIn(vs ...uint32) predicate.ImMessage {
+func TenantIDIn(vs ...int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldIn(FieldTenantID, vs...))
 }
 
 // TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
-func TenantIDNotIn(vs ...uint32) predicate.ImMessage {
+func TenantIDNotIn(vs ...int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldNotIn(FieldTenantID, vs...))
 }
 
 // TenantIDGT applies the GT predicate on the "tenant_id" field.
-func TenantIDGT(v uint32) predicate.ImMessage {
+func TenantIDGT(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldGT(FieldTenantID, v))
 }
 
 // TenantIDGTE applies the GTE predicate on the "tenant_id" field.
-func TenantIDGTE(v uint32) predicate.ImMessage {
+func TenantIDGTE(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldGTE(FieldTenantID, v))
 }
 
 // TenantIDLT applies the LT predicate on the "tenant_id" field.
-func TenantIDLT(v uint32) predicate.ImMessage {
+func TenantIDLT(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldLT(FieldTenantID, v))
 }
 
 // TenantIDLTE applies the LTE predicate on the "tenant_id" field.
-func TenantIDLTE(v uint32) predicate.ImMessage {
+func TenantIDLTE(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldLTE(FieldTenantID, v))
 }
 
@@ -295,122 +295,122 @@ func TenantIDNotNil() predicate.ImMessage {
 }
 
 // ConversationIDEQ applies the EQ predicate on the "conversation_id" field.
-func ConversationIDEQ(v uint32) predicate.ImMessage {
+func ConversationIDEQ(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldEQ(FieldConversationID, v))
 }
 
 // ConversationIDNEQ applies the NEQ predicate on the "conversation_id" field.
-func ConversationIDNEQ(v uint32) predicate.ImMessage {
+func ConversationIDNEQ(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldNEQ(FieldConversationID, v))
 }
 
 // ConversationIDIn applies the In predicate on the "conversation_id" field.
-func ConversationIDIn(vs ...uint32) predicate.ImMessage {
+func ConversationIDIn(vs ...int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldIn(FieldConversationID, vs...))
 }
 
 // ConversationIDNotIn applies the NotIn predicate on the "conversation_id" field.
-func ConversationIDNotIn(vs ...uint32) predicate.ImMessage {
+func ConversationIDNotIn(vs ...int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldNotIn(FieldConversationID, vs...))
 }
 
 // ConversationIDGT applies the GT predicate on the "conversation_id" field.
-func ConversationIDGT(v uint32) predicate.ImMessage {
+func ConversationIDGT(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldGT(FieldConversationID, v))
 }
 
 // ConversationIDGTE applies the GTE predicate on the "conversation_id" field.
-func ConversationIDGTE(v uint32) predicate.ImMessage {
+func ConversationIDGTE(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldGTE(FieldConversationID, v))
 }
 
 // ConversationIDLT applies the LT predicate on the "conversation_id" field.
-func ConversationIDLT(v uint32) predicate.ImMessage {
+func ConversationIDLT(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldLT(FieldConversationID, v))
 }
 
 // ConversationIDLTE applies the LTE predicate on the "conversation_id" field.
-func ConversationIDLTE(v uint32) predicate.ImMessage {
+func ConversationIDLTE(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldLTE(FieldConversationID, v))
 }
 
 // SenderIDEQ applies the EQ predicate on the "sender_id" field.
-func SenderIDEQ(v uint32) predicate.ImMessage {
+func SenderIDEQ(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldEQ(FieldSenderID, v))
 }
 
 // SenderIDNEQ applies the NEQ predicate on the "sender_id" field.
-func SenderIDNEQ(v uint32) predicate.ImMessage {
+func SenderIDNEQ(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldNEQ(FieldSenderID, v))
 }
 
 // SenderIDIn applies the In predicate on the "sender_id" field.
-func SenderIDIn(vs ...uint32) predicate.ImMessage {
+func SenderIDIn(vs ...int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldIn(FieldSenderID, vs...))
 }
 
 // SenderIDNotIn applies the NotIn predicate on the "sender_id" field.
-func SenderIDNotIn(vs ...uint32) predicate.ImMessage {
+func SenderIDNotIn(vs ...int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldNotIn(FieldSenderID, vs...))
 }
 
 // SenderIDGT applies the GT predicate on the "sender_id" field.
-func SenderIDGT(v uint32) predicate.ImMessage {
+func SenderIDGT(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldGT(FieldSenderID, v))
 }
 
 // SenderIDGTE applies the GTE predicate on the "sender_id" field.
-func SenderIDGTE(v uint32) predicate.ImMessage {
+func SenderIDGTE(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldGTE(FieldSenderID, v))
 }
 
 // SenderIDLT applies the LT predicate on the "sender_id" field.
-func SenderIDLT(v uint32) predicate.ImMessage {
+func SenderIDLT(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldLT(FieldSenderID, v))
 }
 
 // SenderIDLTE applies the LTE predicate on the "sender_id" field.
-func SenderIDLTE(v uint32) predicate.ImMessage {
+func SenderIDLTE(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldLTE(FieldSenderID, v))
 }
 
 // ReceiverIDEQ applies the EQ predicate on the "receiver_id" field.
-func ReceiverIDEQ(v uint32) predicate.ImMessage {
+func ReceiverIDEQ(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldEQ(FieldReceiverID, v))
 }
 
 // ReceiverIDNEQ applies the NEQ predicate on the "receiver_id" field.
-func ReceiverIDNEQ(v uint32) predicate.ImMessage {
+func ReceiverIDNEQ(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldNEQ(FieldReceiverID, v))
 }
 
 // ReceiverIDIn applies the In predicate on the "receiver_id" field.
-func ReceiverIDIn(vs ...uint32) predicate.ImMessage {
+func ReceiverIDIn(vs ...int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldIn(FieldReceiverID, vs...))
 }
 
 // ReceiverIDNotIn applies the NotIn predicate on the "receiver_id" field.
-func ReceiverIDNotIn(vs ...uint32) predicate.ImMessage {
+func ReceiverIDNotIn(vs ...int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldNotIn(FieldReceiverID, vs...))
 }
 
 // ReceiverIDGT applies the GT predicate on the "receiver_id" field.
-func ReceiverIDGT(v uint32) predicate.ImMessage {
+func ReceiverIDGT(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldGT(FieldReceiverID, v))
 }
 
 // ReceiverIDGTE applies the GTE predicate on the "receiver_id" field.
-func ReceiverIDGTE(v uint32) predicate.ImMessage {
+func ReceiverIDGTE(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldGTE(FieldReceiverID, v))
 }
 
 // ReceiverIDLT applies the LT predicate on the "receiver_id" field.
-func ReceiverIDLT(v uint32) predicate.ImMessage {
+func ReceiverIDLT(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldLT(FieldReceiverID, v))
 }
 
 // ReceiverIDLTE applies the LTE predicate on the "receiver_id" field.
-func ReceiverIDLTE(v uint32) predicate.ImMessage {
+func ReceiverIDLTE(v int64) predicate.ImMessage {
 	return predicate.ImMessage(sql.FieldLTE(FieldReceiverID, v))
 }
 

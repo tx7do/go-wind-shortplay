@@ -30,11 +30,11 @@ func (VideoCollect) Annotations() []schema.Annotation {
 // Fields of the VideoCollect.
 func (VideoCollect) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint32("user_id").
+		field.Int64("user_id").
 			Comment("收藏人用户ID").
 			Default(0),
 
-		field.Uint32("video_id").
+		field.Int64("video_id").
 			Comment("视频ID").
 			Default(0),
 	}
@@ -43,9 +43,9 @@ func (VideoCollect) Fields() []ent.Field {
 // Mixin of the VideoCollect.
 func (VideoCollect) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.AutoIncrementId{},
+		mixin.AutoIncrementId64{},
 		mixin.TimeAt{},
-		mixin.TenantID[uint32]{},
+		mixin.TenantID[int64]{},
 	}
 }
 

@@ -108,7 +108,7 @@ message Authenticator {
 
 // 用户摘要（旧契约形状）
 message AuthUserProfile {
-  uint32 id = 1 [json_name = "id"];                  // 用户ID
+  int64 id = 1 [json_name = "id"];                  // 用户ID
   string username = 2 [json_name = "username"];      // 登录名
   string nickname = 3 [json_name = "nickname"];      // 昵称
   string avatar_url = 4 [json_name = "avatarUrl"];   // 头像

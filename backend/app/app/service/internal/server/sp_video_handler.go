@@ -23,7 +23,7 @@ func registerSpVideoServiceHandler(srv *http.Server, svc *service.VideoService) 
 		http.SetOperation(ctx, appV1.OperationVideoServiceUploadChunk)
 
 		taskID := ctx.Vars().Get("task_id")
-		chunkIndex64, err := strconv.ParseUint(ctx.Vars().Get("chunk_index"), 10, 32)
+		chunkIndex64, err := strconv.ParseInt(ctx.Vars().Get("chunk_index"), 10, 64)
 		if err != nil || taskID == "" {
 			return videoV1.ErrorBadRequest("invalid upload chunk path")
 		}

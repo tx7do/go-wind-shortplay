@@ -32,11 +32,11 @@ func (VideoComment) Annotations() []schema.Annotation {
 // Fields of the VideoComment.
 func (VideoComment) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint32("video_id").
+		field.Int64("video_id").
 			Comment("视频ID").
 			Default(0),
 
-		field.Uint32("user_id").
+		field.Int64("user_id").
 			Comment("评论人用户ID").
 			Default(0),
 
@@ -44,7 +44,7 @@ func (VideoComment) Fields() []ent.Field {
 			Comment("内容").
 			Default(""),
 
-		field.Uint32("parent_id").
+		field.Int64("parent_id").
 			Comment("父评论ID（0=一级评论）").
 			Default(0),
 
@@ -65,10 +65,10 @@ func (VideoComment) Fields() []ent.Field {
 // Mixin of the VideoComment.
 func (VideoComment) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.AutoIncrementId{},
+		mixin.AutoIncrementId64{},
 		mixin.TimeAt{},
-		mixin.OperatorID{},
-		mixin.TenantID[uint32]{},
+		mixin.OperatorID64{},
+		mixin.TenantID[int64]{},
 	}
 }
 

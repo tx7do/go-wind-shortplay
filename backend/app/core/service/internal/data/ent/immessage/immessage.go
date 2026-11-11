@@ -64,17 +64,17 @@ var (
 	Hooks  [1]ent.Hook
 	Policy ent.Policy
 	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
-	DefaultTenantID uint32
+	DefaultTenantID int64
 	// DefaultConversationID holds the default value on creation for the "conversation_id" field.
-	DefaultConversationID uint32
+	DefaultConversationID int64
 	// DefaultSenderID holds the default value on creation for the "sender_id" field.
-	DefaultSenderID uint32
+	DefaultSenderID int64
 	// DefaultReceiverID holds the default value on creation for the "receiver_id" field.
-	DefaultReceiverID uint32
+	DefaultReceiverID int64
 	// DefaultContent holds the default value on creation for the "content" field.
 	DefaultContent string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(uint32) error
+	IDValidator func(int64) error
 )
 
 // OrderOption defines the ordering options for the ImMessage queries.

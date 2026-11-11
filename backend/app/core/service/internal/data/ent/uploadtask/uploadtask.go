@@ -84,7 +84,7 @@ var (
 	Hooks  [1]ent.Hook
 	Policy ent.Policy
 	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
-	DefaultTenantID uint32
+	DefaultTenantID int64
 	// TaskIDValidator is a validator for the "task_id" field. It is called by the builders before save.
 	TaskIDValidator func(string) error
 	// FileNameValidator is a validator for the "file_name" field. It is called by the builders before save.
@@ -96,11 +96,11 @@ var (
 	// DefaultTotalChunks holds the default value on creation for the "total_chunks" field.
 	DefaultTotalChunks uint32
 	// DefaultVideoID holds the default value on creation for the "video_id" field.
-	DefaultVideoID uint32
+	DefaultVideoID int64
 	// DefaultAuthorID holds the default value on creation for the "author_id" field.
-	DefaultAuthorID uint32
+	DefaultAuthorID int64
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(uint32) error
+	IDValidator func(int64) error
 )
 
 // Status defines the type for the "status" enum field.

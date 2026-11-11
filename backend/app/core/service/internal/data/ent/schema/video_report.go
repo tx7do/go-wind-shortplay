@@ -30,7 +30,7 @@ func (VideoReport) Annotations() []schema.Annotation {
 // Fields of the VideoReport.
 func (VideoReport) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint32("reporter_id").
+		field.Int64("reporter_id").
 			Comment("举报人用户ID").
 			Default(0),
 
@@ -44,7 +44,7 @@ func (VideoReport) Fields() []ent.Field {
 			).
 			Default("VIDEO"),
 
-		field.Uint32("target_id").
+		field.Int64("target_id").
 			Comment("目标ID").
 			Default(0),
 
@@ -66,7 +66,7 @@ func (VideoReport) Fields() []ent.Field {
 			).
 			Default("PENDING"),
 
-		field.Uint32("handled_by").
+		field.Int64("handled_by").
 			Comment("处理人（管理员）").
 			Default(0),
 
@@ -85,10 +85,10 @@ func (VideoReport) Fields() []ent.Field {
 // Mixin of the VideoReport.
 func (VideoReport) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.AutoIncrementId{},
+		mixin.AutoIncrementId64{},
 		mixin.TimeAt{},
-		mixin.OperatorID{},
-		mixin.TenantID[uint32]{},
+		mixin.OperatorID64{},
+		mixin.TenantID[int64]{},
 	}
 }
 

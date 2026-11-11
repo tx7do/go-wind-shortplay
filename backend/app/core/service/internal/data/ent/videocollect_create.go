@@ -65,13 +65,13 @@ func (_c *VideoCollectCreate) SetNillableDeletedAt(v *time.Time) *VideoCollectCr
 }
 
 // SetTenantID sets the "tenant_id" field.
-func (_c *VideoCollectCreate) SetTenantID(v uint32) *VideoCollectCreate {
+func (_c *VideoCollectCreate) SetTenantID(v int64) *VideoCollectCreate {
 	_c.mutation.SetTenantID(v)
 	return _c
 }
 
 // SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
-func (_c *VideoCollectCreate) SetNillableTenantID(v *uint32) *VideoCollectCreate {
+func (_c *VideoCollectCreate) SetNillableTenantID(v *int64) *VideoCollectCreate {
 	if v != nil {
 		_c.SetTenantID(*v)
 	}
@@ -79,13 +79,13 @@ func (_c *VideoCollectCreate) SetNillableTenantID(v *uint32) *VideoCollectCreate
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *VideoCollectCreate) SetUserID(v uint32) *VideoCollectCreate {
+func (_c *VideoCollectCreate) SetUserID(v int64) *VideoCollectCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_c *VideoCollectCreate) SetNillableUserID(v *uint32) *VideoCollectCreate {
+func (_c *VideoCollectCreate) SetNillableUserID(v *int64) *VideoCollectCreate {
 	if v != nil {
 		_c.SetUserID(*v)
 	}
@@ -93,13 +93,13 @@ func (_c *VideoCollectCreate) SetNillableUserID(v *uint32) *VideoCollectCreate {
 }
 
 // SetVideoID sets the "video_id" field.
-func (_c *VideoCollectCreate) SetVideoID(v uint32) *VideoCollectCreate {
+func (_c *VideoCollectCreate) SetVideoID(v int64) *VideoCollectCreate {
 	_c.mutation.SetVideoID(v)
 	return _c
 }
 
 // SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_c *VideoCollectCreate) SetNillableVideoID(v *uint32) *VideoCollectCreate {
+func (_c *VideoCollectCreate) SetNillableVideoID(v *int64) *VideoCollectCreate {
 	if v != nil {
 		_c.SetVideoID(*v)
 	}
@@ -107,7 +107,7 @@ func (_c *VideoCollectCreate) SetNillableVideoID(v *uint32) *VideoCollectCreate 
 }
 
 // SetID sets the "id" field.
-func (_c *VideoCollectCreate) SetID(v uint32) *VideoCollectCreate {
+func (_c *VideoCollectCreate) SetID(v int64) *VideoCollectCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
@@ -193,7 +193,7 @@ func (_c *VideoCollectCreate) sqlSave(ctx context.Context) (*VideoCollect, error
 	}
 	if _spec.ID.Value != _node.ID {
 		id := _spec.ID.Value.(int64)
-		_node.ID = uint32(id)
+		_node.ID = int64(id)
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
@@ -203,7 +203,7 @@ func (_c *VideoCollectCreate) sqlSave(ctx context.Context) (*VideoCollect, error
 func (_c *VideoCollectCreate) createSpec() (*VideoCollect, *sqlgraph.CreateSpec) {
 	var (
 		_node = &VideoCollect{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(videocollect.Table, sqlgraph.NewFieldSpec(videocollect.FieldID, field.TypeUint32))
+		_spec = sqlgraph.NewCreateSpec(videocollect.Table, sqlgraph.NewFieldSpec(videocollect.FieldID, field.TypeInt64))
 	)
 	_spec.OnConflict = _c.conflict
 	if id, ok := _c.mutation.ID(); ok {
@@ -223,15 +223,15 @@ func (_c *VideoCollectCreate) createSpec() (*VideoCollect, *sqlgraph.CreateSpec)
 		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.TenantID(); ok {
-		_spec.SetField(videocollect.FieldTenantID, field.TypeUint32, value)
+		_spec.SetField(videocollect.FieldTenantID, field.TypeInt64, value)
 		_node.TenantID = &value
 	}
 	if value, ok := _c.mutation.UserID(); ok {
-		_spec.SetField(videocollect.FieldUserID, field.TypeUint32, value)
+		_spec.SetField(videocollect.FieldUserID, field.TypeInt64, value)
 		_node.UserID = value
 	}
 	if value, ok := _c.mutation.VideoID(); ok {
-		_spec.SetField(videocollect.FieldVideoID, field.TypeUint32, value)
+		_spec.SetField(videocollect.FieldVideoID, field.TypeInt64, value)
 		_node.VideoID = value
 	}
 	return _node, _spec
@@ -323,7 +323,7 @@ func (u *VideoCollectUpsert) ClearDeletedAt() *VideoCollectUpsert {
 }
 
 // SetUserID sets the "user_id" field.
-func (u *VideoCollectUpsert) SetUserID(v uint32) *VideoCollectUpsert {
+func (u *VideoCollectUpsert) SetUserID(v int64) *VideoCollectUpsert {
 	u.Set(videocollect.FieldUserID, v)
 	return u
 }
@@ -335,13 +335,13 @@ func (u *VideoCollectUpsert) UpdateUserID() *VideoCollectUpsert {
 }
 
 // AddUserID adds v to the "user_id" field.
-func (u *VideoCollectUpsert) AddUserID(v uint32) *VideoCollectUpsert {
+func (u *VideoCollectUpsert) AddUserID(v int64) *VideoCollectUpsert {
 	u.Add(videocollect.FieldUserID, v)
 	return u
 }
 
 // SetVideoID sets the "video_id" field.
-func (u *VideoCollectUpsert) SetVideoID(v uint32) *VideoCollectUpsert {
+func (u *VideoCollectUpsert) SetVideoID(v int64) *VideoCollectUpsert {
 	u.Set(videocollect.FieldVideoID, v)
 	return u
 }
@@ -353,7 +353,7 @@ func (u *VideoCollectUpsert) UpdateVideoID() *VideoCollectUpsert {
 }
 
 // AddVideoID adds v to the "video_id" field.
-func (u *VideoCollectUpsert) AddVideoID(v uint32) *VideoCollectUpsert {
+func (u *VideoCollectUpsert) AddVideoID(v int64) *VideoCollectUpsert {
 	u.Add(videocollect.FieldVideoID, v)
 	return u
 }
@@ -455,14 +455,14 @@ func (u *VideoCollectUpsertOne) ClearDeletedAt() *VideoCollectUpsertOne {
 }
 
 // SetUserID sets the "user_id" field.
-func (u *VideoCollectUpsertOne) SetUserID(v uint32) *VideoCollectUpsertOne {
+func (u *VideoCollectUpsertOne) SetUserID(v int64) *VideoCollectUpsertOne {
 	return u.Update(func(s *VideoCollectUpsert) {
 		s.SetUserID(v)
 	})
 }
 
 // AddUserID adds v to the "user_id" field.
-func (u *VideoCollectUpsertOne) AddUserID(v uint32) *VideoCollectUpsertOne {
+func (u *VideoCollectUpsertOne) AddUserID(v int64) *VideoCollectUpsertOne {
 	return u.Update(func(s *VideoCollectUpsert) {
 		s.AddUserID(v)
 	})
@@ -476,14 +476,14 @@ func (u *VideoCollectUpsertOne) UpdateUserID() *VideoCollectUpsertOne {
 }
 
 // SetVideoID sets the "video_id" field.
-func (u *VideoCollectUpsertOne) SetVideoID(v uint32) *VideoCollectUpsertOne {
+func (u *VideoCollectUpsertOne) SetVideoID(v int64) *VideoCollectUpsertOne {
 	return u.Update(func(s *VideoCollectUpsert) {
 		s.SetVideoID(v)
 	})
 }
 
 // AddVideoID adds v to the "video_id" field.
-func (u *VideoCollectUpsertOne) AddVideoID(v uint32) *VideoCollectUpsertOne {
+func (u *VideoCollectUpsertOne) AddVideoID(v int64) *VideoCollectUpsertOne {
 	return u.Update(func(s *VideoCollectUpsert) {
 		s.AddVideoID(v)
 	})
@@ -512,7 +512,7 @@ func (u *VideoCollectUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *VideoCollectUpsertOne) ID(ctx context.Context) (id uint32, err error) {
+func (u *VideoCollectUpsertOne) ID(ctx context.Context) (id int64, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -521,7 +521,7 @@ func (u *VideoCollectUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *VideoCollectUpsertOne) IDX(ctx context.Context) uint32 {
+func (u *VideoCollectUpsertOne) IDX(ctx context.Context) int64 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -578,7 +578,7 @@ func (_c *VideoCollectCreateBulk) Save(ctx context.Context) ([]*VideoCollect, er
 				mutation.id = &nodes[i].ID
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = uint32(id)
+					nodes[i].ID = int64(id)
 				}
 				mutation.done = true
 				return nodes[i], nil
@@ -759,14 +759,14 @@ func (u *VideoCollectUpsertBulk) ClearDeletedAt() *VideoCollectUpsertBulk {
 }
 
 // SetUserID sets the "user_id" field.
-func (u *VideoCollectUpsertBulk) SetUserID(v uint32) *VideoCollectUpsertBulk {
+func (u *VideoCollectUpsertBulk) SetUserID(v int64) *VideoCollectUpsertBulk {
 	return u.Update(func(s *VideoCollectUpsert) {
 		s.SetUserID(v)
 	})
 }
 
 // AddUserID adds v to the "user_id" field.
-func (u *VideoCollectUpsertBulk) AddUserID(v uint32) *VideoCollectUpsertBulk {
+func (u *VideoCollectUpsertBulk) AddUserID(v int64) *VideoCollectUpsertBulk {
 	return u.Update(func(s *VideoCollectUpsert) {
 		s.AddUserID(v)
 	})
@@ -780,14 +780,14 @@ func (u *VideoCollectUpsertBulk) UpdateUserID() *VideoCollectUpsertBulk {
 }
 
 // SetVideoID sets the "video_id" field.
-func (u *VideoCollectUpsertBulk) SetVideoID(v uint32) *VideoCollectUpsertBulk {
+func (u *VideoCollectUpsertBulk) SetVideoID(v int64) *VideoCollectUpsertBulk {
 	return u.Update(func(s *VideoCollectUpsert) {
 		s.SetVideoID(v)
 	})
 }
 
 // AddVideoID adds v to the "video_id" field.
-func (u *VideoCollectUpsertBulk) AddVideoID(v uint32) *VideoCollectUpsertBulk {
+func (u *VideoCollectUpsertBulk) AddVideoID(v int64) *VideoCollectUpsertBulk {
 	return u.Update(func(s *VideoCollectUpsert) {
 		s.AddVideoID(v)
 	})

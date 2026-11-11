@@ -6,9 +6,9 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/redis/go-redis/v9"
-	"github.com/tx7do/kratos-bootstrap/bootstrap"
-	"github.com/tx7do/go-utils/trans"
 	"github.com/tx7do/go-utils/timeutil"
+	"github.com/tx7do/go-utils/trans"
+	"github.com/tx7do/kratos-bootstrap/bootstrap"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"go-wind-shortplay/app/core/service/internal/data"
@@ -39,7 +39,7 @@ func NewUbaService(ctx *bootstrap.Context, ubaRepo *data.UbaRepo, videoRepo *dat
 }
 
 // markDisliked 「不感兴趣」负反馈写入 Redis set（feed 召回过滤读；尽力而为）
-func (s *UbaService) markDisliked(ctx context.Context, uid uint32, videoIDs []uint32) {
+func (s *UbaService) markDisliked(ctx context.Context, uid int64, videoIDs []int64) {
 	if s.redis == nil || uid == 0 || len(videoIDs) == 0 {
 		return
 	}
@@ -73,7 +73,7 @@ func (s *UbaService) ReportEvents(ctx context.Context, req *ubaV1.ReportEventsRe
 	}
 	// 不感兴趣负反馈同步进 Redis 过滤集（登录用户）
 	if uid > 0 {
-		dislikedIDs := make([]uint32, 0, len(events))
+		dislikedIDs := make([]int64, 0, len(events))
 		for _, ev := range events {
 			if ev.GetEventType() == ubaV1.EventType_EVENT_TYPE_VIDEO_DISLIKE && ev.GetVideoId() > 0 {
 				dislikedIDs = append(dislikedIDs, ev.GetVideoId())
@@ -91,14 +91,14 @@ func (s *UbaService) ListWatchHistory(ctx context.Context, req *ubaV1.ListWatchH
 	if uid == 0 {
 		return nil, ubaV1.ErrorUnauthorized("login required")
 	}
-	page := uint32(1)
-	size := uint32(20)
+	page := int64(1)
+	size := int64(20)
 	if req != nil {
-		if req.GetPageNum() > 0 {
-			page = req.GetPageNum()
+		if int64(req.GetPageNum()) > 0 {
+			page = int64(req.GetPageNum())
 		}
-		if req.GetPageSize() > 0 {
-			size = req.GetPageSize()
+		if int64(req.GetPageSize()) > 0 {
+			size = int64(req.GetPageSize())
 		}
 	}
 	if size > 50 {

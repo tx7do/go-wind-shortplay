@@ -31,7 +31,7 @@ func NewSeriesFollowRepo(ctx *bootstrap.Context, entClient *entCrud.EntClient[*e
 }
 
 // Follow 追剧（幂等）。返回是否新建了关系。
-func (r *SeriesFollowRepo) Follow(ctx context.Context, followerID, seriesID uint32) (bool, error) {
+func (r *SeriesFollowRepo) Follow(ctx context.Context, followerID, seriesID int64) (bool, error) {
 	exists, err := r.entClient.Client().SeriesFollow.Query().
 		Where(seriesfollow.FollowerIDEQ(followerID), seriesfollow.SeriesIDEQ(seriesID)).
 		Exist(ctx)
@@ -57,7 +57,7 @@ func (r *SeriesFollowRepo) Follow(ctx context.Context, followerID, seriesID uint
 }
 
 // Unfollow 取消追剧（幂等）。返回是否真的删除了关系。
-func (r *SeriesFollowRepo) Unfollow(ctx context.Context, followerID, seriesID uint32) (bool, error) {
+func (r *SeriesFollowRepo) Unfollow(ctx context.Context, followerID, seriesID int64) (bool, error) {
 	n, err := r.entClient.Client().SeriesFollow.Delete().
 		Where(seriesfollow.FollowerIDEQ(followerID), seriesfollow.SeriesIDEQ(seriesID)).
 		Exec(ctx)
@@ -69,15 +69,15 @@ func (r *SeriesFollowRepo) Unfollow(ctx context.Context, followerID, seriesID ui
 }
 
 // FollowerCount 剧集追剧人数
-func (r *SeriesFollowRepo) FollowerCount(ctx context.Context, seriesID uint32) (int, error) {
+func (r *SeriesFollowRepo) FollowerCount(ctx context.Context, seriesID int64) (int, error) {
 	return r.entClient.Client().SeriesFollow.Query().
 		Where(seriesfollow.SeriesIDEQ(seriesID)).
 		Count(ctx)
 }
 
 // FollowerCounts 批量追剧人数
-func (r *SeriesFollowRepo) FollowerCounts(ctx context.Context, seriesIDs []uint32) (map[uint32]int, error) {
-	out := make(map[uint32]int, len(seriesIDs))
+func (r *SeriesFollowRepo) FollowerCounts(ctx context.Context, seriesIDs []int64) (map[int64]int, error) {
+	out := make(map[int64]int, len(seriesIDs))
 	if len(seriesIDs) == 0 {
 		return out, nil
 	}
@@ -94,8 +94,8 @@ func (r *SeriesFollowRepo) FollowerCounts(ctx context.Context, seriesIDs []uint3
 }
 
 // GetFollowStatus 批量追剧状态（viewer → 剧集）
-func (r *SeriesFollowRepo) GetFollowStatus(ctx context.Context, followerID uint32, seriesIDs []uint32) (map[uint32]bool, error) {
-	out := make(map[uint32]bool, len(seriesIDs))
+func (r *SeriesFollowRepo) GetFollowStatus(ctx context.Context, followerID int64, seriesIDs []int64) (map[int64]bool, error) {
+	out := make(map[int64]bool, len(seriesIDs))
 	if followerID == 0 || len(seriesIDs) == 0 {
 		return out, nil
 	}
@@ -112,7 +112,7 @@ func (r *SeriesFollowRepo) GetFollowStatus(ctx context.Context, followerID uint3
 }
 
 // FollowedSeriesIDs 追剧的剧集 ID 列表（按追剧时间倒序）
-func (r *SeriesFollowRepo) FollowedSeriesIDs(ctx context.Context, followerID uint32, limit int) ([]uint32, error) {
+func (r *SeriesFollowRepo) FollowedSeriesIDs(ctx context.Context, followerID int64, limit int) ([]int64, error) {
 	rows, err := r.entClient.Client().SeriesFollow.Query().
 		Where(seriesfollow.FollowerIDEQ(followerID)).
 		Order(ent.Desc(seriesfollow.FieldCreatedAt)).
@@ -120,7 +120,7 @@ func (r *SeriesFollowRepo) FollowedSeriesIDs(ctx context.Context, followerID uin
 	if err != nil {
 		return nil, err
 	}
-	ids := make([]uint32, 0, len(rows))
+	ids := make([]int64, 0, len(rows))
 	for _, row := range rows {
 		ids = append(ids, row.SeriesID)
 	}
@@ -128,7 +128,7 @@ func (r *SeriesFollowRepo) FollowedSeriesIDs(ctx context.Context, followerID uin
 }
 
 // FollowerUserIDs 剧集的追剧人 ID 列表（更新通知 fan-out 用，截断到上限）
-func (r *SeriesFollowRepo) FollowerUserIDs(ctx context.Context, seriesID uint32) []uint32 {
+func (r *SeriesFollowRepo) FollowerUserIDs(ctx context.Context, seriesID int64) []int64 {
 	rows, err := r.entClient.Client().SeriesFollow.Query().
 		Where(seriesfollow.SeriesIDEQ(seriesID)).
 		Order(ent.Desc(seriesfollow.FieldCreatedAt)).
@@ -138,7 +138,7 @@ func (r *SeriesFollowRepo) FollowerUserIDs(ctx context.Context, seriesID uint32)
 		r.log.Errorf("list series followers failed: %s", err.Error())
 		return nil
 	}
-	ids := make([]uint32, 0, len(rows))
+	ids := make([]int64, 0, len(rows))
 	for _, row := range rows {
 		ids = append(ids, row.FollowerID)
 	}

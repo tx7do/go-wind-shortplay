@@ -18,12 +18,12 @@ import (
 
 	"github.com/tx7do/go-crud/viewer"
 
-	appViewer "go-wind-shortplay/pkg/entgo/viewer"
 	"go-wind-shortplay/app/core/service/internal/data"
+	appViewer "go-wind-shortplay/pkg/entgo/viewer"
 	"go-wind-shortplay/pkg/task"
 
-	internalMessageV1 "go-wind-shortplay/api/gen/go/internal_message/service/v1"
 	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
+	internalMessageV1 "go-wind-shortplay/api/gen/go/internal_message/service/v1"
 	notifyV1 "go-wind-shortplay/api/gen/go/notify/service/v1"
 
 	"github.com/redis/go-redis/v9"
@@ -39,7 +39,7 @@ type InternalMessageService struct {
 	internalMessageCategoryRepo  *data.InternalMessageCategoryRepo
 	internalMessageRecipientRepo *data.InternalMessageRecipientRepo
 
-	userRepo data.UserRepo
+	userRepo    data.UserRepo
 	taskService *TaskService
 
 	// redisClient 用于把系统通知事件发布到 Redis Pub/Sub（admin 服务订阅后转
@@ -73,7 +73,7 @@ func NewInternalMessageService(
 }
 
 // RegisterNotifier 注入通知域投递缝；注入前系统通知走不到渠道路由，SendSystemNotification 直接报错
-//（不静默降级成直写：装配遗漏应该暴露成显式失败，而不是让台账悄悄缺一列）。
+// （不静默降级成直写：装配遗漏应该暴露成显式失败，而不是让台账悄悄缺一列）。
 func (s *InternalMessageService) RegisterNotifier(notifier Notifier) {
 	s.notifier = notifier
 }
@@ -89,7 +89,7 @@ func (s *InternalMessageService) deliverViaNotifier(ctx context.Context, req *no
 
 func (s *InternalMessageService) extractRelationIDs(
 	messages []*internalMessageV1.InternalMessage,
-	categorySet aggregator.ResourceMap[uint32, *internalMessageV1.InternalMessageCategory],
+	categorySet aggregator.ResourceMap[int64, *internalMessageV1.InternalMessageCategory],
 ) {
 	for _, p := range messages {
 		if p.GetCategoryId() > 0 {
@@ -100,10 +100,10 @@ func (s *InternalMessageService) extractRelationIDs(
 
 func (s *InternalMessageService) fetchRelationInfo(
 	ctx context.Context,
-	categorySet aggregator.ResourceMap[uint32, *internalMessageV1.InternalMessageCategory],
+	categorySet aggregator.ResourceMap[int64, *internalMessageV1.InternalMessageCategory],
 ) error {
 	if len(categorySet) > 0 {
-		categoryIds := make([]uint32, 0, len(categorySet))
+		categoryIds := make([]int64, 0, len(categorySet))
 		for id := range categorySet {
 			categoryIds = append(categoryIds, id)
 		}
@@ -124,12 +124,12 @@ func (s *InternalMessageService) fetchRelationInfo(
 
 func (s *InternalMessageService) bindRelations(
 	messages []*internalMessageV1.InternalMessage,
-	categorySet aggregator.ResourceMap[uint32, *internalMessageV1.InternalMessageCategory],
+	categorySet aggregator.ResourceMap[int64, *internalMessageV1.InternalMessageCategory],
 ) {
 	aggregator.Populate(
 		messages,
 		categorySet,
-		func(ou *internalMessageV1.InternalMessage) uint32 { return ou.GetCategoryId() },
+		func(ou *internalMessageV1.InternalMessage) int64 { return ou.GetCategoryId() },
 		func(ou *internalMessageV1.InternalMessage, c *internalMessageV1.InternalMessageCategory) {
 			ou.CategoryName = c.Name
 		},
@@ -137,7 +137,7 @@ func (s *InternalMessageService) bindRelations(
 }
 
 func (s *InternalMessageService) enrichRelations(ctx context.Context, messages []*internalMessageV1.InternalMessage) error {
-	var categorySet = make(aggregator.ResourceMap[uint32, *internalMessageV1.InternalMessageCategory])
+	var categorySet = make(aggregator.ResourceMap[int64, *internalMessageV1.InternalMessageCategory])
 	s.extractRelationIDs(messages, categorySet)
 	if err := s.fetchRelationInfo(ctx, categorySet); err != nil {
 		return err
@@ -243,15 +243,15 @@ func (s *InternalMessageService) RevokeMessage(ctx context.Context, req *interna
 
 // SendSystemNotification 系统事件通知（Flow 规则动作等自动链路的唯一入口）：
 // 以系统身份（created_by=0）创建 PUBLISHED 消息，收件人经通知域投递缝
-//（Notifier.SendDirect，EventType=INTERNAL_MESSAGE）逐人投递——种子规则默认路由
+// （Notifier.SendDirect，EventType=INTERNAL_MESSAGE）逐人投递——种子规则默认路由
 // INTERNAL 渠道（落收件行 + 尽力实时推送），端态与直写一致，额外落一行投递台账。
 // 管理员在通知规则页停用该规则即整体停止此类通知（此时 SendDirect 报错，只记日志不中断）。
 // 收件人跨租户不拦截——系统消息的租户边界由规则配置方（收件人列表）负责。返回消息 ID。
-func (s *InternalMessageService) SendSystemNotification(ctx context.Context, title, content string, targetUserIDs []uint32) (uint32, error) {
+func (s *InternalMessageService) SendSystemNotification(ctx context.Context, title, content string, targetUserIDs []int64) (int64, error) {
 	if strings.TrimSpace(title) == "" || strings.TrimSpace(content) == "" {
 		return 0, internalMessageV1.ErrorBadRequest("title and content are required")
 	}
-	targets := make([]uint32, 0, len(targetUserIDs))
+	targets := make([]int64, 0, len(targetUserIDs))
 	for _, uid := range targetUserIDs {
 		if uid != 0 {
 			targets = append(targets, uid)
@@ -268,7 +268,7 @@ func (s *InternalMessageService) SendSystemNotification(ctx context.Context, tit
 			Content:   trans.Ptr(content),
 			Status:    trans.Ptr(internalMessageV1.InternalMessage_PUBLISHED),
 			Type:      trans.Ptr(internalMessageV1.InternalMessage_NOTIFICATION),
-			CreatedBy: trans.Ptr(uint32(0)),
+			CreatedBy: trans.Ptr(int64(0)),
 			CreatedAt: timeutil.TimeToTimestamppb(&now),
 		},
 	})
@@ -280,7 +280,7 @@ func (s *InternalMessageService) SendSystemNotification(ctx context.Context, tit
 		// 单收件人失败不中断其余收件人（与群发口径一致）；台账 ID 一并带进日志便于回查
 		resp, dErr := s.notifier.SendDirect(ctx, &notifyV1.SendDirectNotificationRequest{
 			EventType:       notifyV1.EventType_INTERNAL_MESSAGE,
-			Target:          strconv.FormatUint(uint64(uid), 10),
+			Target:          strconv.FormatInt(int64(uid), 10),
 			Title:           title,
 			Content:         content,
 			RecipientUserId: trans.Ptr(uid),
@@ -306,9 +306,9 @@ func (s *InternalMessageService) SendMessage(ctx context.Context, req *internalM
 	}
 
 	// 从 viewer context 获取发送者的租户 ID，用于限定消息发送范围
-	senderTenantID := uint32(0)
+	senderTenantID := int64(0)
 	if vc, exist := viewer.FromContext(ctx); exist && vc != nil {
-		senderTenantID = uint32(vc.TenantID())
+		senderTenantID = int64(vc.TenantID())
 	}
 
 	now := time.Now()
@@ -366,10 +366,10 @@ func (s *InternalMessageService) SendMessage(ctx context.Context, req *internalM
 }
 
 // isRecipientAllowed 校验收件人是否在发送者的可发送范围内，并带回收件人自身的租户 ID
-//（收件行按收件人租户落库，照 NotifyUser 先例——租户归属收件人，不从发送者推导）。
+// （收件行按收件人租户落库，照 NotifyUser 先例——租户归属收件人，不从发送者推导）。
 // 平台管理员（senderTenantID==0）可向任意租户用户发送；
 // 普通租户用户只能向本租户用户发送。收件人不存在或跨租户时拒绝。
-func (s *InternalMessageService) isRecipientAllowed(ctx context.Context, recipientUserID uint32, senderTenantID uint32) (recipientTenantID uint32, allowed bool) {
+func (s *InternalMessageService) isRecipientAllowed(ctx context.Context, recipientUserID int64, senderTenantID int64) (recipientTenantID int64, allowed bool) {
 	recipient, err := s.userRepo.Get(ctx, &identityV1.GetUserRequest{
 		QueryBy: &identityV1.GetUserRequest_Id{Id: recipientUserID},
 	})
@@ -384,14 +384,13 @@ func (s *InternalMessageService) isRecipientAllowed(ctx context.Context, recipie
 	return recipient.GetTenantId(), true
 }
 
-
 // NotifyUser 系统级通知：后台任务（无操作人身份）触达指定用户。
 // 借鉴 go-wind-admin Notification 域的"系统发起"语义——不读 viewer/operator，
 // sender 记为 0（系统）；租户从收件人用户记录推导（消息与收件行都落对租户）。
 // 通知失败只记日志不返回错误：调用方（发布 worker 等任务链路）不能因通知中断。
 //
 // 邮件出站走通知域（SYSTEM_NOTIFY 事件经渠道路由，EmailSender 统一 HTML 壳）。
-func (s *InternalMessageService) NotifyUser(ctx context.Context, recipientUserID uint32, title, content string) {
+func (s *InternalMessageService) NotifyUser(ctx context.Context, recipientUserID int64, title, content string) {
 	if recipientUserID == 0 {
 		return
 	}
@@ -413,7 +412,7 @@ func (s *InternalMessageService) NotifyUser(ctx context.Context, recipientUserID
 			Content:   trans.Ptr(content),
 			Status:    trans.Ptr(internalMessageV1.InternalMessage_PUBLISHED),
 			Type:      trans.Ptr(internalMessageV1.InternalMessage_NOTIFICATION),
-			CreatedBy: trans.Ptr(uint32(0)), // 0 = 系统
+			CreatedBy: trans.Ptr(int64(0)), // 0 = 系统
 			CreatedAt: timeutil.TimeToTimestamppb(&now),
 		},
 	})
@@ -502,7 +501,7 @@ func (s *InternalMessageService) SendEmailWorker(taskType string, payload *task.
 
 // publishNotifyEvent 向 Redis Pub/Sub 发一条实时通知事件（admin 服务订阅后转 SSE）。
 // best-effort：redisClient 未配置或发布失败只记日志——落库为准，只损失实时性。
-func (s *InternalMessageService) publishNotifyEvent(recipientUserID uint32, title, content string) {
+func (s *InternalMessageService) publishNotifyEvent(recipientUserID int64, title, content string) {
 	if s.redisClient == nil {
 		return
 	}
@@ -527,7 +526,7 @@ func (s *InternalMessageService) publishNotifyEvent(recipientUserID uint32, titl
 // 消息本体（internal_messages）的租户归属发送者侧，此处不处理。
 // sendEmailOut 差异化参数：显式传 true 时该收件人出站邮件（群发开关）；
 // 省略时保持各调用方既有口径（系统级通知=有邮箱即出站，群发=默认不出站）。
-func (s *InternalMessageService) sendNotification(ctx context.Context, messageId uint32, recipientUserId uint32, recipientTenantID uint32, senderUserId uint32, now *time.Time, title, content string, sendEmailOut ...bool) error {
+func (s *InternalMessageService) sendNotification(ctx context.Context, messageId int64, recipientUserId int64, recipientTenantID int64, senderUserId int64, now *time.Time, title, content string, sendEmailOut ...bool) error {
 	recipient := &internalMessageV1.InternalMessageRecipient{
 		TenantId:        trans.Ptr(recipientTenantID),
 		MessageId:       trans.Ptr(messageId),
@@ -552,8 +551,8 @@ func (s *InternalMessageService) sendNotification(ctx context.Context, messageId
 
 // recipientTenantID 推导收件人自身的租户 ID（照 NotifyUser 先例：租户归属收件人，
 // 从收件人用户记录读取，不从发送者/调用上下文推导）。收件人不可达时回落 0
-//（平台域，与收件行缺省租户一致），错误只记日志不阻断投递——落库为准。
-func (s *InternalMessageService) recipientTenantID(ctx context.Context, recipientUserID uint32) uint32 {
+// （平台域，与收件行缺省租户一致），错误只记日志不阻断投递——落库为准。
+func (s *InternalMessageService) recipientTenantID(ctx context.Context, recipientUserID int64) int64 {
 	recipient, err := s.userRepo.Get(ctx, &identityV1.GetUserRequest{
 		QueryBy: &identityV1.GetUserRequest_Id{Id: recipientUserID},
 	})

@@ -71,14 +71,14 @@ func (_u *SysConfigUpdate) ClearDeletedAt() *SysConfigUpdate {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_u *SysConfigUpdate) SetCreatedBy(v uint32) *SysConfigUpdate {
+func (_u *SysConfigUpdate) SetCreatedBy(v int64) *SysConfigUpdate {
 	_u.mutation.ResetCreatedBy()
 	_u.mutation.SetCreatedBy(v)
 	return _u
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *SysConfigUpdate) SetNillableCreatedBy(v *uint32) *SysConfigUpdate {
+func (_u *SysConfigUpdate) SetNillableCreatedBy(v *int64) *SysConfigUpdate {
 	if v != nil {
 		_u.SetCreatedBy(*v)
 	}
@@ -86,7 +86,7 @@ func (_u *SysConfigUpdate) SetNillableCreatedBy(v *uint32) *SysConfigUpdate {
 }
 
 // AddCreatedBy adds value to the "created_by" field.
-func (_u *SysConfigUpdate) AddCreatedBy(v int32) *SysConfigUpdate {
+func (_u *SysConfigUpdate) AddCreatedBy(v int64) *SysConfigUpdate {
 	_u.mutation.AddCreatedBy(v)
 	return _u
 }
@@ -98,14 +98,14 @@ func (_u *SysConfigUpdate) ClearCreatedBy() *SysConfigUpdate {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_u *SysConfigUpdate) SetUpdatedBy(v uint32) *SysConfigUpdate {
+func (_u *SysConfigUpdate) SetUpdatedBy(v int64) *SysConfigUpdate {
 	_u.mutation.ResetUpdatedBy()
 	_u.mutation.SetUpdatedBy(v)
 	return _u
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *SysConfigUpdate) SetNillableUpdatedBy(v *uint32) *SysConfigUpdate {
+func (_u *SysConfigUpdate) SetNillableUpdatedBy(v *int64) *SysConfigUpdate {
 	if v != nil {
 		_u.SetUpdatedBy(*v)
 	}
@@ -113,7 +113,7 @@ func (_u *SysConfigUpdate) SetNillableUpdatedBy(v *uint32) *SysConfigUpdate {
 }
 
 // AddUpdatedBy adds value to the "updated_by" field.
-func (_u *SysConfigUpdate) AddUpdatedBy(v int32) *SysConfigUpdate {
+func (_u *SysConfigUpdate) AddUpdatedBy(v int64) *SysConfigUpdate {
 	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
@@ -125,14 +125,14 @@ func (_u *SysConfigUpdate) ClearUpdatedBy() *SysConfigUpdate {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (_u *SysConfigUpdate) SetDeletedBy(v uint32) *SysConfigUpdate {
+func (_u *SysConfigUpdate) SetDeletedBy(v int64) *SysConfigUpdate {
 	_u.mutation.ResetDeletedBy()
 	_u.mutation.SetDeletedBy(v)
 	return _u
 }
 
 // SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
-func (_u *SysConfigUpdate) SetNillableDeletedBy(v *uint32) *SysConfigUpdate {
+func (_u *SysConfigUpdate) SetNillableDeletedBy(v *int64) *SysConfigUpdate {
 	if v != nil {
 		_u.SetDeletedBy(*v)
 	}
@@ -140,7 +140,7 @@ func (_u *SysConfigUpdate) SetNillableDeletedBy(v *uint32) *SysConfigUpdate {
 }
 
 // AddDeletedBy adds value to the "deleted_by" field.
-func (_u *SysConfigUpdate) AddDeletedBy(v int32) *SysConfigUpdate {
+func (_u *SysConfigUpdate) AddDeletedBy(v int64) *SysConfigUpdate {
 	_u.mutation.AddDeletedBy(v)
 	return _u
 }
@@ -386,7 +386,7 @@ func (_u *SysConfigUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SysC
 }
 
 func (_u *SysConfigUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(sysconfig.Table, sysconfig.Columns, sqlgraph.NewFieldSpec(sysconfig.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(sysconfig.Table, sysconfig.Columns, sqlgraph.NewFieldSpec(sysconfig.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -410,31 +410,31 @@ func (_u *SysConfigUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.ClearField(sysconfig.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(sysconfig.FieldCreatedBy, field.TypeUint32, value)
+		_spec.SetField(sysconfig.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(sysconfig.FieldCreatedBy, field.TypeUint32, value)
+		_spec.AddField(sysconfig.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(sysconfig.FieldCreatedBy, field.TypeUint32)
+		_spec.ClearField(sysconfig.FieldCreatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(sysconfig.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.SetField(sysconfig.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(sysconfig.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.AddField(sysconfig.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(sysconfig.FieldUpdatedBy, field.TypeUint32)
+		_spec.ClearField(sysconfig.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.DeletedBy(); ok {
-		_spec.SetField(sysconfig.FieldDeletedBy, field.TypeUint32, value)
+		_spec.SetField(sysconfig.FieldDeletedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedDeletedBy(); ok {
-		_spec.AddField(sysconfig.FieldDeletedBy, field.TypeUint32, value)
+		_spec.AddField(sysconfig.FieldDeletedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.DeletedByCleared() {
-		_spec.ClearField(sysconfig.FieldDeletedBy, field.TypeUint32)
+		_spec.ClearField(sysconfig.FieldDeletedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.MaxUploadSizeMB(); ok {
 		_spec.SetField(sysconfig.FieldMaxUploadSizeMB, field.TypeUint32, value)
@@ -560,14 +560,14 @@ func (_u *SysConfigUpdateOne) ClearDeletedAt() *SysConfigUpdateOne {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_u *SysConfigUpdateOne) SetCreatedBy(v uint32) *SysConfigUpdateOne {
+func (_u *SysConfigUpdateOne) SetCreatedBy(v int64) *SysConfigUpdateOne {
 	_u.mutation.ResetCreatedBy()
 	_u.mutation.SetCreatedBy(v)
 	return _u
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *SysConfigUpdateOne) SetNillableCreatedBy(v *uint32) *SysConfigUpdateOne {
+func (_u *SysConfigUpdateOne) SetNillableCreatedBy(v *int64) *SysConfigUpdateOne {
 	if v != nil {
 		_u.SetCreatedBy(*v)
 	}
@@ -575,7 +575,7 @@ func (_u *SysConfigUpdateOne) SetNillableCreatedBy(v *uint32) *SysConfigUpdateOn
 }
 
 // AddCreatedBy adds value to the "created_by" field.
-func (_u *SysConfigUpdateOne) AddCreatedBy(v int32) *SysConfigUpdateOne {
+func (_u *SysConfigUpdateOne) AddCreatedBy(v int64) *SysConfigUpdateOne {
 	_u.mutation.AddCreatedBy(v)
 	return _u
 }
@@ -587,14 +587,14 @@ func (_u *SysConfigUpdateOne) ClearCreatedBy() *SysConfigUpdateOne {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_u *SysConfigUpdateOne) SetUpdatedBy(v uint32) *SysConfigUpdateOne {
+func (_u *SysConfigUpdateOne) SetUpdatedBy(v int64) *SysConfigUpdateOne {
 	_u.mutation.ResetUpdatedBy()
 	_u.mutation.SetUpdatedBy(v)
 	return _u
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *SysConfigUpdateOne) SetNillableUpdatedBy(v *uint32) *SysConfigUpdateOne {
+func (_u *SysConfigUpdateOne) SetNillableUpdatedBy(v *int64) *SysConfigUpdateOne {
 	if v != nil {
 		_u.SetUpdatedBy(*v)
 	}
@@ -602,7 +602,7 @@ func (_u *SysConfigUpdateOne) SetNillableUpdatedBy(v *uint32) *SysConfigUpdateOn
 }
 
 // AddUpdatedBy adds value to the "updated_by" field.
-func (_u *SysConfigUpdateOne) AddUpdatedBy(v int32) *SysConfigUpdateOne {
+func (_u *SysConfigUpdateOne) AddUpdatedBy(v int64) *SysConfigUpdateOne {
 	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
@@ -614,14 +614,14 @@ func (_u *SysConfigUpdateOne) ClearUpdatedBy() *SysConfigUpdateOne {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (_u *SysConfigUpdateOne) SetDeletedBy(v uint32) *SysConfigUpdateOne {
+func (_u *SysConfigUpdateOne) SetDeletedBy(v int64) *SysConfigUpdateOne {
 	_u.mutation.ResetDeletedBy()
 	_u.mutation.SetDeletedBy(v)
 	return _u
 }
 
 // SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
-func (_u *SysConfigUpdateOne) SetNillableDeletedBy(v *uint32) *SysConfigUpdateOne {
+func (_u *SysConfigUpdateOne) SetNillableDeletedBy(v *int64) *SysConfigUpdateOne {
 	if v != nil {
 		_u.SetDeletedBy(*v)
 	}
@@ -629,7 +629,7 @@ func (_u *SysConfigUpdateOne) SetNillableDeletedBy(v *uint32) *SysConfigUpdateOn
 }
 
 // AddDeletedBy adds value to the "deleted_by" field.
-func (_u *SysConfigUpdateOne) AddDeletedBy(v int32) *SysConfigUpdateOne {
+func (_u *SysConfigUpdateOne) AddDeletedBy(v int64) *SysConfigUpdateOne {
 	_u.mutation.AddDeletedBy(v)
 	return _u
 }
@@ -888,7 +888,7 @@ func (_u *SysConfigUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *S
 }
 
 func (_u *SysConfigUpdateOne) sqlSave(ctx context.Context) (_node *SysConfig, err error) {
-	_spec := sqlgraph.NewUpdateSpec(sysconfig.Table, sysconfig.Columns, sqlgraph.NewFieldSpec(sysconfig.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(sysconfig.Table, sysconfig.Columns, sqlgraph.NewFieldSpec(sysconfig.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "SysConfig.id" for update`)}
@@ -929,31 +929,31 @@ func (_u *SysConfigUpdateOne) sqlSave(ctx context.Context) (_node *SysConfig, er
 		_spec.ClearField(sysconfig.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(sysconfig.FieldCreatedBy, field.TypeUint32, value)
+		_spec.SetField(sysconfig.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(sysconfig.FieldCreatedBy, field.TypeUint32, value)
+		_spec.AddField(sysconfig.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(sysconfig.FieldCreatedBy, field.TypeUint32)
+		_spec.ClearField(sysconfig.FieldCreatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(sysconfig.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.SetField(sysconfig.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(sysconfig.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.AddField(sysconfig.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(sysconfig.FieldUpdatedBy, field.TypeUint32)
+		_spec.ClearField(sysconfig.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.DeletedBy(); ok {
-		_spec.SetField(sysconfig.FieldDeletedBy, field.TypeUint32, value)
+		_spec.SetField(sysconfig.FieldDeletedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedDeletedBy(); ok {
-		_spec.AddField(sysconfig.FieldDeletedBy, field.TypeUint32, value)
+		_spec.AddField(sysconfig.FieldDeletedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.DeletedByCleared() {
-		_spec.ClearField(sysconfig.FieldDeletedBy, field.TypeUint32)
+		_spec.ClearField(sysconfig.FieldDeletedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.MaxUploadSizeMB(); ok {
 		_spec.SetField(sysconfig.FieldMaxUploadSizeMB, field.TypeUint32, value)

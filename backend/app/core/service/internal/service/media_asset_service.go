@@ -35,7 +35,7 @@ func (s *MediaAssetService) ListDuplicatedMediaAssets(ctx context.Context, req *
 	}
 	return &mediaV1.ListDuplicatedMediaAssetsResponse{
 		Groups: groups,
-		Total:  uint64(len(groups)),
+		Total:  int64(len(groups)),
 	}, nil
 }
 

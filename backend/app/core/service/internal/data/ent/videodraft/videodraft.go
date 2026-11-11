@@ -97,7 +97,7 @@ var (
 	Hooks  [1]ent.Hook
 	Policy ent.Policy
 	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
-	DefaultTenantID uint32
+	DefaultTenantID int64
 	// DefaultDuration holds the default value on creation for the "duration" field.
 	DefaultDuration uint32
 	// DefaultWidth holds the default value on creation for the "width" field.
@@ -105,13 +105,13 @@ var (
 	// DefaultHeight holds the default value on creation for the "height" field.
 	DefaultHeight uint32
 	// DefaultAuthorID holds the default value on creation for the "author_id" field.
-	DefaultAuthorID uint32
+	DefaultAuthorID int64
 	// DefaultSeriesID holds the default value on creation for the "series_id" field.
-	DefaultSeriesID uint32
+	DefaultSeriesID int64
 	// DefaultEpisodeNumber holds the default value on creation for the "episode_number" field.
 	DefaultEpisodeNumber uint32
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(uint32) error
+	IDValidator func(int64) error
 )
 
 // OrderOption defines the ordering options for the VideoDraft queries.

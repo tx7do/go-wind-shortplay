@@ -17,8 +17,8 @@ import (
 
 // NavigationNode 动态菜单节点（docs/API.md「Admin 端 RBAC 扩展」形状）。
 type NavigationNode struct {
-	ID        uint32            `json:"id,omitempty"`
-	ParentID  *uint32           `json:"parentId,omitempty"`
+	ID        int64             `json:"id,omitempty"`
+	ParentID  *int64            `json:"parentId,omitempty"`
 	Name      string            `json:"name,omitempty"`
 	Path      string            `json:"path,omitempty"`
 	Component string            `json:"component,omitempty"`
@@ -109,7 +109,7 @@ func (s *NavigationService) ServeNavigation(w http.ResponseWriter, r *http.Reque
 // 子节点会因父级缺失全部平铺为根节点（侧栏被打平的直接根因）；
 // 目录是否下发自底向上由 keep 决定（无可解析子节点的目录整组裁剪）。
 func mapMenusToNodes(menus []*permissionV1.Menu) []*NavigationNode {
-	byID := make(map[uint32]*NavigationNode, len(menus))
+	byID := make(map[int64]*NavigationNode, len(menus))
 	var roots []*NavigationNode
 
 	for _, m := range menus {

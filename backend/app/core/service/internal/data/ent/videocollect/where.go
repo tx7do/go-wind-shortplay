@@ -10,47 +10,47 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id uint32) predicate.VideoCollect {
+func ID(id int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uint32) predicate.VideoCollect {
+func IDEQ(id int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uint32) predicate.VideoCollect {
+func IDNEQ(id int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uint32) predicate.VideoCollect {
+func IDIn(ids ...int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...uint32) predicate.VideoCollect {
+func IDNotIn(ids ...int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id uint32) predicate.VideoCollect {
+func IDGT(id int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uint32) predicate.VideoCollect {
+func IDGTE(id int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id uint32) predicate.VideoCollect {
+func IDLT(id int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uint32) predicate.VideoCollect {
+func IDLTE(id int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldLTE(FieldID, id))
 }
 
@@ -70,17 +70,17 @@ func DeletedAt(v time.Time) predicate.VideoCollect {
 }
 
 // TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
-func TenantID(v uint32) predicate.VideoCollect {
+func TenantID(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldEQ(FieldTenantID, v))
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v uint32) predicate.VideoCollect {
+func UserID(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldEQ(FieldUserID, v))
 }
 
 // VideoID applies equality check predicate on the "video_id" field. It's identical to VideoIDEQ.
-func VideoID(v uint32) predicate.VideoCollect {
+func VideoID(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldEQ(FieldVideoID, v))
 }
 
@@ -235,42 +235,42 @@ func DeletedAtNotNil() predicate.VideoCollect {
 }
 
 // TenantIDEQ applies the EQ predicate on the "tenant_id" field.
-func TenantIDEQ(v uint32) predicate.VideoCollect {
+func TenantIDEQ(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldEQ(FieldTenantID, v))
 }
 
 // TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
-func TenantIDNEQ(v uint32) predicate.VideoCollect {
+func TenantIDNEQ(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldNEQ(FieldTenantID, v))
 }
 
 // TenantIDIn applies the In predicate on the "tenant_id" field.
-func TenantIDIn(vs ...uint32) predicate.VideoCollect {
+func TenantIDIn(vs ...int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldIn(FieldTenantID, vs...))
 }
 
 // TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
-func TenantIDNotIn(vs ...uint32) predicate.VideoCollect {
+func TenantIDNotIn(vs ...int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldNotIn(FieldTenantID, vs...))
 }
 
 // TenantIDGT applies the GT predicate on the "tenant_id" field.
-func TenantIDGT(v uint32) predicate.VideoCollect {
+func TenantIDGT(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldGT(FieldTenantID, v))
 }
 
 // TenantIDGTE applies the GTE predicate on the "tenant_id" field.
-func TenantIDGTE(v uint32) predicate.VideoCollect {
+func TenantIDGTE(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldGTE(FieldTenantID, v))
 }
 
 // TenantIDLT applies the LT predicate on the "tenant_id" field.
-func TenantIDLT(v uint32) predicate.VideoCollect {
+func TenantIDLT(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldLT(FieldTenantID, v))
 }
 
 // TenantIDLTE applies the LTE predicate on the "tenant_id" field.
-func TenantIDLTE(v uint32) predicate.VideoCollect {
+func TenantIDLTE(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldLTE(FieldTenantID, v))
 }
 
@@ -285,82 +285,82 @@ func TenantIDNotNil() predicate.VideoCollect {
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v uint32) predicate.VideoCollect {
+func UserIDEQ(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v uint32) predicate.VideoCollect {
+func UserIDNEQ(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...uint32) predicate.VideoCollect {
+func UserIDIn(vs ...int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...uint32) predicate.VideoCollect {
+func UserIDNotIn(vs ...int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // UserIDGT applies the GT predicate on the "user_id" field.
-func UserIDGT(v uint32) predicate.VideoCollect {
+func UserIDGT(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldGT(FieldUserID, v))
 }
 
 // UserIDGTE applies the GTE predicate on the "user_id" field.
-func UserIDGTE(v uint32) predicate.VideoCollect {
+func UserIDGTE(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldGTE(FieldUserID, v))
 }
 
 // UserIDLT applies the LT predicate on the "user_id" field.
-func UserIDLT(v uint32) predicate.VideoCollect {
+func UserIDLT(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldLT(FieldUserID, v))
 }
 
 // UserIDLTE applies the LTE predicate on the "user_id" field.
-func UserIDLTE(v uint32) predicate.VideoCollect {
+func UserIDLTE(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldLTE(FieldUserID, v))
 }
 
 // VideoIDEQ applies the EQ predicate on the "video_id" field.
-func VideoIDEQ(v uint32) predicate.VideoCollect {
+func VideoIDEQ(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldEQ(FieldVideoID, v))
 }
 
 // VideoIDNEQ applies the NEQ predicate on the "video_id" field.
-func VideoIDNEQ(v uint32) predicate.VideoCollect {
+func VideoIDNEQ(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldNEQ(FieldVideoID, v))
 }
 
 // VideoIDIn applies the In predicate on the "video_id" field.
-func VideoIDIn(vs ...uint32) predicate.VideoCollect {
+func VideoIDIn(vs ...int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldIn(FieldVideoID, vs...))
 }
 
 // VideoIDNotIn applies the NotIn predicate on the "video_id" field.
-func VideoIDNotIn(vs ...uint32) predicate.VideoCollect {
+func VideoIDNotIn(vs ...int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldNotIn(FieldVideoID, vs...))
 }
 
 // VideoIDGT applies the GT predicate on the "video_id" field.
-func VideoIDGT(v uint32) predicate.VideoCollect {
+func VideoIDGT(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldGT(FieldVideoID, v))
 }
 
 // VideoIDGTE applies the GTE predicate on the "video_id" field.
-func VideoIDGTE(v uint32) predicate.VideoCollect {
+func VideoIDGTE(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldGTE(FieldVideoID, v))
 }
 
 // VideoIDLT applies the LT predicate on the "video_id" field.
-func VideoIDLT(v uint32) predicate.VideoCollect {
+func VideoIDLT(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldLT(FieldVideoID, v))
 }
 
 // VideoIDLTE applies the LTE predicate on the "video_id" field.
-func VideoIDLTE(v uint32) predicate.VideoCollect {
+func VideoIDLTE(v int64) predicate.VideoCollect {
 	return predicate.VideoCollect(sql.FieldLTE(FieldVideoID, v))
 }
 

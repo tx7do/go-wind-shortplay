@@ -5,7 +5,7 @@ const VideoScheduledPublishTaskType = "video.scheduled.publish"
 
 // VideoScheduledPublishData 定时发布载荷。
 type VideoScheduledPublishData struct {
-	VideoID uint32 `json:"videoId"`
+	VideoID int64 `json:"videoId"`
 }
 
 // VideoScheduledUnpublishTaskType 定时下架任务：到期将 PUBLISHED（含
@@ -14,5 +14,5 @@ const VideoScheduledUnpublishTaskType = "video.scheduled.unpublish"
 
 // VideoScheduledUnpublishData 定时下架载荷。
 type VideoScheduledUnpublishData struct {
-	VideoID uint32 `json:"videoId"`
+	VideoID int64 `json:"videoId"`
 }

@@ -70,14 +70,14 @@ func (_u *ImMessageUpdate) ClearDeletedAt() *ImMessageUpdate {
 }
 
 // SetConversationID sets the "conversation_id" field.
-func (_u *ImMessageUpdate) SetConversationID(v uint32) *ImMessageUpdate {
+func (_u *ImMessageUpdate) SetConversationID(v int64) *ImMessageUpdate {
 	_u.mutation.ResetConversationID()
 	_u.mutation.SetConversationID(v)
 	return _u
 }
 
 // SetNillableConversationID sets the "conversation_id" field if the given value is not nil.
-func (_u *ImMessageUpdate) SetNillableConversationID(v *uint32) *ImMessageUpdate {
+func (_u *ImMessageUpdate) SetNillableConversationID(v *int64) *ImMessageUpdate {
 	if v != nil {
 		_u.SetConversationID(*v)
 	}
@@ -85,20 +85,20 @@ func (_u *ImMessageUpdate) SetNillableConversationID(v *uint32) *ImMessageUpdate
 }
 
 // AddConversationID adds value to the "conversation_id" field.
-func (_u *ImMessageUpdate) AddConversationID(v int32) *ImMessageUpdate {
+func (_u *ImMessageUpdate) AddConversationID(v int64) *ImMessageUpdate {
 	_u.mutation.AddConversationID(v)
 	return _u
 }
 
 // SetSenderID sets the "sender_id" field.
-func (_u *ImMessageUpdate) SetSenderID(v uint32) *ImMessageUpdate {
+func (_u *ImMessageUpdate) SetSenderID(v int64) *ImMessageUpdate {
 	_u.mutation.ResetSenderID()
 	_u.mutation.SetSenderID(v)
 	return _u
 }
 
 // SetNillableSenderID sets the "sender_id" field if the given value is not nil.
-func (_u *ImMessageUpdate) SetNillableSenderID(v *uint32) *ImMessageUpdate {
+func (_u *ImMessageUpdate) SetNillableSenderID(v *int64) *ImMessageUpdate {
 	if v != nil {
 		_u.SetSenderID(*v)
 	}
@@ -106,20 +106,20 @@ func (_u *ImMessageUpdate) SetNillableSenderID(v *uint32) *ImMessageUpdate {
 }
 
 // AddSenderID adds value to the "sender_id" field.
-func (_u *ImMessageUpdate) AddSenderID(v int32) *ImMessageUpdate {
+func (_u *ImMessageUpdate) AddSenderID(v int64) *ImMessageUpdate {
 	_u.mutation.AddSenderID(v)
 	return _u
 }
 
 // SetReceiverID sets the "receiver_id" field.
-func (_u *ImMessageUpdate) SetReceiverID(v uint32) *ImMessageUpdate {
+func (_u *ImMessageUpdate) SetReceiverID(v int64) *ImMessageUpdate {
 	_u.mutation.ResetReceiverID()
 	_u.mutation.SetReceiverID(v)
 	return _u
 }
 
 // SetNillableReceiverID sets the "receiver_id" field if the given value is not nil.
-func (_u *ImMessageUpdate) SetNillableReceiverID(v *uint32) *ImMessageUpdate {
+func (_u *ImMessageUpdate) SetNillableReceiverID(v *int64) *ImMessageUpdate {
 	if v != nil {
 		_u.SetReceiverID(*v)
 	}
@@ -127,7 +127,7 @@ func (_u *ImMessageUpdate) SetNillableReceiverID(v *uint32) *ImMessageUpdate {
 }
 
 // AddReceiverID adds value to the "receiver_id" field.
-func (_u *ImMessageUpdate) AddReceiverID(v int32) *ImMessageUpdate {
+func (_u *ImMessageUpdate) AddReceiverID(v int64) *ImMessageUpdate {
 	_u.mutation.AddReceiverID(v)
 	return _u
 }
@@ -185,7 +185,7 @@ func (_u *ImMessageUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ImMe
 }
 
 func (_u *ImMessageUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(immessage.Table, immessage.Columns, sqlgraph.NewFieldSpec(immessage.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(immessage.Table, immessage.Columns, sqlgraph.NewFieldSpec(immessage.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -209,25 +209,25 @@ func (_u *ImMessageUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.ClearField(immessage.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(immessage.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(immessage.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.ConversationID(); ok {
-		_spec.SetField(immessage.FieldConversationID, field.TypeUint32, value)
+		_spec.SetField(immessage.FieldConversationID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedConversationID(); ok {
-		_spec.AddField(immessage.FieldConversationID, field.TypeUint32, value)
+		_spec.AddField(immessage.FieldConversationID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.SenderID(); ok {
-		_spec.SetField(immessage.FieldSenderID, field.TypeUint32, value)
+		_spec.SetField(immessage.FieldSenderID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedSenderID(); ok {
-		_spec.AddField(immessage.FieldSenderID, field.TypeUint32, value)
+		_spec.AddField(immessage.FieldSenderID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.ReceiverID(); ok {
-		_spec.SetField(immessage.FieldReceiverID, field.TypeUint32, value)
+		_spec.SetField(immessage.FieldReceiverID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedReceiverID(); ok {
-		_spec.AddField(immessage.FieldReceiverID, field.TypeUint32, value)
+		_spec.AddField(immessage.FieldReceiverID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.Content(); ok {
 		_spec.SetField(immessage.FieldContent, field.TypeString, value)
@@ -295,14 +295,14 @@ func (_u *ImMessageUpdateOne) ClearDeletedAt() *ImMessageUpdateOne {
 }
 
 // SetConversationID sets the "conversation_id" field.
-func (_u *ImMessageUpdateOne) SetConversationID(v uint32) *ImMessageUpdateOne {
+func (_u *ImMessageUpdateOne) SetConversationID(v int64) *ImMessageUpdateOne {
 	_u.mutation.ResetConversationID()
 	_u.mutation.SetConversationID(v)
 	return _u
 }
 
 // SetNillableConversationID sets the "conversation_id" field if the given value is not nil.
-func (_u *ImMessageUpdateOne) SetNillableConversationID(v *uint32) *ImMessageUpdateOne {
+func (_u *ImMessageUpdateOne) SetNillableConversationID(v *int64) *ImMessageUpdateOne {
 	if v != nil {
 		_u.SetConversationID(*v)
 	}
@@ -310,20 +310,20 @@ func (_u *ImMessageUpdateOne) SetNillableConversationID(v *uint32) *ImMessageUpd
 }
 
 // AddConversationID adds value to the "conversation_id" field.
-func (_u *ImMessageUpdateOne) AddConversationID(v int32) *ImMessageUpdateOne {
+func (_u *ImMessageUpdateOne) AddConversationID(v int64) *ImMessageUpdateOne {
 	_u.mutation.AddConversationID(v)
 	return _u
 }
 
 // SetSenderID sets the "sender_id" field.
-func (_u *ImMessageUpdateOne) SetSenderID(v uint32) *ImMessageUpdateOne {
+func (_u *ImMessageUpdateOne) SetSenderID(v int64) *ImMessageUpdateOne {
 	_u.mutation.ResetSenderID()
 	_u.mutation.SetSenderID(v)
 	return _u
 }
 
 // SetNillableSenderID sets the "sender_id" field if the given value is not nil.
-func (_u *ImMessageUpdateOne) SetNillableSenderID(v *uint32) *ImMessageUpdateOne {
+func (_u *ImMessageUpdateOne) SetNillableSenderID(v *int64) *ImMessageUpdateOne {
 	if v != nil {
 		_u.SetSenderID(*v)
 	}
@@ -331,20 +331,20 @@ func (_u *ImMessageUpdateOne) SetNillableSenderID(v *uint32) *ImMessageUpdateOne
 }
 
 // AddSenderID adds value to the "sender_id" field.
-func (_u *ImMessageUpdateOne) AddSenderID(v int32) *ImMessageUpdateOne {
+func (_u *ImMessageUpdateOne) AddSenderID(v int64) *ImMessageUpdateOne {
 	_u.mutation.AddSenderID(v)
 	return _u
 }
 
 // SetReceiverID sets the "receiver_id" field.
-func (_u *ImMessageUpdateOne) SetReceiverID(v uint32) *ImMessageUpdateOne {
+func (_u *ImMessageUpdateOne) SetReceiverID(v int64) *ImMessageUpdateOne {
 	_u.mutation.ResetReceiverID()
 	_u.mutation.SetReceiverID(v)
 	return _u
 }
 
 // SetNillableReceiverID sets the "receiver_id" field if the given value is not nil.
-func (_u *ImMessageUpdateOne) SetNillableReceiverID(v *uint32) *ImMessageUpdateOne {
+func (_u *ImMessageUpdateOne) SetNillableReceiverID(v *int64) *ImMessageUpdateOne {
 	if v != nil {
 		_u.SetReceiverID(*v)
 	}
@@ -352,7 +352,7 @@ func (_u *ImMessageUpdateOne) SetNillableReceiverID(v *uint32) *ImMessageUpdateO
 }
 
 // AddReceiverID adds value to the "receiver_id" field.
-func (_u *ImMessageUpdateOne) AddReceiverID(v int32) *ImMessageUpdateOne {
+func (_u *ImMessageUpdateOne) AddReceiverID(v int64) *ImMessageUpdateOne {
 	_u.mutation.AddReceiverID(v)
 	return _u
 }
@@ -423,7 +423,7 @@ func (_u *ImMessageUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *I
 }
 
 func (_u *ImMessageUpdateOne) sqlSave(ctx context.Context) (_node *ImMessage, err error) {
-	_spec := sqlgraph.NewUpdateSpec(immessage.Table, immessage.Columns, sqlgraph.NewFieldSpec(immessage.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(immessage.Table, immessage.Columns, sqlgraph.NewFieldSpec(immessage.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "ImMessage.id" for update`)}
@@ -464,25 +464,25 @@ func (_u *ImMessageUpdateOne) sqlSave(ctx context.Context) (_node *ImMessage, er
 		_spec.ClearField(immessage.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(immessage.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(immessage.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.ConversationID(); ok {
-		_spec.SetField(immessage.FieldConversationID, field.TypeUint32, value)
+		_spec.SetField(immessage.FieldConversationID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedConversationID(); ok {
-		_spec.AddField(immessage.FieldConversationID, field.TypeUint32, value)
+		_spec.AddField(immessage.FieldConversationID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.SenderID(); ok {
-		_spec.SetField(immessage.FieldSenderID, field.TypeUint32, value)
+		_spec.SetField(immessage.FieldSenderID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedSenderID(); ok {
-		_spec.AddField(immessage.FieldSenderID, field.TypeUint32, value)
+		_spec.AddField(immessage.FieldSenderID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.ReceiverID(); ok {
-		_spec.SetField(immessage.FieldReceiverID, field.TypeUint32, value)
+		_spec.SetField(immessage.FieldReceiverID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedReceiverID(); ok {
-		_spec.AddField(immessage.FieldReceiverID, field.TypeUint32, value)
+		_spec.AddField(immessage.FieldReceiverID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.Content(); ok {
 		_spec.SetField(immessage.FieldContent, field.TypeString, value)

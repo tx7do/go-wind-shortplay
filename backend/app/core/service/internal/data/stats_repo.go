@@ -28,39 +28,39 @@ func NewStatsRepo(ctx *bootstrap.Context, entClient *entCrud.EntClient[*ent.Clie
 
 // OverviewRow 运营总览聚合行
 type OverviewRow struct {
-	TotalVideos     uint64 `json:"total_videos"`
-	PublishedVideos uint64 `json:"published_videos"`
-	TotalViews      uint64 `json:"total_views"`
-	TotalLikes      uint64 `json:"total_likes"`
-	TotalComments   uint64 `json:"total_comments"`
-	TodayPublished  uint64 `json:"today_published"`
+	TotalVideos     int64 `json:"total_videos"`
+	PublishedVideos int64 `json:"published_videos"`
+	TotalViews      int64 `json:"total_views"`
+	TotalLikes      int64 `json:"total_likes"`
+	TotalComments   int64 `json:"total_comments"`
+	TodayPublished  int64 `json:"today_published"`
 }
 
 // TrendRow 单日趋势聚合行
 type TrendRow struct {
 	Day       string `json:"day"`
-	Published uint64 `json:"published"`
-	Plays     uint64 `json:"plays"`
-	Likes     uint64 `json:"likes"`
+	Published int64  `json:"published"`
+	Plays     int64  `json:"plays"`
+	Likes     int64  `json:"likes"`
 }
 
 // AuthorAggRow 作者作品聚合行
 type AuthorAggRow struct {
-	Cnt      uint64 `json:"cnt"`
-	Views    uint64 `json:"views"`
-	Likes    uint64 `json:"likes"`
-	Collects uint64 `json:"collects"`
-	Comments uint64 `json:"comments"`
+	Cnt      int64 `json:"cnt"`
+	Views    int64 `json:"views"`
+	Likes    int64 `json:"likes"`
+	Collects int64 `json:"collects"`
+	Comments int64 `json:"comments"`
 }
 
 // queryUint64 单值聚合查询（COUNT/SUM，空结果返回 0）
-func (r *StatsRepo) queryUint64(ctx context.Context, query string, args ...any) (uint64, error) {
+func (r *StatsRepo) queryUint64(ctx context.Context, query string, args ...any) (int64, error) {
 	rows, err := r.entClient.DB().QueryContext(ctx, query, args...)
 	if err != nil {
 		return 0, err
 	}
 	defer func() { _ = rows.Close() }()
-	var v uint64
+	var v int64
 	if rows.Next() {
 		if err = rows.Scan(&v); err != nil {
 			return 0, err
@@ -70,7 +70,7 @@ func (r *StatsRepo) queryUint64(ctx context.Context, query string, args ...any) 
 }
 
 // Overview 运营总览聚合
-func (r *StatsRepo) Overview(ctx context.Context, totalUsers uint64) (*OverviewRow, error) {
+func (r *StatsRepo) Overview(ctx context.Context, totalUsers int64) (*OverviewRow, error) {
 	row := r.entClient.DB().QueryRowContext(ctx, `
 SELECT
 	COUNT(*) AS total_videos,
@@ -89,7 +89,7 @@ FROM sp_videos`)
 }
 
 // TotalUsers 用户总数（正常状态）
-func (r *StatsRepo) TotalUsers(ctx context.Context) (uint64, error) {
+func (r *StatsRepo) TotalUsers(ctx context.Context) (int64, error) {
 	return r.queryUint64(ctx, `SELECT COUNT(*) FROM sys_users WHERE status = 'NORMAL'`)
 }
 
@@ -147,7 +147,7 @@ ORDER BY s.day`, days)
 
 // CreatorTrendRows 创作者近 N 日趋势（本人口径）：published 按本人视频
 // published_at 落日；plays/likes 按本人视频的 uba_events 当日计数。
-func (r *StatsRepo) CreatorTrendRows(ctx context.Context, authorID uint32, days int) ([]*TrendRow, error) {
+func (r *StatsRepo) CreatorTrendRows(ctx context.Context, authorID int64, days int) ([]*TrendRow, error) {
 	if days <= 0 {
 		days = 7
 	}
@@ -203,18 +203,18 @@ ORDER BY s.day`, days, authorID)
 // AuthorAggregates 作者作品聚合（publishedOnly=true 仅统计已发布）
 // CreatorVideoStatRow 单视频数据行（uba 聚合 + video 计数列）
 type CreatorVideoStatRow struct {
-	VideoID  uint32 `json:"video_id"`
+	VideoID  int64  `json:"video_id"`
 	Title    string `json:"title"`
 	CoverURL string `json:"cover_url"`
-	Plays    uint64 `json:"plays"`
-	Likes    uint64 `json:"likes"`
-	Collects uint64 `json:"collects"`
-	Comments uint64 `json:"comments"`
+	Plays    int64  `json:"plays"`
+	Likes    int64  `json:"likes"`
+	Collects int64  `json:"collects"`
+	Comments int64  `json:"comments"`
 }
 
 // CreatorVideoStats 创作者本人作品逐条数据（播放优先取 uba PLAY 聚合，
 // 兜底 view_count；点赞/收藏/评论取计数列；播放量倒序）。
-func (r *StatsRepo) CreatorVideoStats(ctx context.Context, authorID uint32, limit int) ([]*CreatorVideoStatRow, error) {
+func (r *StatsRepo) CreatorVideoStats(ctx context.Context, authorID int64, limit int) ([]*CreatorVideoStatRow, error) {
 	if limit <= 0 {
 		limit = 20
 	}
@@ -254,7 +254,7 @@ LIMIT $2`, authorID, limit)
 	return rows, dbRows.Err()
 }
 
-func (r *StatsRepo) AuthorAggregates(ctx context.Context, authorID uint32, publishedOnly bool) (*AuthorAggRow, error) {
+func (r *StatsRepo) AuthorAggregates(ctx context.Context, authorID int64, publishedOnly bool) (*AuthorAggRow, error) {
 	cond := ""
 	if publishedOnly {
 		cond = " AND status = 'PUBLISHED'"
@@ -276,24 +276,28 @@ FROM sp_videos WHERE author_id = $1`+cond, authorID)
 }
 
 // FollowerCount 粉丝数
-func (r *StatsRepo) FollowerCount(ctx context.Context, userID uint32) (uint64, error) {
+func (r *StatsRepo) FollowerCount(ctx context.Context, userID int64) (int64, error) {
 	return r.queryUint64(ctx, `SELECT COUNT(*) FROM sp_user_follows WHERE followee_id = $1`, userID)
 }
 
 // FollowingCount 关注数
-func (r *StatsRepo) FollowingCount(ctx context.Context, userID uint32) (uint64, error) {
+func (r *StatsRepo) FollowingCount(ctx context.Context, userID int64) (int64, error) {
 	return r.queryUint64(ctx, `SELECT COUNT(*) FROM sp_user_follows WHERE follower_id = $1`, userID)
 }
 
 // ToProto Overview 聚合行 → proto
-func (row *OverviewRow) ToProto(totalUsers uint64) *statsV1.Overview {
+func (row *OverviewRow) ToProto(totalUsers int64) *statsV1.Overview {
 	return &statsV1.Overview{
-		TotalVideos:     &row.TotalVideos,
-		PublishedVideos: &row.PublishedVideos,
-		TotalViews:      &row.TotalViews,
-		TotalLikes:      &row.TotalLikes,
-		TotalComments:   &row.TotalComments,
-		TotalUsers:      &totalUsers,
-		TodayPublished:  &row.TodayPublished,
+		TotalVideos:     u64Val(row.TotalVideos),
+		PublishedVideos: u64Val(row.PublishedVideos),
+		TotalViews:      u64Val(row.TotalViews),
+		TotalLikes:      i64v(row.TotalLikes),
+		TotalComments:   u64Val(row.TotalComments),
+		TotalUsers:      u64Val(totalUsers),
+		TodayPublished:  u64Val(row.TodayPublished),
 	}
+}
+
+func i64v(v int64) *int64 {
+	return &v
 }

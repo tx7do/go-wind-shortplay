@@ -43,14 +43,14 @@ func TestPickEpisodeCovers(t *testing.T) {
 	cases := []struct {
 		name    string
 		videos  []*ent.Video
-		wantAny map[uint32]string
-		wantPub map[uint32]string
+		wantAny map[int64]string
+		wantPub map[int64]string
 	}{
 		{
 			name:    "empty",
 			videos:  nil,
-			wantAny: map[uint32]string{},
-			wantPub: map[uint32]string{},
+			wantAny: map[int64]string{},
+			wantPub: map[int64]string{},
 		},
 		{
 			name: "published preferred over draft (later episode)",
@@ -58,8 +58,8 @@ func TestPickEpisodeCovers(t *testing.T) {
 				{SeriesID: 1, EpisodeNumber: 1, Status: video.StatusDraft, CoverURL: coverOf("draft.jpg")},
 				{SeriesID: 1, EpisodeNumber: 2, Status: video.StatusPublished, CoverURL: coverOf("pub.jpg")},
 			},
-			wantAny: map[uint32]string{1: "draft.jpg"},
-			wantPub: map[uint32]string{1: "pub.jpg"},
+			wantAny: map[int64]string{1: "draft.jpg"},
+			wantPub: map[int64]string{1: "pub.jpg"},
 		},
 		{
 			name: "first cover wins within same status (episode order)",
@@ -67,8 +67,8 @@ func TestPickEpisodeCovers(t *testing.T) {
 				{SeriesID: 2, EpisodeNumber: 1, Status: video.StatusPublished, CoverURL: coverOf("ep1.jpg")},
 				{SeriesID: 2, EpisodeNumber: 2, Status: video.StatusPublished, CoverURL: coverOf("ep2.jpg")},
 			},
-			wantAny: map[uint32]string{2: "ep1.jpg"},
-			wantPub: map[uint32]string{2: "ep1.jpg"},
+			wantAny: map[int64]string{2: "ep1.jpg"},
+			wantPub: map[int64]string{2: "ep1.jpg"},
 		},
 		{
 			name: "episodes without cover skipped",
@@ -77,8 +77,8 @@ func TestPickEpisodeCovers(t *testing.T) {
 				{SeriesID: 3, EpisodeNumber: 2, Status: video.StatusPublished, CoverURL: coverOf("")},
 				{SeriesID: 3, EpisodeNumber: 3, Status: video.StatusPublished, CoverURL: coverOf("ep3.jpg")},
 			},
-			wantAny: map[uint32]string{3: "ep3.jpg"},
-			wantPub: map[uint32]string{3: "ep3.jpg"},
+			wantAny: map[int64]string{3: "ep3.jpg"},
+			wantPub: map[int64]string{3: "ep3.jpg"},
 		},
 		{
 			name: "multi series isolation",
@@ -86,8 +86,8 @@ func TestPickEpisodeCovers(t *testing.T) {
 				{SeriesID: 4, EpisodeNumber: 1, Status: video.StatusPublished, CoverURL: coverOf("s4.jpg")},
 				{SeriesID: 5, EpisodeNumber: 1, Status: video.StatusOffline, CoverURL: coverOf("s5.jpg")},
 			},
-			wantAny: map[uint32]string{4: "s4.jpg", 5: "s5.jpg"},
-			wantPub: map[uint32]string{4: "s4.jpg"},
+			wantAny: map[int64]string{4: "s4.jpg", 5: "s5.jpg"},
+			wantPub: map[int64]string{4: "s4.jpg"},
 		},
 	}
 

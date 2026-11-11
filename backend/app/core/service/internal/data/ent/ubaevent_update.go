@@ -70,14 +70,14 @@ func (_u *UbaEventUpdate) ClearDeletedAt() *UbaEventUpdate {
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *UbaEventUpdate) SetUserID(v uint32) *UbaEventUpdate {
+func (_u *UbaEventUpdate) SetUserID(v int64) *UbaEventUpdate {
 	_u.mutation.ResetUserID()
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *UbaEventUpdate) SetNillableUserID(v *uint32) *UbaEventUpdate {
+func (_u *UbaEventUpdate) SetNillableUserID(v *int64) *UbaEventUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -85,7 +85,7 @@ func (_u *UbaEventUpdate) SetNillableUserID(v *uint32) *UbaEventUpdate {
 }
 
 // AddUserID adds value to the "user_id" field.
-func (_u *UbaEventUpdate) AddUserID(v int32) *UbaEventUpdate {
+func (_u *UbaEventUpdate) AddUserID(v int64) *UbaEventUpdate {
 	_u.mutation.AddUserID(v)
 	return _u
 }
@@ -105,14 +105,14 @@ func (_u *UbaEventUpdate) SetNillableEventType(v *ubaevent.EventType) *UbaEventU
 }
 
 // SetVideoID sets the "video_id" field.
-func (_u *UbaEventUpdate) SetVideoID(v uint32) *UbaEventUpdate {
+func (_u *UbaEventUpdate) SetVideoID(v int64) *UbaEventUpdate {
 	_u.mutation.ResetVideoID()
 	_u.mutation.SetVideoID(v)
 	return _u
 }
 
 // SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_u *UbaEventUpdate) SetNillableVideoID(v *uint32) *UbaEventUpdate {
+func (_u *UbaEventUpdate) SetNillableVideoID(v *int64) *UbaEventUpdate {
 	if v != nil {
 		_u.SetVideoID(*v)
 	}
@@ -120,20 +120,20 @@ func (_u *UbaEventUpdate) SetNillableVideoID(v *uint32) *UbaEventUpdate {
 }
 
 // AddVideoID adds value to the "video_id" field.
-func (_u *UbaEventUpdate) AddVideoID(v int32) *UbaEventUpdate {
+func (_u *UbaEventUpdate) AddVideoID(v int64) *UbaEventUpdate {
 	_u.mutation.AddVideoID(v)
 	return _u
 }
 
 // SetTargetUserID sets the "target_user_id" field.
-func (_u *UbaEventUpdate) SetTargetUserID(v uint32) *UbaEventUpdate {
+func (_u *UbaEventUpdate) SetTargetUserID(v int64) *UbaEventUpdate {
 	_u.mutation.ResetTargetUserID()
 	_u.mutation.SetTargetUserID(v)
 	return _u
 }
 
 // SetNillableTargetUserID sets the "target_user_id" field if the given value is not nil.
-func (_u *UbaEventUpdate) SetNillableTargetUserID(v *uint32) *UbaEventUpdate {
+func (_u *UbaEventUpdate) SetNillableTargetUserID(v *int64) *UbaEventUpdate {
 	if v != nil {
 		_u.SetTargetUserID(*v)
 	}
@@ -141,7 +141,7 @@ func (_u *UbaEventUpdate) SetNillableTargetUserID(v *uint32) *UbaEventUpdate {
 }
 
 // AddTargetUserID adds value to the "target_user_id" field.
-func (_u *UbaEventUpdate) AddTargetUserID(v int32) *UbaEventUpdate {
+func (_u *UbaEventUpdate) AddTargetUserID(v int64) *UbaEventUpdate {
 	_u.mutation.AddTargetUserID(v)
 	return _u
 }
@@ -301,7 +301,7 @@ func (_u *UbaEventUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(ubaevent.Table, ubaevent.Columns, sqlgraph.NewFieldSpec(ubaevent.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(ubaevent.Table, ubaevent.Columns, sqlgraph.NewFieldSpec(ubaevent.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -325,28 +325,28 @@ func (_u *UbaEventUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.ClearField(ubaevent.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(ubaevent.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(ubaevent.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(ubaevent.FieldUserID, field.TypeUint32, value)
+		_spec.SetField(ubaevent.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(ubaevent.FieldUserID, field.TypeUint32, value)
+		_spec.AddField(ubaevent.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.EventType(); ok {
 		_spec.SetField(ubaevent.FieldEventType, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.VideoID(); ok {
-		_spec.SetField(ubaevent.FieldVideoID, field.TypeUint32, value)
+		_spec.SetField(ubaevent.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedVideoID(); ok {
-		_spec.AddField(ubaevent.FieldVideoID, field.TypeUint32, value)
+		_spec.AddField(ubaevent.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.TargetUserID(); ok {
-		_spec.SetField(ubaevent.FieldTargetUserID, field.TypeUint32, value)
+		_spec.SetField(ubaevent.FieldTargetUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedTargetUserID(); ok {
-		_spec.AddField(ubaevent.FieldTargetUserID, field.TypeUint32, value)
+		_spec.AddField(ubaevent.FieldTargetUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.DurationMs(); ok {
 		_spec.SetField(ubaevent.FieldDurationMs, field.TypeUint64, value)
@@ -441,14 +441,14 @@ func (_u *UbaEventUpdateOne) ClearDeletedAt() *UbaEventUpdateOne {
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *UbaEventUpdateOne) SetUserID(v uint32) *UbaEventUpdateOne {
+func (_u *UbaEventUpdateOne) SetUserID(v int64) *UbaEventUpdateOne {
 	_u.mutation.ResetUserID()
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *UbaEventUpdateOne) SetNillableUserID(v *uint32) *UbaEventUpdateOne {
+func (_u *UbaEventUpdateOne) SetNillableUserID(v *int64) *UbaEventUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -456,7 +456,7 @@ func (_u *UbaEventUpdateOne) SetNillableUserID(v *uint32) *UbaEventUpdateOne {
 }
 
 // AddUserID adds value to the "user_id" field.
-func (_u *UbaEventUpdateOne) AddUserID(v int32) *UbaEventUpdateOne {
+func (_u *UbaEventUpdateOne) AddUserID(v int64) *UbaEventUpdateOne {
 	_u.mutation.AddUserID(v)
 	return _u
 }
@@ -476,14 +476,14 @@ func (_u *UbaEventUpdateOne) SetNillableEventType(v *ubaevent.EventType) *UbaEve
 }
 
 // SetVideoID sets the "video_id" field.
-func (_u *UbaEventUpdateOne) SetVideoID(v uint32) *UbaEventUpdateOne {
+func (_u *UbaEventUpdateOne) SetVideoID(v int64) *UbaEventUpdateOne {
 	_u.mutation.ResetVideoID()
 	_u.mutation.SetVideoID(v)
 	return _u
 }
 
 // SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_u *UbaEventUpdateOne) SetNillableVideoID(v *uint32) *UbaEventUpdateOne {
+func (_u *UbaEventUpdateOne) SetNillableVideoID(v *int64) *UbaEventUpdateOne {
 	if v != nil {
 		_u.SetVideoID(*v)
 	}
@@ -491,20 +491,20 @@ func (_u *UbaEventUpdateOne) SetNillableVideoID(v *uint32) *UbaEventUpdateOne {
 }
 
 // AddVideoID adds value to the "video_id" field.
-func (_u *UbaEventUpdateOne) AddVideoID(v int32) *UbaEventUpdateOne {
+func (_u *UbaEventUpdateOne) AddVideoID(v int64) *UbaEventUpdateOne {
 	_u.mutation.AddVideoID(v)
 	return _u
 }
 
 // SetTargetUserID sets the "target_user_id" field.
-func (_u *UbaEventUpdateOne) SetTargetUserID(v uint32) *UbaEventUpdateOne {
+func (_u *UbaEventUpdateOne) SetTargetUserID(v int64) *UbaEventUpdateOne {
 	_u.mutation.ResetTargetUserID()
 	_u.mutation.SetTargetUserID(v)
 	return _u
 }
 
 // SetNillableTargetUserID sets the "target_user_id" field if the given value is not nil.
-func (_u *UbaEventUpdateOne) SetNillableTargetUserID(v *uint32) *UbaEventUpdateOne {
+func (_u *UbaEventUpdateOne) SetNillableTargetUserID(v *int64) *UbaEventUpdateOne {
 	if v != nil {
 		_u.SetTargetUserID(*v)
 	}
@@ -512,7 +512,7 @@ func (_u *UbaEventUpdateOne) SetNillableTargetUserID(v *uint32) *UbaEventUpdateO
 }
 
 // AddTargetUserID adds value to the "target_user_id" field.
-func (_u *UbaEventUpdateOne) AddTargetUserID(v int32) *UbaEventUpdateOne {
+func (_u *UbaEventUpdateOne) AddTargetUserID(v int64) *UbaEventUpdateOne {
 	_u.mutation.AddTargetUserID(v)
 	return _u
 }
@@ -685,7 +685,7 @@ func (_u *UbaEventUpdateOne) sqlSave(ctx context.Context) (_node *UbaEvent, err 
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(ubaevent.Table, ubaevent.Columns, sqlgraph.NewFieldSpec(ubaevent.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(ubaevent.Table, ubaevent.Columns, sqlgraph.NewFieldSpec(ubaevent.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "UbaEvent.id" for update`)}
@@ -726,28 +726,28 @@ func (_u *UbaEventUpdateOne) sqlSave(ctx context.Context) (_node *UbaEvent, err 
 		_spec.ClearField(ubaevent.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(ubaevent.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(ubaevent.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(ubaevent.FieldUserID, field.TypeUint32, value)
+		_spec.SetField(ubaevent.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(ubaevent.FieldUserID, field.TypeUint32, value)
+		_spec.AddField(ubaevent.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.EventType(); ok {
 		_spec.SetField(ubaevent.FieldEventType, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.VideoID(); ok {
-		_spec.SetField(ubaevent.FieldVideoID, field.TypeUint32, value)
+		_spec.SetField(ubaevent.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedVideoID(); ok {
-		_spec.AddField(ubaevent.FieldVideoID, field.TypeUint32, value)
+		_spec.AddField(ubaevent.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.TargetUserID(); ok {
-		_spec.SetField(ubaevent.FieldTargetUserID, field.TypeUint32, value)
+		_spec.SetField(ubaevent.FieldTargetUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedTargetUserID(); ok {
-		_spec.AddField(ubaevent.FieldTargetUserID, field.TypeUint32, value)
+		_spec.AddField(ubaevent.FieldTargetUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.DurationMs(); ok {
 		_spec.SetField(ubaevent.FieldDurationMs, field.TypeUint64, value)

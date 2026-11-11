@@ -51,7 +51,7 @@ func NewDanmakuService(
 }
 
 // videoVisibleTo 视频可见性（弹幕读写同 GetVideoDetail 口径：非已发布仅作者/管理端）
-func (s *DanmakuService) videoVisibleTo(ctx context.Context, videoID uint32) (*ent.Video, error) {
+func (s *DanmakuService) videoVisibleTo(ctx context.Context, videoID int64) (*ent.Video, error) {
 	e, err := s.videoRepo.GetEntityRaw(ctx, videoID)
 	if err != nil {
 		return nil, danmakuV1.ErrorVideoNotFound("video not found")
@@ -91,7 +91,7 @@ func (s *DanmakuService) SendDanmaku(ctx context.Context, req *danmakuV1.SendDan
 		return nil, danmakuV1.ErrorDanmakuSensitiveWordHit("danmaku rejected by content filter")
 	}
 
-	e, err := s.danmakuRepo.Create(ctx, req.GetVideoId(), uid, string(content), req.GetTimeOffsetMs())
+	e, err := s.danmakuRepo.Create(ctx, req.GetVideoId(), uid, string(content), int64(req.GetTimeOffsetMs()))
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func (s *DanmakuService) ListVideoDanmaku(ctx context.Context, req *danmakuV1.Li
 	if _, err := s.videoVisibleTo(ctx, req.GetVideoId()); err != nil {
 		return nil, err
 	}
-	items, total, err := s.danmakuRepo.ListByVideo(ctx, req.GetVideoId(), req.GetLimit())
+	items, total, err := s.danmakuRepo.ListByVideo(ctx, req.GetVideoId(), int64(req.GetLimit()))
 	if err != nil {
 		return nil, err
 	}
@@ -130,8 +130,8 @@ func (s *DanmakuService) ListVideoDanmaku(ctx context.Context, req *danmakuV1.Li
 }
 
 // usersOf 批量补全发送人 UserBrief（失败静默留空）
-func (s *DanmakuService) usersOf(ctx context.Context, items []*ent.Danmaku) map[uint32]*identityV1.UserBrief {
-	users := make(map[uint32]*identityV1.UserBrief, len(items))
+func (s *DanmakuService) usersOf(ctx context.Context, items []*ent.Danmaku) map[int64]*identityV1.UserBrief {
+	users := make(map[int64]*identityV1.UserBrief, len(items))
 	for _, uid := range s.danmakuRepo.UserIDsOf(items) {
 		if u, err := s.userRepo.Get(ctx, &identityV1.GetUserRequest{
 			QueryBy: &identityV1.GetUserRequest_Id{Id: uid},

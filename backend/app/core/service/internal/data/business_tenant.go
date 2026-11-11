@@ -20,12 +20,12 @@ import (
 
 var (
 	defaultTenantMu      sync.Mutex
-	defaultTenantIDCache uint32
+	defaultTenantIDCache int64
 )
 
 // defaultBusinessTenantID 解析缺省业务租户（constants.DefaultTenantCode）的 ID，
 // 进程内缓存；查询失败不缓存，下次调用重试。系统 viewer 直查，不受租户隔离影响。
-func defaultBusinessTenantID(ctx context.Context, client *ent.Client) uint32 {
+func defaultBusinessTenantID(ctx context.Context, client *ent.Client) int64 {
 	defaultTenantMu.Lock()
 	defer defaultTenantMu.Unlock()
 	if defaultTenantIDCache > 0 {
@@ -45,7 +45,7 @@ func defaultBusinessTenantID(ctx context.Context, client *ent.Client) uint32 {
 // businessTenantID 返回业务行的归属租户：优先取 viewer 携带的租户（C 端租户用户，
 // 基座 TenantPrivacy 亦会强制覆盖）；平台/系统上下文缺省归 shortplay 租户，
 // 避免业务行落 tenant_id=0 成为租户用户的孤儿数据。
-func businessTenantID(ctx context.Context, client *ent.Client) (tenantID uint32, hasTenant bool) {
+func businessTenantID(ctx context.Context, client *ent.Client) (tenantID int64, hasTenant bool) {
 	if tid, ok := maybeTenantFromViewer(ctx); ok {
 		return tid, true
 	}

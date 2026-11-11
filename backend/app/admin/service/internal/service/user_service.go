@@ -6,8 +6,8 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	paginationV1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
-	"github.com/tx7do/kratos-bootstrap/bootstrap"
 	"github.com/tx7do/go-utils/trans"
+	"github.com/tx7do/kratos-bootstrap/bootstrap"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -83,13 +83,13 @@ func (s *UserService) List(ctx context.Context, req *paginationV1.PagingRequest)
 	if req != nil {
 		raw := req.GetQuery()
 		if raw != "" && !json.Valid([]byte(raw)) {
-			setPagingQuerySP(req, `{"nickname___icontains":"` + raw + `"}`)
+			setPagingQuerySP(req, `{"nickname___icontains":"`+raw+`"}`)
 		} else if raw == "" && req.GetFilter() != "" {
 			st := "NORMAL"
 			if req.GetFilter() == "1" {
 				st = "DISABLED"
 			}
-			setPagingQuerySP(req, `{"status":"` + st + `"}`)
+			setPagingQuerySP(req, `{"status":"`+st+`"}`)
 		}
 	}
 	resp, err := s.userServiceClient.List(ctx, req)
@@ -129,7 +129,7 @@ func (s *UserService) Create(ctx context.Context, req *adminV1.CreateAppUserRequ
 			Avatar:      trans.Ptr(req.GetAvatarUrl()),
 			Description: trans.Ptr(req.GetBio()),
 			Status:      identityV1.User_NORMAL.Enum(),
-			TenantId:    trans.Ptr(uint32(0)),
+			TenantId:    trans.Ptr(int64(0)),
 		},
 		Password: trans.Ptr(req.GetPassword()),
 	})

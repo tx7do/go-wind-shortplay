@@ -162,7 +162,7 @@ func (s *InteractionService) Uncollect(ctx context.Context, req *interactionV1.C
 func (s *InteractionService) GetInteractionStatus(ctx context.Context, req *interactionV1.GetInteractionStatusRequest) (*interactionV1.GetInteractionStatusResponse, error) {
 	uid := spViewerUserID(ctx)
 	resp := &interactionV1.GetInteractionStatusResponse{
-		Statuses: make(map[uint32]*interactionV1.InteractionStatus),
+		Statuses: make(map[int64]*interactionV1.InteractionStatus),
 	}
 	if uid == 0 || len(req.GetVideoIds()) == 0 {
 		return resp, nil
@@ -184,11 +184,11 @@ func (s *InteractionService) ListCollectedVideos(ctx context.Context, req *pagin
 	if uid == 0 {
 		return nil, interactionV1.ErrorUnauthorized("login required")
 	}
-	page := req.GetPage()
+	page := int64(req.GetPage())
 	if page < 1 {
 		page = 1
 	}
-	size := req.GetPageSize()
+	size := int64(req.GetPageSize())
 	if size <= 0 {
 		size = 10
 	}
@@ -201,7 +201,7 @@ func (s *InteractionService) ListCollectedVideos(ctx context.Context, req *pagin
 	}
 	resp := &videoV1.ListVideoResponse{Total: trans.Ptr(int64(total))}
 	videos, _ := s.videoRepo.ListCollectedByUser(ctx, ids)
-	byID := make(map[uint32]*videoV1.Video, len(videos))
+	byID := make(map[int64]*videoV1.Video, len(videos))
 	for _, v := range videos {
 		tags, _ := s.videoRepo.TagsOfVideo(ctx, v.ID)
 		byID[v.ID] = spVideoToDTO(v, tags)
@@ -253,7 +253,7 @@ func (s *InteractionService) Unfollow(ctx context.Context, req *interactionV1.Fo
 // GetFollowStatus 批量关注状态
 func (s *InteractionService) GetFollowStatus(ctx context.Context, req *interactionV1.GetFollowStatusRequest) (*interactionV1.GetFollowStatusResponse, error) {
 	uid := spViewerUserID(ctx)
-	resp := &interactionV1.GetFollowStatusResponse{Statuses: make(map[uint32]bool)}
+	resp := &interactionV1.GetFollowStatusResponse{Statuses: make(map[int64]bool)}
 	if uid == 0 || len(req.GetUserIds()) == 0 {
 		return resp, nil
 	}
@@ -280,11 +280,11 @@ func (s *InteractionService) listFollowSide(ctx context.Context, req *pagination
 	if uid == 0 {
 		return nil, interactionV1.ErrorUnauthorized("login required")
 	}
-	page := req.GetPage()
+	page := int64(req.GetPage())
 	if page < 1 {
 		page = 1
 	}
-	size := req.GetPageSize()
+	size := int64(req.GetPageSize())
 	if size <= 0 {
 		size = 10
 	}
@@ -364,13 +364,13 @@ func (s *VideoCommentService) enrichCommentAuthors(ctx context.Context, comments
 	if len(comments) == 0 {
 		return
 	}
-	ids := make(map[uint32]struct{}, len(comments))
+	ids := make(map[int64]struct{}, len(comments))
 	for _, c := range comments {
 		if c.GetUserId() > 0 {
 			ids[c.GetUserId()] = struct{}{}
 		}
 	}
-	users := make(map[uint32]*identityV1.UserBrief, len(ids))
+	users := make(map[int64]*identityV1.UserBrief, len(ids))
 	for id := range ids {
 		if u, err := s.userRepo.Get(ctx, &identityV1.GetUserRequest{
 			QueryBy: &identityV1.GetUserRequest_Id{Id: id},
@@ -407,7 +407,7 @@ func (s *VideoCommentService) CreateComment(ctx context.Context, req *interactio
 	}
 
 	// 评论/回复通知（视频作者 + 楼中楼父评论作者，同人去重）
-	var parentAuthorID uint32
+	var parentAuthorID int64
 	if req.GetParentId() > 0 {
 		if parent, perr := s.commentRepo.Get(ctx, req.GetParentId()); perr == nil && parent != nil {
 			parentAuthorID = parent.UserID
@@ -415,15 +415,15 @@ func (s *VideoCommentService) CreateComment(ctx context.Context, req *interactio
 	}
 	s.notifyCommentCreated(ctx, uid, v.AuthorID, parentAuthorID, v.ID, v.Title, e.Content)
 	dto := &interactionV1.Comment{
-		Id:        trans.Ptr(e.ID),
-		VideoId:   trans.Ptr(e.VideoID),
-		UserId:    trans.Ptr(e.UserID),
-		Content:   trans.Ptr(e.Content),
-		ParentId:  trans.Ptr(e.ParentID),
-		LikeCount: trans.Ptr(e.LikeCount),
-		ReplyCount: trans.Ptr(e.ReplyCount),
-		Pinned:    trans.Ptr(e.Pinned),
-		CreatedAt: rowCreatedAtSP(e.CreatedAt),
+		Id:         trans.Ptr(e.ID),
+		VideoId:    trans.Ptr(e.VideoID),
+		UserId:     trans.Ptr(e.UserID),
+		Content:    trans.Ptr(e.Content),
+		ParentId:   trans.Ptr(e.ParentID),
+		LikeCount:  i64FromU64p(&e.LikeCount),
+		ReplyCount: u64pFromU64p(&e.ReplyCount),
+		Pinned:     trans.Ptr(e.Pinned),
+		CreatedAt:  rowCreatedAtSP(e.CreatedAt),
 	}
 	s.enrichCommentAuthors(ctx, []*interactionV1.Comment{dto})
 	return dto, nil
@@ -475,15 +475,15 @@ func (s *VideoCommentService) PinComment(ctx context.Context, req *interactionV1
 		return nil, err
 	}
 	dto := &interactionV1.Comment{
-		Id:        trans.Ptr(ne.ID),
-		VideoId:   trans.Ptr(ne.VideoID),
-		UserId:    trans.Ptr(ne.UserID),
-		Content:   trans.Ptr(ne.Content),
-		ParentId:  trans.Ptr(ne.ParentID),
-		LikeCount: trans.Ptr(ne.LikeCount),
-		ReplyCount: trans.Ptr(ne.ReplyCount),
-		Pinned:    trans.Ptr(ne.Pinned),
-		CreatedAt: rowCreatedAtSP(ne.CreatedAt),
+		Id:         trans.Ptr(ne.ID),
+		VideoId:    trans.Ptr(ne.VideoID),
+		UserId:     trans.Ptr(ne.UserID),
+		Content:    trans.Ptr(ne.Content),
+		ParentId:   trans.Ptr(ne.ParentID),
+		LikeCount:  i64FromU64p(&ne.LikeCount),
+		ReplyCount: u64pFromU64p(&ne.ReplyCount),
+		Pinned:     trans.Ptr(ne.Pinned),
+		CreatedAt:  rowCreatedAtSP(ne.CreatedAt),
 	}
 	s.enrichCommentAuthors(ctx, []*interactionV1.Comment{dto})
 	return dto, nil
@@ -495,22 +495,22 @@ func (s *VideoCommentService) ListComment(ctx context.Context, req *interactionV
 		return nil, interactionV1.ErrorBadRequest("invalid parameter")
 	}
 	hotSort := req.GetSort() == interactionV1.CommentSort_COMMENT_SORT_HOT
-	items, total, err := s.commentRepo.ListByVideo(ctx, req.GetVideoId(), nil, req.GetPageNum(), req.GetPageSize(), hotSort)
+	items, total, err := s.commentRepo.ListByVideo(ctx, req.GetVideoId(), nil, int64(req.GetPageNum()), int64(req.GetPageSize()), hotSort)
 	if err != nil {
 		return nil, err
 	}
 	resp := &interactionV1.ListCommentResponse{Total: trans.Ptr(int64(total))}
 	for _, e := range items {
 		resp.Items = append(resp.Items, &interactionV1.Comment{
-			Id:        trans.Ptr(e.ID),
-			VideoId:   trans.Ptr(e.VideoID),
-			UserId:    trans.Ptr(e.UserID),
-			Content:   trans.Ptr(e.Content),
-			ParentId:  trans.Ptr(e.ParentID),
-			LikeCount: trans.Ptr(e.LikeCount),
-			ReplyCount: trans.Ptr(e.ReplyCount),
-			Pinned:    trans.Ptr(e.Pinned),
-			CreatedAt: rowCreatedAtSP(e.CreatedAt),
+			Id:         trans.Ptr(e.ID),
+			VideoId:    trans.Ptr(e.VideoID),
+			UserId:     trans.Ptr(e.UserID),
+			Content:    trans.Ptr(e.Content),
+			ParentId:   trans.Ptr(e.ParentID),
+			LikeCount:  i64FromU64p(&e.LikeCount),
+			ReplyCount: u64pFromU64p(&e.ReplyCount),
+			Pinned:     trans.Ptr(e.Pinned),
+			CreatedAt:  rowCreatedAtSP(e.CreatedAt),
 		})
 	}
 	s.enrichCommentAuthors(ctx, resp.Items)
@@ -522,22 +522,22 @@ func (s *VideoCommentService) ListReply(ctx context.Context, req *interactionV1.
 	if req.GetCommentId() == 0 {
 		return nil, interactionV1.ErrorBadRequest("invalid parameter")
 	}
-	items, total, err := s.commentRepo.ListReplies(ctx, req.GetCommentId(), req.GetPageNum(), req.GetPageSize())
+	items, total, err := s.commentRepo.ListReplies(ctx, req.GetCommentId(), int64(req.GetPageNum()), int64(req.GetPageSize()))
 	if err != nil {
 		return nil, err
 	}
 	resp := &interactionV1.ListCommentResponse{Total: trans.Ptr(int64(total))}
 	for _, e := range items {
 		resp.Items = append(resp.Items, &interactionV1.Comment{
-			Id:        trans.Ptr(e.ID),
-			VideoId:   trans.Ptr(e.VideoID),
-			UserId:    trans.Ptr(e.UserID),
-			Content:   trans.Ptr(e.Content),
-			ParentId:  trans.Ptr(e.ParentID),
-			LikeCount: trans.Ptr(e.LikeCount),
-			ReplyCount: trans.Ptr(e.ReplyCount),
-			Pinned:    trans.Ptr(e.Pinned),
-			CreatedAt: rowCreatedAtSP(e.CreatedAt),
+			Id:         trans.Ptr(e.ID),
+			VideoId:    trans.Ptr(e.VideoID),
+			UserId:     trans.Ptr(e.UserID),
+			Content:    trans.Ptr(e.Content),
+			ParentId:   trans.Ptr(e.ParentID),
+			LikeCount:  i64FromU64p(&e.LikeCount),
+			ReplyCount: u64pFromU64p(&e.ReplyCount),
+			Pinned:     trans.Ptr(e.Pinned),
+			CreatedAt:  rowCreatedAtSP(e.CreatedAt),
 		})
 	}
 	s.enrichCommentAuthors(ctx, resp.Items)
@@ -552,4 +552,12 @@ func (s *VideoCommentService) AdminList(ctx context.Context, req *paginationV1.P
 	}
 	s.enrichCommentAuthors(ctx, resp.Items)
 	return resp, nil
+}
+
+func u64pFromU64p(v *uint64) *uint64 {
+	if v == nil {
+		return nil
+	}
+	x := *v
+	return &x
 }

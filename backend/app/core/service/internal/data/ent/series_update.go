@@ -70,14 +70,14 @@ func (_u *SeriesUpdate) ClearDeletedAt() *SeriesUpdate {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_u *SeriesUpdate) SetCreatedBy(v uint32) *SeriesUpdate {
+func (_u *SeriesUpdate) SetCreatedBy(v int64) *SeriesUpdate {
 	_u.mutation.ResetCreatedBy()
 	_u.mutation.SetCreatedBy(v)
 	return _u
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *SeriesUpdate) SetNillableCreatedBy(v *uint32) *SeriesUpdate {
+func (_u *SeriesUpdate) SetNillableCreatedBy(v *int64) *SeriesUpdate {
 	if v != nil {
 		_u.SetCreatedBy(*v)
 	}
@@ -85,7 +85,7 @@ func (_u *SeriesUpdate) SetNillableCreatedBy(v *uint32) *SeriesUpdate {
 }
 
 // AddCreatedBy adds value to the "created_by" field.
-func (_u *SeriesUpdate) AddCreatedBy(v int32) *SeriesUpdate {
+func (_u *SeriesUpdate) AddCreatedBy(v int64) *SeriesUpdate {
 	_u.mutation.AddCreatedBy(v)
 	return _u
 }
@@ -97,14 +97,14 @@ func (_u *SeriesUpdate) ClearCreatedBy() *SeriesUpdate {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_u *SeriesUpdate) SetUpdatedBy(v uint32) *SeriesUpdate {
+func (_u *SeriesUpdate) SetUpdatedBy(v int64) *SeriesUpdate {
 	_u.mutation.ResetUpdatedBy()
 	_u.mutation.SetUpdatedBy(v)
 	return _u
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *SeriesUpdate) SetNillableUpdatedBy(v *uint32) *SeriesUpdate {
+func (_u *SeriesUpdate) SetNillableUpdatedBy(v *int64) *SeriesUpdate {
 	if v != nil {
 		_u.SetUpdatedBy(*v)
 	}
@@ -112,7 +112,7 @@ func (_u *SeriesUpdate) SetNillableUpdatedBy(v *uint32) *SeriesUpdate {
 }
 
 // AddUpdatedBy adds value to the "updated_by" field.
-func (_u *SeriesUpdate) AddUpdatedBy(v int32) *SeriesUpdate {
+func (_u *SeriesUpdate) AddUpdatedBy(v int64) *SeriesUpdate {
 	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
@@ -124,14 +124,14 @@ func (_u *SeriesUpdate) ClearUpdatedBy() *SeriesUpdate {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (_u *SeriesUpdate) SetDeletedBy(v uint32) *SeriesUpdate {
+func (_u *SeriesUpdate) SetDeletedBy(v int64) *SeriesUpdate {
 	_u.mutation.ResetDeletedBy()
 	_u.mutation.SetDeletedBy(v)
 	return _u
 }
 
 // SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
-func (_u *SeriesUpdate) SetNillableDeletedBy(v *uint32) *SeriesUpdate {
+func (_u *SeriesUpdate) SetNillableDeletedBy(v *int64) *SeriesUpdate {
 	if v != nil {
 		_u.SetDeletedBy(*v)
 	}
@@ -139,7 +139,7 @@ func (_u *SeriesUpdate) SetNillableDeletedBy(v *uint32) *SeriesUpdate {
 }
 
 // AddDeletedBy adds value to the "deleted_by" field.
-func (_u *SeriesUpdate) AddDeletedBy(v int32) *SeriesUpdate {
+func (_u *SeriesUpdate) AddDeletedBy(v int64) *SeriesUpdate {
 	_u.mutation.AddDeletedBy(v)
 	return _u
 }
@@ -205,14 +205,14 @@ func (_u *SeriesUpdate) ClearCoverURL() *SeriesUpdate {
 }
 
 // SetAuthorID sets the "author_id" field.
-func (_u *SeriesUpdate) SetAuthorID(v uint32) *SeriesUpdate {
+func (_u *SeriesUpdate) SetAuthorID(v int64) *SeriesUpdate {
 	_u.mutation.ResetAuthorID()
 	_u.mutation.SetAuthorID(v)
 	return _u
 }
 
 // SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (_u *SeriesUpdate) SetNillableAuthorID(v *uint32) *SeriesUpdate {
+func (_u *SeriesUpdate) SetNillableAuthorID(v *int64) *SeriesUpdate {
 	if v != nil {
 		_u.SetAuthorID(*v)
 	}
@@ -220,7 +220,7 @@ func (_u *SeriesUpdate) SetNillableAuthorID(v *uint32) *SeriesUpdate {
 }
 
 // AddAuthorID adds value to the "author_id" field.
-func (_u *SeriesUpdate) AddAuthorID(v int32) *SeriesUpdate {
+func (_u *SeriesUpdate) AddAuthorID(v int64) *SeriesUpdate {
 	_u.mutation.AddAuthorID(v)
 	return _u
 }
@@ -277,7 +277,7 @@ func (_u *SeriesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(series.Table, series.Columns, sqlgraph.NewFieldSpec(series.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(series.Table, series.Columns, sqlgraph.NewFieldSpec(series.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -301,34 +301,34 @@ func (_u *SeriesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.ClearField(series.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(series.FieldCreatedBy, field.TypeUint32, value)
+		_spec.SetField(series.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(series.FieldCreatedBy, field.TypeUint32, value)
+		_spec.AddField(series.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(series.FieldCreatedBy, field.TypeUint32)
+		_spec.ClearField(series.FieldCreatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(series.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.SetField(series.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(series.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.AddField(series.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(series.FieldUpdatedBy, field.TypeUint32)
+		_spec.ClearField(series.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.DeletedBy(); ok {
-		_spec.SetField(series.FieldDeletedBy, field.TypeUint32, value)
+		_spec.SetField(series.FieldDeletedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedDeletedBy(); ok {
-		_spec.AddField(series.FieldDeletedBy, field.TypeUint32, value)
+		_spec.AddField(series.FieldDeletedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.DeletedByCleared() {
-		_spec.ClearField(series.FieldDeletedBy, field.TypeUint32)
+		_spec.ClearField(series.FieldDeletedBy, field.TypeInt64)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(series.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(series.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(series.FieldTitle, field.TypeString, value)
@@ -346,10 +346,10 @@ func (_u *SeriesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.ClearField(series.FieldCoverURL, field.TypeString)
 	}
 	if value, ok := _u.mutation.AuthorID(); ok {
-		_spec.SetField(series.FieldAuthorID, field.TypeUint32, value)
+		_spec.SetField(series.FieldAuthorID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedAuthorID(); ok {
-		_spec.AddField(series.FieldAuthorID, field.TypeUint32, value)
+		_spec.AddField(series.FieldAuthorID, field.TypeInt64, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -414,14 +414,14 @@ func (_u *SeriesUpdateOne) ClearDeletedAt() *SeriesUpdateOne {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_u *SeriesUpdateOne) SetCreatedBy(v uint32) *SeriesUpdateOne {
+func (_u *SeriesUpdateOne) SetCreatedBy(v int64) *SeriesUpdateOne {
 	_u.mutation.ResetCreatedBy()
 	_u.mutation.SetCreatedBy(v)
 	return _u
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *SeriesUpdateOne) SetNillableCreatedBy(v *uint32) *SeriesUpdateOne {
+func (_u *SeriesUpdateOne) SetNillableCreatedBy(v *int64) *SeriesUpdateOne {
 	if v != nil {
 		_u.SetCreatedBy(*v)
 	}
@@ -429,7 +429,7 @@ func (_u *SeriesUpdateOne) SetNillableCreatedBy(v *uint32) *SeriesUpdateOne {
 }
 
 // AddCreatedBy adds value to the "created_by" field.
-func (_u *SeriesUpdateOne) AddCreatedBy(v int32) *SeriesUpdateOne {
+func (_u *SeriesUpdateOne) AddCreatedBy(v int64) *SeriesUpdateOne {
 	_u.mutation.AddCreatedBy(v)
 	return _u
 }
@@ -441,14 +441,14 @@ func (_u *SeriesUpdateOne) ClearCreatedBy() *SeriesUpdateOne {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_u *SeriesUpdateOne) SetUpdatedBy(v uint32) *SeriesUpdateOne {
+func (_u *SeriesUpdateOne) SetUpdatedBy(v int64) *SeriesUpdateOne {
 	_u.mutation.ResetUpdatedBy()
 	_u.mutation.SetUpdatedBy(v)
 	return _u
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *SeriesUpdateOne) SetNillableUpdatedBy(v *uint32) *SeriesUpdateOne {
+func (_u *SeriesUpdateOne) SetNillableUpdatedBy(v *int64) *SeriesUpdateOne {
 	if v != nil {
 		_u.SetUpdatedBy(*v)
 	}
@@ -456,7 +456,7 @@ func (_u *SeriesUpdateOne) SetNillableUpdatedBy(v *uint32) *SeriesUpdateOne {
 }
 
 // AddUpdatedBy adds value to the "updated_by" field.
-func (_u *SeriesUpdateOne) AddUpdatedBy(v int32) *SeriesUpdateOne {
+func (_u *SeriesUpdateOne) AddUpdatedBy(v int64) *SeriesUpdateOne {
 	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
@@ -468,14 +468,14 @@ func (_u *SeriesUpdateOne) ClearUpdatedBy() *SeriesUpdateOne {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (_u *SeriesUpdateOne) SetDeletedBy(v uint32) *SeriesUpdateOne {
+func (_u *SeriesUpdateOne) SetDeletedBy(v int64) *SeriesUpdateOne {
 	_u.mutation.ResetDeletedBy()
 	_u.mutation.SetDeletedBy(v)
 	return _u
 }
 
 // SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
-func (_u *SeriesUpdateOne) SetNillableDeletedBy(v *uint32) *SeriesUpdateOne {
+func (_u *SeriesUpdateOne) SetNillableDeletedBy(v *int64) *SeriesUpdateOne {
 	if v != nil {
 		_u.SetDeletedBy(*v)
 	}
@@ -483,7 +483,7 @@ func (_u *SeriesUpdateOne) SetNillableDeletedBy(v *uint32) *SeriesUpdateOne {
 }
 
 // AddDeletedBy adds value to the "deleted_by" field.
-func (_u *SeriesUpdateOne) AddDeletedBy(v int32) *SeriesUpdateOne {
+func (_u *SeriesUpdateOne) AddDeletedBy(v int64) *SeriesUpdateOne {
 	_u.mutation.AddDeletedBy(v)
 	return _u
 }
@@ -549,14 +549,14 @@ func (_u *SeriesUpdateOne) ClearCoverURL() *SeriesUpdateOne {
 }
 
 // SetAuthorID sets the "author_id" field.
-func (_u *SeriesUpdateOne) SetAuthorID(v uint32) *SeriesUpdateOne {
+func (_u *SeriesUpdateOne) SetAuthorID(v int64) *SeriesUpdateOne {
 	_u.mutation.ResetAuthorID()
 	_u.mutation.SetAuthorID(v)
 	return _u
 }
 
 // SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (_u *SeriesUpdateOne) SetNillableAuthorID(v *uint32) *SeriesUpdateOne {
+func (_u *SeriesUpdateOne) SetNillableAuthorID(v *int64) *SeriesUpdateOne {
 	if v != nil {
 		_u.SetAuthorID(*v)
 	}
@@ -564,7 +564,7 @@ func (_u *SeriesUpdateOne) SetNillableAuthorID(v *uint32) *SeriesUpdateOne {
 }
 
 // AddAuthorID adds value to the "author_id" field.
-func (_u *SeriesUpdateOne) AddAuthorID(v int32) *SeriesUpdateOne {
+func (_u *SeriesUpdateOne) AddAuthorID(v int64) *SeriesUpdateOne {
 	_u.mutation.AddAuthorID(v)
 	return _u
 }
@@ -634,7 +634,7 @@ func (_u *SeriesUpdateOne) sqlSave(ctx context.Context) (_node *Series, err erro
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(series.Table, series.Columns, sqlgraph.NewFieldSpec(series.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(series.Table, series.Columns, sqlgraph.NewFieldSpec(series.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Series.id" for update`)}
@@ -675,34 +675,34 @@ func (_u *SeriesUpdateOne) sqlSave(ctx context.Context) (_node *Series, err erro
 		_spec.ClearField(series.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(series.FieldCreatedBy, field.TypeUint32, value)
+		_spec.SetField(series.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(series.FieldCreatedBy, field.TypeUint32, value)
+		_spec.AddField(series.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(series.FieldCreatedBy, field.TypeUint32)
+		_spec.ClearField(series.FieldCreatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(series.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.SetField(series.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(series.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.AddField(series.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(series.FieldUpdatedBy, field.TypeUint32)
+		_spec.ClearField(series.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.DeletedBy(); ok {
-		_spec.SetField(series.FieldDeletedBy, field.TypeUint32, value)
+		_spec.SetField(series.FieldDeletedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedDeletedBy(); ok {
-		_spec.AddField(series.FieldDeletedBy, field.TypeUint32, value)
+		_spec.AddField(series.FieldDeletedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.DeletedByCleared() {
-		_spec.ClearField(series.FieldDeletedBy, field.TypeUint32)
+		_spec.ClearField(series.FieldDeletedBy, field.TypeInt64)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(series.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(series.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(series.FieldTitle, field.TypeString, value)
@@ -720,10 +720,10 @@ func (_u *SeriesUpdateOne) sqlSave(ctx context.Context) (_node *Series, err erro
 		_spec.ClearField(series.FieldCoverURL, field.TypeString)
 	}
 	if value, ok := _u.mutation.AuthorID(); ok {
-		_spec.SetField(series.FieldAuthorID, field.TypeUint32, value)
+		_spec.SetField(series.FieldAuthorID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedAuthorID(); ok {
-		_spec.AddField(series.FieldAuthorID, field.TypeUint32, value)
+		_spec.AddField(series.FieldAuthorID, field.TypeInt64, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Series{config: _u.config}

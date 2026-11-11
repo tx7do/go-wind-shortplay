@@ -30,11 +30,11 @@ func (UserFollow) Annotations() []schema.Annotation {
 // Fields of the UserFollow.
 func (UserFollow) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint32("follower_id").
+		field.Int64("follower_id").
 			Comment("关注人用户ID").
 			Default(0),
 
-		field.Uint32("followee_id").
+		field.Int64("followee_id").
 			Comment("被关注人用户ID").
 			Default(0),
 	}
@@ -43,9 +43,9 @@ func (UserFollow) Fields() []ent.Field {
 // Mixin of the UserFollow.
 func (UserFollow) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.AutoIncrementId{},
+		mixin.AutoIncrementId64{},
 		mixin.TimeAt{},
-		mixin.TenantID[uint32]{},
+		mixin.TenantID[int64]{},
 	}
 }
 

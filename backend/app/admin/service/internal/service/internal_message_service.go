@@ -263,7 +263,7 @@ func (s *InternalMessageService) SendMessage(ctx context.Context, req *internalM
 //（收件行按收件人租户落库，照 core NotifyUser 先例——租户归属收件人，不从发送者推导）。
 // 平台上下文(senderTenantID==0)可向任意租户用户发送；普通租户用户只能向本租户用户发送。
 // 收件人不存在或跨租户时拒绝。与 core InternalMessageService.SendMessage 的实现保持一致。
-func (s *InternalMessageService) isRecipientAllowed(ctx context.Context, recipientUserID uint32, senderTenantID uint32) (recipientTenantID uint32, allowed bool) {
+func (s *InternalMessageService) isRecipientAllowed(ctx context.Context, recipientUserID int64, senderTenantID int64) (recipientTenantID int64, allowed bool) {
 	recipient, err := s.userServiceClient.Get(ctx, &identityV1.GetUserRequest{
 		QueryBy: &identityV1.GetUserRequest_Id{Id: recipientUserID},
 	})
@@ -283,7 +283,7 @@ func (s *InternalMessageService) isRecipientAllowed(ctx context.Context, recipie
 // 推导）：收件行按收件人租户落库——租户用户查收件箱经基座 TenantPrivacy 按 viewer
 // 租户过滤，行租户落成发送者侧租户（平台管理员直发时为 0）会让收件人看不见这条消息。
 // core 侧仓储对平台上下文尊重显式 tenant_id（TenantPrivacy.EvalMutation）。
-func (s *InternalMessageService) sendNotification(ctx context.Context, messageId uint32, recipientUserId uint32, recipientTenantID uint32, senderUserId uint32, now *time.Time, title, content string) error {
+func (s *InternalMessageService) sendNotification(ctx context.Context, messageId int64, recipientUserId int64, recipientTenantID int64, senderUserId int64, now *time.Time, title, content string) error {
 	recipient := &internalMessageV1.InternalMessageRecipient{
 		TenantId:        trans.Ptr(recipientTenantID),
 		MessageId:       trans.Ptr(messageId),

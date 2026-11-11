@@ -71,14 +71,14 @@ func (_u *VideoDraftUpdate) ClearDeletedAt() *VideoDraftUpdate {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_u *VideoDraftUpdate) SetCreatedBy(v uint32) *VideoDraftUpdate {
+func (_u *VideoDraftUpdate) SetCreatedBy(v int64) *VideoDraftUpdate {
 	_u.mutation.ResetCreatedBy()
 	_u.mutation.SetCreatedBy(v)
 	return _u
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *VideoDraftUpdate) SetNillableCreatedBy(v *uint32) *VideoDraftUpdate {
+func (_u *VideoDraftUpdate) SetNillableCreatedBy(v *int64) *VideoDraftUpdate {
 	if v != nil {
 		_u.SetCreatedBy(*v)
 	}
@@ -86,7 +86,7 @@ func (_u *VideoDraftUpdate) SetNillableCreatedBy(v *uint32) *VideoDraftUpdate {
 }
 
 // AddCreatedBy adds value to the "created_by" field.
-func (_u *VideoDraftUpdate) AddCreatedBy(v int32) *VideoDraftUpdate {
+func (_u *VideoDraftUpdate) AddCreatedBy(v int64) *VideoDraftUpdate {
 	_u.mutation.AddCreatedBy(v)
 	return _u
 }
@@ -98,14 +98,14 @@ func (_u *VideoDraftUpdate) ClearCreatedBy() *VideoDraftUpdate {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_u *VideoDraftUpdate) SetUpdatedBy(v uint32) *VideoDraftUpdate {
+func (_u *VideoDraftUpdate) SetUpdatedBy(v int64) *VideoDraftUpdate {
 	_u.mutation.ResetUpdatedBy()
 	_u.mutation.SetUpdatedBy(v)
 	return _u
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *VideoDraftUpdate) SetNillableUpdatedBy(v *uint32) *VideoDraftUpdate {
+func (_u *VideoDraftUpdate) SetNillableUpdatedBy(v *int64) *VideoDraftUpdate {
 	if v != nil {
 		_u.SetUpdatedBy(*v)
 	}
@@ -113,7 +113,7 @@ func (_u *VideoDraftUpdate) SetNillableUpdatedBy(v *uint32) *VideoDraftUpdate {
 }
 
 // AddUpdatedBy adds value to the "updated_by" field.
-func (_u *VideoDraftUpdate) AddUpdatedBy(v int32) *VideoDraftUpdate {
+func (_u *VideoDraftUpdate) AddUpdatedBy(v int64) *VideoDraftUpdate {
 	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
@@ -125,14 +125,14 @@ func (_u *VideoDraftUpdate) ClearUpdatedBy() *VideoDraftUpdate {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (_u *VideoDraftUpdate) SetDeletedBy(v uint32) *VideoDraftUpdate {
+func (_u *VideoDraftUpdate) SetDeletedBy(v int64) *VideoDraftUpdate {
 	_u.mutation.ResetDeletedBy()
 	_u.mutation.SetDeletedBy(v)
 	return _u
 }
 
 // SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
-func (_u *VideoDraftUpdate) SetNillableDeletedBy(v *uint32) *VideoDraftUpdate {
+func (_u *VideoDraftUpdate) SetNillableDeletedBy(v *int64) *VideoDraftUpdate {
 	if v != nil {
 		_u.SetDeletedBy(*v)
 	}
@@ -140,7 +140,7 @@ func (_u *VideoDraftUpdate) SetNillableDeletedBy(v *uint32) *VideoDraftUpdate {
 }
 
 // AddDeletedBy adds value to the "deleted_by" field.
-func (_u *VideoDraftUpdate) AddDeletedBy(v int32) *VideoDraftUpdate {
+func (_u *VideoDraftUpdate) AddDeletedBy(v int64) *VideoDraftUpdate {
 	_u.mutation.AddDeletedBy(v)
 	return _u
 }
@@ -333,14 +333,14 @@ func (_u *VideoDraftUpdate) ClearUploadTaskID() *VideoDraftUpdate {
 }
 
 // SetAuthorID sets the "author_id" field.
-func (_u *VideoDraftUpdate) SetAuthorID(v uint32) *VideoDraftUpdate {
+func (_u *VideoDraftUpdate) SetAuthorID(v int64) *VideoDraftUpdate {
 	_u.mutation.ResetAuthorID()
 	_u.mutation.SetAuthorID(v)
 	return _u
 }
 
 // SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (_u *VideoDraftUpdate) SetNillableAuthorID(v *uint32) *VideoDraftUpdate {
+func (_u *VideoDraftUpdate) SetNillableAuthorID(v *int64) *VideoDraftUpdate {
 	if v != nil {
 		_u.SetAuthorID(*v)
 	}
@@ -348,20 +348,20 @@ func (_u *VideoDraftUpdate) SetNillableAuthorID(v *uint32) *VideoDraftUpdate {
 }
 
 // AddAuthorID adds value to the "author_id" field.
-func (_u *VideoDraftUpdate) AddAuthorID(v int32) *VideoDraftUpdate {
+func (_u *VideoDraftUpdate) AddAuthorID(v int64) *VideoDraftUpdate {
 	_u.mutation.AddAuthorID(v)
 	return _u
 }
 
 // SetSeriesID sets the "series_id" field.
-func (_u *VideoDraftUpdate) SetSeriesID(v uint32) *VideoDraftUpdate {
+func (_u *VideoDraftUpdate) SetSeriesID(v int64) *VideoDraftUpdate {
 	_u.mutation.ResetSeriesID()
 	_u.mutation.SetSeriesID(v)
 	return _u
 }
 
 // SetNillableSeriesID sets the "series_id" field if the given value is not nil.
-func (_u *VideoDraftUpdate) SetNillableSeriesID(v *uint32) *VideoDraftUpdate {
+func (_u *VideoDraftUpdate) SetNillableSeriesID(v *int64) *VideoDraftUpdate {
 	if v != nil {
 		_u.SetSeriesID(*v)
 	}
@@ -369,7 +369,7 @@ func (_u *VideoDraftUpdate) SetNillableSeriesID(v *uint32) *VideoDraftUpdate {
 }
 
 // AddSeriesID adds value to the "series_id" field.
-func (_u *VideoDraftUpdate) AddSeriesID(v int32) *VideoDraftUpdate {
+func (_u *VideoDraftUpdate) AddSeriesID(v int64) *VideoDraftUpdate {
 	_u.mutation.AddSeriesID(v)
 	return _u
 }
@@ -434,7 +434,7 @@ func (_u *VideoDraftUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Vid
 }
 
 func (_u *VideoDraftUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(videodraft.Table, videodraft.Columns, sqlgraph.NewFieldSpec(videodraft.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(videodraft.Table, videodraft.Columns, sqlgraph.NewFieldSpec(videodraft.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -458,34 +458,34 @@ func (_u *VideoDraftUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		_spec.ClearField(videodraft.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(videodraft.FieldCreatedBy, field.TypeUint32, value)
+		_spec.SetField(videodraft.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(videodraft.FieldCreatedBy, field.TypeUint32, value)
+		_spec.AddField(videodraft.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(videodraft.FieldCreatedBy, field.TypeUint32)
+		_spec.ClearField(videodraft.FieldCreatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(videodraft.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.SetField(videodraft.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(videodraft.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.AddField(videodraft.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(videodraft.FieldUpdatedBy, field.TypeUint32)
+		_spec.ClearField(videodraft.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.DeletedBy(); ok {
-		_spec.SetField(videodraft.FieldDeletedBy, field.TypeUint32, value)
+		_spec.SetField(videodraft.FieldDeletedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedDeletedBy(); ok {
-		_spec.AddField(videodraft.FieldDeletedBy, field.TypeUint32, value)
+		_spec.AddField(videodraft.FieldDeletedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.DeletedByCleared() {
-		_spec.ClearField(videodraft.FieldDeletedBy, field.TypeUint32)
+		_spec.ClearField(videodraft.FieldDeletedBy, field.TypeInt64)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(videodraft.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(videodraft.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(videodraft.FieldTitle, field.TypeString, value)
@@ -547,16 +547,16 @@ func (_u *VideoDraftUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		_spec.ClearField(videodraft.FieldUploadTaskID, field.TypeString)
 	}
 	if value, ok := _u.mutation.AuthorID(); ok {
-		_spec.SetField(videodraft.FieldAuthorID, field.TypeUint32, value)
+		_spec.SetField(videodraft.FieldAuthorID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedAuthorID(); ok {
-		_spec.AddField(videodraft.FieldAuthorID, field.TypeUint32, value)
+		_spec.AddField(videodraft.FieldAuthorID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.SeriesID(); ok {
-		_spec.SetField(videodraft.FieldSeriesID, field.TypeUint32, value)
+		_spec.SetField(videodraft.FieldSeriesID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedSeriesID(); ok {
-		_spec.AddField(videodraft.FieldSeriesID, field.TypeUint32, value)
+		_spec.AddField(videodraft.FieldSeriesID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.EpisodeNumber(); ok {
 		_spec.SetField(videodraft.FieldEpisodeNumber, field.TypeUint32, value)
@@ -627,14 +627,14 @@ func (_u *VideoDraftUpdateOne) ClearDeletedAt() *VideoDraftUpdateOne {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_u *VideoDraftUpdateOne) SetCreatedBy(v uint32) *VideoDraftUpdateOne {
+func (_u *VideoDraftUpdateOne) SetCreatedBy(v int64) *VideoDraftUpdateOne {
 	_u.mutation.ResetCreatedBy()
 	_u.mutation.SetCreatedBy(v)
 	return _u
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *VideoDraftUpdateOne) SetNillableCreatedBy(v *uint32) *VideoDraftUpdateOne {
+func (_u *VideoDraftUpdateOne) SetNillableCreatedBy(v *int64) *VideoDraftUpdateOne {
 	if v != nil {
 		_u.SetCreatedBy(*v)
 	}
@@ -642,7 +642,7 @@ func (_u *VideoDraftUpdateOne) SetNillableCreatedBy(v *uint32) *VideoDraftUpdate
 }
 
 // AddCreatedBy adds value to the "created_by" field.
-func (_u *VideoDraftUpdateOne) AddCreatedBy(v int32) *VideoDraftUpdateOne {
+func (_u *VideoDraftUpdateOne) AddCreatedBy(v int64) *VideoDraftUpdateOne {
 	_u.mutation.AddCreatedBy(v)
 	return _u
 }
@@ -654,14 +654,14 @@ func (_u *VideoDraftUpdateOne) ClearCreatedBy() *VideoDraftUpdateOne {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_u *VideoDraftUpdateOne) SetUpdatedBy(v uint32) *VideoDraftUpdateOne {
+func (_u *VideoDraftUpdateOne) SetUpdatedBy(v int64) *VideoDraftUpdateOne {
 	_u.mutation.ResetUpdatedBy()
 	_u.mutation.SetUpdatedBy(v)
 	return _u
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *VideoDraftUpdateOne) SetNillableUpdatedBy(v *uint32) *VideoDraftUpdateOne {
+func (_u *VideoDraftUpdateOne) SetNillableUpdatedBy(v *int64) *VideoDraftUpdateOne {
 	if v != nil {
 		_u.SetUpdatedBy(*v)
 	}
@@ -669,7 +669,7 @@ func (_u *VideoDraftUpdateOne) SetNillableUpdatedBy(v *uint32) *VideoDraftUpdate
 }
 
 // AddUpdatedBy adds value to the "updated_by" field.
-func (_u *VideoDraftUpdateOne) AddUpdatedBy(v int32) *VideoDraftUpdateOne {
+func (_u *VideoDraftUpdateOne) AddUpdatedBy(v int64) *VideoDraftUpdateOne {
 	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
@@ -681,14 +681,14 @@ func (_u *VideoDraftUpdateOne) ClearUpdatedBy() *VideoDraftUpdateOne {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (_u *VideoDraftUpdateOne) SetDeletedBy(v uint32) *VideoDraftUpdateOne {
+func (_u *VideoDraftUpdateOne) SetDeletedBy(v int64) *VideoDraftUpdateOne {
 	_u.mutation.ResetDeletedBy()
 	_u.mutation.SetDeletedBy(v)
 	return _u
 }
 
 // SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
-func (_u *VideoDraftUpdateOne) SetNillableDeletedBy(v *uint32) *VideoDraftUpdateOne {
+func (_u *VideoDraftUpdateOne) SetNillableDeletedBy(v *int64) *VideoDraftUpdateOne {
 	if v != nil {
 		_u.SetDeletedBy(*v)
 	}
@@ -696,7 +696,7 @@ func (_u *VideoDraftUpdateOne) SetNillableDeletedBy(v *uint32) *VideoDraftUpdate
 }
 
 // AddDeletedBy adds value to the "deleted_by" field.
-func (_u *VideoDraftUpdateOne) AddDeletedBy(v int32) *VideoDraftUpdateOne {
+func (_u *VideoDraftUpdateOne) AddDeletedBy(v int64) *VideoDraftUpdateOne {
 	_u.mutation.AddDeletedBy(v)
 	return _u
 }
@@ -889,14 +889,14 @@ func (_u *VideoDraftUpdateOne) ClearUploadTaskID() *VideoDraftUpdateOne {
 }
 
 // SetAuthorID sets the "author_id" field.
-func (_u *VideoDraftUpdateOne) SetAuthorID(v uint32) *VideoDraftUpdateOne {
+func (_u *VideoDraftUpdateOne) SetAuthorID(v int64) *VideoDraftUpdateOne {
 	_u.mutation.ResetAuthorID()
 	_u.mutation.SetAuthorID(v)
 	return _u
 }
 
 // SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (_u *VideoDraftUpdateOne) SetNillableAuthorID(v *uint32) *VideoDraftUpdateOne {
+func (_u *VideoDraftUpdateOne) SetNillableAuthorID(v *int64) *VideoDraftUpdateOne {
 	if v != nil {
 		_u.SetAuthorID(*v)
 	}
@@ -904,20 +904,20 @@ func (_u *VideoDraftUpdateOne) SetNillableAuthorID(v *uint32) *VideoDraftUpdateO
 }
 
 // AddAuthorID adds value to the "author_id" field.
-func (_u *VideoDraftUpdateOne) AddAuthorID(v int32) *VideoDraftUpdateOne {
+func (_u *VideoDraftUpdateOne) AddAuthorID(v int64) *VideoDraftUpdateOne {
 	_u.mutation.AddAuthorID(v)
 	return _u
 }
 
 // SetSeriesID sets the "series_id" field.
-func (_u *VideoDraftUpdateOne) SetSeriesID(v uint32) *VideoDraftUpdateOne {
+func (_u *VideoDraftUpdateOne) SetSeriesID(v int64) *VideoDraftUpdateOne {
 	_u.mutation.ResetSeriesID()
 	_u.mutation.SetSeriesID(v)
 	return _u
 }
 
 // SetNillableSeriesID sets the "series_id" field if the given value is not nil.
-func (_u *VideoDraftUpdateOne) SetNillableSeriesID(v *uint32) *VideoDraftUpdateOne {
+func (_u *VideoDraftUpdateOne) SetNillableSeriesID(v *int64) *VideoDraftUpdateOne {
 	if v != nil {
 		_u.SetSeriesID(*v)
 	}
@@ -925,7 +925,7 @@ func (_u *VideoDraftUpdateOne) SetNillableSeriesID(v *uint32) *VideoDraftUpdateO
 }
 
 // AddSeriesID adds value to the "series_id" field.
-func (_u *VideoDraftUpdateOne) AddSeriesID(v int32) *VideoDraftUpdateOne {
+func (_u *VideoDraftUpdateOne) AddSeriesID(v int64) *VideoDraftUpdateOne {
 	_u.mutation.AddSeriesID(v)
 	return _u
 }
@@ -1003,7 +1003,7 @@ func (_u *VideoDraftUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *
 }
 
 func (_u *VideoDraftUpdateOne) sqlSave(ctx context.Context) (_node *VideoDraft, err error) {
-	_spec := sqlgraph.NewUpdateSpec(videodraft.Table, videodraft.Columns, sqlgraph.NewFieldSpec(videodraft.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(videodraft.Table, videodraft.Columns, sqlgraph.NewFieldSpec(videodraft.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "VideoDraft.id" for update`)}
@@ -1044,34 +1044,34 @@ func (_u *VideoDraftUpdateOne) sqlSave(ctx context.Context) (_node *VideoDraft, 
 		_spec.ClearField(videodraft.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(videodraft.FieldCreatedBy, field.TypeUint32, value)
+		_spec.SetField(videodraft.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(videodraft.FieldCreatedBy, field.TypeUint32, value)
+		_spec.AddField(videodraft.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(videodraft.FieldCreatedBy, field.TypeUint32)
+		_spec.ClearField(videodraft.FieldCreatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(videodraft.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.SetField(videodraft.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(videodraft.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.AddField(videodraft.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(videodraft.FieldUpdatedBy, field.TypeUint32)
+		_spec.ClearField(videodraft.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.DeletedBy(); ok {
-		_spec.SetField(videodraft.FieldDeletedBy, field.TypeUint32, value)
+		_spec.SetField(videodraft.FieldDeletedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedDeletedBy(); ok {
-		_spec.AddField(videodraft.FieldDeletedBy, field.TypeUint32, value)
+		_spec.AddField(videodraft.FieldDeletedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.DeletedByCleared() {
-		_spec.ClearField(videodraft.FieldDeletedBy, field.TypeUint32)
+		_spec.ClearField(videodraft.FieldDeletedBy, field.TypeInt64)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(videodraft.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(videodraft.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(videodraft.FieldTitle, field.TypeString, value)
@@ -1133,16 +1133,16 @@ func (_u *VideoDraftUpdateOne) sqlSave(ctx context.Context) (_node *VideoDraft, 
 		_spec.ClearField(videodraft.FieldUploadTaskID, field.TypeString)
 	}
 	if value, ok := _u.mutation.AuthorID(); ok {
-		_spec.SetField(videodraft.FieldAuthorID, field.TypeUint32, value)
+		_spec.SetField(videodraft.FieldAuthorID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedAuthorID(); ok {
-		_spec.AddField(videodraft.FieldAuthorID, field.TypeUint32, value)
+		_spec.AddField(videodraft.FieldAuthorID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.SeriesID(); ok {
-		_spec.SetField(videodraft.FieldSeriesID, field.TypeUint32, value)
+		_spec.SetField(videodraft.FieldSeriesID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedSeriesID(); ok {
-		_spec.AddField(videodraft.FieldSeriesID, field.TypeUint32, value)
+		_spec.AddField(videodraft.FieldSeriesID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.EpisodeNumber(); ok {
 		_spec.SetField(videodraft.FieldEpisodeNumber, field.TypeUint32, value)

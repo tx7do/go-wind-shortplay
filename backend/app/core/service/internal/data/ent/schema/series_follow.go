@@ -30,11 +30,11 @@ func (SeriesFollow) Annotations() []schema.Annotation {
 // Fields of the SeriesFollow.
 func (SeriesFollow) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint32("follower_id").
+		field.Int64("follower_id").
 			Comment("追剧用户ID").
 			Default(0),
 
-		field.Uint32("series_id").
+		field.Int64("series_id").
 			Comment("剧集ID").
 			Default(0),
 	}
@@ -43,9 +43,9 @@ func (SeriesFollow) Fields() []ent.Field {
 // Mixin of the SeriesFollow.
 func (SeriesFollow) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.AutoIncrementId{},
+		mixin.AutoIncrementId64{},
 		mixin.TimeAt{},
-		mixin.TenantID[uint32]{},
+		mixin.TenantID[int64]{},
 	}
 }
 

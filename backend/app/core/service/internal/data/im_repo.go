@@ -13,9 +13,9 @@ import (
 	entCrud "github.com/tx7do/go-crud/entgo"
 
 	"go-wind-shortplay/app/core/service/internal/data/ent"
-	"go-wind-shortplay/app/core/service/internal/data/ent/predicate"
 	"go-wind-shortplay/app/core/service/internal/data/ent/imconversation"
 	"go-wind-shortplay/app/core/service/internal/data/ent/immessage"
+	"go-wind-shortplay/app/core/service/internal/data/ent/predicate"
 
 	imV1 "go-wind-shortplay/api/gen/go/im/service/v1"
 )
@@ -36,7 +36,7 @@ func NewImRepo(ctx *bootstrap.Context, entClient *entCrud.EntClient[*ent.Client]
 }
 
 // imPair 会话参与方归一化：a 恒为较小 ID、b 恒为较大（成对唯一前提）
-func imPair(uid, peer uint32) (uint32, uint32) {
+func imPair(uid, peer int64) (int64, int64) {
 	if uid < peer {
 		return uid, peer
 	}
@@ -53,7 +53,7 @@ func imPreviewOf(content string) string {
 }
 
 // EnsureConversation 查或建 1:1 会话（幂等；并发建会话唯一键冲突回读）
-func (r *ImRepo) EnsureConversation(ctx context.Context, uid, peer uint32) (*ent.ImConversation, error) {
+func (r *ImRepo) EnsureConversation(ctx context.Context, uid, peer int64) (*ent.ImConversation, error) {
 	a, b := imPair(uid, peer)
 	e, err := r.entClient.Client().ImConversation.Query().
 		Where(imconversation.ParticipantAIDEQ(a), imconversation.ParticipantBIDEQ(b)).
@@ -86,7 +86,7 @@ func (r *ImRepo) EnsureConversation(ctx context.Context, uid, peer uint32) (*ent
 }
 
 // GetConversation 取单条（服务层参与方校验用）
-func (r *ImRepo) GetConversation(ctx context.Context, id uint32) (*ent.ImConversation, error) {
+func (r *ImRepo) GetConversation(ctx context.Context, id int64) (*ent.ImConversation, error) {
 	e, err := r.entClient.Client().ImConversation.Query().
 		Where(imconversation.IDEQ(id)).
 		First(ctx)
@@ -101,7 +101,7 @@ func (r *ImRepo) GetConversation(ctx context.Context, id uint32) (*ent.ImConvers
 }
 
 // SendMessage 发消息：建消息行 + 收件侧未读台账自增 + 会话 last_* 回写
-func (r *ImRepo) SendMessage(ctx context.Context, conv *ent.ImConversation, senderID uint32, content string) (*ent.ImMessage, error) {
+func (r *ImRepo) SendMessage(ctx context.Context, conv *ent.ImConversation, senderID int64, content string) (*ent.ImMessage, error) {
 	receiverID := conv.ParticipantAID
 	if senderID == receiverID {
 		receiverID = conv.ParticipantBID
@@ -140,7 +140,7 @@ func (r *ImRepo) SendMessage(ctx context.Context, conv *ent.ImConversation, send
 }
 
 // ListConversationsPage viewer 视角会话列表（最近消息倒序，空会话按建会话时间兜底）
-func (r *ImRepo) ListConversationsPage(ctx context.Context, uid uint32, offset, limit int) ([]*ent.ImConversation, int, error) {
+func (r *ImRepo) ListConversationsPage(ctx context.Context, uid int64, offset, limit int) ([]*ent.ImConversation, int, error) {
 	ps := []predicate.ImConversation{
 		imconversation.Or(
 			imconversation.ParticipantAIDEQ(uid),
@@ -165,7 +165,7 @@ func (r *ImRepo) ListConversationsPage(ctx context.Context, uid uint32, offset, 
 }
 
 // ListMessagesPage 会话消息（ID 倒序：最新一页在前，翻页取更早）
-func (r *ImRepo) ListMessagesPage(ctx context.Context, convID uint32, offset, limit int) ([]*ent.ImMessage, int, error) {
+func (r *ImRepo) ListMessagesPage(ctx context.Context, convID int64, offset, limit int) ([]*ent.ImMessage, int, error) {
 	q := r.entClient.Client().ImMessage.Query().Where(immessage.ConversationIDEQ(convID))
 	total, err := q.Count(ctx)
 	if err != nil {
@@ -185,9 +185,9 @@ func (r *ImRepo) ListMessagesPage(ctx context.Context, convID uint32, offset, li
 
 // spImAdminFilter 管理端私信列表过滤
 type spImAdminFilter struct {
-	Content   *string `json:"content___icontains"`
-	SenderID  *uint32 `json:"sender_id"`
-	ReceiverID *uint32 `json:"receiver_id"`
+	Content    *string `json:"content___icontains"`
+	SenderID   *int64  `json:"sender_id"`
+	ReceiverID *int64  `json:"receiver_id"`
 }
 
 // ListAdmin 管理端全量私信列表（分页 + 内容/发送人/接收人过滤，ID 倒序）
@@ -229,7 +229,7 @@ func (r *ImRepo) ListAdmin(ctx context.Context, req *paginationV1.PagingRequest)
 }
 
 // MarkRead 清零 viewer 侧未读（幂等）
-func (r *ImRepo) MarkRead(ctx context.Context, conv *ent.ImConversation, uid uint32) error {
+func (r *ImRepo) MarkRead(ctx context.Context, conv *ent.ImConversation, uid int64) error {
 	update := r.entClient.Client().ImConversation.UpdateOneID(conv.ID).SetUpdatedAt(time.Now())
 	if uid == conv.ParticipantAID {
 		if conv.AUnreadCount == 0 {
@@ -250,7 +250,7 @@ func (r *ImRepo) MarkRead(ctx context.Context, conv *ent.ImConversation, uid uin
 }
 
 // CountUnread viewer 全部会话未读总数
-func (r *ImRepo) CountUnread(ctx context.Context, uid uint32) (int64, error) {
+func (r *ImRepo) CountUnread(ctx context.Context, uid int64) (int64, error) {
 	rows, err := r.entClient.Client().ImConversation.Query().
 		Where(
 			imconversation.Or(

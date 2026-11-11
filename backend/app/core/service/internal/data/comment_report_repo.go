@@ -42,20 +42,20 @@ func commentEntityToDTO(e *ent.VideoComment, user *identityV1.UserBrief) *intera
 		return nil
 	}
 	return &interactionV1.Comment{
-		Id:        trans.Ptr(e.ID),
-		VideoId:   trans.Ptr(e.VideoID),
-		UserId:    trans.Ptr(e.UserID),
-		User:      user,
-		Content:   trans.Ptr(e.Content),
-		ParentId:  trans.Ptr(e.ParentID),
-		LikeCount: trans.Ptr(e.LikeCount),
+		Id:         trans.Ptr(e.ID),
+		VideoId:    trans.Ptr(e.VideoID),
+		UserId:     trans.Ptr(e.UserID),
+		User:       user,
+		Content:    trans.Ptr(e.Content),
+		ParentId:   trans.Ptr(e.ParentID),
+		LikeCount:  i64FromU64v(e.LikeCount),
 		ReplyCount: trans.Ptr(e.ReplyCount),
-		Pinned:    trans.Ptr(e.Pinned),
-		CreatedAt: timeutil.TimeToTimestamppb(e.CreatedAt),
+		Pinned:     trans.Ptr(e.Pinned),
+		CreatedAt:  timeutil.TimeToTimestamppb(e.CreatedAt),
 	}
 }
 
-func (r *VideoCommentRepo) Get(ctx context.Context, id uint32) (*ent.VideoComment, error) {
+func (r *VideoCommentRepo) Get(ctx context.Context, id int64) (*ent.VideoComment, error) {
 	e, err := r.entClient.Client().VideoComment.Query().Where(videocomment.IDEQ(id)).Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -69,7 +69,7 @@ func (r *VideoCommentRepo) Get(ctx context.Context, id uint32) (*ent.VideoCommen
 
 // ListByVideo 视频评论列表（分页；sort：HOT 按点赞/回复数加权倒序，否则时间倒序。
 // parentID=nil 一级 / 非 nil 仅该父级回复 / sentinel 全部）
-func (r *VideoCommentRepo) ListByVideo(ctx context.Context, videoID uint32, parentID *uint32, page, pageSize uint32, hotSort bool) ([]*ent.VideoComment, int, error) {
+func (r *VideoCommentRepo) ListByVideo(ctx context.Context, videoID int64, parentID *int64, page, pageSize int64, hotSort bool) ([]*ent.VideoComment, int, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -106,7 +106,7 @@ func (r *VideoCommentRepo) ListByVideo(ctx context.Context, videoID uint32, pare
 }
 
 // ListReplies 楼中楼回复列表
-func (r *VideoCommentRepo) ListReplies(ctx context.Context, commentID uint32, page, pageSize uint32) ([]*ent.VideoComment, int, error) {
+func (r *VideoCommentRepo) ListReplies(ctx context.Context, commentID int64, page, pageSize int64) ([]*ent.VideoComment, int, error) {
 	pid := commentID
 	q := r.entClient.Client().VideoComment.Query().Where(videocomment.ParentIDEQ(pid))
 	total, err := q.Count(ctx)
@@ -133,7 +133,7 @@ func (r *VideoCommentRepo) ListReplies(ctx context.Context, commentID uint32, pa
 // spCommentAdminFilter admin 评论列表过滤
 type spCommentAdminFilter struct {
 	Content *string `json:"content___icontains"`
-	VideoID *uint32 `json:"video_id"`
+	VideoID *int64  `json:"video_id"`
 }
 
 // ListAdmin 管理端全量评论列表
@@ -185,7 +185,7 @@ func (r *VideoCommentRepo) ListAdmin(ctx context.Context, req *paginationV1.Pagi
 	return resp, nil
 }
 
-func (r *VideoCommentRepo) Create(ctx context.Context, videoID, userID uint32, content string, parentID uint32) (*ent.VideoComment, error) {
+func (r *VideoCommentRepo) Create(ctx context.Context, videoID, userID int64, content string, parentID int64) (*ent.VideoComment, error) {
 	builder := r.entClient.Client().VideoComment.Create().
 		SetVideoID(videoID).
 		SetUserID(userID).
@@ -207,7 +207,7 @@ func (r *VideoCommentRepo) Create(ctx context.Context, videoID, userID uint32, c
 }
 
 // SetPinned 作者置顶/取消置顶（仅一级评论，服务层校验）
-func (r *VideoCommentRepo) SetPinned(ctx context.Context, id uint32, pinned bool) (*ent.VideoComment, error) {
+func (r *VideoCommentRepo) SetPinned(ctx context.Context, id int64, pinned bool) (*ent.VideoComment, error) {
 	e, err := r.entClient.Client().VideoComment.UpdateOneID(id).
 		SetPinned(pinned).
 		SetUpdatedAt(time.Now()).
@@ -222,7 +222,7 @@ func (r *VideoCommentRepo) SetPinned(ctx context.Context, id uint32, pinned bool
 	return e, nil
 }
 
-func (r *VideoCommentRepo) Delete(ctx context.Context, id uint32) error {
+func (r *VideoCommentRepo) Delete(ctx context.Context, id int64) error {
 	err := r.entClient.Client().VideoComment.DeleteOneID(id).Exec(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -235,12 +235,12 @@ func (r *VideoCommentRepo) Delete(ctx context.Context, id uint32) error {
 }
 
 // IncReplyCount 一级评论回复数 +1
-func (r *VideoCommentRepo) IncReplyCount(ctx context.Context, tx *ent.Tx, commentID uint32) error {
+func (r *VideoCommentRepo) IncReplyCount(ctx context.Context, tx *ent.Tx, commentID int64) error {
 	return tx.VideoComment.UpdateOneID(commentID).AddReplyCount(1).Exec(ctx)
 }
 
 // CreateWithCounter 评论创建：评论行 + 视频评论计数 + 父评论回复数（同事务，铁律 5）。
-func (r *VideoCommentRepo) CreateWithCounter(ctx context.Context, userID, videoID uint32, content string, parentID uint32) (e *ent.VideoComment, err error) {
+func (r *VideoCommentRepo) CreateWithCounter(ctx context.Context, userID, videoID int64, content string, parentID int64) (e *ent.VideoComment, err error) {
 	tx, terr := r.entClient.Client().Tx(ctx)
 	if terr != nil {
 		return nil, interactionV1.ErrorInternalServerError("start transaction failed")
@@ -412,7 +412,7 @@ func (r *ReportRepo) adminFilter(req *paginationV1.PagingRequest) []predicate.Vi
 	return nil
 }
 
-func (r *ReportRepo) Get(ctx context.Context, id uint32) (*ent.VideoReport, error) {
+func (r *ReportRepo) Get(ctx context.Context, id int64) (*ent.VideoReport, error) {
 	e, err := r.entClient.Client().VideoReport.Query().Where(videoreport.IDEQ(id)).Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -461,7 +461,7 @@ func (r *ReportRepo) List(ctx context.Context, req *paginationV1.PagingRequest) 
 }
 
 // HasPendingOfTarget 同目标同举报人的待处理工单是否已存在（防重复举报）
-func (r *ReportRepo) HasPendingOfTarget(ctx context.Context, reporterID uint32, t reportV1.ReportTargetType, targetID uint32) (bool, error) {
+func (r *ReportRepo) HasPendingOfTarget(ctx context.Context, reporterID int64, t reportV1.ReportTargetType, targetID int64) (bool, error) {
 	return r.entClient.Client().VideoReport.Query().
 		Where(
 			videoreport.ReporterIDEQ(reporterID),
@@ -471,7 +471,7 @@ func (r *ReportRepo) HasPendingOfTarget(ctx context.Context, reporterID uint32, 
 		).Exist(ctx)
 }
 
-func (r *ReportRepo) Create(ctx context.Context, reporterID uint32, t reportV1.ReportTargetType, targetID uint32, reason, description string) (*ent.VideoReport, error) {
+func (r *ReportRepo) Create(ctx context.Context, reporterID int64, t reportV1.ReportTargetType, targetID int64, reason, description string) (*ent.VideoReport, error) {
 	builder := r.entClient.Client().VideoReport.Create().
 		SetReporterID(reporterID).
 		SetTargetType(reportTargetEntity(t)).
@@ -494,7 +494,7 @@ func (r *ReportRepo) Create(ctx context.Context, reporterID uint32, t reportV1.R
 	return e, nil
 }
 
-func (r *ReportRepo) UpdateHandle(ctx context.Context, id uint32, status reportV1.ReportStatus, handledBy uint32, note string) (*ent.VideoReport, error) {
+func (r *ReportRepo) UpdateHandle(ctx context.Context, id int64, status reportV1.ReportStatus, handledBy int64, note string) (*ent.VideoReport, error) {
 	now := time.Now()
 	builder := r.entClient.Client().VideoReport.UpdateOneID(id).
 		SetStatus(reportStatusEntity(status)).
@@ -516,4 +516,12 @@ func (r *ReportRepo) UpdateHandle(ctx context.Context, id uint32, status reportV
 // CountPending 待处理工单数
 func (r *ReportRepo) CountPending(ctx context.Context) (int, error) {
 	return r.entClient.Client().VideoReport.Query().Where(videoreport.StatusEQ(videoreport.StatusPending)).Count(ctx)
+}
+
+func i64FromU64(v *uint64) *int64 {
+	if v == nil {
+		return nil
+	}
+	x := int64(*v)
+	return &x
 }

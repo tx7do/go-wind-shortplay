@@ -72,11 +72,11 @@ func (Video) Fields() []ent.Field {
 			).
 			Default("DRAFT"),
 
-		field.Uint32("author_id").
+		field.Int64("author_id").
 			Comment("作者用户ID").
 			Default(0),
 
-		field.Uint32("series_id").
+		field.Int64("series_id").
 			Comment("挂靠剧集ID（0=未挂靠）").
 			Default(0),
 
@@ -125,10 +125,10 @@ func (Video) Fields() []ent.Field {
 // Mixin of the Video.
 func (Video) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.AutoIncrementId{},
+		mixin.AutoIncrementId64{},
 		mixin.TimeAt{},
-		mixin.OperatorID{},
-		mixin.TenantID[uint32]{},
+		mixin.OperatorID64{},
+		mixin.TenantID[int64]{},
 	}
 }
 

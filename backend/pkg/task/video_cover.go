@@ -13,5 +13,5 @@ type VideoCoverExtractTaskData struct {
 	TaskID  string `json:"taskId"`            // 上传任务号
 	Bucket  string `json:"bucket"`            // 视频对象所在桶
 	Object  string `json:"object"`            // 视频对象键
-	VideoID uint32 `json:"videoId,omitempty"` // 关联视频ID（直接发布时回填封面）
+	VideoID int64  `json:"videoId,omitempty"` // 关联视频ID（直接发布时回填封面）
 }

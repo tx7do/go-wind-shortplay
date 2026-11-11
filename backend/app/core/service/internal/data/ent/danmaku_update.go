@@ -70,14 +70,14 @@ func (_u *DanmakuUpdate) ClearDeletedAt() *DanmakuUpdate {
 }
 
 // SetVideoID sets the "video_id" field.
-func (_u *DanmakuUpdate) SetVideoID(v uint32) *DanmakuUpdate {
+func (_u *DanmakuUpdate) SetVideoID(v int64) *DanmakuUpdate {
 	_u.mutation.ResetVideoID()
 	_u.mutation.SetVideoID(v)
 	return _u
 }
 
 // SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_u *DanmakuUpdate) SetNillableVideoID(v *uint32) *DanmakuUpdate {
+func (_u *DanmakuUpdate) SetNillableVideoID(v *int64) *DanmakuUpdate {
 	if v != nil {
 		_u.SetVideoID(*v)
 	}
@@ -85,20 +85,20 @@ func (_u *DanmakuUpdate) SetNillableVideoID(v *uint32) *DanmakuUpdate {
 }
 
 // AddVideoID adds value to the "video_id" field.
-func (_u *DanmakuUpdate) AddVideoID(v int32) *DanmakuUpdate {
+func (_u *DanmakuUpdate) AddVideoID(v int64) *DanmakuUpdate {
 	_u.mutation.AddVideoID(v)
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *DanmakuUpdate) SetUserID(v uint32) *DanmakuUpdate {
+func (_u *DanmakuUpdate) SetUserID(v int64) *DanmakuUpdate {
 	_u.mutation.ResetUserID()
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *DanmakuUpdate) SetNillableUserID(v *uint32) *DanmakuUpdate {
+func (_u *DanmakuUpdate) SetNillableUserID(v *int64) *DanmakuUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -106,7 +106,7 @@ func (_u *DanmakuUpdate) SetNillableUserID(v *uint32) *DanmakuUpdate {
 }
 
 // AddUserID adds value to the "user_id" field.
-func (_u *DanmakuUpdate) AddUserID(v int32) *DanmakuUpdate {
+func (_u *DanmakuUpdate) AddUserID(v int64) *DanmakuUpdate {
 	_u.mutation.AddUserID(v)
 	return _u
 }
@@ -212,7 +212,7 @@ func (_u *DanmakuUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(danmaku.Table, danmaku.Columns, sqlgraph.NewFieldSpec(danmaku.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(danmaku.Table, danmaku.Columns, sqlgraph.NewFieldSpec(danmaku.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -236,19 +236,19 @@ func (_u *DanmakuUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.ClearField(danmaku.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(danmaku.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(danmaku.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.VideoID(); ok {
-		_spec.SetField(danmaku.FieldVideoID, field.TypeUint32, value)
+		_spec.SetField(danmaku.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedVideoID(); ok {
-		_spec.AddField(danmaku.FieldVideoID, field.TypeUint32, value)
+		_spec.AddField(danmaku.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(danmaku.FieldUserID, field.TypeUint32, value)
+		_spec.SetField(danmaku.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(danmaku.FieldUserID, field.TypeUint32, value)
+		_spec.AddField(danmaku.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.Content(); ok {
 		_spec.SetField(danmaku.FieldContent, field.TypeString, value)
@@ -325,14 +325,14 @@ func (_u *DanmakuUpdateOne) ClearDeletedAt() *DanmakuUpdateOne {
 }
 
 // SetVideoID sets the "video_id" field.
-func (_u *DanmakuUpdateOne) SetVideoID(v uint32) *DanmakuUpdateOne {
+func (_u *DanmakuUpdateOne) SetVideoID(v int64) *DanmakuUpdateOne {
 	_u.mutation.ResetVideoID()
 	_u.mutation.SetVideoID(v)
 	return _u
 }
 
 // SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_u *DanmakuUpdateOne) SetNillableVideoID(v *uint32) *DanmakuUpdateOne {
+func (_u *DanmakuUpdateOne) SetNillableVideoID(v *int64) *DanmakuUpdateOne {
 	if v != nil {
 		_u.SetVideoID(*v)
 	}
@@ -340,20 +340,20 @@ func (_u *DanmakuUpdateOne) SetNillableVideoID(v *uint32) *DanmakuUpdateOne {
 }
 
 // AddVideoID adds value to the "video_id" field.
-func (_u *DanmakuUpdateOne) AddVideoID(v int32) *DanmakuUpdateOne {
+func (_u *DanmakuUpdateOne) AddVideoID(v int64) *DanmakuUpdateOne {
 	_u.mutation.AddVideoID(v)
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *DanmakuUpdateOne) SetUserID(v uint32) *DanmakuUpdateOne {
+func (_u *DanmakuUpdateOne) SetUserID(v int64) *DanmakuUpdateOne {
 	_u.mutation.ResetUserID()
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *DanmakuUpdateOne) SetNillableUserID(v *uint32) *DanmakuUpdateOne {
+func (_u *DanmakuUpdateOne) SetNillableUserID(v *int64) *DanmakuUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -361,7 +361,7 @@ func (_u *DanmakuUpdateOne) SetNillableUserID(v *uint32) *DanmakuUpdateOne {
 }
 
 // AddUserID adds value to the "user_id" field.
-func (_u *DanmakuUpdateOne) AddUserID(v int32) *DanmakuUpdateOne {
+func (_u *DanmakuUpdateOne) AddUserID(v int64) *DanmakuUpdateOne {
 	_u.mutation.AddUserID(v)
 	return _u
 }
@@ -480,7 +480,7 @@ func (_u *DanmakuUpdateOne) sqlSave(ctx context.Context) (_node *Danmaku, err er
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(danmaku.Table, danmaku.Columns, sqlgraph.NewFieldSpec(danmaku.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(danmaku.Table, danmaku.Columns, sqlgraph.NewFieldSpec(danmaku.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Danmaku.id" for update`)}
@@ -521,19 +521,19 @@ func (_u *DanmakuUpdateOne) sqlSave(ctx context.Context) (_node *Danmaku, err er
 		_spec.ClearField(danmaku.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(danmaku.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(danmaku.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.VideoID(); ok {
-		_spec.SetField(danmaku.FieldVideoID, field.TypeUint32, value)
+		_spec.SetField(danmaku.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedVideoID(); ok {
-		_spec.AddField(danmaku.FieldVideoID, field.TypeUint32, value)
+		_spec.AddField(danmaku.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.UserID(); ok {
-		_spec.SetField(danmaku.FieldUserID, field.TypeUint32, value)
+		_spec.SetField(danmaku.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUserID(); ok {
-		_spec.AddField(danmaku.FieldUserID, field.TypeUint32, value)
+		_spec.AddField(danmaku.FieldUserID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.Content(); ok {
 		_spec.SetField(danmaku.FieldContent, field.TypeString, value)

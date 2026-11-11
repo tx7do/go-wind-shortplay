@@ -58,13 +58,13 @@ var (
 	Hooks  [1]ent.Hook
 	Policy ent.Policy
 	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
-	DefaultTenantID uint32
+	DefaultTenantID int64
 	// DefaultUserID holds the default value on creation for the "user_id" field.
-	DefaultUserID uint32
+	DefaultUserID int64
 	// DefaultVideoID holds the default value on creation for the "video_id" field.
-	DefaultVideoID uint32
+	DefaultVideoID int64
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(uint32) error
+	IDValidator func(int64) error
 )
 
 // OrderOption defines the ordering options for the VideoCollect queries.

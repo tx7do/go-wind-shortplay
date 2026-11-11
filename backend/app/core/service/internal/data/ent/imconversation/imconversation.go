@@ -70,11 +70,11 @@ var (
 	Hooks  [1]ent.Hook
 	Policy ent.Policy
 	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
-	DefaultTenantID uint32
+	DefaultTenantID int64
 	// DefaultParticipantAID holds the default value on creation for the "participant_a_id" field.
-	DefaultParticipantAID uint32
+	DefaultParticipantAID int64
 	// DefaultParticipantBID holds the default value on creation for the "participant_b_id" field.
-	DefaultParticipantBID uint32
+	DefaultParticipantBID int64
 	// DefaultLastMessagePreview holds the default value on creation for the "last_message_preview" field.
 	DefaultLastMessagePreview string
 	// DefaultAUnreadCount holds the default value on creation for the "a_unread_count" field.
@@ -82,7 +82,7 @@ var (
 	// DefaultBUnreadCount holds the default value on creation for the "b_unread_count" field.
 	DefaultBUnreadCount uint64
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(uint32) error
+	IDValidator func(int64) error
 )
 
 // OrderOption defines the ordering options for the ImConversation queries.

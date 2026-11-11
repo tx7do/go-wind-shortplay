@@ -56,7 +56,7 @@ enum TargetType {
 
 message LikeRequest {
   TargetType target_type = 1 [json_name = "targetType"]; // 目标类型
-  uint32 target_id = 2 [json_name = "targetId"];         // 目标ID
+  int64 target_id = 2 [json_name = "targetId"];         // 目标ID
 }
 
 message LikeResponse {
@@ -65,7 +65,7 @@ message LikeResponse {
 }
 
 message CollectRequest {
-  uint32 video_id = 1 [json_name = "videoId"]; // 视频ID
+  int64 video_id = 1 [json_name = "videoId"]; // 视频ID
 }
 
 message CollectResponse {
@@ -74,7 +74,7 @@ message CollectResponse {
 }
 
 message GetInteractionStatusRequest {
-  repeated uint32 video_ids = 1 [json_name = "videoIds"]; // 视频ID列表
+  repeated int64 video_ids = 1 [json_name = "videoIds"]; // 视频ID列表
 }
 
 message InteractionStatus {
@@ -83,11 +83,11 @@ message InteractionStatus {
 }
 
 message GetInteractionStatusResponse {
-  map<uint32, InteractionStatus> statuses = 1 [json_name = "statuses"]; // videoId → 状态
+  map<int64, InteractionStatus> statuses = 1 [json_name = "statuses"]; // videoId → 状态
 }
 
 message FollowRequest {
-  uint32 user_id = 1 [json_name = "userId"]; // 目标作者ID
+  int64 user_id = 1 [json_name = "userId"]; // 目标作者ID
 }
 
 message FollowResponse {
@@ -95,11 +95,11 @@ message FollowResponse {
 }
 
 message GetFollowStatusRequest {
-  repeated uint32 user_ids = 1 [json_name = "userIds"]; // 作者ID列表
+  repeated int64 user_ids = 1 [json_name = "userIds"]; // 作者ID列表
 }
 
 message GetFollowStatusResponse {
-  map<uint32, bool> statuses = 1 [json_name = "statuses"]; // userId → 是否关注
+  map<int64, bool> statuses = 1 [json_name = "statuses"]; // userId → 是否关注
 }
 
 message FollowItem {

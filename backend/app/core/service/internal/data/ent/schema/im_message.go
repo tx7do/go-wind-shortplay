@@ -30,15 +30,15 @@ func (ImMessage) Annotations() []schema.Annotation {
 // Fields of the ImMessage.
 func (ImMessage) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint32("conversation_id").
+		field.Int64("conversation_id").
 			Comment("会话ID").
 			Default(0),
 
-		field.Uint32("sender_id").
+		field.Int64("sender_id").
 			Comment("发送人用户ID").
 			Default(0),
 
-		field.Uint32("receiver_id").
+		field.Int64("receiver_id").
 			Comment("接收人用户ID（冗余，按人查询/审计用）").
 			Default(0),
 
@@ -51,9 +51,9 @@ func (ImMessage) Fields() []ent.Field {
 // Mixin of the ImMessage.
 func (ImMessage) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.AutoIncrementId{},
+		mixin.AutoIncrementId64{},
 		mixin.TimeAt{},
-		mixin.TenantID[uint32]{},
+		mixin.TenantID[int64]{},
 	}
 }
 

@@ -15,8 +15,8 @@ import (
 	"go-wind-shortplay/app/core/service/internal/data/ent"
 	videopkg "go-wind-shortplay/app/core/service/internal/data/ent/video"
 
-	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
 	feedV1 "go-wind-shortplay/api/gen/go/feed/service/v1"
+	identityV1 "go-wind-shortplay/api/gen/go/identity/service/v1"
 	videoV1 "go-wind-shortplay/api/gen/go/video/service/v1"
 )
 
@@ -76,12 +76,12 @@ func NewFeedService(
 
 // ── 已看集合（Redis set，尽力而为）──
 
-func (s *FeedService) seenKey(uid uint32) string {
+func (s *FeedService) seenKey(uid int64) string {
 	return fmt.Sprintf("%s%d", feedSeenKeyPrefix, uid)
 }
 
-func (s *FeedService) loadSeenSet(ctx context.Context, uid uint32) map[uint32]struct{} {
-	out := make(map[uint32]struct{})
+func (s *FeedService) loadSeenSet(ctx context.Context, uid int64) map[int64]struct{} {
+	out := make(map[int64]struct{})
 	if uid == 0 || s.redis == nil {
 		return out
 	}
@@ -90,7 +90,7 @@ func (s *FeedService) loadSeenSet(ctx context.Context, uid uint32) map[uint32]st
 		return out
 	}
 	for _, idStr := range ids {
-		var id uint32
+		var id int64
 		if _, err := fmt.Sscanf(idStr, "%d", &id); err == nil {
 			out[id] = struct{}{}
 		}
@@ -99,7 +99,7 @@ func (s *FeedService) loadSeenSet(ctx context.Context, uid uint32) map[uint32]st
 }
 
 // markSeen 本页记为已看（SAdd + TTL；超上限随机弹出多余成员防膨胀）
-func (s *FeedService) markSeen(ctx context.Context, uid uint32, videoIDs []uint32) {
+func (s *FeedService) markSeen(ctx context.Context, uid int64, videoIDs []int64) {
 	if uid == 0 || s.redis == nil || len(videoIDs) == 0 {
 		return
 	}
@@ -121,8 +121,8 @@ func (s *FeedService) markSeen(ctx context.Context, uid uint32, videoIDs []uint3
 }
 
 // loadDislikeSet 「不感兴趣」集合（Redis set，尽力而为；uba 服务写入）
-func (s *FeedService) loadDislikeSet(ctx context.Context, uid uint32) map[uint32]struct{} {
-	out := make(map[uint32]struct{})
+func (s *FeedService) loadDislikeSet(ctx context.Context, uid int64) map[int64]struct{} {
+	out := make(map[int64]struct{})
 	if uid == 0 || s.redis == nil {
 		return out
 	}
@@ -131,7 +131,7 @@ func (s *FeedService) loadDislikeSet(ctx context.Context, uid uint32) map[uint32
 		return out
 	}
 	for _, idStr := range ids {
-		var id uint32
+		var id int64
 		if _, err := fmt.Sscanf(idStr, "%d", &id); err == nil {
 			out[id] = struct{}{}
 		}
@@ -158,7 +158,7 @@ func (s *FeedService) RecordSearchKeyword(ctx context.Context, keyword string) {
 }
 
 // pageArgsFeed 页码/页大小（缺省 1/10，上限 50）
-func pageArgsFeed(pageNum, pageSize uint32) (uint32, uint32) {
+func pageArgsFeed(pageNum, pageSize int64) (int64, int64) {
 	if pageNum < 1 {
 		pageNum = 1
 	}
@@ -173,13 +173,13 @@ func pageArgsFeed(pageNum, pageSize uint32) (uint32, uint32) {
 
 // GetFeed 沉浸式 Feed：关注召回 → 热门 → 最新兜底，已看过滤
 func (s *FeedService) GetFeed(ctx context.Context, req *feedV1.GetFeedRequest) (*feedV1.GetFeedResponse, error) {
-	pageNum, pageSize := pageArgsFeed(req.GetPageNum(), req.GetPageSize())
+	pageNum, pageSize := pageArgsFeed(int64(req.GetPageNum()), int64(req.GetPageSize()))
 	uid := spViewerUserID(ctx)
 
 	recallN := int(pageSize) * 4
-	reasonsOf := make(map[uint32]feedV1.FeedReason, recallN)
+	reasonsOf := make(map[int64]feedV1.FeedReason, recallN)
 	merged := make([]*ent.Video, 0, recallN)
-	mergedIDs := make(map[uint32]struct{}, recallN)
+	mergedIDs := make(map[int64]struct{}, recallN)
 
 	add := func(vs []*ent.Video, reason feedV1.FeedReason) {
 		for _, v := range vs {
@@ -245,7 +245,7 @@ func (s *FeedService) GetFeed(ctx context.Context, req *feedV1.GetFeedRequest) (
 	}
 
 	items := make([]*feedV1.FeedItem, 0, len(merged))
-	videoIDs := make([]uint32, 0, len(merged))
+	videoIDs := make([]int64, 0, len(merged))
 	for _, v := range merged {
 		reason := reasonsOf[v.ID]
 		if reason == feedV1.FeedReason_FEED_REASON_UNSPECIFIED {
@@ -293,8 +293,8 @@ func (s *FeedService) GetVideoDetail(ctx context.Context, req *feedV1.GetVideoDe
 		following, followers, _ := s.interRepo.FollowCounts(ctx, author.GetId())
 		detail.AuthorStats = &identityV1.UserStats{
 			UserId:         trans.Ptr(author.GetId()),
-			FollowerCount:  trans.Ptr(uint64(followers)),
-			FollowingCount: trans.Ptr(uint64(following)),
+			FollowerCount:  u64pI64v(int64(followers)),
+			FollowingCount: u64pI64v(int64(following)),
 		}
 	}
 
@@ -302,15 +302,15 @@ func (s *FeedService) GetVideoDetail(ctx context.Context, req *feedV1.GetVideoDe
 	uid := spViewerUserID(ctx)
 	state := &feedV1.ViewerState{Liked: trans.Ptr(false), Collected: trans.Ptr(false), Following: trans.Ptr(false)}
 	if uid > 0 {
-		liked, _ := s.interRepo.GetLikeStatus(ctx, uid, []uint32{e.ID})
-		collected, _ := s.interRepo.GetCollectStatus(ctx, uid, []uint32{e.ID})
-		followed, _ := s.interRepo.GetFollowStatus(ctx, uid, []uint32{e.AuthorID})
+		liked, _ := s.interRepo.GetLikeStatus(ctx, uid, []int64{e.ID})
+		collected, _ := s.interRepo.GetCollectStatus(ctx, uid, []int64{e.ID})
+		followed, _ := s.interRepo.GetFollowStatus(ctx, uid, []int64{e.AuthorID})
 		state.Liked = trans.Ptr(liked[e.ID])
 		state.Collected = trans.Ptr(collected[e.ID])
 		state.Following = trans.Ptr(followed[e.AuthorID])
 		if s.ubaRepo != nil {
 			if pos, perr := s.ubaRepo.LatestPosition(ctx, uid, e.ID); perr == nil && pos > 0 {
-				state.ResumePositionMs = trans.Ptr(pos)
+				state.ResumePositionMs = u64pI64v(pos)
 			}
 		}
 	}
@@ -324,7 +324,7 @@ func (s *FeedService) GetVideoDetail(ctx context.Context, req *feedV1.GetVideoDe
 
 // SearchVideos 搜索（标题模糊 + 标签精确合并；关键词计入热搜榜）
 func (s *FeedService) SearchVideos(ctx context.Context, req *feedV1.SearchVideosRequest) (*feedV1.GetFeedResponse, error) {
-	pageNum, pageSize := pageArgsFeed(req.GetPageNum(), req.GetPageSize())
+	pageNum, pageSize := pageArgsFeed(int64(req.GetPageNum()), int64(req.GetPageSize()))
 	videos, err := s.videoRepo.SearchByKeyword(ctx, req.GetKeyword(), 200)
 	if err != nil {
 		return nil, err
@@ -361,7 +361,7 @@ func (s *FeedService) ListHotKeywords(ctx context.Context, req *feedV1.ListHotKe
 
 // ListVideosByTag 标签聚合
 func (s *FeedService) ListVideosByTag(ctx context.Context, req *feedV1.ListVideosByTagRequest) (*feedV1.GetFeedResponse, error) {
-	pageNum, pageSize := pageArgsFeed(req.GetPageNum(), req.GetPageSize())
+	pageNum, pageSize := pageArgsFeed(int64(req.GetPageNum()), int64(req.GetPageSize()))
 	videos, err := s.videoRepo.ListByTag(ctx, req.GetTag(), 200)
 	if err != nil {
 		return nil, err
@@ -428,9 +428,9 @@ func spVideoToDTO(e *ent.Video, tags []string) *videoV1.Video {
 		Height:       trans.Ptr(e.Height),
 		Status:       spVideoStatusDTO(e.Status).Enum(),
 		AuthorId:     trans.Ptr(e.AuthorID),
-		LikeCount:    trans.Ptr(e.LikeCount),
+		LikeCount:    i64FromU64p(&e.LikeCount),
 		CollectCount: trans.Ptr(e.CollectCount),
-		CommentCount: trans.Ptr(e.CommentCount),
+		CommentCount: i64FromU64p(&e.CommentCount),
 		ViewCount:    trans.Ptr(e.ViewCount),
 		RejectReason: e.RejectReason,
 		Tags:         tags,
@@ -447,4 +447,25 @@ func toUserBriefSP(u *identityV1.User) *identityV1.UserBrief {
 		Nickname:  trans.Ptr(u.GetNickname()),
 		AvatarUrl: trans.Ptr(u.GetAvatar()),
 	}
+}
+
+func u64pI64v(v int64) *uint64 {
+	x := uint64(v)
+	return &x
+}
+
+func i64FromU64v(v *uint64) *int64 {
+	if v == nil {
+		return nil
+	}
+	x := int64(*v)
+	return &x
+}
+
+func i64FromU64p(v *uint64) *int64 {
+	if v == nil {
+		return nil
+	}
+	x := int64(*v)
+	return &x
 }

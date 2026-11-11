@@ -10,47 +10,47 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id uint32) predicate.VideoReport {
+func ID(id int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uint32) predicate.VideoReport {
+func IDEQ(id int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uint32) predicate.VideoReport {
+func IDNEQ(id int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uint32) predicate.VideoReport {
+func IDIn(ids ...int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...uint32) predicate.VideoReport {
+func IDNotIn(ids ...int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id uint32) predicate.VideoReport {
+func IDGT(id int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uint32) predicate.VideoReport {
+func IDGTE(id int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id uint32) predicate.VideoReport {
+func IDLT(id int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uint32) predicate.VideoReport {
+func IDLTE(id int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldLTE(FieldID, id))
 }
 
@@ -70,32 +70,32 @@ func DeletedAt(v time.Time) predicate.VideoReport {
 }
 
 // CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
-func CreatedBy(v uint32) predicate.VideoReport {
+func CreatedBy(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldEQ(FieldCreatedBy, v))
 }
 
 // UpdatedBy applies equality check predicate on the "updated_by" field. It's identical to UpdatedByEQ.
-func UpdatedBy(v uint32) predicate.VideoReport {
+func UpdatedBy(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldEQ(FieldUpdatedBy, v))
 }
 
 // DeletedBy applies equality check predicate on the "deleted_by" field. It's identical to DeletedByEQ.
-func DeletedBy(v uint32) predicate.VideoReport {
+func DeletedBy(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldEQ(FieldDeletedBy, v))
 }
 
 // TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
-func TenantID(v uint32) predicate.VideoReport {
+func TenantID(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldEQ(FieldTenantID, v))
 }
 
 // ReporterID applies equality check predicate on the "reporter_id" field. It's identical to ReporterIDEQ.
-func ReporterID(v uint32) predicate.VideoReport {
+func ReporterID(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldEQ(FieldReporterID, v))
 }
 
 // TargetID applies equality check predicate on the "target_id" field. It's identical to TargetIDEQ.
-func TargetID(v uint32) predicate.VideoReport {
+func TargetID(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldEQ(FieldTargetID, v))
 }
 
@@ -110,7 +110,7 @@ func Description(v string) predicate.VideoReport {
 }
 
 // HandledBy applies equality check predicate on the "handled_by" field. It's identical to HandledByEQ.
-func HandledBy(v uint32) predicate.VideoReport {
+func HandledBy(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldEQ(FieldHandledBy, v))
 }
 
@@ -275,42 +275,42 @@ func DeletedAtNotNil() predicate.VideoReport {
 }
 
 // CreatedByEQ applies the EQ predicate on the "created_by" field.
-func CreatedByEQ(v uint32) predicate.VideoReport {
+func CreatedByEQ(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldEQ(FieldCreatedBy, v))
 }
 
 // CreatedByNEQ applies the NEQ predicate on the "created_by" field.
-func CreatedByNEQ(v uint32) predicate.VideoReport {
+func CreatedByNEQ(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldNEQ(FieldCreatedBy, v))
 }
 
 // CreatedByIn applies the In predicate on the "created_by" field.
-func CreatedByIn(vs ...uint32) predicate.VideoReport {
+func CreatedByIn(vs ...int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldIn(FieldCreatedBy, vs...))
 }
 
 // CreatedByNotIn applies the NotIn predicate on the "created_by" field.
-func CreatedByNotIn(vs ...uint32) predicate.VideoReport {
+func CreatedByNotIn(vs ...int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldNotIn(FieldCreatedBy, vs...))
 }
 
 // CreatedByGT applies the GT predicate on the "created_by" field.
-func CreatedByGT(v uint32) predicate.VideoReport {
+func CreatedByGT(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldGT(FieldCreatedBy, v))
 }
 
 // CreatedByGTE applies the GTE predicate on the "created_by" field.
-func CreatedByGTE(v uint32) predicate.VideoReport {
+func CreatedByGTE(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldGTE(FieldCreatedBy, v))
 }
 
 // CreatedByLT applies the LT predicate on the "created_by" field.
-func CreatedByLT(v uint32) predicate.VideoReport {
+func CreatedByLT(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldLT(FieldCreatedBy, v))
 }
 
 // CreatedByLTE applies the LTE predicate on the "created_by" field.
-func CreatedByLTE(v uint32) predicate.VideoReport {
+func CreatedByLTE(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldLTE(FieldCreatedBy, v))
 }
 
@@ -325,42 +325,42 @@ func CreatedByNotNil() predicate.VideoReport {
 }
 
 // UpdatedByEQ applies the EQ predicate on the "updated_by" field.
-func UpdatedByEQ(v uint32) predicate.VideoReport {
+func UpdatedByEQ(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldEQ(FieldUpdatedBy, v))
 }
 
 // UpdatedByNEQ applies the NEQ predicate on the "updated_by" field.
-func UpdatedByNEQ(v uint32) predicate.VideoReport {
+func UpdatedByNEQ(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldNEQ(FieldUpdatedBy, v))
 }
 
 // UpdatedByIn applies the In predicate on the "updated_by" field.
-func UpdatedByIn(vs ...uint32) predicate.VideoReport {
+func UpdatedByIn(vs ...int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldIn(FieldUpdatedBy, vs...))
 }
 
 // UpdatedByNotIn applies the NotIn predicate on the "updated_by" field.
-func UpdatedByNotIn(vs ...uint32) predicate.VideoReport {
+func UpdatedByNotIn(vs ...int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldNotIn(FieldUpdatedBy, vs...))
 }
 
 // UpdatedByGT applies the GT predicate on the "updated_by" field.
-func UpdatedByGT(v uint32) predicate.VideoReport {
+func UpdatedByGT(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldGT(FieldUpdatedBy, v))
 }
 
 // UpdatedByGTE applies the GTE predicate on the "updated_by" field.
-func UpdatedByGTE(v uint32) predicate.VideoReport {
+func UpdatedByGTE(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldGTE(FieldUpdatedBy, v))
 }
 
 // UpdatedByLT applies the LT predicate on the "updated_by" field.
-func UpdatedByLT(v uint32) predicate.VideoReport {
+func UpdatedByLT(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldLT(FieldUpdatedBy, v))
 }
 
 // UpdatedByLTE applies the LTE predicate on the "updated_by" field.
-func UpdatedByLTE(v uint32) predicate.VideoReport {
+func UpdatedByLTE(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldLTE(FieldUpdatedBy, v))
 }
 
@@ -375,42 +375,42 @@ func UpdatedByNotNil() predicate.VideoReport {
 }
 
 // DeletedByEQ applies the EQ predicate on the "deleted_by" field.
-func DeletedByEQ(v uint32) predicate.VideoReport {
+func DeletedByEQ(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldEQ(FieldDeletedBy, v))
 }
 
 // DeletedByNEQ applies the NEQ predicate on the "deleted_by" field.
-func DeletedByNEQ(v uint32) predicate.VideoReport {
+func DeletedByNEQ(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldNEQ(FieldDeletedBy, v))
 }
 
 // DeletedByIn applies the In predicate on the "deleted_by" field.
-func DeletedByIn(vs ...uint32) predicate.VideoReport {
+func DeletedByIn(vs ...int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldIn(FieldDeletedBy, vs...))
 }
 
 // DeletedByNotIn applies the NotIn predicate on the "deleted_by" field.
-func DeletedByNotIn(vs ...uint32) predicate.VideoReport {
+func DeletedByNotIn(vs ...int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldNotIn(FieldDeletedBy, vs...))
 }
 
 // DeletedByGT applies the GT predicate on the "deleted_by" field.
-func DeletedByGT(v uint32) predicate.VideoReport {
+func DeletedByGT(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldGT(FieldDeletedBy, v))
 }
 
 // DeletedByGTE applies the GTE predicate on the "deleted_by" field.
-func DeletedByGTE(v uint32) predicate.VideoReport {
+func DeletedByGTE(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldGTE(FieldDeletedBy, v))
 }
 
 // DeletedByLT applies the LT predicate on the "deleted_by" field.
-func DeletedByLT(v uint32) predicate.VideoReport {
+func DeletedByLT(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldLT(FieldDeletedBy, v))
 }
 
 // DeletedByLTE applies the LTE predicate on the "deleted_by" field.
-func DeletedByLTE(v uint32) predicate.VideoReport {
+func DeletedByLTE(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldLTE(FieldDeletedBy, v))
 }
 
@@ -425,42 +425,42 @@ func DeletedByNotNil() predicate.VideoReport {
 }
 
 // TenantIDEQ applies the EQ predicate on the "tenant_id" field.
-func TenantIDEQ(v uint32) predicate.VideoReport {
+func TenantIDEQ(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldEQ(FieldTenantID, v))
 }
 
 // TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
-func TenantIDNEQ(v uint32) predicate.VideoReport {
+func TenantIDNEQ(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldNEQ(FieldTenantID, v))
 }
 
 // TenantIDIn applies the In predicate on the "tenant_id" field.
-func TenantIDIn(vs ...uint32) predicate.VideoReport {
+func TenantIDIn(vs ...int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldIn(FieldTenantID, vs...))
 }
 
 // TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
-func TenantIDNotIn(vs ...uint32) predicate.VideoReport {
+func TenantIDNotIn(vs ...int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldNotIn(FieldTenantID, vs...))
 }
 
 // TenantIDGT applies the GT predicate on the "tenant_id" field.
-func TenantIDGT(v uint32) predicate.VideoReport {
+func TenantIDGT(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldGT(FieldTenantID, v))
 }
 
 // TenantIDGTE applies the GTE predicate on the "tenant_id" field.
-func TenantIDGTE(v uint32) predicate.VideoReport {
+func TenantIDGTE(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldGTE(FieldTenantID, v))
 }
 
 // TenantIDLT applies the LT predicate on the "tenant_id" field.
-func TenantIDLT(v uint32) predicate.VideoReport {
+func TenantIDLT(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldLT(FieldTenantID, v))
 }
 
 // TenantIDLTE applies the LTE predicate on the "tenant_id" field.
-func TenantIDLTE(v uint32) predicate.VideoReport {
+func TenantIDLTE(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldLTE(FieldTenantID, v))
 }
 
@@ -475,42 +475,42 @@ func TenantIDNotNil() predicate.VideoReport {
 }
 
 // ReporterIDEQ applies the EQ predicate on the "reporter_id" field.
-func ReporterIDEQ(v uint32) predicate.VideoReport {
+func ReporterIDEQ(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldEQ(FieldReporterID, v))
 }
 
 // ReporterIDNEQ applies the NEQ predicate on the "reporter_id" field.
-func ReporterIDNEQ(v uint32) predicate.VideoReport {
+func ReporterIDNEQ(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldNEQ(FieldReporterID, v))
 }
 
 // ReporterIDIn applies the In predicate on the "reporter_id" field.
-func ReporterIDIn(vs ...uint32) predicate.VideoReport {
+func ReporterIDIn(vs ...int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldIn(FieldReporterID, vs...))
 }
 
 // ReporterIDNotIn applies the NotIn predicate on the "reporter_id" field.
-func ReporterIDNotIn(vs ...uint32) predicate.VideoReport {
+func ReporterIDNotIn(vs ...int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldNotIn(FieldReporterID, vs...))
 }
 
 // ReporterIDGT applies the GT predicate on the "reporter_id" field.
-func ReporterIDGT(v uint32) predicate.VideoReport {
+func ReporterIDGT(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldGT(FieldReporterID, v))
 }
 
 // ReporterIDGTE applies the GTE predicate on the "reporter_id" field.
-func ReporterIDGTE(v uint32) predicate.VideoReport {
+func ReporterIDGTE(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldGTE(FieldReporterID, v))
 }
 
 // ReporterIDLT applies the LT predicate on the "reporter_id" field.
-func ReporterIDLT(v uint32) predicate.VideoReport {
+func ReporterIDLT(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldLT(FieldReporterID, v))
 }
 
 // ReporterIDLTE applies the LTE predicate on the "reporter_id" field.
-func ReporterIDLTE(v uint32) predicate.VideoReport {
+func ReporterIDLTE(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldLTE(FieldReporterID, v))
 }
 
@@ -535,42 +535,42 @@ func TargetTypeNotIn(vs ...TargetType) predicate.VideoReport {
 }
 
 // TargetIDEQ applies the EQ predicate on the "target_id" field.
-func TargetIDEQ(v uint32) predicate.VideoReport {
+func TargetIDEQ(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldEQ(FieldTargetID, v))
 }
 
 // TargetIDNEQ applies the NEQ predicate on the "target_id" field.
-func TargetIDNEQ(v uint32) predicate.VideoReport {
+func TargetIDNEQ(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldNEQ(FieldTargetID, v))
 }
 
 // TargetIDIn applies the In predicate on the "target_id" field.
-func TargetIDIn(vs ...uint32) predicate.VideoReport {
+func TargetIDIn(vs ...int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldIn(FieldTargetID, vs...))
 }
 
 // TargetIDNotIn applies the NotIn predicate on the "target_id" field.
-func TargetIDNotIn(vs ...uint32) predicate.VideoReport {
+func TargetIDNotIn(vs ...int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldNotIn(FieldTargetID, vs...))
 }
 
 // TargetIDGT applies the GT predicate on the "target_id" field.
-func TargetIDGT(v uint32) predicate.VideoReport {
+func TargetIDGT(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldGT(FieldTargetID, v))
 }
 
 // TargetIDGTE applies the GTE predicate on the "target_id" field.
-func TargetIDGTE(v uint32) predicate.VideoReport {
+func TargetIDGTE(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldGTE(FieldTargetID, v))
 }
 
 // TargetIDLT applies the LT predicate on the "target_id" field.
-func TargetIDLT(v uint32) predicate.VideoReport {
+func TargetIDLT(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldLT(FieldTargetID, v))
 }
 
 // TargetIDLTE applies the LTE predicate on the "target_id" field.
-func TargetIDLTE(v uint32) predicate.VideoReport {
+func TargetIDLTE(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldLTE(FieldTargetID, v))
 }
 
@@ -735,42 +735,42 @@ func StatusNotIn(vs ...Status) predicate.VideoReport {
 }
 
 // HandledByEQ applies the EQ predicate on the "handled_by" field.
-func HandledByEQ(v uint32) predicate.VideoReport {
+func HandledByEQ(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldEQ(FieldHandledBy, v))
 }
 
 // HandledByNEQ applies the NEQ predicate on the "handled_by" field.
-func HandledByNEQ(v uint32) predicate.VideoReport {
+func HandledByNEQ(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldNEQ(FieldHandledBy, v))
 }
 
 // HandledByIn applies the In predicate on the "handled_by" field.
-func HandledByIn(vs ...uint32) predicate.VideoReport {
+func HandledByIn(vs ...int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldIn(FieldHandledBy, vs...))
 }
 
 // HandledByNotIn applies the NotIn predicate on the "handled_by" field.
-func HandledByNotIn(vs ...uint32) predicate.VideoReport {
+func HandledByNotIn(vs ...int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldNotIn(FieldHandledBy, vs...))
 }
 
 // HandledByGT applies the GT predicate on the "handled_by" field.
-func HandledByGT(v uint32) predicate.VideoReport {
+func HandledByGT(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldGT(FieldHandledBy, v))
 }
 
 // HandledByGTE applies the GTE predicate on the "handled_by" field.
-func HandledByGTE(v uint32) predicate.VideoReport {
+func HandledByGTE(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldGTE(FieldHandledBy, v))
 }
 
 // HandledByLT applies the LT predicate on the "handled_by" field.
-func HandledByLT(v uint32) predicate.VideoReport {
+func HandledByLT(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldLT(FieldHandledBy, v))
 }
 
 // HandledByLTE applies the LTE predicate on the "handled_by" field.
-func HandledByLTE(v uint32) predicate.VideoReport {
+func HandledByLTE(v int64) predicate.VideoReport {
 	return predicate.VideoReport(sql.FieldLTE(FieldHandledBy, v))
 }
 

@@ -65,13 +65,13 @@ func (_c *UbaEventCreate) SetNillableDeletedAt(v *time.Time) *UbaEventCreate {
 }
 
 // SetTenantID sets the "tenant_id" field.
-func (_c *UbaEventCreate) SetTenantID(v uint32) *UbaEventCreate {
+func (_c *UbaEventCreate) SetTenantID(v int64) *UbaEventCreate {
 	_c.mutation.SetTenantID(v)
 	return _c
 }
 
 // SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
-func (_c *UbaEventCreate) SetNillableTenantID(v *uint32) *UbaEventCreate {
+func (_c *UbaEventCreate) SetNillableTenantID(v *int64) *UbaEventCreate {
 	if v != nil {
 		_c.SetTenantID(*v)
 	}
@@ -79,13 +79,13 @@ func (_c *UbaEventCreate) SetNillableTenantID(v *uint32) *UbaEventCreate {
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *UbaEventCreate) SetUserID(v uint32) *UbaEventCreate {
+func (_c *UbaEventCreate) SetUserID(v int64) *UbaEventCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_c *UbaEventCreate) SetNillableUserID(v *uint32) *UbaEventCreate {
+func (_c *UbaEventCreate) SetNillableUserID(v *int64) *UbaEventCreate {
 	if v != nil {
 		_c.SetUserID(*v)
 	}
@@ -107,13 +107,13 @@ func (_c *UbaEventCreate) SetNillableEventType(v *ubaevent.EventType) *UbaEventC
 }
 
 // SetVideoID sets the "video_id" field.
-func (_c *UbaEventCreate) SetVideoID(v uint32) *UbaEventCreate {
+func (_c *UbaEventCreate) SetVideoID(v int64) *UbaEventCreate {
 	_c.mutation.SetVideoID(v)
 	return _c
 }
 
 // SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_c *UbaEventCreate) SetNillableVideoID(v *uint32) *UbaEventCreate {
+func (_c *UbaEventCreate) SetNillableVideoID(v *int64) *UbaEventCreate {
 	if v != nil {
 		_c.SetVideoID(*v)
 	}
@@ -121,13 +121,13 @@ func (_c *UbaEventCreate) SetNillableVideoID(v *uint32) *UbaEventCreate {
 }
 
 // SetTargetUserID sets the "target_user_id" field.
-func (_c *UbaEventCreate) SetTargetUserID(v uint32) *UbaEventCreate {
+func (_c *UbaEventCreate) SetTargetUserID(v int64) *UbaEventCreate {
 	_c.mutation.SetTargetUserID(v)
 	return _c
 }
 
 // SetNillableTargetUserID sets the "target_user_id" field if the given value is not nil.
-func (_c *UbaEventCreate) SetNillableTargetUserID(v *uint32) *UbaEventCreate {
+func (_c *UbaEventCreate) SetNillableTargetUserID(v *int64) *UbaEventCreate {
 	if v != nil {
 		_c.SetTargetUserID(*v)
 	}
@@ -205,7 +205,7 @@ func (_c *UbaEventCreate) SetNillableOccurredAt(v *time.Time) *UbaEventCreate {
 }
 
 // SetID sets the "id" field.
-func (_c *UbaEventCreate) SetID(v uint32) *UbaEventCreate {
+func (_c *UbaEventCreate) SetID(v int64) *UbaEventCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
@@ -331,7 +331,7 @@ func (_c *UbaEventCreate) sqlSave(ctx context.Context) (*UbaEvent, error) {
 	}
 	if _spec.ID.Value != _node.ID {
 		id := _spec.ID.Value.(int64)
-		_node.ID = uint32(id)
+		_node.ID = int64(id)
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
@@ -341,7 +341,7 @@ func (_c *UbaEventCreate) sqlSave(ctx context.Context) (*UbaEvent, error) {
 func (_c *UbaEventCreate) createSpec() (*UbaEvent, *sqlgraph.CreateSpec) {
 	var (
 		_node = &UbaEvent{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(ubaevent.Table, sqlgraph.NewFieldSpec(ubaevent.FieldID, field.TypeUint32))
+		_spec = sqlgraph.NewCreateSpec(ubaevent.Table, sqlgraph.NewFieldSpec(ubaevent.FieldID, field.TypeInt64))
 	)
 	_spec.OnConflict = _c.conflict
 	if id, ok := _c.mutation.ID(); ok {
@@ -361,11 +361,11 @@ func (_c *UbaEventCreate) createSpec() (*UbaEvent, *sqlgraph.CreateSpec) {
 		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.TenantID(); ok {
-		_spec.SetField(ubaevent.FieldTenantID, field.TypeUint32, value)
+		_spec.SetField(ubaevent.FieldTenantID, field.TypeInt64, value)
 		_node.TenantID = &value
 	}
 	if value, ok := _c.mutation.UserID(); ok {
-		_spec.SetField(ubaevent.FieldUserID, field.TypeUint32, value)
+		_spec.SetField(ubaevent.FieldUserID, field.TypeInt64, value)
 		_node.UserID = value
 	}
 	if value, ok := _c.mutation.EventType(); ok {
@@ -373,11 +373,11 @@ func (_c *UbaEventCreate) createSpec() (*UbaEvent, *sqlgraph.CreateSpec) {
 		_node.EventType = value
 	}
 	if value, ok := _c.mutation.VideoID(); ok {
-		_spec.SetField(ubaevent.FieldVideoID, field.TypeUint32, value)
+		_spec.SetField(ubaevent.FieldVideoID, field.TypeInt64, value)
 		_node.VideoID = value
 	}
 	if value, ok := _c.mutation.TargetUserID(); ok {
-		_spec.SetField(ubaevent.FieldTargetUserID, field.TypeUint32, value)
+		_spec.SetField(ubaevent.FieldTargetUserID, field.TypeInt64, value)
 		_node.TargetUserID = value
 	}
 	if value, ok := _c.mutation.DurationMs(); ok {
@@ -489,7 +489,7 @@ func (u *UbaEventUpsert) ClearDeletedAt() *UbaEventUpsert {
 }
 
 // SetUserID sets the "user_id" field.
-func (u *UbaEventUpsert) SetUserID(v uint32) *UbaEventUpsert {
+func (u *UbaEventUpsert) SetUserID(v int64) *UbaEventUpsert {
 	u.Set(ubaevent.FieldUserID, v)
 	return u
 }
@@ -501,7 +501,7 @@ func (u *UbaEventUpsert) UpdateUserID() *UbaEventUpsert {
 }
 
 // AddUserID adds v to the "user_id" field.
-func (u *UbaEventUpsert) AddUserID(v uint32) *UbaEventUpsert {
+func (u *UbaEventUpsert) AddUserID(v int64) *UbaEventUpsert {
 	u.Add(ubaevent.FieldUserID, v)
 	return u
 }
@@ -519,7 +519,7 @@ func (u *UbaEventUpsert) UpdateEventType() *UbaEventUpsert {
 }
 
 // SetVideoID sets the "video_id" field.
-func (u *UbaEventUpsert) SetVideoID(v uint32) *UbaEventUpsert {
+func (u *UbaEventUpsert) SetVideoID(v int64) *UbaEventUpsert {
 	u.Set(ubaevent.FieldVideoID, v)
 	return u
 }
@@ -531,13 +531,13 @@ func (u *UbaEventUpsert) UpdateVideoID() *UbaEventUpsert {
 }
 
 // AddVideoID adds v to the "video_id" field.
-func (u *UbaEventUpsert) AddVideoID(v uint32) *UbaEventUpsert {
+func (u *UbaEventUpsert) AddVideoID(v int64) *UbaEventUpsert {
 	u.Add(ubaevent.FieldVideoID, v)
 	return u
 }
 
 // SetTargetUserID sets the "target_user_id" field.
-func (u *UbaEventUpsert) SetTargetUserID(v uint32) *UbaEventUpsert {
+func (u *UbaEventUpsert) SetTargetUserID(v int64) *UbaEventUpsert {
 	u.Set(ubaevent.FieldTargetUserID, v)
 	return u
 }
@@ -549,7 +549,7 @@ func (u *UbaEventUpsert) UpdateTargetUserID() *UbaEventUpsert {
 }
 
 // AddTargetUserID adds v to the "target_user_id" field.
-func (u *UbaEventUpsert) AddTargetUserID(v uint32) *UbaEventUpsert {
+func (u *UbaEventUpsert) AddTargetUserID(v int64) *UbaEventUpsert {
 	u.Add(ubaevent.FieldTargetUserID, v)
 	return u
 }
@@ -741,14 +741,14 @@ func (u *UbaEventUpsertOne) ClearDeletedAt() *UbaEventUpsertOne {
 }
 
 // SetUserID sets the "user_id" field.
-func (u *UbaEventUpsertOne) SetUserID(v uint32) *UbaEventUpsertOne {
+func (u *UbaEventUpsertOne) SetUserID(v int64) *UbaEventUpsertOne {
 	return u.Update(func(s *UbaEventUpsert) {
 		s.SetUserID(v)
 	})
 }
 
 // AddUserID adds v to the "user_id" field.
-func (u *UbaEventUpsertOne) AddUserID(v uint32) *UbaEventUpsertOne {
+func (u *UbaEventUpsertOne) AddUserID(v int64) *UbaEventUpsertOne {
 	return u.Update(func(s *UbaEventUpsert) {
 		s.AddUserID(v)
 	})
@@ -776,14 +776,14 @@ func (u *UbaEventUpsertOne) UpdateEventType() *UbaEventUpsertOne {
 }
 
 // SetVideoID sets the "video_id" field.
-func (u *UbaEventUpsertOne) SetVideoID(v uint32) *UbaEventUpsertOne {
+func (u *UbaEventUpsertOne) SetVideoID(v int64) *UbaEventUpsertOne {
 	return u.Update(func(s *UbaEventUpsert) {
 		s.SetVideoID(v)
 	})
 }
 
 // AddVideoID adds v to the "video_id" field.
-func (u *UbaEventUpsertOne) AddVideoID(v uint32) *UbaEventUpsertOne {
+func (u *UbaEventUpsertOne) AddVideoID(v int64) *UbaEventUpsertOne {
 	return u.Update(func(s *UbaEventUpsert) {
 		s.AddVideoID(v)
 	})
@@ -797,14 +797,14 @@ func (u *UbaEventUpsertOne) UpdateVideoID() *UbaEventUpsertOne {
 }
 
 // SetTargetUserID sets the "target_user_id" field.
-func (u *UbaEventUpsertOne) SetTargetUserID(v uint32) *UbaEventUpsertOne {
+func (u *UbaEventUpsertOne) SetTargetUserID(v int64) *UbaEventUpsertOne {
 	return u.Update(func(s *UbaEventUpsert) {
 		s.SetTargetUserID(v)
 	})
 }
 
 // AddTargetUserID adds v to the "target_user_id" field.
-func (u *UbaEventUpsertOne) AddTargetUserID(v uint32) *UbaEventUpsertOne {
+func (u *UbaEventUpsertOne) AddTargetUserID(v int64) *UbaEventUpsertOne {
 	return u.Update(func(s *UbaEventUpsert) {
 		s.AddTargetUserID(v)
 	})
@@ -938,7 +938,7 @@ func (u *UbaEventUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *UbaEventUpsertOne) ID(ctx context.Context) (id uint32, err error) {
+func (u *UbaEventUpsertOne) ID(ctx context.Context) (id int64, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -947,7 +947,7 @@ func (u *UbaEventUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *UbaEventUpsertOne) IDX(ctx context.Context) uint32 {
+func (u *UbaEventUpsertOne) IDX(ctx context.Context) int64 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -1004,7 +1004,7 @@ func (_c *UbaEventCreateBulk) Save(ctx context.Context) ([]*UbaEvent, error) {
 				mutation.id = &nodes[i].ID
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = uint32(id)
+					nodes[i].ID = int64(id)
 				}
 				mutation.done = true
 				return nodes[i], nil
@@ -1185,14 +1185,14 @@ func (u *UbaEventUpsertBulk) ClearDeletedAt() *UbaEventUpsertBulk {
 }
 
 // SetUserID sets the "user_id" field.
-func (u *UbaEventUpsertBulk) SetUserID(v uint32) *UbaEventUpsertBulk {
+func (u *UbaEventUpsertBulk) SetUserID(v int64) *UbaEventUpsertBulk {
 	return u.Update(func(s *UbaEventUpsert) {
 		s.SetUserID(v)
 	})
 }
 
 // AddUserID adds v to the "user_id" field.
-func (u *UbaEventUpsertBulk) AddUserID(v uint32) *UbaEventUpsertBulk {
+func (u *UbaEventUpsertBulk) AddUserID(v int64) *UbaEventUpsertBulk {
 	return u.Update(func(s *UbaEventUpsert) {
 		s.AddUserID(v)
 	})
@@ -1220,14 +1220,14 @@ func (u *UbaEventUpsertBulk) UpdateEventType() *UbaEventUpsertBulk {
 }
 
 // SetVideoID sets the "video_id" field.
-func (u *UbaEventUpsertBulk) SetVideoID(v uint32) *UbaEventUpsertBulk {
+func (u *UbaEventUpsertBulk) SetVideoID(v int64) *UbaEventUpsertBulk {
 	return u.Update(func(s *UbaEventUpsert) {
 		s.SetVideoID(v)
 	})
 }
 
 // AddVideoID adds v to the "video_id" field.
-func (u *UbaEventUpsertBulk) AddVideoID(v uint32) *UbaEventUpsertBulk {
+func (u *UbaEventUpsertBulk) AddVideoID(v int64) *UbaEventUpsertBulk {
 	return u.Update(func(s *UbaEventUpsert) {
 		s.AddVideoID(v)
 	})
@@ -1241,14 +1241,14 @@ func (u *UbaEventUpsertBulk) UpdateVideoID() *UbaEventUpsertBulk {
 }
 
 // SetTargetUserID sets the "target_user_id" field.
-func (u *UbaEventUpsertBulk) SetTargetUserID(v uint32) *UbaEventUpsertBulk {
+func (u *UbaEventUpsertBulk) SetTargetUserID(v int64) *UbaEventUpsertBulk {
 	return u.Update(func(s *UbaEventUpsert) {
 		s.SetTargetUserID(v)
 	})
 }
 
 // AddTargetUserID adds v to the "target_user_id" field.
-func (u *UbaEventUpsertBulk) AddTargetUserID(v uint32) *UbaEventUpsertBulk {
+func (u *UbaEventUpsertBulk) AddTargetUserID(v int64) *UbaEventUpsertBulk {
 	return u.Update(func(s *UbaEventUpsert) {
 		s.AddTargetUserID(v)
 	})

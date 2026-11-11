@@ -10,47 +10,47 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id uint32) predicate.SeriesFollow {
+func ID(id int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uint32) predicate.SeriesFollow {
+func IDEQ(id int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uint32) predicate.SeriesFollow {
+func IDNEQ(id int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uint32) predicate.SeriesFollow {
+func IDIn(ids ...int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...uint32) predicate.SeriesFollow {
+func IDNotIn(ids ...int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id uint32) predicate.SeriesFollow {
+func IDGT(id int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uint32) predicate.SeriesFollow {
+func IDGTE(id int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id uint32) predicate.SeriesFollow {
+func IDLT(id int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uint32) predicate.SeriesFollow {
+func IDLTE(id int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldLTE(FieldID, id))
 }
 
@@ -70,17 +70,17 @@ func DeletedAt(v time.Time) predicate.SeriesFollow {
 }
 
 // TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
-func TenantID(v uint32) predicate.SeriesFollow {
+func TenantID(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldEQ(FieldTenantID, v))
 }
 
 // FollowerID applies equality check predicate on the "follower_id" field. It's identical to FollowerIDEQ.
-func FollowerID(v uint32) predicate.SeriesFollow {
+func FollowerID(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldEQ(FieldFollowerID, v))
 }
 
 // SeriesID applies equality check predicate on the "series_id" field. It's identical to SeriesIDEQ.
-func SeriesID(v uint32) predicate.SeriesFollow {
+func SeriesID(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldEQ(FieldSeriesID, v))
 }
 
@@ -235,42 +235,42 @@ func DeletedAtNotNil() predicate.SeriesFollow {
 }
 
 // TenantIDEQ applies the EQ predicate on the "tenant_id" field.
-func TenantIDEQ(v uint32) predicate.SeriesFollow {
+func TenantIDEQ(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldEQ(FieldTenantID, v))
 }
 
 // TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
-func TenantIDNEQ(v uint32) predicate.SeriesFollow {
+func TenantIDNEQ(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldNEQ(FieldTenantID, v))
 }
 
 // TenantIDIn applies the In predicate on the "tenant_id" field.
-func TenantIDIn(vs ...uint32) predicate.SeriesFollow {
+func TenantIDIn(vs ...int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldIn(FieldTenantID, vs...))
 }
 
 // TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
-func TenantIDNotIn(vs ...uint32) predicate.SeriesFollow {
+func TenantIDNotIn(vs ...int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldNotIn(FieldTenantID, vs...))
 }
 
 // TenantIDGT applies the GT predicate on the "tenant_id" field.
-func TenantIDGT(v uint32) predicate.SeriesFollow {
+func TenantIDGT(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldGT(FieldTenantID, v))
 }
 
 // TenantIDGTE applies the GTE predicate on the "tenant_id" field.
-func TenantIDGTE(v uint32) predicate.SeriesFollow {
+func TenantIDGTE(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldGTE(FieldTenantID, v))
 }
 
 // TenantIDLT applies the LT predicate on the "tenant_id" field.
-func TenantIDLT(v uint32) predicate.SeriesFollow {
+func TenantIDLT(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldLT(FieldTenantID, v))
 }
 
 // TenantIDLTE applies the LTE predicate on the "tenant_id" field.
-func TenantIDLTE(v uint32) predicate.SeriesFollow {
+func TenantIDLTE(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldLTE(FieldTenantID, v))
 }
 
@@ -285,82 +285,82 @@ func TenantIDNotNil() predicate.SeriesFollow {
 }
 
 // FollowerIDEQ applies the EQ predicate on the "follower_id" field.
-func FollowerIDEQ(v uint32) predicate.SeriesFollow {
+func FollowerIDEQ(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldEQ(FieldFollowerID, v))
 }
 
 // FollowerIDNEQ applies the NEQ predicate on the "follower_id" field.
-func FollowerIDNEQ(v uint32) predicate.SeriesFollow {
+func FollowerIDNEQ(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldNEQ(FieldFollowerID, v))
 }
 
 // FollowerIDIn applies the In predicate on the "follower_id" field.
-func FollowerIDIn(vs ...uint32) predicate.SeriesFollow {
+func FollowerIDIn(vs ...int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldIn(FieldFollowerID, vs...))
 }
 
 // FollowerIDNotIn applies the NotIn predicate on the "follower_id" field.
-func FollowerIDNotIn(vs ...uint32) predicate.SeriesFollow {
+func FollowerIDNotIn(vs ...int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldNotIn(FieldFollowerID, vs...))
 }
 
 // FollowerIDGT applies the GT predicate on the "follower_id" field.
-func FollowerIDGT(v uint32) predicate.SeriesFollow {
+func FollowerIDGT(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldGT(FieldFollowerID, v))
 }
 
 // FollowerIDGTE applies the GTE predicate on the "follower_id" field.
-func FollowerIDGTE(v uint32) predicate.SeriesFollow {
+func FollowerIDGTE(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldGTE(FieldFollowerID, v))
 }
 
 // FollowerIDLT applies the LT predicate on the "follower_id" field.
-func FollowerIDLT(v uint32) predicate.SeriesFollow {
+func FollowerIDLT(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldLT(FieldFollowerID, v))
 }
 
 // FollowerIDLTE applies the LTE predicate on the "follower_id" field.
-func FollowerIDLTE(v uint32) predicate.SeriesFollow {
+func FollowerIDLTE(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldLTE(FieldFollowerID, v))
 }
 
 // SeriesIDEQ applies the EQ predicate on the "series_id" field.
-func SeriesIDEQ(v uint32) predicate.SeriesFollow {
+func SeriesIDEQ(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldEQ(FieldSeriesID, v))
 }
 
 // SeriesIDNEQ applies the NEQ predicate on the "series_id" field.
-func SeriesIDNEQ(v uint32) predicate.SeriesFollow {
+func SeriesIDNEQ(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldNEQ(FieldSeriesID, v))
 }
 
 // SeriesIDIn applies the In predicate on the "series_id" field.
-func SeriesIDIn(vs ...uint32) predicate.SeriesFollow {
+func SeriesIDIn(vs ...int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldIn(FieldSeriesID, vs...))
 }
 
 // SeriesIDNotIn applies the NotIn predicate on the "series_id" field.
-func SeriesIDNotIn(vs ...uint32) predicate.SeriesFollow {
+func SeriesIDNotIn(vs ...int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldNotIn(FieldSeriesID, vs...))
 }
 
 // SeriesIDGT applies the GT predicate on the "series_id" field.
-func SeriesIDGT(v uint32) predicate.SeriesFollow {
+func SeriesIDGT(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldGT(FieldSeriesID, v))
 }
 
 // SeriesIDGTE applies the GTE predicate on the "series_id" field.
-func SeriesIDGTE(v uint32) predicate.SeriesFollow {
+func SeriesIDGTE(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldGTE(FieldSeriesID, v))
 }
 
 // SeriesIDLT applies the LT predicate on the "series_id" field.
-func SeriesIDLT(v uint32) predicate.SeriesFollow {
+func SeriesIDLT(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldLT(FieldSeriesID, v))
 }
 
 // SeriesIDLTE applies the LTE predicate on the "series_id" field.
-func SeriesIDLTE(v uint32) predicate.SeriesFollow {
+func SeriesIDLTE(v int64) predicate.SeriesFollow {
 	return predicate.SeriesFollow(sql.FieldLTE(FieldSeriesID, v))
 }
 

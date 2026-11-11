@@ -14,17 +14,17 @@ import (
 	"github.com/hibiken/asynq"
 	minio "github.com/minio/minio-go/v7"
 	paginationV1 "github.com/tx7do/go-crud/api/gen/go/pagination/v1"
-	"github.com/tx7do/kratos-bootstrap/bootstrap"
 	"github.com/tx7do/go-utils/timeutil"
 	"github.com/tx7do/go-utils/trans"
+	"github.com/tx7do/kratos-bootstrap/bootstrap"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	crudViewer "github.com/tx7do/go-crud/viewer"
 	"go-wind-shortplay/app/core/service/internal/data"
 	"go-wind-shortplay/app/core/service/internal/data/ent"
 	"go-wind-shortplay/app/core/service/internal/data/ent/uploadtask"
 	videopkg "go-wind-shortplay/app/core/service/internal/data/ent/video"
-	crudViewer "github.com/tx7do/go-crud/viewer"
 	appViewer "go-wind-shortplay/pkg/entgo/viewer"
 	"go-wind-shortplay/pkg/oss"
 	"go-wind-shortplay/pkg/task"
@@ -53,7 +53,7 @@ const (
 	spUploadTempRootEnv = "SP_UPLOAD_TEMP_DIR"
 
 	// 缺省分片 4MB
-	defaultChunkSize uint32 = 4 * 1024 * 1024
+	defaultChunkSize int64 = 4 * 1024 * 1024
 	// 单个上传任务的并发分片写入不做限制（顺序上传）
 )
 
@@ -125,8 +125,8 @@ func uploadTaskEntityToDTO(e *ent.UploadTask) *videoV1.UploadTask {
 		FileName:       trans.Ptr(e.FileName),
 		FileSize:       trans.Ptr(e.FileSize),
 		ChunkSize:      trans.Ptr(e.ChunkSize),
-		TotalChunks:    trans.Ptr(e.TotalChunks),
-		UploadedChunks: e.UploadedChunks,
+		TotalChunks:    trans.Ptr(uint32(e.TotalChunks)),
+		UploadedChunks: u32sFromI64s(e.UploadedChunks),
 		Status:         status.Enum(),
 		FileKey:        e.FileKey,
 		VideoId:        trans.Ptr(e.VideoID),
@@ -140,23 +140,23 @@ func draftEntityToDTO(e *ent.VideoDraft) *videoV1.VideoDraft {
 		return nil
 	}
 	dto := &videoV1.VideoDraft{
-		Id:            trans.Ptr(e.ID),
-		Title:         trans.Ptr(e.Title),
-		Description:   e.Description,
-		Tags:          e.Tags,
-		CoverUrl:      e.CoverURL,
-		VideoUrl:      e.VideoURL,
-		Duration:      trans.Ptr(e.Duration),
-		Width:         trans.Ptr(e.Width),
-		Height:        trans.Ptr(e.Height),
-		UploadTaskId:  e.UploadTaskID,
-		AuthorId:      trans.Ptr(e.AuthorID),
-		CreatedAt:     timeutil.TimeToTimestamppb(e.CreatedAt),
-		UpdatedAt:     timeutil.TimeToTimestamppb(e.UpdatedAt),
+		Id:           trans.Ptr(e.ID),
+		Title:        trans.Ptr(e.Title),
+		Description:  e.Description,
+		Tags:         e.Tags,
+		CoverUrl:     e.CoverURL,
+		VideoUrl:     e.VideoURL,
+		Duration:     trans.Ptr(e.Duration),
+		Width:        trans.Ptr(e.Width),
+		Height:       trans.Ptr(e.Height),
+		UploadTaskId: e.UploadTaskID,
+		AuthorId:     trans.Ptr(e.AuthorID),
+		CreatedAt:    timeutil.TimeToTimestamppb(e.CreatedAt),
+		UpdatedAt:    timeutil.TimeToTimestamppb(e.UpdatedAt),
 	}
 	if e.SeriesID > 0 {
 		dto.SeriesId = trans.Ptr(e.SeriesID)
-		dto.EpisodeNumber = trans.Ptr(e.EpisodeNumber)
+		dto.EpisodeNumber = trans.Ptr(uint32(e.EpisodeNumber))
 	}
 	return dto
 }
@@ -164,7 +164,7 @@ func draftEntityToDTO(e *ent.VideoDraft) *videoV1.VideoDraft {
 // ── viewer 助手 ──
 
 // spViewerUserID 取当前登录用户 ID（未登录返回 0）
-func spViewerUserID(ctx context.Context) uint32 {
+func spViewerUserID(ctx context.Context) int64 {
 	uid, _ := viewerUserIDFromContext(ctx)
 	return uid
 }
@@ -191,7 +191,7 @@ func (s *VideoService) ListVideo(ctx context.Context, req *paginationV1.PagingRe
 func (s *VideoService) ListUserVideo(ctx context.Context, req *videoV1.ListUserVideoRequest) (*videoV1.ListVideoResponse, error) {
 	uid := spViewerUserID(ctx)
 	isSelf := uid > 0 && uid == req.GetUserId()
-	return s.videoRepo.ListByAuthor(ctx, req.GetUserId(), isSelf, req.GetPageNum(), req.GetPageSize())
+	return s.videoRepo.ListByAuthor(ctx, req.GetUserId(), isSelf, int64(req.GetPageNum()), int64(req.GetPageSize()))
 }
 
 func (s *VideoService) UpdateVideo(ctx context.Context, req *videoV1.UpdateVideoRequest) (*videoV1.Video, error) {
@@ -216,14 +216,14 @@ func (s *VideoService) UpdateVideo(ctx context.Context, req *videoV1.UpdateVideo
 	// 挂靠剧集：>0 挂靠（校验剧归属）、=0 解挂、缺省不变
 	if req.SeriesId != nil {
 		if req.GetSeriesId() > 0 {
-			seriesID, episodeNo, err := s.seriesSvc.ResolveSeriesAttach(ctx, spViewerUserID(ctx), req.GetSeriesId(), req.GetEpisodeNumber())
+			seriesID, episodeNo, err := s.seriesSvc.ResolveSeriesAttach(ctx, spViewerUserID(ctx), req.GetSeriesId(), int64(req.GetEpisodeNumber()))
 			if err != nil {
 				return nil, err
 			}
 			dto.SeriesId = trans.Ptr(seriesID)
-			dto.EpisodeNumber = trans.Ptr(episodeNo)
+			dto.EpisodeNumber = trans.Ptr(uint32(episodeNo))
 		} else {
-			dto.SeriesId = trans.Ptr(uint32(0))
+			dto.SeriesId = trans.Ptr(int64(0))
 		}
 	}
 	return s.videoRepo.Update(ctx, req.GetId(), dto, req.GetTags())
@@ -321,14 +321,14 @@ func (s *VideoService) ChangeVideoStatus(ctx context.Context, req *videoV1.Chang
 
 	// 剧集更新通知：挂靠剧集的视频新发布，fan-out 给追剧者（尽力而为）
 	if to == videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED && updated.GetSeriesId() > 0 && s.seriesSvc != nil {
-		s.seriesSvc.NotifyFollowersNewEpisode(ctx, updated.GetSeriesId(), updated.GetId(), updated.GetEpisodeNumber(), updated.GetTitle(), updated.GetAuthorId())
+		s.seriesSvc.NotifyFollowersNewEpisode(ctx, updated.GetSeriesId(), updated.GetId(), int64(updated.GetEpisodeNumber()), updated.GetTitle(), updated.GetAuthorId())
 	}
 	return updated, nil
 }
 
 // ScheduleVideo 设置/取消定时发布与定时下架（作者本人或管理端）。
 // scheduledAt 仅 DRAFT（到期转 PUBLISHED）；scheduledOffAt 仅 PUBLISHED
-//（到期转 OFFLINE）；各自缺省=取消对应排程。
+// （到期转 OFFLINE）；各自缺省=取消对应排程。
 func (s *VideoService) ScheduleVideo(ctx context.Context, req *videoV1.ScheduleVideoRequest) (*videoV1.Video, error) {
 	if req == nil || req.GetId() == 0 {
 		return nil, videoV1.ErrorBadRequest("invalid parameter")
@@ -382,7 +382,7 @@ func spScheduledFuture(ts *timestamppb.Timestamp) bool {
 
 // schedulePublishTask 定时发布入队（asynq ProcessAt；取消定时则尽力撤销任务）。
 // 入队失败仅记日志：到期任务属尽力而为，另有补偿扫描兜底（spScheduledSweep）。
-func (s *VideoService) schedulePublishTask(ctx context.Context, videoID uint32, at *time.Time) {
+func (s *VideoService) schedulePublishTask(ctx context.Context, videoID int64, at *time.Time) {
 	if s.taskEnqueuer == nil {
 		return
 	}
@@ -407,7 +407,7 @@ func (s *VideoService) afterVideoCreated(ctx context.Context, video *videoV1.Vid
 	}
 	if video.GetStatus() == videoV1.VideoStatus_VIDEO_STATUS_PUBLISHED {
 		if video.GetSeriesId() > 0 && s.seriesSvc != nil {
-			s.seriesSvc.NotifyFollowersNewEpisode(ctx, video.GetSeriesId(), video.GetId(), video.GetEpisodeNumber(), video.GetTitle(), video.GetAuthorId())
+			s.seriesSvc.NotifyFollowersNewEpisode(ctx, video.GetSeriesId(), video.GetId(), int64(video.GetEpisodeNumber()), video.GetTitle(), video.GetAuthorId())
 		}
 		return
 	}
@@ -418,7 +418,7 @@ func (s *VideoService) afterVideoCreated(ctx context.Context, video *videoV1.Vid
 }
 
 // scheduleUnpublishTask 定时下架入队（取消定时无需撤销：到期回调自校验状态）
-func (s *VideoService) scheduleUnpublishTask(ctx context.Context, videoID uint32, at *time.Time) {
+func (s *VideoService) scheduleUnpublishTask(ctx context.Context, videoID int64, at *time.Time) {
 	if s.taskEnqueuer == nil {
 		return
 	}
@@ -482,7 +482,7 @@ func (s *VideoService) AsyncScheduledPublish(_ string, payload *task.VideoSchedu
 }
 
 // publishScheduledNow 执行定时转发布（清计划时间 → 状态机内流转 → 追更 fan-out）
-func (s *VideoService) publishScheduledNow(ctx context.Context, videoID uint32, scheduledAt *time.Time) {
+func (s *VideoService) publishScheduledNow(ctx context.Context, videoID int64, scheduledAt *time.Time) {
 	// 先清计划时间再走 Update 状态流转，保证两步任一失败可见
 	if _, err := s.videoRepo.SetScheduledAt(ctx, videoID, nil); err != nil {
 		s.log.Errorf("clear scheduled_at before publish failed: %s", err.Error())
@@ -507,7 +507,7 @@ func (s *VideoService) publishScheduledNow(ctx context.Context, videoID uint32, 
 		return
 	}
 	if updated.GetSeriesId() > 0 && s.seriesSvc != nil {
-		s.seriesSvc.NotifyFollowersNewEpisode(ctx, updated.GetSeriesId(), updated.GetId(), updated.GetEpisodeNumber(), updated.GetTitle(), updated.GetAuthorId())
+		s.seriesSvc.NotifyFollowersNewEpisode(ctx, updated.GetSeriesId(), updated.GetId(), int64(updated.GetEpisodeNumber()), updated.GetTitle(), updated.GetAuthorId())
 	}
 	s.log.Infof("scheduled video %d published (planned at %s)", videoID, scheduledAt.Format(time.RFC3339))
 }
@@ -525,7 +525,7 @@ func spChunkTempDir(root, taskID string) string {
 	return filepath.Join(root, taskID)
 }
 
-func spChunkFilePath(root, taskID string, chunkIndex uint32) string {
+func spChunkFilePath(root, taskID string, chunkIndex int64) string {
 	return filepath.Join(spChunkTempDir(root, taskID), fmt.Sprintf("%06d.part", chunkIndex))
 }
 
@@ -560,22 +560,22 @@ func (s *VideoService) CreateUploadTask(ctx context.Context, req *videoV1.Create
 		return nil, videoV1.ErrorFileTypeNotAllowed("file type not allowed: %s", ext)
 	}
 
-	maxBytes := uint64(conf.MaxUploadSizeMB) * 1024 * 1024
-	if maxBytes > 0 && req.GetFileSize() > maxBytes {
+	maxBytes := int64(conf.MaxUploadSizeMB) * 1024 * 1024
+	if maxBytes > 0 && int64(req.GetFileSize()) > maxBytes {
 		return nil, videoV1.ErrorFileTooLarge("file exceeds max size %dMB", conf.MaxUploadSizeMB)
 	}
 
 	chunkSize := req.GetChunkSize()
 	if chunkSize <= 0 {
-		chunkSize = defaultChunkSize
+		chunkSize = uint32(defaultChunkSize)
 	}
-	totalChunks := uint32((req.GetFileSize() + uint64(chunkSize) - 1) / uint64(chunkSize))
+	totalChunks := int64((int64(req.GetFileSize()) + int64(chunkSize) - 1) / int64(chunkSize))
 	if totalChunks == 0 {
 		totalChunks = 1
 	}
 
 	taskID := newShortplayTaskID()
-	e, err := s.uploadTaskRepo.Create(ctx, taskID, req.GetFileName(), req.GetFileSize(), chunkSize, totalChunks)
+	e, err := s.uploadTaskRepo.Create(ctx, taskID, req.GetFileName(), int64(req.GetFileSize()), int64(chunkSize), int64(totalChunks))
 	if err != nil {
 		return nil, err
 	}
@@ -601,7 +601,7 @@ func (s *VideoService) UploadChunk(ctx context.Context, req *videoV1.UploadChunk
 		return nil, videoV1.ErrorBadRequest("empty chunk data")
 	}
 
-	path := spChunkFilePath(spUploadTempRoot(), e.TaskID, req.GetChunkIndex())
+	path := spChunkFilePath(spUploadTempRoot(), e.TaskID, int64(req.GetChunkIndex()))
 	if err = os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		s.log.Errorf("mkdir chunk dir failed: %s", err.Error())
 		return nil, videoV1.ErrorInternalServerError("write chunk failed")
@@ -611,11 +611,11 @@ func (s *VideoService) UploadChunk(ctx context.Context, req *videoV1.UploadChunk
 		return nil, videoV1.ErrorInternalServerError("write chunk failed")
 	}
 
-	chunks, err := s.uploadTaskRepo.AppendUploadedChunk(ctx, e.TaskID, req.GetChunkIndex())
+	chunks, err := s.uploadTaskRepo.AppendUploadedChunk(ctx, e.TaskID, int64(req.GetChunkIndex()))
 	if err != nil {
 		return nil, err
 	}
-	return &videoV1.UploadChunkResponse{UploadedChunks: chunks}, nil
+	return &videoV1.UploadChunkResponse{UploadedChunks: u32sFromI64s(chunks)}, nil
 }
 
 // CompleteUpload 完成上传：校验分片完整性 → 合并 → MinIO → 建视频/草稿 → 异步抽帧封面。
@@ -640,8 +640,8 @@ func (s *VideoService) CompleteUpload(ctx context.Context, req *videoV1.Complete
 	}
 
 	// 分片完整性
-	if uint32(len(e.UploadedChunks)) < e.TotalChunks {
-		return nil, videoV1.ErrorChunkMissing("chunks missing: %d/%d", len(e.UploadedChunks), e.TotalChunks)
+	if int64(len(e.UploadedChunks)) < int64(e.TotalChunks) {
+		return nil, videoV1.ErrorChunkMissing("chunks missing: %d/%d", len(e.UploadedChunks), int64(e.TotalChunks))
 	}
 
 	// 转合并中
@@ -673,7 +673,6 @@ func (s *VideoService) CompleteUpload(ctx context.Context, req *videoV1.Complete
 		}
 	}
 
-
 	dto := &videoV1.Video{
 		Title:       req.Title,
 		Description: req.Description,
@@ -697,13 +696,13 @@ func (s *VideoService) CompleteUpload(ctx context.Context, req *videoV1.Complete
 
 	// 挂靠剧集：剧须为本人所有；集号缺省自动排到当前最大 +1
 	if req.GetSeriesId() > 0 {
-		seriesID, episodeNo, aerr := s.seriesSvc.ResolveSeriesAttach(ctx, uid, req.GetSeriesId(), req.GetEpisodeNumber())
+		seriesID, episodeNo, aerr := s.seriesSvc.ResolveSeriesAttach(ctx, uid, req.GetSeriesId(), int64(req.GetEpisodeNumber()))
 		if aerr != nil {
 			_ = s.uploadTaskRepo.UpdateStatus(ctx, e.ID, videoV1.UploadTaskStatus_UPLOAD_TASK_STATUS_FAILED, nil)
 			return nil, aerr
 		}
 		dto.SeriesId = trans.Ptr(seriesID)
-		dto.EpisodeNumber = trans.Ptr(episodeNo)
+		dto.EpisodeNumber = trans.Ptr(uint32(episodeNo))
 	}
 
 	// 敏感词过滤：非草稿命中（标题/简介）强制转审核中，即使人工审核关
@@ -777,7 +776,7 @@ func (s *VideoService) GetUploadTask(ctx context.Context, req *videoV1.GetUpload
 // mergeAndUpload 顺序合并分片并上传 MinIO。
 func (s *VideoService) mergeAndUpload(ctx context.Context, e *ent.UploadTask, root string) (objectKey, mergedPath string, err error) {
 	mergedPath = filepath.Join(spChunkTempDir(root, e.TaskID), "merged"+spVideoExtOf(e.FileName))
-	if err = mergeChunksSP(root, e.TaskID, mergedPath, e.TotalChunks); err != nil {
+	if err = mergeChunksSP(root, e.TaskID, mergedPath, int64(e.TotalChunks)); err != nil {
 		s.log.Errorf("merge chunks failed: %s", err.Error())
 		return "", "", videoV1.ErrorFileMergeFailed("merge chunks failed")
 	}
@@ -816,7 +815,7 @@ func mimeOfVideoExt(ext string) string {
 }
 
 // mergeChunksSP 顺序合并分片到目标文件
-func mergeChunksSP(root, taskID, targetPath string, totalChunks uint32) error {
+func mergeChunksSP(root, taskID, targetPath string, totalChunks int64) error {
 	if err := os.MkdirAll(filepath.Dir(targetPath), 0o755); err != nil {
 		return err
 	}
@@ -826,7 +825,7 @@ func mergeChunksSP(root, taskID, targetPath string, totalChunks uint32) error {
 	}
 	defer func() { _ = target.Close() }()
 
-	for i := uint32(0); i < totalChunks; i++ {
+	for i := int64(0); i < totalChunks; i++ {
 		part, err := os.Open(spChunkFilePath(root, taskID, i))
 		if err != nil {
 			return fmt.Errorf("chunk %d missing: %w", i, err)
@@ -928,7 +927,7 @@ func (s *VideoService) SaveDraft(ctx context.Context, req *videoV1.SaveDraftRequ
 	}
 	// 挂靠剧集：先校验归属（草稿保存即校验，提交发布时免二次失败）
 	if req.GetSeriesId() > 0 {
-		if _, _, err := s.seriesSvc.ResolveSeriesAttach(ctx, uid, req.GetSeriesId(), req.GetEpisodeNumber()); err != nil {
+		if _, _, err := s.seriesSvc.ResolveSeriesAttach(ctx, uid, req.GetSeriesId(), int64(req.GetEpisodeNumber())); err != nil {
 			return nil, err
 		}
 	}
@@ -984,7 +983,7 @@ func (s *VideoService) ListDraft(ctx context.Context, req *paginationV1.PagingRe
 	if uid == 0 {
 		return nil, videoV1.ErrorUnauthorized("login required")
 	}
-	items, total, err := s.draftRepo.ListByAuthor(ctx, uid, req.GetPage(), req.GetPageSize())
+	items, total, err := s.draftRepo.ListByAuthor(ctx, uid, int64(req.GetPage()), int64(req.GetPageSize()))
 	if err != nil {
 		return nil, err
 	}
@@ -1063,12 +1062,12 @@ func (s *VideoService) SubmitDraft(ctx context.Context, req *videoV1.SubmitDraft
 	}
 	// 草稿携带的挂靠信息随提交生效（剧归属已在保存草稿时校验；集号 0 = 此刻自动排号）
 	if e.SeriesID > 0 {
-		seriesID, episodeNo, aerr := s.seriesSvc.ResolveSeriesAttach(ctx, uid, e.SeriesID, e.EpisodeNumber)
+		seriesID, episodeNo, aerr := s.seriesSvc.ResolveSeriesAttach(ctx, uid, e.SeriesID, int64(e.EpisodeNumber))
 		if aerr != nil {
 			return nil, aerr
 		}
 		dto.SeriesId = trans.Ptr(seriesID)
-		dto.EpisodeNumber = trans.Ptr(episodeNo)
+		dto.EpisodeNumber = trans.Ptr(uint32(episodeNo))
 	}
 	video, err := s.videoRepo.Create(ctx, dto, e.Tags)
 	if err != nil {
@@ -1114,7 +1113,7 @@ func (s *VideoService) ListHotVideos(ctx context.Context, req *videoV1.ListHotVi
 
 // ModerateOffline 管理处置下架（举报处置联动入口）：走状态机白名单 + 落驳回原因 +
 // 通知作者（reviewOffline 口径）。非已发布状态返回明确错误，由调用方尽力而为消化。
-func (s *VideoService) ModerateOffline(ctx context.Context, videoID uint32, reason string) error {
+func (s *VideoService) ModerateOffline(ctx context.Context, videoID int64, reason string) error {
 	cur, err := s.videoRepo.Get(ctx, videoID)
 	if err != nil {
 		return err
@@ -1132,4 +1131,12 @@ func (s *VideoService) ModerateOffline(ctx context.Context, videoID uint32, reas
 	}
 	s.notifyVideoReviewed(ctx, updated.GetAuthorId(), updated.GetId(), updated.GetTitle(), reason, reviewOffline)
 	return nil
+}
+
+func u32sFromI64s(in []int64) []uint32 {
+	out := make([]uint32, 0, len(in))
+	for _, v := range in {
+		out = append(out, uint32(v))
+	}
+	return out
 }

@@ -65,13 +65,13 @@ func (_c *VideoDraftCreate) SetNillableDeletedAt(v *time.Time) *VideoDraftCreate
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_c *VideoDraftCreate) SetCreatedBy(v uint32) *VideoDraftCreate {
+func (_c *VideoDraftCreate) SetCreatedBy(v int64) *VideoDraftCreate {
 	_c.mutation.SetCreatedBy(v)
 	return _c
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_c *VideoDraftCreate) SetNillableCreatedBy(v *uint32) *VideoDraftCreate {
+func (_c *VideoDraftCreate) SetNillableCreatedBy(v *int64) *VideoDraftCreate {
 	if v != nil {
 		_c.SetCreatedBy(*v)
 	}
@@ -79,13 +79,13 @@ func (_c *VideoDraftCreate) SetNillableCreatedBy(v *uint32) *VideoDraftCreate {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_c *VideoDraftCreate) SetUpdatedBy(v uint32) *VideoDraftCreate {
+func (_c *VideoDraftCreate) SetUpdatedBy(v int64) *VideoDraftCreate {
 	_c.mutation.SetUpdatedBy(v)
 	return _c
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_c *VideoDraftCreate) SetNillableUpdatedBy(v *uint32) *VideoDraftCreate {
+func (_c *VideoDraftCreate) SetNillableUpdatedBy(v *int64) *VideoDraftCreate {
 	if v != nil {
 		_c.SetUpdatedBy(*v)
 	}
@@ -93,13 +93,13 @@ func (_c *VideoDraftCreate) SetNillableUpdatedBy(v *uint32) *VideoDraftCreate {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (_c *VideoDraftCreate) SetDeletedBy(v uint32) *VideoDraftCreate {
+func (_c *VideoDraftCreate) SetDeletedBy(v int64) *VideoDraftCreate {
 	_c.mutation.SetDeletedBy(v)
 	return _c
 }
 
 // SetNillableDeletedBy sets the "deleted_by" field if the given value is not nil.
-func (_c *VideoDraftCreate) SetNillableDeletedBy(v *uint32) *VideoDraftCreate {
+func (_c *VideoDraftCreate) SetNillableDeletedBy(v *int64) *VideoDraftCreate {
 	if v != nil {
 		_c.SetDeletedBy(*v)
 	}
@@ -107,13 +107,13 @@ func (_c *VideoDraftCreate) SetNillableDeletedBy(v *uint32) *VideoDraftCreate {
 }
 
 // SetTenantID sets the "tenant_id" field.
-func (_c *VideoDraftCreate) SetTenantID(v uint32) *VideoDraftCreate {
+func (_c *VideoDraftCreate) SetTenantID(v int64) *VideoDraftCreate {
 	_c.mutation.SetTenantID(v)
 	return _c
 }
 
 // SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
-func (_c *VideoDraftCreate) SetNillableTenantID(v *uint32) *VideoDraftCreate {
+func (_c *VideoDraftCreate) SetNillableTenantID(v *int64) *VideoDraftCreate {
 	if v != nil {
 		_c.SetTenantID(*v)
 	}
@@ -239,13 +239,13 @@ func (_c *VideoDraftCreate) SetNillableUploadTaskID(v *string) *VideoDraftCreate
 }
 
 // SetAuthorID sets the "author_id" field.
-func (_c *VideoDraftCreate) SetAuthorID(v uint32) *VideoDraftCreate {
+func (_c *VideoDraftCreate) SetAuthorID(v int64) *VideoDraftCreate {
 	_c.mutation.SetAuthorID(v)
 	return _c
 }
 
 // SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (_c *VideoDraftCreate) SetNillableAuthorID(v *uint32) *VideoDraftCreate {
+func (_c *VideoDraftCreate) SetNillableAuthorID(v *int64) *VideoDraftCreate {
 	if v != nil {
 		_c.SetAuthorID(*v)
 	}
@@ -253,13 +253,13 @@ func (_c *VideoDraftCreate) SetNillableAuthorID(v *uint32) *VideoDraftCreate {
 }
 
 // SetSeriesID sets the "series_id" field.
-func (_c *VideoDraftCreate) SetSeriesID(v uint32) *VideoDraftCreate {
+func (_c *VideoDraftCreate) SetSeriesID(v int64) *VideoDraftCreate {
 	_c.mutation.SetSeriesID(v)
 	return _c
 }
 
 // SetNillableSeriesID sets the "series_id" field if the given value is not nil.
-func (_c *VideoDraftCreate) SetNillableSeriesID(v *uint32) *VideoDraftCreate {
+func (_c *VideoDraftCreate) SetNillableSeriesID(v *int64) *VideoDraftCreate {
 	if v != nil {
 		_c.SetSeriesID(*v)
 	}
@@ -281,7 +281,7 @@ func (_c *VideoDraftCreate) SetNillableEpisodeNumber(v *uint32) *VideoDraftCreat
 }
 
 // SetID sets the "id" field.
-func (_c *VideoDraftCreate) SetID(v uint32) *VideoDraftCreate {
+func (_c *VideoDraftCreate) SetID(v int64) *VideoDraftCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
@@ -395,7 +395,7 @@ func (_c *VideoDraftCreate) sqlSave(ctx context.Context) (*VideoDraft, error) {
 	}
 	if _spec.ID.Value != _node.ID {
 		id := _spec.ID.Value.(int64)
-		_node.ID = uint32(id)
+		_node.ID = int64(id)
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
@@ -405,7 +405,7 @@ func (_c *VideoDraftCreate) sqlSave(ctx context.Context) (*VideoDraft, error) {
 func (_c *VideoDraftCreate) createSpec() (*VideoDraft, *sqlgraph.CreateSpec) {
 	var (
 		_node = &VideoDraft{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(videodraft.Table, sqlgraph.NewFieldSpec(videodraft.FieldID, field.TypeUint32))
+		_spec = sqlgraph.NewCreateSpec(videodraft.Table, sqlgraph.NewFieldSpec(videodraft.FieldID, field.TypeInt64))
 	)
 	_spec.OnConflict = _c.conflict
 	if id, ok := _c.mutation.ID(); ok {
@@ -425,19 +425,19 @@ func (_c *VideoDraftCreate) createSpec() (*VideoDraft, *sqlgraph.CreateSpec) {
 		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.CreatedBy(); ok {
-		_spec.SetField(videodraft.FieldCreatedBy, field.TypeUint32, value)
+		_spec.SetField(videodraft.FieldCreatedBy, field.TypeInt64, value)
 		_node.CreatedBy = &value
 	}
 	if value, ok := _c.mutation.UpdatedBy(); ok {
-		_spec.SetField(videodraft.FieldUpdatedBy, field.TypeUint32, value)
+		_spec.SetField(videodraft.FieldUpdatedBy, field.TypeInt64, value)
 		_node.UpdatedBy = &value
 	}
 	if value, ok := _c.mutation.DeletedBy(); ok {
-		_spec.SetField(videodraft.FieldDeletedBy, field.TypeUint32, value)
+		_spec.SetField(videodraft.FieldDeletedBy, field.TypeInt64, value)
 		_node.DeletedBy = &value
 	}
 	if value, ok := _c.mutation.TenantID(); ok {
-		_spec.SetField(videodraft.FieldTenantID, field.TypeUint32, value)
+		_spec.SetField(videodraft.FieldTenantID, field.TypeInt64, value)
 		_node.TenantID = &value
 	}
 	if value, ok := _c.mutation.Title(); ok {
@@ -477,11 +477,11 @@ func (_c *VideoDraftCreate) createSpec() (*VideoDraft, *sqlgraph.CreateSpec) {
 		_node.UploadTaskID = &value
 	}
 	if value, ok := _c.mutation.AuthorID(); ok {
-		_spec.SetField(videodraft.FieldAuthorID, field.TypeUint32, value)
+		_spec.SetField(videodraft.FieldAuthorID, field.TypeInt64, value)
 		_node.AuthorID = value
 	}
 	if value, ok := _c.mutation.SeriesID(); ok {
-		_spec.SetField(videodraft.FieldSeriesID, field.TypeUint32, value)
+		_spec.SetField(videodraft.FieldSeriesID, field.TypeInt64, value)
 		_node.SeriesID = value
 	}
 	if value, ok := _c.mutation.EpisodeNumber(); ok {
@@ -577,7 +577,7 @@ func (u *VideoDraftUpsert) ClearDeletedAt() *VideoDraftUpsert {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (u *VideoDraftUpsert) SetCreatedBy(v uint32) *VideoDraftUpsert {
+func (u *VideoDraftUpsert) SetCreatedBy(v int64) *VideoDraftUpsert {
 	u.Set(videodraft.FieldCreatedBy, v)
 	return u
 }
@@ -589,7 +589,7 @@ func (u *VideoDraftUpsert) UpdateCreatedBy() *VideoDraftUpsert {
 }
 
 // AddCreatedBy adds v to the "created_by" field.
-func (u *VideoDraftUpsert) AddCreatedBy(v uint32) *VideoDraftUpsert {
+func (u *VideoDraftUpsert) AddCreatedBy(v int64) *VideoDraftUpsert {
 	u.Add(videodraft.FieldCreatedBy, v)
 	return u
 }
@@ -601,7 +601,7 @@ func (u *VideoDraftUpsert) ClearCreatedBy() *VideoDraftUpsert {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (u *VideoDraftUpsert) SetUpdatedBy(v uint32) *VideoDraftUpsert {
+func (u *VideoDraftUpsert) SetUpdatedBy(v int64) *VideoDraftUpsert {
 	u.Set(videodraft.FieldUpdatedBy, v)
 	return u
 }
@@ -613,7 +613,7 @@ func (u *VideoDraftUpsert) UpdateUpdatedBy() *VideoDraftUpsert {
 }
 
 // AddUpdatedBy adds v to the "updated_by" field.
-func (u *VideoDraftUpsert) AddUpdatedBy(v uint32) *VideoDraftUpsert {
+func (u *VideoDraftUpsert) AddUpdatedBy(v int64) *VideoDraftUpsert {
 	u.Add(videodraft.FieldUpdatedBy, v)
 	return u
 }
@@ -625,7 +625,7 @@ func (u *VideoDraftUpsert) ClearUpdatedBy() *VideoDraftUpsert {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (u *VideoDraftUpsert) SetDeletedBy(v uint32) *VideoDraftUpsert {
+func (u *VideoDraftUpsert) SetDeletedBy(v int64) *VideoDraftUpsert {
 	u.Set(videodraft.FieldDeletedBy, v)
 	return u
 }
@@ -637,7 +637,7 @@ func (u *VideoDraftUpsert) UpdateDeletedBy() *VideoDraftUpsert {
 }
 
 // AddDeletedBy adds v to the "deleted_by" field.
-func (u *VideoDraftUpsert) AddDeletedBy(v uint32) *VideoDraftUpsert {
+func (u *VideoDraftUpsert) AddDeletedBy(v int64) *VideoDraftUpsert {
 	u.Add(videodraft.FieldDeletedBy, v)
 	return u
 }
@@ -811,7 +811,7 @@ func (u *VideoDraftUpsert) ClearUploadTaskID() *VideoDraftUpsert {
 }
 
 // SetAuthorID sets the "author_id" field.
-func (u *VideoDraftUpsert) SetAuthorID(v uint32) *VideoDraftUpsert {
+func (u *VideoDraftUpsert) SetAuthorID(v int64) *VideoDraftUpsert {
 	u.Set(videodraft.FieldAuthorID, v)
 	return u
 }
@@ -823,13 +823,13 @@ func (u *VideoDraftUpsert) UpdateAuthorID() *VideoDraftUpsert {
 }
 
 // AddAuthorID adds v to the "author_id" field.
-func (u *VideoDraftUpsert) AddAuthorID(v uint32) *VideoDraftUpsert {
+func (u *VideoDraftUpsert) AddAuthorID(v int64) *VideoDraftUpsert {
 	u.Add(videodraft.FieldAuthorID, v)
 	return u
 }
 
 // SetSeriesID sets the "series_id" field.
-func (u *VideoDraftUpsert) SetSeriesID(v uint32) *VideoDraftUpsert {
+func (u *VideoDraftUpsert) SetSeriesID(v int64) *VideoDraftUpsert {
 	u.Set(videodraft.FieldSeriesID, v)
 	return u
 }
@@ -841,7 +841,7 @@ func (u *VideoDraftUpsert) UpdateSeriesID() *VideoDraftUpsert {
 }
 
 // AddSeriesID adds v to the "series_id" field.
-func (u *VideoDraftUpsert) AddSeriesID(v uint32) *VideoDraftUpsert {
+func (u *VideoDraftUpsert) AddSeriesID(v int64) *VideoDraftUpsert {
 	u.Add(videodraft.FieldSeriesID, v)
 	return u
 }
@@ -961,14 +961,14 @@ func (u *VideoDraftUpsertOne) ClearDeletedAt() *VideoDraftUpsertOne {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (u *VideoDraftUpsertOne) SetCreatedBy(v uint32) *VideoDraftUpsertOne {
+func (u *VideoDraftUpsertOne) SetCreatedBy(v int64) *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.SetCreatedBy(v)
 	})
 }
 
 // AddCreatedBy adds v to the "created_by" field.
-func (u *VideoDraftUpsertOne) AddCreatedBy(v uint32) *VideoDraftUpsertOne {
+func (u *VideoDraftUpsertOne) AddCreatedBy(v int64) *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.AddCreatedBy(v)
 	})
@@ -989,14 +989,14 @@ func (u *VideoDraftUpsertOne) ClearCreatedBy() *VideoDraftUpsertOne {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (u *VideoDraftUpsertOne) SetUpdatedBy(v uint32) *VideoDraftUpsertOne {
+func (u *VideoDraftUpsertOne) SetUpdatedBy(v int64) *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.SetUpdatedBy(v)
 	})
 }
 
 // AddUpdatedBy adds v to the "updated_by" field.
-func (u *VideoDraftUpsertOne) AddUpdatedBy(v uint32) *VideoDraftUpsertOne {
+func (u *VideoDraftUpsertOne) AddUpdatedBy(v int64) *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.AddUpdatedBy(v)
 	})
@@ -1017,14 +1017,14 @@ func (u *VideoDraftUpsertOne) ClearUpdatedBy() *VideoDraftUpsertOne {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (u *VideoDraftUpsertOne) SetDeletedBy(v uint32) *VideoDraftUpsertOne {
+func (u *VideoDraftUpsertOne) SetDeletedBy(v int64) *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.SetDeletedBy(v)
 	})
 }
 
 // AddDeletedBy adds v to the "deleted_by" field.
-func (u *VideoDraftUpsertOne) AddDeletedBy(v uint32) *VideoDraftUpsertOne {
+func (u *VideoDraftUpsertOne) AddDeletedBy(v int64) *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.AddDeletedBy(v)
 	})
@@ -1234,14 +1234,14 @@ func (u *VideoDraftUpsertOne) ClearUploadTaskID() *VideoDraftUpsertOne {
 }
 
 // SetAuthorID sets the "author_id" field.
-func (u *VideoDraftUpsertOne) SetAuthorID(v uint32) *VideoDraftUpsertOne {
+func (u *VideoDraftUpsertOne) SetAuthorID(v int64) *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.SetAuthorID(v)
 	})
 }
 
 // AddAuthorID adds v to the "author_id" field.
-func (u *VideoDraftUpsertOne) AddAuthorID(v uint32) *VideoDraftUpsertOne {
+func (u *VideoDraftUpsertOne) AddAuthorID(v int64) *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.AddAuthorID(v)
 	})
@@ -1255,14 +1255,14 @@ func (u *VideoDraftUpsertOne) UpdateAuthorID() *VideoDraftUpsertOne {
 }
 
 // SetSeriesID sets the "series_id" field.
-func (u *VideoDraftUpsertOne) SetSeriesID(v uint32) *VideoDraftUpsertOne {
+func (u *VideoDraftUpsertOne) SetSeriesID(v int64) *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.SetSeriesID(v)
 	})
 }
 
 // AddSeriesID adds v to the "series_id" field.
-func (u *VideoDraftUpsertOne) AddSeriesID(v uint32) *VideoDraftUpsertOne {
+func (u *VideoDraftUpsertOne) AddSeriesID(v int64) *VideoDraftUpsertOne {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.AddSeriesID(v)
 	})
@@ -1312,7 +1312,7 @@ func (u *VideoDraftUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *VideoDraftUpsertOne) ID(ctx context.Context) (id uint32, err error) {
+func (u *VideoDraftUpsertOne) ID(ctx context.Context) (id int64, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -1321,7 +1321,7 @@ func (u *VideoDraftUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *VideoDraftUpsertOne) IDX(ctx context.Context) uint32 {
+func (u *VideoDraftUpsertOne) IDX(ctx context.Context) int64 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -1378,7 +1378,7 @@ func (_c *VideoDraftCreateBulk) Save(ctx context.Context) ([]*VideoDraft, error)
 				mutation.id = &nodes[i].ID
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = uint32(id)
+					nodes[i].ID = int64(id)
 				}
 				mutation.done = true
 				return nodes[i], nil
@@ -1559,14 +1559,14 @@ func (u *VideoDraftUpsertBulk) ClearDeletedAt() *VideoDraftUpsertBulk {
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (u *VideoDraftUpsertBulk) SetCreatedBy(v uint32) *VideoDraftUpsertBulk {
+func (u *VideoDraftUpsertBulk) SetCreatedBy(v int64) *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.SetCreatedBy(v)
 	})
 }
 
 // AddCreatedBy adds v to the "created_by" field.
-func (u *VideoDraftUpsertBulk) AddCreatedBy(v uint32) *VideoDraftUpsertBulk {
+func (u *VideoDraftUpsertBulk) AddCreatedBy(v int64) *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.AddCreatedBy(v)
 	})
@@ -1587,14 +1587,14 @@ func (u *VideoDraftUpsertBulk) ClearCreatedBy() *VideoDraftUpsertBulk {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (u *VideoDraftUpsertBulk) SetUpdatedBy(v uint32) *VideoDraftUpsertBulk {
+func (u *VideoDraftUpsertBulk) SetUpdatedBy(v int64) *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.SetUpdatedBy(v)
 	})
 }
 
 // AddUpdatedBy adds v to the "updated_by" field.
-func (u *VideoDraftUpsertBulk) AddUpdatedBy(v uint32) *VideoDraftUpsertBulk {
+func (u *VideoDraftUpsertBulk) AddUpdatedBy(v int64) *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.AddUpdatedBy(v)
 	})
@@ -1615,14 +1615,14 @@ func (u *VideoDraftUpsertBulk) ClearUpdatedBy() *VideoDraftUpsertBulk {
 }
 
 // SetDeletedBy sets the "deleted_by" field.
-func (u *VideoDraftUpsertBulk) SetDeletedBy(v uint32) *VideoDraftUpsertBulk {
+func (u *VideoDraftUpsertBulk) SetDeletedBy(v int64) *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.SetDeletedBy(v)
 	})
 }
 
 // AddDeletedBy adds v to the "deleted_by" field.
-func (u *VideoDraftUpsertBulk) AddDeletedBy(v uint32) *VideoDraftUpsertBulk {
+func (u *VideoDraftUpsertBulk) AddDeletedBy(v int64) *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.AddDeletedBy(v)
 	})
@@ -1832,14 +1832,14 @@ func (u *VideoDraftUpsertBulk) ClearUploadTaskID() *VideoDraftUpsertBulk {
 }
 
 // SetAuthorID sets the "author_id" field.
-func (u *VideoDraftUpsertBulk) SetAuthorID(v uint32) *VideoDraftUpsertBulk {
+func (u *VideoDraftUpsertBulk) SetAuthorID(v int64) *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.SetAuthorID(v)
 	})
 }
 
 // AddAuthorID adds v to the "author_id" field.
-func (u *VideoDraftUpsertBulk) AddAuthorID(v uint32) *VideoDraftUpsertBulk {
+func (u *VideoDraftUpsertBulk) AddAuthorID(v int64) *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.AddAuthorID(v)
 	})
@@ -1853,14 +1853,14 @@ func (u *VideoDraftUpsertBulk) UpdateAuthorID() *VideoDraftUpsertBulk {
 }
 
 // SetSeriesID sets the "series_id" field.
-func (u *VideoDraftUpsertBulk) SetSeriesID(v uint32) *VideoDraftUpsertBulk {
+func (u *VideoDraftUpsertBulk) SetSeriesID(v int64) *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.SetSeriesID(v)
 	})
 }
 
 // AddSeriesID adds v to the "series_id" field.
-func (u *VideoDraftUpsertBulk) AddSeriesID(v uint32) *VideoDraftUpsertBulk {
+func (u *VideoDraftUpsertBulk) AddSeriesID(v int64) *VideoDraftUpsertBulk {
 	return u.Update(func(s *VideoDraftUpsert) {
 		s.AddSeriesID(v)
 	})

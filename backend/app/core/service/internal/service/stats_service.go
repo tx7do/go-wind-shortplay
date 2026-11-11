@@ -66,9 +66,9 @@ func (s *DashboardService) ListTrends(ctx context.Context, req *statsV1.ListTren
 	for _, row := range rows {
 		resp.Items = append(resp.Items, &statsV1.TrendItem{
 			Date:      trans.Ptr(row.Day),
-			Published: trans.Ptr(row.Published),
-			Plays:     trans.Ptr(row.Plays),
-			Likes:     trans.Ptr(row.Likes),
+			Published: u64Val(row.Published),
+			Plays:     u64Val(row.Plays),
+			Likes:     u64Val(row.Likes),
 		})
 	}
 	return resp, nil
@@ -88,9 +88,9 @@ func (s *DashboardService) ListCreatorTrends(ctx context.Context, req *statsV1.L
 	for _, row := range rows {
 		resp.Items = append(resp.Items, &statsV1.TrendItem{
 			Date:      trans.Ptr(row.Day),
-			Published: trans.Ptr(row.Published),
-			Plays:     trans.Ptr(row.Plays),
-			Likes:     trans.Ptr(row.Likes),
+			Published: u64Val(row.Published),
+			Plays:     u64Val(row.Plays),
+			Likes:     u64Val(row.Likes),
 		})
 	}
 	return resp, nil
@@ -109,13 +109,13 @@ func (s *DashboardService) ListCreatorVideoStats(ctx context.Context, req *stats
 	resp := &statsV1.ListCreatorVideoStatsResponse{}
 	for _, row := range rows {
 		resp.Items = append(resp.Items, &statsV1.CreatorVideoStat{
-			VideoId:   trans.Ptr(row.VideoID),
-			Title:     trans.Ptr(row.Title),
-			CoverUrl:  trans.Ptr(row.CoverURL),
-			Plays:     trans.Ptr(row.Plays),
-			Likes:     trans.Ptr(row.Likes),
-			Collects:  trans.Ptr(row.Collects),
-			Comments:  trans.Ptr(row.Comments),
+			VideoId:  trans.Ptr(row.VideoID),
+			Title:    trans.Ptr(row.Title),
+			CoverUrl: trans.Ptr(row.CoverURL),
+			Plays:    u64Val(row.Plays),
+			Likes:    u64Val(row.Likes),
+			Collects: u64Val(row.Collects),
+			Comments: u64Val(row.Comments),
 		})
 	}
 	return resp, nil
@@ -166,12 +166,12 @@ func (s *DashboardService) GetCreatorOverview(ctx context.Context, req *statsV1.
 		return nil, statsV1.ErrorInternalServerError("follower count failed")
 	}
 	return &statsV1.CreatorOverview{
-		VideoCount:    trans.Ptr(agg.Cnt),
-		TotalViews:    trans.Ptr(agg.Views),
-		TotalLikes:    trans.Ptr(agg.Likes),
-		TotalCollects: trans.Ptr(agg.Collects),
-		TotalComments: trans.Ptr(agg.Comments),
-		FollowerCount: trans.Ptr(followers),
+		VideoCount:    u64Val(agg.Cnt),
+		TotalViews:    u64Val(agg.Views),
+		TotalLikes:    i64v(agg.Likes),
+		TotalCollects: u64Val(agg.Collects),
+		TotalComments: u64Val(agg.Comments),
+		FollowerCount: u64Val(followers),
 	}, nil
 }
 
@@ -198,13 +198,30 @@ func (s *DashboardService) GetUserStats(ctx context.Context, req *identityV1.Get
 		return nil, statsV1.ErrorInternalServerError("like received failed")
 	}
 	return &identityV1.UserStats{
-		UserId:           trans.Ptr(uid),
-		VideoCount:       trans.Ptr(agg.Cnt),
-		FollowerCount:    trans.Ptr(followers),
-		FollowingCount:   trans.Ptr(following),
-		LikeReceivedCount: trans.Ptr(likeReceived.Likes),
+		UserId:            trans.Ptr(uid),
+		VideoCount:        u64Val(agg.Cnt),
+		FollowerCount:     u64Val(followers),
+		FollowingCount:    u64Val(following),
+		LikeReceivedCount: u64Val(likeReceived.Likes),
 	}, nil
 }
 
 // ListCreatorVideos 占位保持 pagination 引用（用户作品列表由 video 域提供）
 var _ = paginationV1.PagingRequest{}
+
+func u64pI64(v *int64) *uint64 {
+	if v == nil {
+		return nil
+	}
+	x := uint64(*v)
+	return &x
+}
+
+func u64Val(v int64) *uint64 {
+	x := uint64(v)
+	return &x
+}
+
+func i64v(v int64) *int64 {
+	return &v
+}

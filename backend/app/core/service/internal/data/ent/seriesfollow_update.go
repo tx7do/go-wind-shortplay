@@ -70,14 +70,14 @@ func (_u *SeriesFollowUpdate) ClearDeletedAt() *SeriesFollowUpdate {
 }
 
 // SetFollowerID sets the "follower_id" field.
-func (_u *SeriesFollowUpdate) SetFollowerID(v uint32) *SeriesFollowUpdate {
+func (_u *SeriesFollowUpdate) SetFollowerID(v int64) *SeriesFollowUpdate {
 	_u.mutation.ResetFollowerID()
 	_u.mutation.SetFollowerID(v)
 	return _u
 }
 
 // SetNillableFollowerID sets the "follower_id" field if the given value is not nil.
-func (_u *SeriesFollowUpdate) SetNillableFollowerID(v *uint32) *SeriesFollowUpdate {
+func (_u *SeriesFollowUpdate) SetNillableFollowerID(v *int64) *SeriesFollowUpdate {
 	if v != nil {
 		_u.SetFollowerID(*v)
 	}
@@ -85,20 +85,20 @@ func (_u *SeriesFollowUpdate) SetNillableFollowerID(v *uint32) *SeriesFollowUpda
 }
 
 // AddFollowerID adds value to the "follower_id" field.
-func (_u *SeriesFollowUpdate) AddFollowerID(v int32) *SeriesFollowUpdate {
+func (_u *SeriesFollowUpdate) AddFollowerID(v int64) *SeriesFollowUpdate {
 	_u.mutation.AddFollowerID(v)
 	return _u
 }
 
 // SetSeriesID sets the "series_id" field.
-func (_u *SeriesFollowUpdate) SetSeriesID(v uint32) *SeriesFollowUpdate {
+func (_u *SeriesFollowUpdate) SetSeriesID(v int64) *SeriesFollowUpdate {
 	_u.mutation.ResetSeriesID()
 	_u.mutation.SetSeriesID(v)
 	return _u
 }
 
 // SetNillableSeriesID sets the "series_id" field if the given value is not nil.
-func (_u *SeriesFollowUpdate) SetNillableSeriesID(v *uint32) *SeriesFollowUpdate {
+func (_u *SeriesFollowUpdate) SetNillableSeriesID(v *int64) *SeriesFollowUpdate {
 	if v != nil {
 		_u.SetSeriesID(*v)
 	}
@@ -106,7 +106,7 @@ func (_u *SeriesFollowUpdate) SetNillableSeriesID(v *uint32) *SeriesFollowUpdate
 }
 
 // AddSeriesID adds value to the "series_id" field.
-func (_u *SeriesFollowUpdate) AddSeriesID(v int32) *SeriesFollowUpdate {
+func (_u *SeriesFollowUpdate) AddSeriesID(v int64) *SeriesFollowUpdate {
 	_u.mutation.AddSeriesID(v)
 	return _u
 }
@@ -150,7 +150,7 @@ func (_u *SeriesFollowUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *S
 }
 
 func (_u *SeriesFollowUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(seriesfollow.Table, seriesfollow.Columns, sqlgraph.NewFieldSpec(seriesfollow.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(seriesfollow.Table, seriesfollow.Columns, sqlgraph.NewFieldSpec(seriesfollow.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -174,19 +174,19 @@ func (_u *SeriesFollowUpdate) sqlSave(ctx context.Context) (_node int, err error
 		_spec.ClearField(seriesfollow.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(seriesfollow.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(seriesfollow.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.FollowerID(); ok {
-		_spec.SetField(seriesfollow.FieldFollowerID, field.TypeUint32, value)
+		_spec.SetField(seriesfollow.FieldFollowerID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedFollowerID(); ok {
-		_spec.AddField(seriesfollow.FieldFollowerID, field.TypeUint32, value)
+		_spec.AddField(seriesfollow.FieldFollowerID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.SeriesID(); ok {
-		_spec.SetField(seriesfollow.FieldSeriesID, field.TypeUint32, value)
+		_spec.SetField(seriesfollow.FieldSeriesID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedSeriesID(); ok {
-		_spec.AddField(seriesfollow.FieldSeriesID, field.TypeUint32, value)
+		_spec.AddField(seriesfollow.FieldSeriesID, field.TypeInt64, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -251,14 +251,14 @@ func (_u *SeriesFollowUpdateOne) ClearDeletedAt() *SeriesFollowUpdateOne {
 }
 
 // SetFollowerID sets the "follower_id" field.
-func (_u *SeriesFollowUpdateOne) SetFollowerID(v uint32) *SeriesFollowUpdateOne {
+func (_u *SeriesFollowUpdateOne) SetFollowerID(v int64) *SeriesFollowUpdateOne {
 	_u.mutation.ResetFollowerID()
 	_u.mutation.SetFollowerID(v)
 	return _u
 }
 
 // SetNillableFollowerID sets the "follower_id" field if the given value is not nil.
-func (_u *SeriesFollowUpdateOne) SetNillableFollowerID(v *uint32) *SeriesFollowUpdateOne {
+func (_u *SeriesFollowUpdateOne) SetNillableFollowerID(v *int64) *SeriesFollowUpdateOne {
 	if v != nil {
 		_u.SetFollowerID(*v)
 	}
@@ -266,20 +266,20 @@ func (_u *SeriesFollowUpdateOne) SetNillableFollowerID(v *uint32) *SeriesFollowU
 }
 
 // AddFollowerID adds value to the "follower_id" field.
-func (_u *SeriesFollowUpdateOne) AddFollowerID(v int32) *SeriesFollowUpdateOne {
+func (_u *SeriesFollowUpdateOne) AddFollowerID(v int64) *SeriesFollowUpdateOne {
 	_u.mutation.AddFollowerID(v)
 	return _u
 }
 
 // SetSeriesID sets the "series_id" field.
-func (_u *SeriesFollowUpdateOne) SetSeriesID(v uint32) *SeriesFollowUpdateOne {
+func (_u *SeriesFollowUpdateOne) SetSeriesID(v int64) *SeriesFollowUpdateOne {
 	_u.mutation.ResetSeriesID()
 	_u.mutation.SetSeriesID(v)
 	return _u
 }
 
 // SetNillableSeriesID sets the "series_id" field if the given value is not nil.
-func (_u *SeriesFollowUpdateOne) SetNillableSeriesID(v *uint32) *SeriesFollowUpdateOne {
+func (_u *SeriesFollowUpdateOne) SetNillableSeriesID(v *int64) *SeriesFollowUpdateOne {
 	if v != nil {
 		_u.SetSeriesID(*v)
 	}
@@ -287,7 +287,7 @@ func (_u *SeriesFollowUpdateOne) SetNillableSeriesID(v *uint32) *SeriesFollowUpd
 }
 
 // AddSeriesID adds value to the "series_id" field.
-func (_u *SeriesFollowUpdateOne) AddSeriesID(v int32) *SeriesFollowUpdateOne {
+func (_u *SeriesFollowUpdateOne) AddSeriesID(v int64) *SeriesFollowUpdateOne {
 	_u.mutation.AddSeriesID(v)
 	return _u
 }
@@ -344,7 +344,7 @@ func (_u *SeriesFollowUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder))
 }
 
 func (_u *SeriesFollowUpdateOne) sqlSave(ctx context.Context) (_node *SeriesFollow, err error) {
-	_spec := sqlgraph.NewUpdateSpec(seriesfollow.Table, seriesfollow.Columns, sqlgraph.NewFieldSpec(seriesfollow.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(seriesfollow.Table, seriesfollow.Columns, sqlgraph.NewFieldSpec(seriesfollow.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "SeriesFollow.id" for update`)}
@@ -385,19 +385,19 @@ func (_u *SeriesFollowUpdateOne) sqlSave(ctx context.Context) (_node *SeriesFoll
 		_spec.ClearField(seriesfollow.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(seriesfollow.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(seriesfollow.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.FollowerID(); ok {
-		_spec.SetField(seriesfollow.FieldFollowerID, field.TypeUint32, value)
+		_spec.SetField(seriesfollow.FieldFollowerID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedFollowerID(); ok {
-		_spec.AddField(seriesfollow.FieldFollowerID, field.TypeUint32, value)
+		_spec.AddField(seriesfollow.FieldFollowerID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.SeriesID(); ok {
-		_spec.SetField(seriesfollow.FieldSeriesID, field.TypeUint32, value)
+		_spec.SetField(seriesfollow.FieldSeriesID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedSeriesID(); ok {
-		_spec.AddField(seriesfollow.FieldSeriesID, field.TypeUint32, value)
+		_spec.AddField(seriesfollow.FieldSeriesID, field.TypeInt64, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &SeriesFollow{config: _u.config}

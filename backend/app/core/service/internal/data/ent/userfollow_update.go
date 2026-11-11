@@ -70,14 +70,14 @@ func (_u *UserFollowUpdate) ClearDeletedAt() *UserFollowUpdate {
 }
 
 // SetFollowerID sets the "follower_id" field.
-func (_u *UserFollowUpdate) SetFollowerID(v uint32) *UserFollowUpdate {
+func (_u *UserFollowUpdate) SetFollowerID(v int64) *UserFollowUpdate {
 	_u.mutation.ResetFollowerID()
 	_u.mutation.SetFollowerID(v)
 	return _u
 }
 
 // SetNillableFollowerID sets the "follower_id" field if the given value is not nil.
-func (_u *UserFollowUpdate) SetNillableFollowerID(v *uint32) *UserFollowUpdate {
+func (_u *UserFollowUpdate) SetNillableFollowerID(v *int64) *UserFollowUpdate {
 	if v != nil {
 		_u.SetFollowerID(*v)
 	}
@@ -85,20 +85,20 @@ func (_u *UserFollowUpdate) SetNillableFollowerID(v *uint32) *UserFollowUpdate {
 }
 
 // AddFollowerID adds value to the "follower_id" field.
-func (_u *UserFollowUpdate) AddFollowerID(v int32) *UserFollowUpdate {
+func (_u *UserFollowUpdate) AddFollowerID(v int64) *UserFollowUpdate {
 	_u.mutation.AddFollowerID(v)
 	return _u
 }
 
 // SetFolloweeID sets the "followee_id" field.
-func (_u *UserFollowUpdate) SetFolloweeID(v uint32) *UserFollowUpdate {
+func (_u *UserFollowUpdate) SetFolloweeID(v int64) *UserFollowUpdate {
 	_u.mutation.ResetFolloweeID()
 	_u.mutation.SetFolloweeID(v)
 	return _u
 }
 
 // SetNillableFolloweeID sets the "followee_id" field if the given value is not nil.
-func (_u *UserFollowUpdate) SetNillableFolloweeID(v *uint32) *UserFollowUpdate {
+func (_u *UserFollowUpdate) SetNillableFolloweeID(v *int64) *UserFollowUpdate {
 	if v != nil {
 		_u.SetFolloweeID(*v)
 	}
@@ -106,7 +106,7 @@ func (_u *UserFollowUpdate) SetNillableFolloweeID(v *uint32) *UserFollowUpdate {
 }
 
 // AddFolloweeID adds value to the "followee_id" field.
-func (_u *UserFollowUpdate) AddFolloweeID(v int32) *UserFollowUpdate {
+func (_u *UserFollowUpdate) AddFolloweeID(v int64) *UserFollowUpdate {
 	_u.mutation.AddFolloweeID(v)
 	return _u
 }
@@ -150,7 +150,7 @@ func (_u *UserFollowUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Use
 }
 
 func (_u *UserFollowUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(userfollow.Table, userfollow.Columns, sqlgraph.NewFieldSpec(userfollow.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(userfollow.Table, userfollow.Columns, sqlgraph.NewFieldSpec(userfollow.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -174,19 +174,19 @@ func (_u *UserFollowUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		_spec.ClearField(userfollow.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(userfollow.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(userfollow.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.FollowerID(); ok {
-		_spec.SetField(userfollow.FieldFollowerID, field.TypeUint32, value)
+		_spec.SetField(userfollow.FieldFollowerID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedFollowerID(); ok {
-		_spec.AddField(userfollow.FieldFollowerID, field.TypeUint32, value)
+		_spec.AddField(userfollow.FieldFollowerID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.FolloweeID(); ok {
-		_spec.SetField(userfollow.FieldFolloweeID, field.TypeUint32, value)
+		_spec.SetField(userfollow.FieldFolloweeID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedFolloweeID(); ok {
-		_spec.AddField(userfollow.FieldFolloweeID, field.TypeUint32, value)
+		_spec.AddField(userfollow.FieldFolloweeID, field.TypeInt64, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -251,14 +251,14 @@ func (_u *UserFollowUpdateOne) ClearDeletedAt() *UserFollowUpdateOne {
 }
 
 // SetFollowerID sets the "follower_id" field.
-func (_u *UserFollowUpdateOne) SetFollowerID(v uint32) *UserFollowUpdateOne {
+func (_u *UserFollowUpdateOne) SetFollowerID(v int64) *UserFollowUpdateOne {
 	_u.mutation.ResetFollowerID()
 	_u.mutation.SetFollowerID(v)
 	return _u
 }
 
 // SetNillableFollowerID sets the "follower_id" field if the given value is not nil.
-func (_u *UserFollowUpdateOne) SetNillableFollowerID(v *uint32) *UserFollowUpdateOne {
+func (_u *UserFollowUpdateOne) SetNillableFollowerID(v *int64) *UserFollowUpdateOne {
 	if v != nil {
 		_u.SetFollowerID(*v)
 	}
@@ -266,20 +266,20 @@ func (_u *UserFollowUpdateOne) SetNillableFollowerID(v *uint32) *UserFollowUpdat
 }
 
 // AddFollowerID adds value to the "follower_id" field.
-func (_u *UserFollowUpdateOne) AddFollowerID(v int32) *UserFollowUpdateOne {
+func (_u *UserFollowUpdateOne) AddFollowerID(v int64) *UserFollowUpdateOne {
 	_u.mutation.AddFollowerID(v)
 	return _u
 }
 
 // SetFolloweeID sets the "followee_id" field.
-func (_u *UserFollowUpdateOne) SetFolloweeID(v uint32) *UserFollowUpdateOne {
+func (_u *UserFollowUpdateOne) SetFolloweeID(v int64) *UserFollowUpdateOne {
 	_u.mutation.ResetFolloweeID()
 	_u.mutation.SetFolloweeID(v)
 	return _u
 }
 
 // SetNillableFolloweeID sets the "followee_id" field if the given value is not nil.
-func (_u *UserFollowUpdateOne) SetNillableFolloweeID(v *uint32) *UserFollowUpdateOne {
+func (_u *UserFollowUpdateOne) SetNillableFolloweeID(v *int64) *UserFollowUpdateOne {
 	if v != nil {
 		_u.SetFolloweeID(*v)
 	}
@@ -287,7 +287,7 @@ func (_u *UserFollowUpdateOne) SetNillableFolloweeID(v *uint32) *UserFollowUpdat
 }
 
 // AddFolloweeID adds value to the "followee_id" field.
-func (_u *UserFollowUpdateOne) AddFolloweeID(v int32) *UserFollowUpdateOne {
+func (_u *UserFollowUpdateOne) AddFolloweeID(v int64) *UserFollowUpdateOne {
 	_u.mutation.AddFolloweeID(v)
 	return _u
 }
@@ -344,7 +344,7 @@ func (_u *UserFollowUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *
 }
 
 func (_u *UserFollowUpdateOne) sqlSave(ctx context.Context) (_node *UserFollow, err error) {
-	_spec := sqlgraph.NewUpdateSpec(userfollow.Table, userfollow.Columns, sqlgraph.NewFieldSpec(userfollow.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(userfollow.Table, userfollow.Columns, sqlgraph.NewFieldSpec(userfollow.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "UserFollow.id" for update`)}
@@ -385,19 +385,19 @@ func (_u *UserFollowUpdateOne) sqlSave(ctx context.Context) (_node *UserFollow, 
 		_spec.ClearField(userfollow.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(userfollow.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(userfollow.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.FollowerID(); ok {
-		_spec.SetField(userfollow.FieldFollowerID, field.TypeUint32, value)
+		_spec.SetField(userfollow.FieldFollowerID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedFollowerID(); ok {
-		_spec.AddField(userfollow.FieldFollowerID, field.TypeUint32, value)
+		_spec.AddField(userfollow.FieldFollowerID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.FolloweeID(); ok {
-		_spec.SetField(userfollow.FieldFolloweeID, field.TypeUint32, value)
+		_spec.SetField(userfollow.FieldFolloweeID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedFolloweeID(); ok {
-		_spec.AddField(userfollow.FieldFolloweeID, field.TypeUint32, value)
+		_spec.AddField(userfollow.FieldFolloweeID, field.TypeInt64, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &UserFollow{config: _u.config}

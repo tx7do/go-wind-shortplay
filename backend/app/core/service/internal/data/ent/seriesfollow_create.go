@@ -65,13 +65,13 @@ func (_c *SeriesFollowCreate) SetNillableDeletedAt(v *time.Time) *SeriesFollowCr
 }
 
 // SetTenantID sets the "tenant_id" field.
-func (_c *SeriesFollowCreate) SetTenantID(v uint32) *SeriesFollowCreate {
+func (_c *SeriesFollowCreate) SetTenantID(v int64) *SeriesFollowCreate {
 	_c.mutation.SetTenantID(v)
 	return _c
 }
 
 // SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
-func (_c *SeriesFollowCreate) SetNillableTenantID(v *uint32) *SeriesFollowCreate {
+func (_c *SeriesFollowCreate) SetNillableTenantID(v *int64) *SeriesFollowCreate {
 	if v != nil {
 		_c.SetTenantID(*v)
 	}
@@ -79,13 +79,13 @@ func (_c *SeriesFollowCreate) SetNillableTenantID(v *uint32) *SeriesFollowCreate
 }
 
 // SetFollowerID sets the "follower_id" field.
-func (_c *SeriesFollowCreate) SetFollowerID(v uint32) *SeriesFollowCreate {
+func (_c *SeriesFollowCreate) SetFollowerID(v int64) *SeriesFollowCreate {
 	_c.mutation.SetFollowerID(v)
 	return _c
 }
 
 // SetNillableFollowerID sets the "follower_id" field if the given value is not nil.
-func (_c *SeriesFollowCreate) SetNillableFollowerID(v *uint32) *SeriesFollowCreate {
+func (_c *SeriesFollowCreate) SetNillableFollowerID(v *int64) *SeriesFollowCreate {
 	if v != nil {
 		_c.SetFollowerID(*v)
 	}
@@ -93,13 +93,13 @@ func (_c *SeriesFollowCreate) SetNillableFollowerID(v *uint32) *SeriesFollowCrea
 }
 
 // SetSeriesID sets the "series_id" field.
-func (_c *SeriesFollowCreate) SetSeriesID(v uint32) *SeriesFollowCreate {
+func (_c *SeriesFollowCreate) SetSeriesID(v int64) *SeriesFollowCreate {
 	_c.mutation.SetSeriesID(v)
 	return _c
 }
 
 // SetNillableSeriesID sets the "series_id" field if the given value is not nil.
-func (_c *SeriesFollowCreate) SetNillableSeriesID(v *uint32) *SeriesFollowCreate {
+func (_c *SeriesFollowCreate) SetNillableSeriesID(v *int64) *SeriesFollowCreate {
 	if v != nil {
 		_c.SetSeriesID(*v)
 	}
@@ -107,7 +107,7 @@ func (_c *SeriesFollowCreate) SetNillableSeriesID(v *uint32) *SeriesFollowCreate
 }
 
 // SetID sets the "id" field.
-func (_c *SeriesFollowCreate) SetID(v uint32) *SeriesFollowCreate {
+func (_c *SeriesFollowCreate) SetID(v int64) *SeriesFollowCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
@@ -193,7 +193,7 @@ func (_c *SeriesFollowCreate) sqlSave(ctx context.Context) (*SeriesFollow, error
 	}
 	if _spec.ID.Value != _node.ID {
 		id := _spec.ID.Value.(int64)
-		_node.ID = uint32(id)
+		_node.ID = int64(id)
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
@@ -203,7 +203,7 @@ func (_c *SeriesFollowCreate) sqlSave(ctx context.Context) (*SeriesFollow, error
 func (_c *SeriesFollowCreate) createSpec() (*SeriesFollow, *sqlgraph.CreateSpec) {
 	var (
 		_node = &SeriesFollow{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(seriesfollow.Table, sqlgraph.NewFieldSpec(seriesfollow.FieldID, field.TypeUint32))
+		_spec = sqlgraph.NewCreateSpec(seriesfollow.Table, sqlgraph.NewFieldSpec(seriesfollow.FieldID, field.TypeInt64))
 	)
 	_spec.OnConflict = _c.conflict
 	if id, ok := _c.mutation.ID(); ok {
@@ -223,15 +223,15 @@ func (_c *SeriesFollowCreate) createSpec() (*SeriesFollow, *sqlgraph.CreateSpec)
 		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.TenantID(); ok {
-		_spec.SetField(seriesfollow.FieldTenantID, field.TypeUint32, value)
+		_spec.SetField(seriesfollow.FieldTenantID, field.TypeInt64, value)
 		_node.TenantID = &value
 	}
 	if value, ok := _c.mutation.FollowerID(); ok {
-		_spec.SetField(seriesfollow.FieldFollowerID, field.TypeUint32, value)
+		_spec.SetField(seriesfollow.FieldFollowerID, field.TypeInt64, value)
 		_node.FollowerID = value
 	}
 	if value, ok := _c.mutation.SeriesID(); ok {
-		_spec.SetField(seriesfollow.FieldSeriesID, field.TypeUint32, value)
+		_spec.SetField(seriesfollow.FieldSeriesID, field.TypeInt64, value)
 		_node.SeriesID = value
 	}
 	return _node, _spec
@@ -323,7 +323,7 @@ func (u *SeriesFollowUpsert) ClearDeletedAt() *SeriesFollowUpsert {
 }
 
 // SetFollowerID sets the "follower_id" field.
-func (u *SeriesFollowUpsert) SetFollowerID(v uint32) *SeriesFollowUpsert {
+func (u *SeriesFollowUpsert) SetFollowerID(v int64) *SeriesFollowUpsert {
 	u.Set(seriesfollow.FieldFollowerID, v)
 	return u
 }
@@ -335,13 +335,13 @@ func (u *SeriesFollowUpsert) UpdateFollowerID() *SeriesFollowUpsert {
 }
 
 // AddFollowerID adds v to the "follower_id" field.
-func (u *SeriesFollowUpsert) AddFollowerID(v uint32) *SeriesFollowUpsert {
+func (u *SeriesFollowUpsert) AddFollowerID(v int64) *SeriesFollowUpsert {
 	u.Add(seriesfollow.FieldFollowerID, v)
 	return u
 }
 
 // SetSeriesID sets the "series_id" field.
-func (u *SeriesFollowUpsert) SetSeriesID(v uint32) *SeriesFollowUpsert {
+func (u *SeriesFollowUpsert) SetSeriesID(v int64) *SeriesFollowUpsert {
 	u.Set(seriesfollow.FieldSeriesID, v)
 	return u
 }
@@ -353,7 +353,7 @@ func (u *SeriesFollowUpsert) UpdateSeriesID() *SeriesFollowUpsert {
 }
 
 // AddSeriesID adds v to the "series_id" field.
-func (u *SeriesFollowUpsert) AddSeriesID(v uint32) *SeriesFollowUpsert {
+func (u *SeriesFollowUpsert) AddSeriesID(v int64) *SeriesFollowUpsert {
 	u.Add(seriesfollow.FieldSeriesID, v)
 	return u
 }
@@ -455,14 +455,14 @@ func (u *SeriesFollowUpsertOne) ClearDeletedAt() *SeriesFollowUpsertOne {
 }
 
 // SetFollowerID sets the "follower_id" field.
-func (u *SeriesFollowUpsertOne) SetFollowerID(v uint32) *SeriesFollowUpsertOne {
+func (u *SeriesFollowUpsertOne) SetFollowerID(v int64) *SeriesFollowUpsertOne {
 	return u.Update(func(s *SeriesFollowUpsert) {
 		s.SetFollowerID(v)
 	})
 }
 
 // AddFollowerID adds v to the "follower_id" field.
-func (u *SeriesFollowUpsertOne) AddFollowerID(v uint32) *SeriesFollowUpsertOne {
+func (u *SeriesFollowUpsertOne) AddFollowerID(v int64) *SeriesFollowUpsertOne {
 	return u.Update(func(s *SeriesFollowUpsert) {
 		s.AddFollowerID(v)
 	})
@@ -476,14 +476,14 @@ func (u *SeriesFollowUpsertOne) UpdateFollowerID() *SeriesFollowUpsertOne {
 }
 
 // SetSeriesID sets the "series_id" field.
-func (u *SeriesFollowUpsertOne) SetSeriesID(v uint32) *SeriesFollowUpsertOne {
+func (u *SeriesFollowUpsertOne) SetSeriesID(v int64) *SeriesFollowUpsertOne {
 	return u.Update(func(s *SeriesFollowUpsert) {
 		s.SetSeriesID(v)
 	})
 }
 
 // AddSeriesID adds v to the "series_id" field.
-func (u *SeriesFollowUpsertOne) AddSeriesID(v uint32) *SeriesFollowUpsertOne {
+func (u *SeriesFollowUpsertOne) AddSeriesID(v int64) *SeriesFollowUpsertOne {
 	return u.Update(func(s *SeriesFollowUpsert) {
 		s.AddSeriesID(v)
 	})
@@ -512,7 +512,7 @@ func (u *SeriesFollowUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *SeriesFollowUpsertOne) ID(ctx context.Context) (id uint32, err error) {
+func (u *SeriesFollowUpsertOne) ID(ctx context.Context) (id int64, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -521,7 +521,7 @@ func (u *SeriesFollowUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *SeriesFollowUpsertOne) IDX(ctx context.Context) uint32 {
+func (u *SeriesFollowUpsertOne) IDX(ctx context.Context) int64 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -578,7 +578,7 @@ func (_c *SeriesFollowCreateBulk) Save(ctx context.Context) ([]*SeriesFollow, er
 				mutation.id = &nodes[i].ID
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = uint32(id)
+					nodes[i].ID = int64(id)
 				}
 				mutation.done = true
 				return nodes[i], nil
@@ -759,14 +759,14 @@ func (u *SeriesFollowUpsertBulk) ClearDeletedAt() *SeriesFollowUpsertBulk {
 }
 
 // SetFollowerID sets the "follower_id" field.
-func (u *SeriesFollowUpsertBulk) SetFollowerID(v uint32) *SeriesFollowUpsertBulk {
+func (u *SeriesFollowUpsertBulk) SetFollowerID(v int64) *SeriesFollowUpsertBulk {
 	return u.Update(func(s *SeriesFollowUpsert) {
 		s.SetFollowerID(v)
 	})
 }
 
 // AddFollowerID adds v to the "follower_id" field.
-func (u *SeriesFollowUpsertBulk) AddFollowerID(v uint32) *SeriesFollowUpsertBulk {
+func (u *SeriesFollowUpsertBulk) AddFollowerID(v int64) *SeriesFollowUpsertBulk {
 	return u.Update(func(s *SeriesFollowUpsert) {
 		s.AddFollowerID(v)
 	})
@@ -780,14 +780,14 @@ func (u *SeriesFollowUpsertBulk) UpdateFollowerID() *SeriesFollowUpsertBulk {
 }
 
 // SetSeriesID sets the "series_id" field.
-func (u *SeriesFollowUpsertBulk) SetSeriesID(v uint32) *SeriesFollowUpsertBulk {
+func (u *SeriesFollowUpsertBulk) SetSeriesID(v int64) *SeriesFollowUpsertBulk {
 	return u.Update(func(s *SeriesFollowUpsert) {
 		s.SetSeriesID(v)
 	})
 }
 
 // AddSeriesID adds v to the "series_id" field.
-func (u *SeriesFollowUpsertBulk) AddSeriesID(v uint32) *SeriesFollowUpsertBulk {
+func (u *SeriesFollowUpsertBulk) AddSeriesID(v int64) *SeriesFollowUpsertBulk {
 	return u.Update(func(s *SeriesFollowUpsert) {
 		s.AddSeriesID(v)
 	})

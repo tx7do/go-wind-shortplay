@@ -65,13 +65,13 @@ func (_c *VideoTagRelCreate) SetNillableDeletedAt(v *time.Time) *VideoTagRelCrea
 }
 
 // SetTenantID sets the "tenant_id" field.
-func (_c *VideoTagRelCreate) SetTenantID(v uint32) *VideoTagRelCreate {
+func (_c *VideoTagRelCreate) SetTenantID(v int64) *VideoTagRelCreate {
 	_c.mutation.SetTenantID(v)
 	return _c
 }
 
 // SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
-func (_c *VideoTagRelCreate) SetNillableTenantID(v *uint32) *VideoTagRelCreate {
+func (_c *VideoTagRelCreate) SetNillableTenantID(v *int64) *VideoTagRelCreate {
 	if v != nil {
 		_c.SetTenantID(*v)
 	}
@@ -79,13 +79,13 @@ func (_c *VideoTagRelCreate) SetNillableTenantID(v *uint32) *VideoTagRelCreate {
 }
 
 // SetVideoID sets the "video_id" field.
-func (_c *VideoTagRelCreate) SetVideoID(v uint32) *VideoTagRelCreate {
+func (_c *VideoTagRelCreate) SetVideoID(v int64) *VideoTagRelCreate {
 	_c.mutation.SetVideoID(v)
 	return _c
 }
 
 // SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_c *VideoTagRelCreate) SetNillableVideoID(v *uint32) *VideoTagRelCreate {
+func (_c *VideoTagRelCreate) SetNillableVideoID(v *int64) *VideoTagRelCreate {
 	if v != nil {
 		_c.SetVideoID(*v)
 	}
@@ -93,13 +93,13 @@ func (_c *VideoTagRelCreate) SetNillableVideoID(v *uint32) *VideoTagRelCreate {
 }
 
 // SetTagID sets the "tag_id" field.
-func (_c *VideoTagRelCreate) SetTagID(v uint32) *VideoTagRelCreate {
+func (_c *VideoTagRelCreate) SetTagID(v int64) *VideoTagRelCreate {
 	_c.mutation.SetTagID(v)
 	return _c
 }
 
 // SetNillableTagID sets the "tag_id" field if the given value is not nil.
-func (_c *VideoTagRelCreate) SetNillableTagID(v *uint32) *VideoTagRelCreate {
+func (_c *VideoTagRelCreate) SetNillableTagID(v *int64) *VideoTagRelCreate {
 	if v != nil {
 		_c.SetTagID(*v)
 	}
@@ -107,7 +107,7 @@ func (_c *VideoTagRelCreate) SetNillableTagID(v *uint32) *VideoTagRelCreate {
 }
 
 // SetID sets the "id" field.
-func (_c *VideoTagRelCreate) SetID(v uint32) *VideoTagRelCreate {
+func (_c *VideoTagRelCreate) SetID(v int64) *VideoTagRelCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
@@ -193,7 +193,7 @@ func (_c *VideoTagRelCreate) sqlSave(ctx context.Context) (*VideoTagRel, error) 
 	}
 	if _spec.ID.Value != _node.ID {
 		id := _spec.ID.Value.(int64)
-		_node.ID = uint32(id)
+		_node.ID = int64(id)
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
@@ -203,7 +203,7 @@ func (_c *VideoTagRelCreate) sqlSave(ctx context.Context) (*VideoTagRel, error) 
 func (_c *VideoTagRelCreate) createSpec() (*VideoTagRel, *sqlgraph.CreateSpec) {
 	var (
 		_node = &VideoTagRel{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(videotagrel.Table, sqlgraph.NewFieldSpec(videotagrel.FieldID, field.TypeUint32))
+		_spec = sqlgraph.NewCreateSpec(videotagrel.Table, sqlgraph.NewFieldSpec(videotagrel.FieldID, field.TypeInt64))
 	)
 	_spec.OnConflict = _c.conflict
 	if id, ok := _c.mutation.ID(); ok {
@@ -223,15 +223,15 @@ func (_c *VideoTagRelCreate) createSpec() (*VideoTagRel, *sqlgraph.CreateSpec) {
 		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.TenantID(); ok {
-		_spec.SetField(videotagrel.FieldTenantID, field.TypeUint32, value)
+		_spec.SetField(videotagrel.FieldTenantID, field.TypeInt64, value)
 		_node.TenantID = &value
 	}
 	if value, ok := _c.mutation.VideoID(); ok {
-		_spec.SetField(videotagrel.FieldVideoID, field.TypeUint32, value)
+		_spec.SetField(videotagrel.FieldVideoID, field.TypeInt64, value)
 		_node.VideoID = value
 	}
 	if value, ok := _c.mutation.TagID(); ok {
-		_spec.SetField(videotagrel.FieldTagID, field.TypeUint32, value)
+		_spec.SetField(videotagrel.FieldTagID, field.TypeInt64, value)
 		_node.TagID = value
 	}
 	return _node, _spec
@@ -323,7 +323,7 @@ func (u *VideoTagRelUpsert) ClearDeletedAt() *VideoTagRelUpsert {
 }
 
 // SetVideoID sets the "video_id" field.
-func (u *VideoTagRelUpsert) SetVideoID(v uint32) *VideoTagRelUpsert {
+func (u *VideoTagRelUpsert) SetVideoID(v int64) *VideoTagRelUpsert {
 	u.Set(videotagrel.FieldVideoID, v)
 	return u
 }
@@ -335,13 +335,13 @@ func (u *VideoTagRelUpsert) UpdateVideoID() *VideoTagRelUpsert {
 }
 
 // AddVideoID adds v to the "video_id" field.
-func (u *VideoTagRelUpsert) AddVideoID(v uint32) *VideoTagRelUpsert {
+func (u *VideoTagRelUpsert) AddVideoID(v int64) *VideoTagRelUpsert {
 	u.Add(videotagrel.FieldVideoID, v)
 	return u
 }
 
 // SetTagID sets the "tag_id" field.
-func (u *VideoTagRelUpsert) SetTagID(v uint32) *VideoTagRelUpsert {
+func (u *VideoTagRelUpsert) SetTagID(v int64) *VideoTagRelUpsert {
 	u.Set(videotagrel.FieldTagID, v)
 	return u
 }
@@ -353,7 +353,7 @@ func (u *VideoTagRelUpsert) UpdateTagID() *VideoTagRelUpsert {
 }
 
 // AddTagID adds v to the "tag_id" field.
-func (u *VideoTagRelUpsert) AddTagID(v uint32) *VideoTagRelUpsert {
+func (u *VideoTagRelUpsert) AddTagID(v int64) *VideoTagRelUpsert {
 	u.Add(videotagrel.FieldTagID, v)
 	return u
 }
@@ -455,14 +455,14 @@ func (u *VideoTagRelUpsertOne) ClearDeletedAt() *VideoTagRelUpsertOne {
 }
 
 // SetVideoID sets the "video_id" field.
-func (u *VideoTagRelUpsertOne) SetVideoID(v uint32) *VideoTagRelUpsertOne {
+func (u *VideoTagRelUpsertOne) SetVideoID(v int64) *VideoTagRelUpsertOne {
 	return u.Update(func(s *VideoTagRelUpsert) {
 		s.SetVideoID(v)
 	})
 }
 
 // AddVideoID adds v to the "video_id" field.
-func (u *VideoTagRelUpsertOne) AddVideoID(v uint32) *VideoTagRelUpsertOne {
+func (u *VideoTagRelUpsertOne) AddVideoID(v int64) *VideoTagRelUpsertOne {
 	return u.Update(func(s *VideoTagRelUpsert) {
 		s.AddVideoID(v)
 	})
@@ -476,14 +476,14 @@ func (u *VideoTagRelUpsertOne) UpdateVideoID() *VideoTagRelUpsertOne {
 }
 
 // SetTagID sets the "tag_id" field.
-func (u *VideoTagRelUpsertOne) SetTagID(v uint32) *VideoTagRelUpsertOne {
+func (u *VideoTagRelUpsertOne) SetTagID(v int64) *VideoTagRelUpsertOne {
 	return u.Update(func(s *VideoTagRelUpsert) {
 		s.SetTagID(v)
 	})
 }
 
 // AddTagID adds v to the "tag_id" field.
-func (u *VideoTagRelUpsertOne) AddTagID(v uint32) *VideoTagRelUpsertOne {
+func (u *VideoTagRelUpsertOne) AddTagID(v int64) *VideoTagRelUpsertOne {
 	return u.Update(func(s *VideoTagRelUpsert) {
 		s.AddTagID(v)
 	})
@@ -512,7 +512,7 @@ func (u *VideoTagRelUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *VideoTagRelUpsertOne) ID(ctx context.Context) (id uint32, err error) {
+func (u *VideoTagRelUpsertOne) ID(ctx context.Context) (id int64, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -521,7 +521,7 @@ func (u *VideoTagRelUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *VideoTagRelUpsertOne) IDX(ctx context.Context) uint32 {
+func (u *VideoTagRelUpsertOne) IDX(ctx context.Context) int64 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -578,7 +578,7 @@ func (_c *VideoTagRelCreateBulk) Save(ctx context.Context) ([]*VideoTagRel, erro
 				mutation.id = &nodes[i].ID
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = uint32(id)
+					nodes[i].ID = int64(id)
 				}
 				mutation.done = true
 				return nodes[i], nil
@@ -759,14 +759,14 @@ func (u *VideoTagRelUpsertBulk) ClearDeletedAt() *VideoTagRelUpsertBulk {
 }
 
 // SetVideoID sets the "video_id" field.
-func (u *VideoTagRelUpsertBulk) SetVideoID(v uint32) *VideoTagRelUpsertBulk {
+func (u *VideoTagRelUpsertBulk) SetVideoID(v int64) *VideoTagRelUpsertBulk {
 	return u.Update(func(s *VideoTagRelUpsert) {
 		s.SetVideoID(v)
 	})
 }
 
 // AddVideoID adds v to the "video_id" field.
-func (u *VideoTagRelUpsertBulk) AddVideoID(v uint32) *VideoTagRelUpsertBulk {
+func (u *VideoTagRelUpsertBulk) AddVideoID(v int64) *VideoTagRelUpsertBulk {
 	return u.Update(func(s *VideoTagRelUpsert) {
 		s.AddVideoID(v)
 	})
@@ -780,14 +780,14 @@ func (u *VideoTagRelUpsertBulk) UpdateVideoID() *VideoTagRelUpsertBulk {
 }
 
 // SetTagID sets the "tag_id" field.
-func (u *VideoTagRelUpsertBulk) SetTagID(v uint32) *VideoTagRelUpsertBulk {
+func (u *VideoTagRelUpsertBulk) SetTagID(v int64) *VideoTagRelUpsertBulk {
 	return u.Update(func(s *VideoTagRelUpsert) {
 		s.SetTagID(v)
 	})
 }
 
 // AddTagID adds v to the "tag_id" field.
-func (u *VideoTagRelUpsertBulk) AddTagID(v uint32) *VideoTagRelUpsertBulk {
+func (u *VideoTagRelUpsertBulk) AddTagID(v int64) *VideoTagRelUpsertBulk {
 	return u.Update(func(s *VideoTagRelUpsert) {
 		s.AddTagID(v)
 	})

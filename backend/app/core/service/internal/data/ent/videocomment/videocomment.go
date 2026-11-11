@@ -82,15 +82,15 @@ var (
 	Hooks  [1]ent.Hook
 	Policy ent.Policy
 	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
-	DefaultTenantID uint32
+	DefaultTenantID int64
 	// DefaultVideoID holds the default value on creation for the "video_id" field.
-	DefaultVideoID uint32
+	DefaultVideoID int64
 	// DefaultUserID holds the default value on creation for the "user_id" field.
-	DefaultUserID uint32
+	DefaultUserID int64
 	// DefaultContent holds the default value on creation for the "content" field.
 	DefaultContent string
 	// DefaultParentID holds the default value on creation for the "parent_id" field.
-	DefaultParentID uint32
+	DefaultParentID int64
 	// DefaultLikeCount holds the default value on creation for the "like_count" field.
 	DefaultLikeCount uint64
 	// DefaultReplyCount holds the default value on creation for the "reply_count" field.
@@ -98,7 +98,7 @@ var (
 	// DefaultPinned holds the default value on creation for the "pinned" field.
 	DefaultPinned bool
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(uint32) error
+	IDValidator func(int64) error
 )
 
 // OrderOption defines the ordering options for the VideoComment queries.

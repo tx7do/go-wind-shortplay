@@ -69,17 +69,17 @@ var (
 	Hooks  [1]ent.Hook
 	Policy ent.Policy
 	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
-	DefaultTenantID uint32
+	DefaultTenantID int64
 	// DefaultVideoID holds the default value on creation for the "video_id" field.
-	DefaultVideoID uint32
+	DefaultVideoID int64
 	// DefaultUserID holds the default value on creation for the "user_id" field.
-	DefaultUserID uint32
+	DefaultUserID int64
 	// DefaultContent holds the default value on creation for the "content" field.
 	DefaultContent string
 	// DefaultTimeOffsetMs holds the default value on creation for the "time_offset_ms" field.
 	DefaultTimeOffsetMs uint64
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(uint32) error
+	IDValidator func(int64) error
 )
 
 // Status defines the type for the "status" enum field.

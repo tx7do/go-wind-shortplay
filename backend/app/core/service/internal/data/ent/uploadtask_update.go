@@ -162,13 +162,13 @@ func (_u *UploadTaskUpdate) AddTotalChunks(v int32) *UploadTaskUpdate {
 }
 
 // SetUploadedChunks sets the "uploaded_chunks" field.
-func (_u *UploadTaskUpdate) SetUploadedChunks(v []uint32) *UploadTaskUpdate {
+func (_u *UploadTaskUpdate) SetUploadedChunks(v []int64) *UploadTaskUpdate {
 	_u.mutation.SetUploadedChunks(v)
 	return _u
 }
 
 // AppendUploadedChunks appends value to the "uploaded_chunks" field.
-func (_u *UploadTaskUpdate) AppendUploadedChunks(v []uint32) *UploadTaskUpdate {
+func (_u *UploadTaskUpdate) AppendUploadedChunks(v []int64) *UploadTaskUpdate {
 	_u.mutation.AppendUploadedChunks(v)
 	return _u
 }
@@ -214,14 +214,14 @@ func (_u *UploadTaskUpdate) ClearFileKey() *UploadTaskUpdate {
 }
 
 // SetVideoID sets the "video_id" field.
-func (_u *UploadTaskUpdate) SetVideoID(v uint32) *UploadTaskUpdate {
+func (_u *UploadTaskUpdate) SetVideoID(v int64) *UploadTaskUpdate {
 	_u.mutation.ResetVideoID()
 	_u.mutation.SetVideoID(v)
 	return _u
 }
 
 // SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_u *UploadTaskUpdate) SetNillableVideoID(v *uint32) *UploadTaskUpdate {
+func (_u *UploadTaskUpdate) SetNillableVideoID(v *int64) *UploadTaskUpdate {
 	if v != nil {
 		_u.SetVideoID(*v)
 	}
@@ -229,20 +229,20 @@ func (_u *UploadTaskUpdate) SetNillableVideoID(v *uint32) *UploadTaskUpdate {
 }
 
 // AddVideoID adds value to the "video_id" field.
-func (_u *UploadTaskUpdate) AddVideoID(v int32) *UploadTaskUpdate {
+func (_u *UploadTaskUpdate) AddVideoID(v int64) *UploadTaskUpdate {
 	_u.mutation.AddVideoID(v)
 	return _u
 }
 
 // SetAuthorID sets the "author_id" field.
-func (_u *UploadTaskUpdate) SetAuthorID(v uint32) *UploadTaskUpdate {
+func (_u *UploadTaskUpdate) SetAuthorID(v int64) *UploadTaskUpdate {
 	_u.mutation.ResetAuthorID()
 	_u.mutation.SetAuthorID(v)
 	return _u
 }
 
 // SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (_u *UploadTaskUpdate) SetNillableAuthorID(v *uint32) *UploadTaskUpdate {
+func (_u *UploadTaskUpdate) SetNillableAuthorID(v *int64) *UploadTaskUpdate {
 	if v != nil {
 		_u.SetAuthorID(*v)
 	}
@@ -250,7 +250,7 @@ func (_u *UploadTaskUpdate) SetNillableAuthorID(v *uint32) *UploadTaskUpdate {
 }
 
 // AddAuthorID adds value to the "author_id" field.
-func (_u *UploadTaskUpdate) AddAuthorID(v int32) *UploadTaskUpdate {
+func (_u *UploadTaskUpdate) AddAuthorID(v int64) *UploadTaskUpdate {
 	_u.mutation.AddAuthorID(v)
 	return _u
 }
@@ -317,7 +317,7 @@ func (_u *UploadTaskUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(uploadtask.Table, uploadtask.Columns, sqlgraph.NewFieldSpec(uploadtask.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(uploadtask.Table, uploadtask.Columns, sqlgraph.NewFieldSpec(uploadtask.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -341,7 +341,7 @@ func (_u *UploadTaskUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		_spec.ClearField(uploadtask.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(uploadtask.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(uploadtask.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.TaskID(); ok {
 		_spec.SetField(uploadtask.FieldTaskID, field.TypeString, value)
@@ -388,16 +388,16 @@ func (_u *UploadTaskUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		_spec.ClearField(uploadtask.FieldFileKey, field.TypeString)
 	}
 	if value, ok := _u.mutation.VideoID(); ok {
-		_spec.SetField(uploadtask.FieldVideoID, field.TypeUint32, value)
+		_spec.SetField(uploadtask.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedVideoID(); ok {
-		_spec.AddField(uploadtask.FieldVideoID, field.TypeUint32, value)
+		_spec.AddField(uploadtask.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AuthorID(); ok {
-		_spec.SetField(uploadtask.FieldAuthorID, field.TypeUint32, value)
+		_spec.SetField(uploadtask.FieldAuthorID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedAuthorID(); ok {
-		_spec.AddField(uploadtask.FieldAuthorID, field.TypeUint32, value)
+		_spec.AddField(uploadtask.FieldAuthorID, field.TypeInt64, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -553,13 +553,13 @@ func (_u *UploadTaskUpdateOne) AddTotalChunks(v int32) *UploadTaskUpdateOne {
 }
 
 // SetUploadedChunks sets the "uploaded_chunks" field.
-func (_u *UploadTaskUpdateOne) SetUploadedChunks(v []uint32) *UploadTaskUpdateOne {
+func (_u *UploadTaskUpdateOne) SetUploadedChunks(v []int64) *UploadTaskUpdateOne {
 	_u.mutation.SetUploadedChunks(v)
 	return _u
 }
 
 // AppendUploadedChunks appends value to the "uploaded_chunks" field.
-func (_u *UploadTaskUpdateOne) AppendUploadedChunks(v []uint32) *UploadTaskUpdateOne {
+func (_u *UploadTaskUpdateOne) AppendUploadedChunks(v []int64) *UploadTaskUpdateOne {
 	_u.mutation.AppendUploadedChunks(v)
 	return _u
 }
@@ -605,14 +605,14 @@ func (_u *UploadTaskUpdateOne) ClearFileKey() *UploadTaskUpdateOne {
 }
 
 // SetVideoID sets the "video_id" field.
-func (_u *UploadTaskUpdateOne) SetVideoID(v uint32) *UploadTaskUpdateOne {
+func (_u *UploadTaskUpdateOne) SetVideoID(v int64) *UploadTaskUpdateOne {
 	_u.mutation.ResetVideoID()
 	_u.mutation.SetVideoID(v)
 	return _u
 }
 
 // SetNillableVideoID sets the "video_id" field if the given value is not nil.
-func (_u *UploadTaskUpdateOne) SetNillableVideoID(v *uint32) *UploadTaskUpdateOne {
+func (_u *UploadTaskUpdateOne) SetNillableVideoID(v *int64) *UploadTaskUpdateOne {
 	if v != nil {
 		_u.SetVideoID(*v)
 	}
@@ -620,20 +620,20 @@ func (_u *UploadTaskUpdateOne) SetNillableVideoID(v *uint32) *UploadTaskUpdateOn
 }
 
 // AddVideoID adds value to the "video_id" field.
-func (_u *UploadTaskUpdateOne) AddVideoID(v int32) *UploadTaskUpdateOne {
+func (_u *UploadTaskUpdateOne) AddVideoID(v int64) *UploadTaskUpdateOne {
 	_u.mutation.AddVideoID(v)
 	return _u
 }
 
 // SetAuthorID sets the "author_id" field.
-func (_u *UploadTaskUpdateOne) SetAuthorID(v uint32) *UploadTaskUpdateOne {
+func (_u *UploadTaskUpdateOne) SetAuthorID(v int64) *UploadTaskUpdateOne {
 	_u.mutation.ResetAuthorID()
 	_u.mutation.SetAuthorID(v)
 	return _u
 }
 
 // SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (_u *UploadTaskUpdateOne) SetNillableAuthorID(v *uint32) *UploadTaskUpdateOne {
+func (_u *UploadTaskUpdateOne) SetNillableAuthorID(v *int64) *UploadTaskUpdateOne {
 	if v != nil {
 		_u.SetAuthorID(*v)
 	}
@@ -641,7 +641,7 @@ func (_u *UploadTaskUpdateOne) SetNillableAuthorID(v *uint32) *UploadTaskUpdateO
 }
 
 // AddAuthorID adds value to the "author_id" field.
-func (_u *UploadTaskUpdateOne) AddAuthorID(v int32) *UploadTaskUpdateOne {
+func (_u *UploadTaskUpdateOne) AddAuthorID(v int64) *UploadTaskUpdateOne {
 	_u.mutation.AddAuthorID(v)
 	return _u
 }
@@ -721,7 +721,7 @@ func (_u *UploadTaskUpdateOne) sqlSave(ctx context.Context) (_node *UploadTask, 
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(uploadtask.Table, uploadtask.Columns, sqlgraph.NewFieldSpec(uploadtask.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewUpdateSpec(uploadtask.Table, uploadtask.Columns, sqlgraph.NewFieldSpec(uploadtask.FieldID, field.TypeInt64))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "UploadTask.id" for update`)}
@@ -762,7 +762,7 @@ func (_u *UploadTaskUpdateOne) sqlSave(ctx context.Context) (_node *UploadTask, 
 		_spec.ClearField(uploadtask.FieldDeletedAt, field.TypeTime)
 	}
 	if _u.mutation.TenantIDCleared() {
-		_spec.ClearField(uploadtask.FieldTenantID, field.TypeUint32)
+		_spec.ClearField(uploadtask.FieldTenantID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.TaskID(); ok {
 		_spec.SetField(uploadtask.FieldTaskID, field.TypeString, value)
@@ -809,16 +809,16 @@ func (_u *UploadTaskUpdateOne) sqlSave(ctx context.Context) (_node *UploadTask, 
 		_spec.ClearField(uploadtask.FieldFileKey, field.TypeString)
 	}
 	if value, ok := _u.mutation.VideoID(); ok {
-		_spec.SetField(uploadtask.FieldVideoID, field.TypeUint32, value)
+		_spec.SetField(uploadtask.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedVideoID(); ok {
-		_spec.AddField(uploadtask.FieldVideoID, field.TypeUint32, value)
+		_spec.AddField(uploadtask.FieldVideoID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AuthorID(); ok {
-		_spec.SetField(uploadtask.FieldAuthorID, field.TypeUint32, value)
+		_spec.SetField(uploadtask.FieldAuthorID, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedAuthorID(); ok {
-		_spec.AddField(uploadtask.FieldAuthorID, field.TypeUint32, value)
+		_spec.AddField(uploadtask.FieldAuthorID, field.TypeInt64, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &UploadTask{config: _u.config}

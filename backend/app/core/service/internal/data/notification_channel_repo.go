@@ -120,8 +120,8 @@ func (r *NotificationChannelRepo) fillSecretFlagsByIDs(ctx context.Context, item
 		r.log.Errorf("query credential flags failed: %s", err.Error())
 		return
 	}
-	hasSmtpPwd := make(map[uint32]bool, len(entities))
-	hasWebhookSecret := make(map[uint32]bool, len(entities))
+	hasSmtpPwd := make(map[int64]bool, len(entities))
+	hasWebhookSecret := make(map[int64]bool, len(entities))
 	for _, e := range entities {
 		hasSmtpPwd[e.ID] = e.SMTPPassword != nil
 		hasWebhookSecret[e.ID] = e.WebhookSecret != nil
@@ -145,7 +145,7 @@ func (r *NotificationChannelRepo) fillEnabledByIDs(ctx context.Context, items []
 		r.log.Errorf("query channel statuses failed: %s", err.Error())
 		return
 	}
-	statuses := make(map[uint32]notificationchannel.Status, len(entities))
+	statuses := make(map[int64]notificationchannel.Status, len(entities))
 	for _, e := range entities {
 		if e.Status != nil {
 			statuses[e.ID] = *e.Status
@@ -158,7 +158,7 @@ func (r *NotificationChannelRepo) fillEnabledByIDs(ctx context.Context, items []
 }
 
 // Get 按 ID 查询渠道（脱敏：DTO 不含凭据，仅 Has* 标识）。
-func (r *NotificationChannelRepo) Get(ctx context.Context, id uint32) (*notifyV1.NotificationChannel, error) {
+func (r *NotificationChannelRepo) Get(ctx context.Context, id int64) (*notifyV1.NotificationChannel, error) {
 	entity, err := r.entClient.Client().NotificationChannel.Get(ctx, id)
 	if err != nil {
 		r.log.Errorf("get notification channel [%d] failed: %s", id, err.Error())
@@ -314,7 +314,7 @@ func (r *NotificationChannelRepo) Update(ctx context.Context, req *notifyV1.Upda
 	return r.Get(ctx, req.GetId())
 }
 
-func (r *NotificationChannelRepo) Delete(ctx context.Context, id uint32) error {
+func (r *NotificationChannelRepo) Delete(ctx context.Context, id int64) error {
 	if id == 0 {
 		return errors.BadRequest("NOTIFICATION_CHANNEL", "id is required")
 	}
@@ -335,9 +335,9 @@ func (r *NotificationChannelRepo) Delete(ctx context.Context, id uint32) error {
 // ID 是这条配置在 notification_channels 里的主键：渠道自选后还要靠它把
 // "实际用了哪个账号"写回投递台账。
 type SmtpAccount struct {
-	ID       uint32
+	ID       int64
 	Host     string
-	Port     uint32
+	Port     int64
 	Username string
 	Password string
 	From     string
@@ -368,7 +368,7 @@ func (r *NotificationChannelRepo) GetFirstEnabledEmailChannel(ctx context.Contex
 
 // GetDecryptedSmtpAccount 取指定渠道的解密 SMTP 配置；类型不符即报错，
 // 免得一条 WEBHOOK 行被当 SMTP 账号使（反向守卫在 EmailSender.resolveAccount）。
-func (r *NotificationChannelRepo) GetDecryptedSmtpAccount(ctx context.Context, id uint32) (*SmtpAccount, error) {
+func (r *NotificationChannelRepo) GetDecryptedSmtpAccount(ctx context.Context, id int64) (*SmtpAccount, error) {
 	entity, err := r.entClient.Client().NotificationChannel.Query().
 		Where(notificationchannel.IDEQ(id)).
 		Only(ctx)
@@ -403,7 +403,7 @@ func (r *NotificationChannelRepo) smtpAccountOf(ctx context.Context, entity *ent
 	return &SmtpAccount{
 		ID:       entity.ID,
 		Host:     derefString(entity.SMTPHost),
-		Port:     derefUint32(entity.SMTPPort),
+		Port:     int64(int64(derefU32v(entity.SMTPPort))),
 		Username: derefString(entity.SMTPUsername),
 		Password: password,
 		From:     derefString(entity.SMTPFrom),
@@ -419,7 +419,7 @@ func (r *NotificationChannelRepo) smtpAccountOf(ctx context.Context, entity *ent
 // 与 SmtpAccount 同形：ID 是"实际用了哪条渠道配置"这条事实的来源，
 // URL 是回调地址，Secret 为空表示不签名（签名头不下发）。
 type WebhookAccount struct {
-	ID     uint32
+	ID     int64
 	URL    string
 	Secret string
 
@@ -454,7 +454,7 @@ func (r *NotificationChannelRepo) GetFirstEnabledWebhookChannel(ctx context.Cont
 
 // GetDecryptedWebhookAccount 取指定渠道的解密 WEBHOOK 配置；类型不符即报错，
 // 免得一条 SMTP 行被当 webhook 目标使（反向守卫在 WebhookSender.resolveAccount）。
-func (r *NotificationChannelRepo) GetDecryptedWebhookAccount(ctx context.Context, id uint32) (*WebhookAccount, error) {
+func (r *NotificationChannelRepo) GetDecryptedWebhookAccount(ctx context.Context, id int64) (*WebhookAccount, error) {
 	entity, err := r.entClient.Client().NotificationChannel.Query().
 		Where(notificationchannel.IDEQ(id)).
 		Only(ctx)
@@ -508,7 +508,7 @@ func statusFromEnabled(enabled bool) notificationchannel.Status {
 }
 
 // derefUint32 nil 安全解引用（ent 数值字段为 nillable 指针）。
-func derefUint32(v *uint32) uint32 {
+func derefUint32(v *int64) int64 {
 	if v == nil {
 		return 0
 	}

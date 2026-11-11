@@ -40,7 +40,7 @@ func (_d *DanmakuDelete) ExecX(ctx context.Context) int {
 }
 
 func (_d *DanmakuDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(danmaku.Table, sqlgraph.NewFieldSpec(danmaku.FieldID, field.TypeUint32))
+	_spec := sqlgraph.NewDeleteSpec(danmaku.Table, sqlgraph.NewFieldSpec(danmaku.FieldID, field.TypeInt64))
 	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

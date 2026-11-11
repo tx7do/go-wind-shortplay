@@ -90,17 +90,17 @@ var (
 	Hooks  [1]ent.Hook
 	Policy ent.Policy
 	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
-	DefaultTenantID uint32
+	DefaultTenantID int64
 	// DefaultReporterID holds the default value on creation for the "reporter_id" field.
-	DefaultReporterID uint32
+	DefaultReporterID int64
 	// DefaultTargetID holds the default value on creation for the "target_id" field.
-	DefaultTargetID uint32
+	DefaultTargetID int64
 	// ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
 	ReasonValidator func(string) error
 	// DefaultHandledBy holds the default value on creation for the "handled_by" field.
-	DefaultHandledBy uint32
+	DefaultHandledBy int64
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(uint32) error
+	IDValidator func(int64) error
 )
 
 // TargetType defines the type for the "target_type" enum field.

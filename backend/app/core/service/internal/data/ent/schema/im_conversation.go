@@ -32,11 +32,11 @@ func (ImConversation) Annotations() []schema.Annotation {
 // Fields of the ImConversation.
 func (ImConversation) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint32("participant_a_id").
+		field.Int64("participant_a_id").
 			Comment("参与方A（较小用户ID）").
 			Default(0),
 
-		field.Uint32("participant_b_id").
+		field.Int64("participant_b_id").
 			Comment("参与方B（较大用户ID）").
 			Default(0),
 
@@ -62,9 +62,9 @@ func (ImConversation) Fields() []ent.Field {
 // Mixin of the ImConversation.
 func (ImConversation) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.AutoIncrementId{},
+		mixin.AutoIncrementId64{},
 		mixin.TimeAt{},
-		mixin.TenantID[uint32]{},
+		mixin.TenantID[int64]{},
 	}
 }
 

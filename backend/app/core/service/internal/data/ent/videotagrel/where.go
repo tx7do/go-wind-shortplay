@@ -10,47 +10,47 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id uint32) predicate.VideoTagRel {
+func ID(id int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uint32) predicate.VideoTagRel {
+func IDEQ(id int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uint32) predicate.VideoTagRel {
+func IDNEQ(id int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uint32) predicate.VideoTagRel {
+func IDIn(ids ...int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...uint32) predicate.VideoTagRel {
+func IDNotIn(ids ...int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id uint32) predicate.VideoTagRel {
+func IDGT(id int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uint32) predicate.VideoTagRel {
+func IDGTE(id int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id uint32) predicate.VideoTagRel {
+func IDLT(id int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uint32) predicate.VideoTagRel {
+func IDLTE(id int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldLTE(FieldID, id))
 }
 
@@ -70,17 +70,17 @@ func DeletedAt(v time.Time) predicate.VideoTagRel {
 }
 
 // TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
-func TenantID(v uint32) predicate.VideoTagRel {
+func TenantID(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldEQ(FieldTenantID, v))
 }
 
 // VideoID applies equality check predicate on the "video_id" field. It's identical to VideoIDEQ.
-func VideoID(v uint32) predicate.VideoTagRel {
+func VideoID(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldEQ(FieldVideoID, v))
 }
 
 // TagID applies equality check predicate on the "tag_id" field. It's identical to TagIDEQ.
-func TagID(v uint32) predicate.VideoTagRel {
+func TagID(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldEQ(FieldTagID, v))
 }
 
@@ -235,42 +235,42 @@ func DeletedAtNotNil() predicate.VideoTagRel {
 }
 
 // TenantIDEQ applies the EQ predicate on the "tenant_id" field.
-func TenantIDEQ(v uint32) predicate.VideoTagRel {
+func TenantIDEQ(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldEQ(FieldTenantID, v))
 }
 
 // TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
-func TenantIDNEQ(v uint32) predicate.VideoTagRel {
+func TenantIDNEQ(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldNEQ(FieldTenantID, v))
 }
 
 // TenantIDIn applies the In predicate on the "tenant_id" field.
-func TenantIDIn(vs ...uint32) predicate.VideoTagRel {
+func TenantIDIn(vs ...int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldIn(FieldTenantID, vs...))
 }
 
 // TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
-func TenantIDNotIn(vs ...uint32) predicate.VideoTagRel {
+func TenantIDNotIn(vs ...int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldNotIn(FieldTenantID, vs...))
 }
 
 // TenantIDGT applies the GT predicate on the "tenant_id" field.
-func TenantIDGT(v uint32) predicate.VideoTagRel {
+func TenantIDGT(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldGT(FieldTenantID, v))
 }
 
 // TenantIDGTE applies the GTE predicate on the "tenant_id" field.
-func TenantIDGTE(v uint32) predicate.VideoTagRel {
+func TenantIDGTE(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldGTE(FieldTenantID, v))
 }
 
 // TenantIDLT applies the LT predicate on the "tenant_id" field.
-func TenantIDLT(v uint32) predicate.VideoTagRel {
+func TenantIDLT(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldLT(FieldTenantID, v))
 }
 
 // TenantIDLTE applies the LTE predicate on the "tenant_id" field.
-func TenantIDLTE(v uint32) predicate.VideoTagRel {
+func TenantIDLTE(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldLTE(FieldTenantID, v))
 }
 
@@ -285,82 +285,82 @@ func TenantIDNotNil() predicate.VideoTagRel {
 }
 
 // VideoIDEQ applies the EQ predicate on the "video_id" field.
-func VideoIDEQ(v uint32) predicate.VideoTagRel {
+func VideoIDEQ(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldEQ(FieldVideoID, v))
 }
 
 // VideoIDNEQ applies the NEQ predicate on the "video_id" field.
-func VideoIDNEQ(v uint32) predicate.VideoTagRel {
+func VideoIDNEQ(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldNEQ(FieldVideoID, v))
 }
 
 // VideoIDIn applies the In predicate on the "video_id" field.
-func VideoIDIn(vs ...uint32) predicate.VideoTagRel {
+func VideoIDIn(vs ...int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldIn(FieldVideoID, vs...))
 }
 
 // VideoIDNotIn applies the NotIn predicate on the "video_id" field.
-func VideoIDNotIn(vs ...uint32) predicate.VideoTagRel {
+func VideoIDNotIn(vs ...int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldNotIn(FieldVideoID, vs...))
 }
 
 // VideoIDGT applies the GT predicate on the "video_id" field.
-func VideoIDGT(v uint32) predicate.VideoTagRel {
+func VideoIDGT(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldGT(FieldVideoID, v))
 }
 
 // VideoIDGTE applies the GTE predicate on the "video_id" field.
-func VideoIDGTE(v uint32) predicate.VideoTagRel {
+func VideoIDGTE(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldGTE(FieldVideoID, v))
 }
 
 // VideoIDLT applies the LT predicate on the "video_id" field.
-func VideoIDLT(v uint32) predicate.VideoTagRel {
+func VideoIDLT(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldLT(FieldVideoID, v))
 }
 
 // VideoIDLTE applies the LTE predicate on the "video_id" field.
-func VideoIDLTE(v uint32) predicate.VideoTagRel {
+func VideoIDLTE(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldLTE(FieldVideoID, v))
 }
 
 // TagIDEQ applies the EQ predicate on the "tag_id" field.
-func TagIDEQ(v uint32) predicate.VideoTagRel {
+func TagIDEQ(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldEQ(FieldTagID, v))
 }
 
 // TagIDNEQ applies the NEQ predicate on the "tag_id" field.
-func TagIDNEQ(v uint32) predicate.VideoTagRel {
+func TagIDNEQ(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldNEQ(FieldTagID, v))
 }
 
 // TagIDIn applies the In predicate on the "tag_id" field.
-func TagIDIn(vs ...uint32) predicate.VideoTagRel {
+func TagIDIn(vs ...int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldIn(FieldTagID, vs...))
 }
 
 // TagIDNotIn applies the NotIn predicate on the "tag_id" field.
-func TagIDNotIn(vs ...uint32) predicate.VideoTagRel {
+func TagIDNotIn(vs ...int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldNotIn(FieldTagID, vs...))
 }
 
 // TagIDGT applies the GT predicate on the "tag_id" field.
-func TagIDGT(v uint32) predicate.VideoTagRel {
+func TagIDGT(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldGT(FieldTagID, v))
 }
 
 // TagIDGTE applies the GTE predicate on the "tag_id" field.
-func TagIDGTE(v uint32) predicate.VideoTagRel {
+func TagIDGTE(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldGTE(FieldTagID, v))
 }
 
 // TagIDLT applies the LT predicate on the "tag_id" field.
-func TagIDLT(v uint32) predicate.VideoTagRel {
+func TagIDLT(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldLT(FieldTagID, v))
 }
 
 // TagIDLTE applies the LTE predicate on the "tag_id" field.
-func TagIDLTE(v uint32) predicate.VideoTagRel {
+func TagIDLTE(v int64) predicate.VideoTagRel {
 	return predicate.VideoTagRel(sql.FieldLTE(FieldTagID, v))
 }
 

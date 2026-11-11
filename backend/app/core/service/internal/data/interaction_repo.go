@@ -39,7 +39,7 @@ func likeTargetEntity(t interactionV1.TargetType) videolike.TargetType {
 }
 
 // ExistsLike 是否已点赞
-func (r *InteractionRepo) ExistsLike(ctx context.Context, userID uint32, t interactionV1.TargetType, targetID uint32) (bool, error) {
+func (r *InteractionRepo) ExistsLike(ctx context.Context, userID int64, t interactionV1.TargetType, targetID int64) (bool, error) {
 	return r.entClient.Client().VideoLike.Query().
 		Where(
 			videolike.UserIDEQ(userID),
@@ -49,7 +49,7 @@ func (r *InteractionRepo) ExistsLike(ctx context.Context, userID uint32, t inter
 }
 
 // CreateLike 点赞入账（存在则 no-op 返回 false）
-func (r *InteractionRepo) CreateLike(ctx context.Context, userID uint32, t interactionV1.TargetType, targetID uint32) (bool, error) {
+func (r *InteractionRepo) CreateLike(ctx context.Context, userID int64, t interactionV1.TargetType, targetID int64) (bool, error) {
 	exist, err := r.ExistsLike(ctx, userID, t, targetID)
 	if err != nil {
 		return false, err
@@ -73,7 +73,7 @@ func (r *InteractionRepo) CreateLike(ctx context.Context, userID uint32, t inter
 }
 
 // DeleteLike 取消点赞（不存在则 no-op 返回 false）
-func (r *InteractionRepo) DeleteLike(ctx context.Context, userID uint32, t interactionV1.TargetType, targetID uint32) (bool, error) {
+func (r *InteractionRepo) DeleteLike(ctx context.Context, userID int64, t interactionV1.TargetType, targetID int64) (bool, error) {
 	n, err := r.entClient.Client().VideoLike.Delete().
 		Where(
 			videolike.UserIDEQ(userID),
@@ -88,7 +88,7 @@ func (r *InteractionRepo) DeleteLike(ctx context.Context, userID uint32, t inter
 }
 
 // CountLikesOfTarget 目标当前点赞总数
-func (r *InteractionRepo) CountLikesOfTarget(ctx context.Context, t interactionV1.TargetType, targetID uint32) (int, error) {
+func (r *InteractionRepo) CountLikesOfTarget(ctx context.Context, t interactionV1.TargetType, targetID int64) (int, error) {
 	return r.entClient.Client().VideoLike.Query().
 		Where(videolike.TargetTypeEQ(likeTargetEntity(t)), videolike.TargetIDEQ(targetID)).
 		Count(ctx)
@@ -97,7 +97,7 @@ func (r *InteractionRepo) CountLikesOfTarget(ctx context.Context, t interactionV
 // ── 台账事务：行入账 + 计数增减同事务提交（全仓铁律 5）──
 
 // LikeVideoWithCounter 视频点赞：台账行 + like_count 同事务。
-func (r *InteractionRepo) LikeVideoWithCounter(ctx context.Context, userID, videoID uint32) (liked bool, likeCount int64, err error) {
+func (r *InteractionRepo) LikeVideoWithCounter(ctx context.Context, userID, videoID int64) (liked bool, likeCount int64, err error) {
 	tx, terr := r.entClient.Client().Tx(ctx)
 	if terr != nil {
 		return false, 0, interactionV1.ErrorInternalServerError("start transaction failed")
@@ -138,7 +138,7 @@ func (r *InteractionRepo) LikeVideoWithCounter(ctx context.Context, userID, vide
 }
 
 // UnlikeVideoWithCounter 视频取消点赞：删台账行 + like_count 同事务。
-func (r *InteractionRepo) UnlikeVideoWithCounter(ctx context.Context, userID, videoID uint32) (removed bool, err error) {
+func (r *InteractionRepo) UnlikeVideoWithCounter(ctx context.Context, userID, videoID int64) (removed bool, err error) {
 	tx, terr := r.entClient.Client().Tx(ctx)
 	if terr != nil {
 		return false, interactionV1.ErrorInternalServerError("start transaction failed")
@@ -172,7 +172,7 @@ func (r *InteractionRepo) UnlikeVideoWithCounter(ctx context.Context, userID, vi
 }
 
 // LikeCommentWithCounter 评论点赞：台账行 + 评论 like_count 同事务。
-func (r *InteractionRepo) LikeCommentWithCounter(ctx context.Context, userID, commentID uint32) (liked bool, err error) {
+func (r *InteractionRepo) LikeCommentWithCounter(ctx context.Context, userID, commentID int64) (liked bool, err error) {
 	tx, terr := r.entClient.Client().Tx(ctx)
 	if terr != nil {
 		return false, interactionV1.ErrorInternalServerError("start transaction failed")
@@ -212,7 +212,7 @@ func (r *InteractionRepo) LikeCommentWithCounter(ctx context.Context, userID, co
 }
 
 // UnlikeCommentWithCounter 评论取消点赞。
-func (r *InteractionRepo) UnlikeCommentWithCounter(ctx context.Context, userID, commentID uint32) (removed bool, err error) {
+func (r *InteractionRepo) UnlikeCommentWithCounter(ctx context.Context, userID, commentID int64) (removed bool, err error) {
 	tx, terr := r.entClient.Client().Tx(ctx)
 	if terr != nil {
 		return false, interactionV1.ErrorInternalServerError("start transaction failed")
@@ -246,7 +246,7 @@ func (r *InteractionRepo) UnlikeCommentWithCounter(ctx context.Context, userID, 
 }
 
 // CollectWithCounter 收藏：台账行 + collect_count 同事务。
-func (r *InteractionRepo) CollectWithCounter(ctx context.Context, userID, videoID uint32) (collected bool, err error) {
+func (r *InteractionRepo) CollectWithCounter(ctx context.Context, userID, videoID int64) (collected bool, err error) {
 	tx, terr := r.entClient.Client().Tx(ctx)
 	if terr != nil {
 		return false, interactionV1.ErrorInternalServerError("start transaction failed")
@@ -285,7 +285,7 @@ func (r *InteractionRepo) CollectWithCounter(ctx context.Context, userID, videoI
 }
 
 // UncollectWithCounter 取消收藏。
-func (r *InteractionRepo) UncollectWithCounter(ctx context.Context, userID, videoID uint32) (removed bool, err error) {
+func (r *InteractionRepo) UncollectWithCounter(ctx context.Context, userID, videoID int64) (removed bool, err error) {
 	tx, terr := r.entClient.Client().Tx(ctx)
 	if terr != nil {
 		return false, interactionV1.ErrorInternalServerError("start transaction failed")
@@ -315,8 +315,8 @@ func (r *InteractionRepo) UncollectWithCounter(ctx context.Context, userID, vide
 }
 
 // GetLikeStatus 批量视频点赞状态
-func (r *InteractionRepo) GetLikeStatus(ctx context.Context, userID uint32, videoIDs []uint32) (map[uint32]bool, error) {
-	out := make(map[uint32]bool, len(videoIDs))
+func (r *InteractionRepo) GetLikeStatus(ctx context.Context, userID int64, videoIDs []int64) (map[int64]bool, error) {
+	out := make(map[int64]bool, len(videoIDs))
 	if userID == 0 || len(videoIDs) == 0 {
 		return out, nil
 	}
@@ -335,13 +335,13 @@ func (r *InteractionRepo) GetLikeStatus(ctx context.Context, userID uint32, vide
 // ── 收藏 ──
 
 // ExistsCollect 是否已收藏
-func (r *InteractionRepo) ExistsCollect(ctx context.Context, userID, videoID uint32) (bool, error) {
+func (r *InteractionRepo) ExistsCollect(ctx context.Context, userID, videoID int64) (bool, error) {
 	return r.entClient.Client().VideoCollect.Query().
 		Where(videocollect.UserIDEQ(userID), videocollect.VideoIDEQ(videoID)).Exist(ctx)
 }
 
 // CreateCollect 收藏入账
-func (r *InteractionRepo) CreateCollect(ctx context.Context, userID, videoID uint32) (bool, error) {
+func (r *InteractionRepo) CreateCollect(ctx context.Context, userID, videoID int64) (bool, error) {
 	exist, err := r.ExistsCollect(ctx, userID, videoID)
 	if err != nil {
 		return false, err
@@ -364,7 +364,7 @@ func (r *InteractionRepo) CreateCollect(ctx context.Context, userID, videoID uin
 }
 
 // DeleteCollect 取消收藏
-func (r *InteractionRepo) DeleteCollect(ctx context.Context, userID, videoID uint32) (bool, error) {
+func (r *InteractionRepo) DeleteCollect(ctx context.Context, userID, videoID int64) (bool, error) {
 	n, err := r.entClient.Client().VideoCollect.Delete().
 		Where(videocollect.UserIDEQ(userID), videocollect.VideoIDEQ(videoID)).Exec(ctx)
 	if err != nil {
@@ -375,7 +375,7 @@ func (r *InteractionRepo) DeleteCollect(ctx context.Context, userID, videoID uin
 }
 
 // CollectedVideoIDs 我的收藏视频 ID（按收藏时间倒序）
-func (r *InteractionRepo) CollectedVideoIDs(ctx context.Context, userID uint32, page, pageSize uint32) ([]uint32, int, error) {
+func (r *InteractionRepo) CollectedVideoIDs(ctx context.Context, userID int64, page, pageSize int64) ([]int64, int, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -395,7 +395,7 @@ func (r *InteractionRepo) CollectedVideoIDs(ctx context.Context, userID uint32, 
 	if err != nil {
 		return nil, 0, err
 	}
-	ids := make([]uint32, 0, len(rows))
+	ids := make([]int64, 0, len(rows))
 	for _, row := range rows {
 		ids = append(ids, row.VideoID)
 	}
@@ -403,8 +403,8 @@ func (r *InteractionRepo) CollectedVideoIDs(ctx context.Context, userID uint32, 
 }
 
 // GetCollectStatus 批量收藏状态
-func (r *InteractionRepo) GetCollectStatus(ctx context.Context, userID uint32, videoIDs []uint32) (map[uint32]bool, error) {
-	out := make(map[uint32]bool, len(videoIDs))
+func (r *InteractionRepo) GetCollectStatus(ctx context.Context, userID int64, videoIDs []int64) (map[int64]bool, error) {
+	out := make(map[int64]bool, len(videoIDs))
 	if userID == 0 || len(videoIDs) == 0 {
 		return out, nil
 	}
@@ -423,13 +423,13 @@ func (r *InteractionRepo) GetCollectStatus(ctx context.Context, userID uint32, v
 // ── 关注 ──
 
 // ExistsFollow 是否已关注
-func (r *InteractionRepo) ExistsFollow(ctx context.Context, followerID, followeeID uint32) (bool, error) {
+func (r *InteractionRepo) ExistsFollow(ctx context.Context, followerID, followeeID int64) (bool, error) {
 	return r.entClient.Client().UserFollow.Query().
 		Where(userfollow.FollowerIDEQ(followerID), userfollow.FolloweeIDEQ(followeeID)).Exist(ctx)
 }
 
 // CreateFollow 关注入账
-func (r *InteractionRepo) CreateFollow(ctx context.Context, followerID, followeeID uint32) (bool, error) {
+func (r *InteractionRepo) CreateFollow(ctx context.Context, followerID, followeeID int64) (bool, error) {
 	exist, err := r.ExistsFollow(ctx, followerID, followeeID)
 	if err != nil {
 		return false, err
@@ -452,7 +452,7 @@ func (r *InteractionRepo) CreateFollow(ctx context.Context, followerID, followee
 }
 
 // DeleteFollow 取消关注
-func (r *InteractionRepo) DeleteFollow(ctx context.Context, followerID, followeeID uint32) (bool, error) {
+func (r *InteractionRepo) DeleteFollow(ctx context.Context, followerID, followeeID int64) (bool, error) {
 	n, err := r.entClient.Client().UserFollow.Delete().
 		Where(userfollow.FollowerIDEQ(followerID), userfollow.FolloweeIDEQ(followeeID)).Exec(ctx)
 	if err != nil {
@@ -463,7 +463,7 @@ func (r *InteractionRepo) DeleteFollow(ctx context.Context, followerID, followee
 }
 
 // FollowCounts 双向计数（following 我关注的数量，followers 我的粉丝数量）
-func (r *InteractionRepo) FollowCounts(ctx context.Context, userID uint32) (following, followers int, err error) {
+func (r *InteractionRepo) FollowCounts(ctx context.Context, userID int64) (following, followers int, err error) {
 	if following, err = r.entClient.Client().UserFollow.Query().Where(userfollow.FollowerIDEQ(userID)).Count(ctx); err != nil {
 		return
 	}
@@ -472,7 +472,7 @@ func (r *InteractionRepo) FollowCounts(ctx context.Context, userID uint32) (foll
 }
 
 // FollowingAuthorIDs 关注作者 ID 列表（Feed 关注召回用）
-func (r *InteractionRepo) FollowingAuthorIDs(ctx context.Context, followerID uint32, limit int) ([]uint32, error) {
+func (r *InteractionRepo) FollowingAuthorIDs(ctx context.Context, followerID int64, limit int) ([]int64, error) {
 	rows, err := r.entClient.Client().UserFollow.Query().
 		Where(userfollow.FollowerIDEQ(followerID)).
 		Order(ent.Desc(userfollow.FieldCreatedAt)).
@@ -480,7 +480,7 @@ func (r *InteractionRepo) FollowingAuthorIDs(ctx context.Context, followerID uin
 	if err != nil {
 		return nil, err
 	}
-	ids := make([]uint32, 0, len(rows))
+	ids := make([]int64, 0, len(rows))
 	for _, row := range rows {
 		ids = append(ids, row.FolloweeID)
 	}
@@ -488,8 +488,8 @@ func (r *InteractionRepo) FollowingAuthorIDs(ctx context.Context, followerID uin
 }
 
 // GetFollowStatus 批量关注状态（viewer → 作者）
-func (r *InteractionRepo) GetFollowStatus(ctx context.Context, followerID uint32, userIDs []uint32) (map[uint32]bool, error) {
-	out := make(map[uint32]bool, len(userIDs))
+func (r *InteractionRepo) GetFollowStatus(ctx context.Context, followerID int64, userIDs []int64) (map[int64]bool, error) {
+	out := make(map[int64]bool, len(userIDs))
 	if followerID == 0 || len(userIDs) == 0 {
 		return out, nil
 	}
@@ -506,16 +506,16 @@ func (r *InteractionRepo) GetFollowStatus(ctx context.Context, followerID uint32
 }
 
 // ListFollowing 我的关注列表
-func (r *InteractionRepo) ListFollowing(ctx context.Context, userID uint32, page, pageSize uint32) ([]*ent.UserFollow, int, error) {
+func (r *InteractionRepo) ListFollowing(ctx context.Context, userID int64, page, pageSize int64) ([]*ent.UserFollow, int, error) {
 	return r.listFollowSide(ctx, userfollow.FieldFollowerID, userID, page, pageSize)
 }
 
 // ListFollowers 我的粉丝列表
-func (r *InteractionRepo) ListFollowers(ctx context.Context, userID uint32, page, pageSize uint32) ([]*ent.UserFollow, int, error) {
+func (r *InteractionRepo) ListFollowers(ctx context.Context, userID int64, page, pageSize int64) ([]*ent.UserFollow, int, error) {
 	return r.listFollowSide(ctx, userfollow.FieldFolloweeID, userID, page, pageSize)
 }
 
-func (r *InteractionRepo) listFollowSide(ctx context.Context, sideField string, userID uint32, page, pageSize uint32) ([]*ent.UserFollow, int, error) {
+func (r *InteractionRepo) listFollowSide(ctx context.Context, sideField string, userID int64, page, pageSize int64) ([]*ent.UserFollow, int, error) {
 	if page < 1 {
 		page = 1
 	}

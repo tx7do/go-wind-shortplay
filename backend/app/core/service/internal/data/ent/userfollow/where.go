@@ -10,47 +10,47 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id uint32) predicate.UserFollow {
+func ID(id int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uint32) predicate.UserFollow {
+func IDEQ(id int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uint32) predicate.UserFollow {
+func IDNEQ(id int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uint32) predicate.UserFollow {
+func IDIn(ids ...int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...uint32) predicate.UserFollow {
+func IDNotIn(ids ...int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id uint32) predicate.UserFollow {
+func IDGT(id int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uint32) predicate.UserFollow {
+func IDGTE(id int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id uint32) predicate.UserFollow {
+func IDLT(id int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uint32) predicate.UserFollow {
+func IDLTE(id int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldLTE(FieldID, id))
 }
 
@@ -70,17 +70,17 @@ func DeletedAt(v time.Time) predicate.UserFollow {
 }
 
 // TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
-func TenantID(v uint32) predicate.UserFollow {
+func TenantID(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldEQ(FieldTenantID, v))
 }
 
 // FollowerID applies equality check predicate on the "follower_id" field. It's identical to FollowerIDEQ.
-func FollowerID(v uint32) predicate.UserFollow {
+func FollowerID(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldEQ(FieldFollowerID, v))
 }
 
 // FolloweeID applies equality check predicate on the "followee_id" field. It's identical to FolloweeIDEQ.
-func FolloweeID(v uint32) predicate.UserFollow {
+func FolloweeID(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldEQ(FieldFolloweeID, v))
 }
 
@@ -235,42 +235,42 @@ func DeletedAtNotNil() predicate.UserFollow {
 }
 
 // TenantIDEQ applies the EQ predicate on the "tenant_id" field.
-func TenantIDEQ(v uint32) predicate.UserFollow {
+func TenantIDEQ(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldEQ(FieldTenantID, v))
 }
 
 // TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
-func TenantIDNEQ(v uint32) predicate.UserFollow {
+func TenantIDNEQ(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldNEQ(FieldTenantID, v))
 }
 
 // TenantIDIn applies the In predicate on the "tenant_id" field.
-func TenantIDIn(vs ...uint32) predicate.UserFollow {
+func TenantIDIn(vs ...int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldIn(FieldTenantID, vs...))
 }
 
 // TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
-func TenantIDNotIn(vs ...uint32) predicate.UserFollow {
+func TenantIDNotIn(vs ...int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldNotIn(FieldTenantID, vs...))
 }
 
 // TenantIDGT applies the GT predicate on the "tenant_id" field.
-func TenantIDGT(v uint32) predicate.UserFollow {
+func TenantIDGT(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldGT(FieldTenantID, v))
 }
 
 // TenantIDGTE applies the GTE predicate on the "tenant_id" field.
-func TenantIDGTE(v uint32) predicate.UserFollow {
+func TenantIDGTE(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldGTE(FieldTenantID, v))
 }
 
 // TenantIDLT applies the LT predicate on the "tenant_id" field.
-func TenantIDLT(v uint32) predicate.UserFollow {
+func TenantIDLT(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldLT(FieldTenantID, v))
 }
 
 // TenantIDLTE applies the LTE predicate on the "tenant_id" field.
-func TenantIDLTE(v uint32) predicate.UserFollow {
+func TenantIDLTE(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldLTE(FieldTenantID, v))
 }
 
@@ -285,82 +285,82 @@ func TenantIDNotNil() predicate.UserFollow {
 }
 
 // FollowerIDEQ applies the EQ predicate on the "follower_id" field.
-func FollowerIDEQ(v uint32) predicate.UserFollow {
+func FollowerIDEQ(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldEQ(FieldFollowerID, v))
 }
 
 // FollowerIDNEQ applies the NEQ predicate on the "follower_id" field.
-func FollowerIDNEQ(v uint32) predicate.UserFollow {
+func FollowerIDNEQ(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldNEQ(FieldFollowerID, v))
 }
 
 // FollowerIDIn applies the In predicate on the "follower_id" field.
-func FollowerIDIn(vs ...uint32) predicate.UserFollow {
+func FollowerIDIn(vs ...int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldIn(FieldFollowerID, vs...))
 }
 
 // FollowerIDNotIn applies the NotIn predicate on the "follower_id" field.
-func FollowerIDNotIn(vs ...uint32) predicate.UserFollow {
+func FollowerIDNotIn(vs ...int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldNotIn(FieldFollowerID, vs...))
 }
 
 // FollowerIDGT applies the GT predicate on the "follower_id" field.
-func FollowerIDGT(v uint32) predicate.UserFollow {
+func FollowerIDGT(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldGT(FieldFollowerID, v))
 }
 
 // FollowerIDGTE applies the GTE predicate on the "follower_id" field.
-func FollowerIDGTE(v uint32) predicate.UserFollow {
+func FollowerIDGTE(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldGTE(FieldFollowerID, v))
 }
 
 // FollowerIDLT applies the LT predicate on the "follower_id" field.
-func FollowerIDLT(v uint32) predicate.UserFollow {
+func FollowerIDLT(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldLT(FieldFollowerID, v))
 }
 
 // FollowerIDLTE applies the LTE predicate on the "follower_id" field.
-func FollowerIDLTE(v uint32) predicate.UserFollow {
+func FollowerIDLTE(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldLTE(FieldFollowerID, v))
 }
 
 // FolloweeIDEQ applies the EQ predicate on the "followee_id" field.
-func FolloweeIDEQ(v uint32) predicate.UserFollow {
+func FolloweeIDEQ(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldEQ(FieldFolloweeID, v))
 }
 
 // FolloweeIDNEQ applies the NEQ predicate on the "followee_id" field.
-func FolloweeIDNEQ(v uint32) predicate.UserFollow {
+func FolloweeIDNEQ(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldNEQ(FieldFolloweeID, v))
 }
 
 // FolloweeIDIn applies the In predicate on the "followee_id" field.
-func FolloweeIDIn(vs ...uint32) predicate.UserFollow {
+func FolloweeIDIn(vs ...int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldIn(FieldFolloweeID, vs...))
 }
 
 // FolloweeIDNotIn applies the NotIn predicate on the "followee_id" field.
-func FolloweeIDNotIn(vs ...uint32) predicate.UserFollow {
+func FolloweeIDNotIn(vs ...int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldNotIn(FieldFolloweeID, vs...))
 }
 
 // FolloweeIDGT applies the GT predicate on the "followee_id" field.
-func FolloweeIDGT(v uint32) predicate.UserFollow {
+func FolloweeIDGT(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldGT(FieldFolloweeID, v))
 }
 
 // FolloweeIDGTE applies the GTE predicate on the "followee_id" field.
-func FolloweeIDGTE(v uint32) predicate.UserFollow {
+func FolloweeIDGTE(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldGTE(FieldFolloweeID, v))
 }
 
 // FolloweeIDLT applies the LT predicate on the "followee_id" field.
-func FolloweeIDLT(v uint32) predicate.UserFollow {
+func FolloweeIDLT(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldLT(FieldFolloweeID, v))
 }
 
 // FolloweeIDLTE applies the LTE predicate on the "followee_id" field.
-func FolloweeIDLTE(v uint32) predicate.UserFollow {
+func FolloweeIDLTE(v int64) predicate.UserFollow {
 	return predicate.UserFollow(sql.FieldLTE(FieldFolloweeID, v))
 }
 

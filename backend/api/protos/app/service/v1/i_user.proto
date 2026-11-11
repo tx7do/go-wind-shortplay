@@ -41,7 +41,7 @@ service UserService {
 
 // 用户主页资料（旧版契约形状：avatarUrl/bio）
 message UserDetail {
-  optional uint32 id = 1 [json_name = "id"];                 // 用户ID
+  optional int64 id = 1 [json_name = "id"];                 // 用户ID
   optional string username = 2 [json_name = "username"];     // 登录名
   optional string nickname = 3 [json_name = "nickname"];     // 昵称
   optional string avatar_url = 4 [json_name = "avatarUrl"];  // 头像
@@ -50,7 +50,7 @@ message UserDetail {
 }
 
 message GetAppUserRequest {
-  uint32 id = 1 [json_name = "id"]; // 用户ID
+  int64 id = 1 [json_name = "id"]; // 用户ID
 }
 
 message UpdateProfileRequest {
@@ -60,7 +60,7 @@ message UpdateProfileRequest {
 }
 
 message ListUserVideosRequest {
-  uint32 user_id = 1 [json_name = "userId"];               // 用户ID
+  int64 user_id = 1 [json_name = "userId"];               // 用户ID
   optional uint32 page_num = 2 [json_name = "pageNum"];    // 页码
   optional uint32 page_size = 3 [json_name = "pageSize"];  // 页大小
 }

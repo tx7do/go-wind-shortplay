@@ -37,42 +37,42 @@ service ImService {
 }
 
 message Conversation {
-  optional uint32 id = 1 [json_name = "id"];                     // 会话ID
-  optional uint32 peer_id = 2 [json_name = "peerId"];            // 对端用户ID（viewer 视角解析）
+  optional int64 id = 1 [json_name = "id"];                     // 会话ID
+  optional int64 peer_id = 2 [json_name = "peerId"];            // 对端用户ID（viewer 视角解析）
   identity.service.v1.UserBrief peer = 3 [json_name = "peer"];   // 对端用户（冗余展示）
   optional string last_message_preview = 4 [json_name = "lastMessagePreview"]; // 最近一条预览
   optional google.protobuf.Timestamp last_message_at = 5 [json_name = "lastMessageAt"]; // 最近消息时间
-  optional uint64 unread_count = 6 [json_name = "unreadCount"];  // viewer 侧未读数
+  optional int64 unread_count = 6 [json_name = "unreadCount"];  // viewer 侧未读数
   optional google.protobuf.Timestamp created_at = 20 [json_name = "createdAt"]; // 建会话时间
 }
 
 message Message {
-  optional uint32 id = 1 [json_name = "id"];                      // 消息ID
-  optional uint32 conversation_id = 2 [json_name = "conversationId"]; // 会话ID
-  optional uint32 sender_id = 3 [json_name = "senderId"];         // 发送人
-  optional uint32 receiver_id = 4 [json_name = "receiverId"];     // 接收人
+  optional int64 id = 1 [json_name = "id"];                      // 消息ID
+  optional int64 conversation_id = 2 [json_name = "conversationId"]; // 会话ID
+  optional int64 sender_id = 3 [json_name = "senderId"];         // 发送人
+  optional int64 receiver_id = 4 [json_name = "receiverId"];     // 接收人
   identity.service.v1.UserBrief sender = 5 [json_name = "sender"]; // 发送人（冗余展示）
   optional string content = 6 [json_name = "content"];            // 内容
   optional google.protobuf.Timestamp created_at = 20 [json_name = "createdAt"]; // 发送时间
 }
 
 message SendMessageRequest {
-  uint32 receiver_id = 1 [json_name = "receiverId"]; // 接收人（不能是自己）
+  int64 receiver_id = 1 [json_name = "receiverId"]; // 接收人（不能是自己）
   string content = 2 [json_name = "content"];        // 内容（≤500 字）
 }
 
 message ListMessagesRequest {
-  uint32 conversation_id = 1 [json_name = "conversationId"]; // 会话ID
+  int64 conversation_id = 1 [json_name = "conversationId"]; // 会话ID
   optional uint32 page_num = 2 [json_name = "pageNum"];      // 页码（从 1 开始，最新一页在前）
   optional uint32 page_size = 3 [json_name = "pageSize"];    // 页大小（缺省 20，上限 50）
 }
 
 message MarkConversationReadRequest {
-  uint32 conversation_id = 1 [json_name = "conversationId"]; // 会话ID
+  int64 conversation_id = 1 [json_name = "conversationId"]; // 会话ID
 }
 
 message EnsureConversationRequest {
-  uint32 peer_user_id = 1 [json_name = "peerUserId"]; // 对端用户ID（不能是自己）
+  int64 peer_user_id = 1 [json_name = "peerUserId"]; // 对端用户ID（不能是自己）
 }
 
 message ListConversationsResponse {
@@ -86,5 +86,5 @@ message ListMessagesResponse {
 }
 
 message CountUnreadResponse {
-  optional uint64 count = 1 [json_name = "count"]; // 未读总数
+  optional int64 count = 1 [json_name = "count"]; // 未读总数
 }
